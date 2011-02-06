@@ -24,19 +24,11 @@ echo_tabbar();
 ?>
 <br/><br/>
 
-
-
 <fb:editor action="http://apps.facebook.com/missionsconnector/newtrip.php">
-
-
 
 <fb:editor-text name="tripname" label="Trip Name"/>
 <fb:editor-text name="desc" label="Trip Description"/>
 <fb:editor-text name="orgweb" label="Organization Website (Optional)"/>
-
-
-
-
 
 <fb:editor-custom label="Medical Skills Needed" name="medskills">
 <select name="medskills" id="medskills" multiple="true">
@@ -150,13 +142,15 @@ echo "<option name='country' id='country' value='".$row['longname']."'>".$row['l
 <fb:editor-custom name="sharecontact" label="Contact Information Settings">
 <input type="radio" name="sharecontact" value="false"/>I do not want to display my contact information as displayed on my Facebook profile.
 <input type="radio" name="sharecontact" value="true"/>Display my contact information as displayed on my Facebook profile. Also display these additional methods of contacting me (optional):
-<fb:editor-text name="phone" label="Additional Phone Number (Optional)"/>
-<fb:editor-text name="email" label="Additional Email Address (Optional)"/>
+<fb:editor-text name="phone" label="Phone Number (Optional)"/>
+<fb:editor-text name="email" label="Email Address (Optional)"/>
 
 
 
-
+<fb:editor-buttonset>
 <fb:editor-button value="Submit" name="submit"/>
+</fb:editor-buttonset>
+
 </fb:editor>
 
 

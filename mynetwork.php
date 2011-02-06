@@ -10,7 +10,7 @@
 
 include_once 'common.php';
 
-$fb = cmc_startup($appapikey, $appsecret);
+$fb = cmc_startup($appapikey, $appsecret,0);
 
 ?>
 <br/><br/>
@@ -19,8 +19,14 @@ $fb = cmc_startup($appapikey, $appsecret);
 <?PHP 
  $app_name="Christian Missions Connector"; $app_url="http://tangiblesoft.net/missionsconnector"; 
 
-$friends=$facebook->api_client->friends_getAppUsers();
+$friends=$fb->api_client->friends_getAppUsers();
+
+if (empty($friends)) {
+ echo "You do not have any friends in your network <br />";
+}
+else {
  foreach ($friends as $currentfriend){
-	echo "<fb:profile-pic uid=".$currentfriend." linked='false' />  <fb:name uid=".$currentfriend." linked='false' shownetwork='true'/><a href='http://apps.facebook.com/missionsconnector/profile.php?userid=".$currentfriend."'><br/>  See Profile</a><br/><br/>";
+	echo "<fb:profile-pic uid=".$currentfriend." linked='true' /> <br /> <fb:name uid=".$currentfriend." linked='true' shownetwork='true'/><a href='http://apps.facebook.com/missionsconnector/profile.php?userid=".$currentfriend."'><br/>  See CMC Profile</a><br/><br/>";
 	}
+}
 ?>
