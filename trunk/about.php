@@ -7,9 +7,14 @@
 
 include_once 'common.php';
 
-$fb = cmc_startup($appapikey, $appsecret);
+$fb = cmc_startup($appapikey, $appsecret,0);
 
 ?>
+</br></br>
+
+If you have any questions about the application, please feel free to contact us at missionsconnector@tangiblesoft.net. 
+
+</br></br>
 
 This application is the property of
-<a href="www.tangiblesoft.net">Tangible LLC</a>.
+<a href="http://tangiblesoft.net">Tangible LLC</a>.

@@ -7,9 +7,9 @@
 
 include_once 'common.php';
 
-$facebook = new Facebook($appapikey, $appsecret);
-$facebook->require_frame(); 
-$fbid = $facebook->require_login();
+$fb = new Facebook($appapikey, $appsecret);
+$fb->require_frame(); 
+$fbid = $fb->require_login();
 arena_connect();
 //if(db_check_user($fbid)) {
 if(false) {

@@ -7,6 +7,7 @@
 // 
 $appapikey = 'fde3ecb860f6ba6081e678896fb57259';
 $appsecret = 'ff414514f41914c07fa3d79bda2b1630';
+$appid = 305928355832;
 
 $canvas_page = 'apps.facebook.com/Christian_Missions_Connecter/';
 ?>
