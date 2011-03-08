@@ -41,7 +41,7 @@ if(isset($_REQUEST['ids'])) {
 	// Prepare the invitation text that all invited users will receive. 
 	$content = "<fb:name uid=\"".$user."\" firstnameonly=\"true\" shownetwork=\"false\"/> has started using <a href=\"http://apps.facebook.com/".$app_url."/\">".$app_name."</a> and thought you should try it out!\n". "<fb:req-choice url=\"".$fb->get_add_url()."\" label=\"Put ".$app_name." on your profile\"/>";
 	?>
-<fb:request-form action="<? echo $invite_href; ?>" method="post" type="<? echo $app_name; ?>" content="<? echo htmlentities($content,ENT_COMPAT,'UTF-8'); ?>">
-<fb:multi-friend-selector actiontext="Here are your friends who don't have <? echo $app_name; ?> yet. Invite whoever you want -it's free!" exclude_ids="<? echo $friends; ?>" />
+<fb:request-form action="<?php echo $invite_href; ?>" method="post" type="<?php echo $app_name; ?>" content="<?php echo htmlentities($content,ENT_COMPAT,'UTF-8'); ?>">
+<fb:multi-friend-selector actiontext="Here are your friends who don't have <?php echo $app_name; ?> yet. Invite whoever you want -it's free!" exclude_ids="<?php echo $friends; ?>" />
 </fb:request-form>
 <?php } ?> 

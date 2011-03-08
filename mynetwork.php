@@ -16,7 +16,7 @@ $fb = cmc_startup($appapikey, $appsecret,0);
 <br/><br/>
 
 
-<?PHP 
+<?php 
  $app_name="Christian Missions Connector"; $app_url="http://tangiblesoft.net/missionsconnector"; 
 
 $friends=$fb->api_client->friends_getAppUsers();

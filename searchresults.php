@@ -50,7 +50,7 @@ if(mysql_num_rows($query) < 1)
 //$profileid=$_Request['id'];
 $profileid = $fbid;
 
-function get_rest_of_string(&$sql3,&$sql1,&$sql2,$val) {
+function get_rest_of_string(&$sql3,&$sql1,&$sql2,$val,$saferequest) {
 
 $skills = 0;
 $sql2 = '';
@@ -58,20 +58,20 @@ $sql1 = ' ';
 $sql3='';
 $usersinc=0;
 
-if (isset($_REQUEST['relg'])) {
-  if (strcmp($_REQUEST['relg'],"Any")) {
+if (isset($saferequest['relg'])) {
+  if (strcmp($saferequest['relg'],"Any")) {
   if ($val ==1) {
         $usersinc = 1;
   	$sql1 = ',users';
-  	$sql3 = $sql3.' and users.religion="'.$_REQUEST['relg'].'"';
+  	$sql3 = $sql3.' and users.religion="'.$saferequest['relg'].'"';
   }
   else
-  	$sql3 = $sql3.' and users.religion="'.$_REQUEST['relg'].'"';
+  	$sql3 = $sql3.' and users.religion="'.$saferequest['relg'].'"';
   }
 }
-if (isset($_REQUEST['medskills'])) {
-  if (strcmp($_REQUEST['medskills'],"Any")) {
-  $sql3 = $sql3.' and skills.skilldesc="'.$_REQUEST['medskills'].'"';
+if (isset($saferequest['medskills'])) {
+  if (strcmp($saferequest['medskills'],"Any")) {
+  $sql3 = $sql3.' and skills.skilldesc="'.$saferequest['medskills'].'"';
   $sql2 = $sql2.' and skills.id=skillsselected.id and users.userid=skillsselected.userid';
   	if ($val==1) {
   if ($usersinc == 0) {
@@ -84,9 +84,9 @@ if (isset($_REQUEST['medskills'])) {
   $skills = 1;
   }
 }
-if (isset($_REQUEST['otherskills'])) {
-  if (strcmp($_REQUEST['otherskills'],"Any")) {
-  $sql3 = $sql3.' and skills.skilldesc="'.$_REQUEST['otherskills'].'"';
+if (isset($saferequest['otherskills'])) {
+  if (strcmp($saferequest['otherskills'],"Any")) {
+  $sql3 = $sql3.' and skills.skilldesc="'.$saferequest['otherskills'].'"';
   if ($skills==0) {
   	$sql2 = $sql2.' and skills.id=skillsselected.id and users.userid=skillsselected.userid';
 
@@ -103,9 +103,9 @@ if (isset($_REQUEST['otherskills'])) {
   }
   }
 }
-if (isset($_REQUEST['spiritserv'])) {
-  if (strcmp($_REQUEST['spiritserv'],"Any")) {
-  $sql3 = $sql3.' and skills.skilldesc="'.$_REQUEST['spiritserv'].'"';
+if (isset($saferequest['spiritserv'])) {
+  if (strcmp($saferequest['spiritserv'],"Any")) {
+  $sql3 = $sql3.' and skills.skilldesc="'.$saferequest['spiritserv'].'"';
   if ($skills==0) {
   	$sql2 = $sql2.' and skills.id=skillsselected.id and users.userid=skillsselected.userid';
   	if ($val==1) {
@@ -121,9 +121,9 @@ if (isset($_REQUEST['spiritserv'])) {
   }
   }
 }
-if (isset($_REQUEST['country'])) {
-  if (strcmp($_REQUEST['country'],"Any")) {
-  $sql3 = $sql3.' and countries.longname="'.$_REQUEST['country'].'"';
+if (isset($saferequest['country'])) {
+  if (strcmp($saferequest['country'],"Any")) {
+  $sql3 = $sql3.' and countries.longname="'.$saferequest['country'].'"';
   	if ($val==1) {
   if ($usersinc == 0) {
   	$sql1 = $sql1.',users,countries,countriesselected';
@@ -136,9 +136,9 @@ if (isset($_REQUEST['country'])) {
   $sql2 = $sql2.' and countries.id=countriesselected.id and users.userid=countriesselected.userid';
   }
 }
-if (isset($_REQUEST['region'])) {
-  if (strcmp($_REQUEST['region'],"Any")) {
-  $sql3 = $sql3.' and regions.name="'.$_REQUEST['region'].'"';
+if (isset($saferequest['region'])) {
+  if (strcmp($saferequest['region'],"Any")) {
+  $sql3 = $sql3.' and regions.name="'.$saferequest['region'].'"';
   if ($val==1) {
   if ($usersinc == 0) {
   	$sql1 = $sql1.',users,regions,regionsselected';
@@ -151,9 +151,9 @@ if (isset($_REQUEST['region'])) {
   $sql2 = $sql2.' and regions.id=regionsselected.id and users.userid=regionsselected.userid';
   }
 }
-if (isset($_REQUEST['dur'])) {
-  if (strcmp($_REQUEST['dur'],"Any")) {
-  $sql3 = $sql3.' and durations.name="'.$_REQUEST['dur'].'"';
+if (isset($saferequest['dur'])) {
+  if (strcmp($saferequest['dur'],"Any")) {
+  $sql3 = $sql3.' and durations.name="'.$saferequest['dur'].'"';
   	if ($val==1) {
   if ($usersinc == 0) {
   	$sql1 = $sql1.',users,durations,durationsselected';
@@ -170,8 +170,8 @@ if (isset($_REQUEST['dur'])) {
 
 }
 
-//$con = mysql_connect(localhost,"arena", "***arena!password!getmoney!getpaid***");
-$con = mysql_connect(localhost,"poornima", "MYdata@1");
+$con = mysql_connect('localhost',"arena", "***arena!password!getmoney!getpaid***");
+//$con = mysql_connect(localhost,"poornima", "MYdata@1");
 if(!$con)
 {
   die('Could not connect: ' .  mysql_error());
@@ -201,17 +201,21 @@ echo '<br /><b>Your Search Results (Sorted according to nearest from you):<b/><b
 
 }
 
+$saferequest = cmc_safe_request_strip();
+
 // This is for basic search
 if ($adv==0) {
 
-if (isset($_REQUEST['keys'])) {
+//if (isset($_REQUEST['keys'])) {
+if (isset($saferequest['keys'])) {
 session_start();
 $_SESSION['storeid'] = '';
 $_SESSION['storeida'] = '';
 }
 
 
-$keywords = $_REQUEST['keys'];
+//$keywords = $_REQUEST['keys'];
+$keywords = $saferequest['keys'];
 //echo $keywords.'<br />';
 if (!empty($keywords)) {
 
@@ -469,7 +473,8 @@ else {
 // This is for advanced search
 else {
 
-if (!isset($_REQUEST['type'])) {
+//if (!isset($_REQUEST['type'])) {
+if (!isset($saferequest['type'])) {
 
 if (!empty($_SESSION['vstoreid'])) {
 		$friends = $_SESSION['vstoreid'];
@@ -500,58 +505,74 @@ echo "<a href='profileT.php?tripid=".$tstoreid[$i]."'>".$tstorename[$i]."</a><br
 else {
  //echo '<b>The type parameter must be specified for the search to work <br /></b>';
  $str = '';
-if (!empty($_REQUEST['medskills']))
-        $str = $str.'&ms='.$_REQUEST['medskills'];
+//if (!empty($_REQUEST['medskills']))
+if (!empty($saferequest['medskills']))
+        $str = $str.'&ms='.$saferequest['medskills'];
 	//$_SESSION['medskills'] = $_REQUEST['medskiils'];
-if (!empty($_REQUEST['otherskills']))
-        $str = $str.'&os='.$_REQUEST['otherskills'];
+//if (!empty($_REQUEST['otherskills']))
+if (!empty($saferequest['otherskills']))
+        $str = $str.'&os='.$saferequest['otherskills'];
 	//$_SESSION["otherskills"] = $_REQUEST['otherskiils'];
-if (!empty($_REQUEST['spiritserv']))
-        $str = $str.'&ss='.$_REQUEST['spiritserv'];
+//if (!empty($_REQUEST['spiritserv']))
+if (!empty($saferequest['spiritserv']))
+        $str = $str.'&ss='.$saferequest['spiritserv'];
 	//$_SESSION["spiritserv"] = $_REQUEST['spiritserv'];
-if (!empty($_REQUEST['relg']))
-        $str = $str.'&rg='.$_REQUEST['relg'];
+//if (!empty($_REQUEST['relg']))
+if (!empty($saferequest['relg']))
+        $str = $str.'&rg='.$saferequest['relg'];
 	//$_SESSION["relg"] = $_REQUEST['relg'];
-if (!empty($_REQUEST['partner'])) {
+//if (!empty($_REQUEST['partner'])) {
+if (!empty($saferequest['partner'])) {
         //$str = $str.'&p='.$_REQUEST['partner'];
-	if (!strcmp($_REQUEST['partner'],"false"))
+	if (!strcmp($saferequest['partner'],"false"))
 		$str = $str.'&p=2';
 	else
 		$str = $str.'&p=1';
 }
 	//$_SESSION["partner"] = $_REQUEST['partner'];
-if (!empty($_REQUEST['zip']))
-        $str = $str.'&zip='.$_REQUEST['zip'];
+//if (!empty($_REQUEST['zip']))
+if (!empty($saferequest['zip']))
+        $str = $str.'&zip='.$saferequest['zip'];
 	//$_SESSION["zip"] = $_REQUEST['zip'];
-if (!empty($_REQUEST['region']))
-        $str = $str.'&region='.$_REQUEST['region'];
-	//$_SESSION["region"] = $_REQUEST['region'];
-if (!empty($_REQUEST['country']))
-        $str = $str.'&ct='.$_REQUEST['country'];
+//if (!empty($_REQUEST['region']))
+if (!empty($saferequest['region']))
+        $str = $str.'&region='.$saferequest['region'];
+	//$_SESSION["region"] = $saferequest['region'];
+//if (!empty($_REQUEST['country']))
+if (!empty($saferequest['country']))
+        $str = $str.'&ct='.$saferequest['country'];
 	//$_SESSION["country"] = $_REQUEST['country'];
-if (!empty($_REQUEST['name']))
-        $str = $str.'&nm='.$_REQUEST['name'];
+//if (!empty($_REQUEST['name']))
+if (!empty($saferequest['name']))
+        $str = $str.'&nm='.$saferequest['name'];
 	//$_SESSION["name"] = $_REQUEST['name'];
-if (!empty($_REQUEST['dur']))
-        $str = $str.'&dur='.$_REQUEST['dur'];
+//if (!empty($_REQUEST['dur']))
+if (!empty($saferequest['dur']))
+        $str = $str.'&dur='.$saferequest['dur'];
 	//$_SESSION["dur"] = $_REQUEST['dur'];
-if (!empty($_REQUEST['DepartYear']))
-        $str = $str.'&dy='.$_REQUEST['DepartYear'];
+//if (!empty($_REQUEST['DepartYear']))
+if (!empty($saferequest['DepartYear']))
+        $str = $str.'&dy='.$saferequest['DepartYear'];
 	//$_SESSION["DepartYear"] = $_REQUEST['DepartYear'];
-if (!empty($_REQUEST['DepartMonth']))
-        $str = $str.'&dm='.$_REQUEST['DepartMonth'];
+//if (!empty($_REQUEST['DepartMonth']))
+if (!empty($saferequest['DepartMonth']))
+        $str = $str.'&dm='.$saferequest['DepartMonth'];
 	//$_SESSION["DepartMonth"] = $_REQUEST['DepartMonth'];
-if (!empty($_REQUEST['DepartDay']))
-        $str = $str.'&dd='.$_REQUEST['DepartDay'];
+//if (!empty($_REQUEST['DepartDay']))
+if (!empty($saferequest['DepartDay']))
+        $str = $str.'&dd='.$saferequest['DepartDay'];
 	//$_SESSION["DepartDay"] = $_REQUEST['DepartDay'];
-if (!empty($_REQUEST['ReturnYear']))
-        $str = $str.'&ry='.$_REQUEST['ReturnYear'];
+//if (!empty($_REQUEST['ReturnYear']))
+if (!empty($saferequest['ReturnYear']))
+        $str = $str.'&ry='.$saferequest['ReturnYear'];
 	//$_SESSION["ReturnYear"] = $_REQUEST['ReturnYear'];
-if (!empty($_REQUEST['ReturnMonth']))
-        $str = $str.'&rm='.$_REQUEST['ReturnMonth'];
+//if (!empty($_REQUEST['ReturnMonth']))
+if (!empty($saferequest['ReturnMonth']))
+        $str = $str.'&rm='.$saferequest['ReturnMonth'];
 	//$_SESSION["ReturnMonth"] = $_REQUEST['ReturnMonth'];
-if (!empty($_REQUEST['ReturnDay']))
-        $str = $str.'&rd='.$_REQUEST['ReturnDay'];
+//if (!empty($_REQUEST['ReturnDay']))
+if (!empty($saferequest['ReturnDay']))
+        $str = $str.'&rd='.$saferequest['ReturnDay'];
 	//$_SESSION["ReturnDay"] = $_REQUEST['ReturnDay'];
 
  echo "<fb:redirect url='http://apps.facebook.com/missionsconnector/advancedsearch.php?fill=1".$str."' />";
@@ -559,12 +580,12 @@ if (!empty($_REQUEST['ReturnDay']))
 }
 else {
 //if($_REQUEST['type']=="Active Mission Organizers"){
-if($_REQUEST['type']==1){
+if($saferequest['type']==1){
   $friends=array();
 
   $sql='select users.userid,users.zipcode from users';
 
-  get_rest_of_string($sql3,$sql1,$sql2,0);
+  get_rest_of_string($sql3,$sql1,$sql2,0,$saferequest);
   $sql = $sql.$sql1.' where isreceiver="1"'.$sql3.$sql2;
 
 if($result = mysql_query($sql)){
@@ -635,11 +656,11 @@ else {
 }
 
       //if($_REQUEST['type']=="Volunteers"){
-      if($_REQUEST['type']==2){
+      if($saferequest['type']==2){
         $friends=array();
   	
   	$sql='select users.userid,users.zipcode from users';
-	get_rest_of_string($sql3,$sql1,$sql2,0);
+	get_rest_of_string($sql3,$sql1,$sql2,0,$saferequest);
   	$sql = $sql.$sql1.' where isreceiver="0"'.$sql3.$sql2;
        if($result = mysql_query($sql)){
          $num_rows = mysql_num_rows($result);
@@ -702,7 +723,7 @@ else {
 
 
             //if($_REQUEST['type']=="Upcoming Mission Trips"){
-            if($_REQUEST['type']==3){
+            if($saferequest['type']==3){
 
 	function getdatestring($year,$month,$date,$hour,$min,$sec) {
 
@@ -735,7 +756,7 @@ else {
 
 	$sql='select distinct trips.tripname, trips.id from trips';
 	$sql4 = ' where trips.departure >="'.$today.'"';
-	get_rest_of_string($sql3,$sql1,$sql2,1);
+	get_rest_of_string($sql3,$sql1,$sql2,1,$saferequest);
   	//$sql = $sql.$sql1.' where trips.id=tripmembers.tripid and tripmembers.userid=users.userid and tripmembers.isadmin="1"'.$sql3.$sql2;
 	//if (empty($sql2) && empty($sql3))
   	//	$sql = $sql.$sql1.$sql4.$sql3.$sql2;

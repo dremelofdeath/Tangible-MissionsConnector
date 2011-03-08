@@ -151,7 +151,7 @@ if (isset($_GET)) {
 // get which trip - list all trips that this user is admin of
 // Then the trip that needs further action is selected.
 
-$sql = 'select tripid from tripmembers where userid="'.$fbid.'" and isadmin="1"';
+$sql = 'select tripid from tripmembers where userid="'.$fbid.'"';
 
 $result = mysql_query($sql);
 $j=1;
@@ -199,8 +199,8 @@ if ($result = mysql_query($sql)) {
 	$isadmin = $row['isadmin'];
 }
 
-if (!$isadmin) {
- echo 'You are not a trip administrator; therefore you cannot invite or delete others on this trip <br />';
+if ((!$isadmin) && (($value==2) || ($value==3) || ($value==4))) {
+ echo '<br /> You are not a trip administrator; therefore you cannot delete others on this trip <br />';
  echo '<a href="welcome.php">Go back to Application home</a><br />';
 }
 else {
@@ -282,8 +282,8 @@ $app_name="Christian Missions Connector Trips";
 
 ?>
 
-<fb:request-form action="<? echo $invite_href; ?>" method="post" type="<? echo $app_name; ?>" content="<? echo htmlentities($content,ENT_COMPAT,'UTF-8'); ?>">
-<fb:multi-friend-selector actiontext="Here are your friends whom you can invite to the trip" exclude_ids="<? echo $myfriends; ?>" />
+<fb:request-form action="<?php echo $invite_href; ?>" method="post" type="<?php echo $app_name; ?>" content="<?php echo htmlentities($content,ENT_COMPAT,'UTF-8'); ?>">
+<fb:multi-friend-selector actiontext="Here are your friends whom you can invite to the trip" exclude_ids="<?php echo $myfriends; ?>" />
 </fb:request-form>
 
 
@@ -311,6 +311,9 @@ else if ($value == 3) { // delete trip
 }
 else if ($value == 4) { // update trip
   echo "<fb:redirect url='makeprofile.php?type=trip&edit=1&update=".$tripid."' />";
+}
+else if ($value == 5) { // remove self from a trip
+  echo "<fb:redirect url='removeself.php?tripid=".$tripid."' />";
 }
 
 }

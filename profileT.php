@@ -42,8 +42,8 @@ else
 	$tid=$_REQUEST['tripid'];
 
 
-//$con = mysql_connect(localhost,"arena", "***arena!password!getmoney!getpaid***");
-$con = mysql_connect(localhost,"poornima", "MYdata@1");
+$con = mysql_connect(localhost,"arena", "***arena!password!getmoney!getpaid***");
+//$con = mysql_connect(localhost,"poornima", "MYdata@1");
 	if(!$con)
 	{
 		die('Could not connect: ' .  mysql_error());
@@ -56,39 +56,40 @@ $con = mysql_connect(localhost,"poornima", "MYdata@1");
 
 $sql = 'select * from trips where id="'.$tid.'"';
 
-if($result = mysql_query($sql)){
-		$num_rows = mysql_num_rows($result);
-	while($row= mysql_fetch_array($result)){
-		$name = $row['tripname'];
-		$creatorid = $row['creatorid'];
-		$sql2 = 'select * from users where userid="'.$creatorid.'"';
-		$result2 = mysql_query($sql2);
-		$row2 = mysql_fetch_array($result2);
-		$towner=$row2['name'];
-		$tripdesc=$row['tripdesc'];
-		$phone=$row['phone'];
-		$email=$row['email'];
-		$web=$row['website'];
-		$dur=$row['duration'];
-		$stage=$row['isinexecutionstage'];
-		$destination=$row['destination'];
-		$destinationcountry=$row['country'];
-		//$departn=$row['departure'];
-		$departn = explode(' ',$row['departure']);
-		$depart = explode('-',$departn[0]);
-		//$depart = date('m-d-Y', $departn);
-		//$returnn=$row['returning'];
-		//$return = date('m-d-Y',$returnn);
-		$returnn = explode(' ',$row['returning']);
-		$return = explode('-',$returnn[0]);
-		$zip=$row['zipcode'];	
-		$relg=$row['religion'];
-		$numpeople = $row['numpeople'];
-		$website = $row['website'];
-		
-	}}else {
-		echo "SQL Error ".mysql_error()." ";
-		 }	
+if($result = mysql_query($sql)) {
+  $num_rows = mysql_num_rows($result);
+  while($row= mysql_fetch_array($result)) {
+    $name = $row['tripname'];
+    $creatorid = $row['creatorid'];
+    $sql2 = 'select * from users where userid="'.$creatorid.'"';
+    $result2 = mysql_query($sql2);
+    $row2 = mysql_fetch_array($result2);
+    $towner=$row2['name'];
+    $tripdesc=$row['tripdesc'];
+    $phone=$row['phone'];
+    $email=$row['email'];
+    $web=$row['website'];
+    $dur=$row['duration'];
+    $stage=$row['isinexecutionstage'];
+    $destination=$row['destination'];
+    $destinationcountry=$row['country'];
+    //$departn=$row['departure'];
+    $departn = explode(' ',$row['departure']);
+    $depart = explode('-',$departn[0]);
+    //$depart = date('m-d-Y', $departn);
+    //$returnn=$row['returning'];
+    //$return = date('m-d-Y',$returnn);
+    $returnn = explode(' ',$row['returning']);
+    $return = explode('-',$returnn[0]);
+    $zip=$row['zipcode'];	
+    $relg=$row['religion'];
+    $numpeople = $row['numpeople'];
+    $website = $row['website'];
+
+  }
+} else {
+  echo "SQL Error ".mysql_error()." ";
+}	
 
 echo "<h1>".$name." is led by ".$towner."</h1><br/><br/><br/>";
 		if (!empty($tripdesc))
@@ -135,6 +136,10 @@ $numrows = mysql_num_rows($result);
 if ($numrows>0) {
 	echo '<b> You are already part of this trip <br /> <br />';
   
+echo "<fb:editor action='http://apps.facebook.com/missionsconnector/removeself.php?tripid=".$tid."' method='get'>";
+echo "<fb:editor-button value='Remove Yourself from this Trip' name='remove'/>";
+echo "</fb:editor>";
+
   echo "<br/><a href='invitetotrip.php?value=1'>Invite others to trips</a><br/><br/>";
     echo "<br/><a href='invitetotrip.php?value=0'>Invite others to trips as Trip Administrators</a><br/><br/>";
 

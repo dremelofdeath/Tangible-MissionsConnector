@@ -262,8 +262,8 @@ $app_name="Christian Missions Connector Trip Messages";
 
 ?>
 
-<fb:request-form action="<? echo $invite_href; ?>" method="post" type="<? echo $app_name; ?>" content="<? echo htmlentities($content,ENT_COMPAT,'UTF-8'); ?>"
-<fb:multi-friend-selector actiontext="Here are your friends with whom you can share trip related messages" exclude_ids="<? echo $myfriends; ?>" />
+<fb:request-form action="<?php echo $invite_href; ?>" method="post" type="<?php echo $app_name; ?>" content="<?php echo htmlentities($content,ENT_COMPAT,'UTF-8'); ?>"
+<fb:multi-friend-selector actiontext="Here are your friends with whom you can share trip related messages" exclude_ids="<?php echo $myfriends; ?>" />
 </fb:request-form>
 
 

@@ -26,6 +26,8 @@ r /><br/>
 <h1><a href="invitetotrip.php?value=2"> Remove Others from Trips </a></h1><br /><br />
 <h1><a href="invitetotrip.php?value=3"> Delete Trips </a></h1><br /><br />
 
+<h1><a href="invitetotrip.php?value=5"> Remove yourself from a trip </a></h1><br /><br />
+
 <h1><a href="searchtrips.php"> Search Upcoming Trips </a></h1><br /><br />
 <h1><a href="tripactivity.php"> View Recent Trip Activity </a></h1><br /><br />
 
@@ -33,7 +35,7 @@ r /><br/>
 
 
 
-<?PHP 
+<?php 
 //<fb:feed title="Trips News Feed" max="10"/>
 /*
  $app_name="Christian Missions Connector"; $app_url="http://tangiblesoft.net/missionsconnector"; 

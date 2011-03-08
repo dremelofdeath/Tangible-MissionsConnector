@@ -37,30 +37,27 @@ $fbid = $fb->require_login("publish_stream,read_stream");
 function cmc_fetch_opts_ex($query, $id_prefix, $id_field, $value_field, $text_field,$editprofile,$skillsrow) {
   if($result = mysql_query($query)) {
     while($row = mysql_fetch_array($result)) {
-
       if ($editprofile) {
-      	$selectthis = 0;
-       for ($i=0;$i<count($skillsrow);$i++) {
-      	if ($skillsrow[$i] == $row[$value_field]) {
-		$selectthis = 1;
-		continue 1;
-	}
-	}
-      if ($selectthis) {
-      echo '<option selected="selected" id="'.$id_prefix.$row[$id_field].'" value="'.$row[$value_field].'">';
-      echo $row[$text_field];
-      echo '</option>';
-      }
-      else {
-      echo '<option id="'.$id_prefix.$row[$id_field].'" value="'.$row[$value_field].'">';
-      echo $row[$text_field];
-      echo '</option>';
-      }
-      }
-      else {
-      echo '<option id="'.$id_prefix.$row[$id_field].'" value="'.$row[$value_field].'">';
-      echo $row[$text_field];
-      echo '</option>';
+        $selectthis = 0;
+        for ($i=0;$i<count($skillsrow);$i++) {
+          if ($skillsrow[$i] == $row[$value_field]) {
+            $selectthis = 1;
+            continue 1;
+          }
+        }
+        if ($selectthis) {
+          echo '<option selected="selected" id="'.$id_prefix.$row[$id_field].'" value="'.$row[$value_field].'">';
+          echo $row[$text_field];
+          echo '</option>';
+        } else {
+          echo '<option id="'.$id_prefix.$row[$id_field].'" value="'.$row[$value_field].'">';
+          echo $row[$text_field];
+          echo '</option>';
+        }
+      } else {
+        echo '<option id="'.$id_prefix.$row[$id_field].'" value="'.$row[$value_field].'">';
+        echo $row[$text_field];
+        echo '</option>';
       }
     }
   }
@@ -68,26 +65,25 @@ function cmc_fetch_opts_ex($query, $id_prefix, $id_field, $value_field, $text_fi
 
 function cmc_fetch_optsnew($query, $id_field, $value_field, $text_field, $editprofile,$myrow) {
 	if ($result = mysql_query($query)) {
-		while ($row = mysql_fetch_array($result)) {
-		if ($editprofile) {
-		if (!strcmp($row[$text_field],$myrow['country']))
-      		echo '<option selected="selected" id="'.$row[$id_field].'" value="'.$row[$value_field].'">';
-		else
-      		echo '<option id="'.$row[$id_field].'" value="'.$row[$value_field].'">';
+    while ($row = mysql_fetch_array($result)) {
+      if ($editprofile) {
 
-      		echo $row[$text_field];
-      		echo '</option>';
+        if (!strcmp($row[$text_field],$myrow['country'])) {
+          echo '<option selected="selected" id="'.$row[$id_field].'" value="'.$row[$value_field].'">';
+        } else {
+          echo '<option id="'.$row[$id_field].'" value="'.$row[$value_field].'">';
+        }
 
-		}
-		else {
-      		echo '<option id="'.$row[$id_field].'" value="'.$row[$value_field].'">';
-      		echo $row[$text_field];
-      		echo '</option>';
+        echo $row[$text_field];
+        echo '</option>';
 
-		}
-		}
+      } else {
+        echo '<option id="'.$row[$id_field].'" value="'.$row[$value_field].'">';
+        echo $row[$text_field];
+        echo '</option>';
+      }
+    }
 	}
-
 }
 
 /**
@@ -120,98 +116,104 @@ $is_volunteer = false;
 $is_mission = false;
 $is_trip = false;
 
-if($_GET['type'] == "volunteer") $is_volunteer = true;
-if($_GET['type'] == "mission") $is_mission = true;
-if($_GET['type'] == "trip") {
-$is_trip = true;
-
-// check to see if there is a CMC profile for this user
-$sql = 'select * from users where userid="'.$fbid.'"';
-if ($result = mysql_query($sql)) {
-$numrows = mysql_num_rows($result);
-if ($numrows == 0)
-	echo "<fb:redirect url='new.php?error=1' />";
+if (isset($_GET['type'])) {
+  if($_GET['type'] == "volunteer") $is_volunteer = true;
+  if($_GET['type'] == "mission") $is_mission = true;
+  if($_GET['type'] == "trip") {
+    $is_trip = true;
+    // check to see if there is a CMC profile for this user
+    $sql = 'select * from users where userid="'.$fbid.'"';
+    if ($result = mysql_query($sql)) {
+      $numrows = mysql_num_rows($result);
+      if ($numrows == 0)
+        echo "<fb:redirect url='new.php?error=1' />";
+    } else {
+      echo "SQL Error ".mysql_error()." ";
+    }
+    //echo 'TRIP='.$is_trip.'<br />';
+  }
 }
-else
-	echo "SQL Error ".mysql_error()." ";
-//echo 'TRIP='.$is_trip.'<br />';
-}
 
-if ($_GET['error']) {
-
-	echo '<br /><br />';
-
-	if ($_GET['error'] == 1)
-		echo '<b>WARNING: Zip Code is a required Field, please re-enter the data with a zip code <b/><br/><br />';
-	else if ($_GET['error'] == 2)
-		echo '<b>WARNING: Departure Date out of range - please re-enter data <b/><br /> <br />';
-	else if ($_GET['error'] == 3) 
-		echo '<b>WARNING: Return Date out of range - please re-enter data <b/><br /> <br />';
-	else if ($_GET['error'] == 4) 
-		echo '<b>WARNING: Return Date cannot be before Departure Date <b/><br /> <br />';
-	else if ($_GET['error'] == 5) 
-		echo '<b>WARNING: Trip name is a required value <b/><br /> <br />';
-	else if ($_GET['error'] == 6) 
-		echo '<b>WARNING: You entered an invalid URL for website, perhaps you are missing http:// or https:// at the front of the url.  <b/><br /> <br />';
-	else if ($_GET['error'] == 7) 
-		echo '<b>WARNING: You entered an invalid Email <b/><br /> <br />';		
+if (isset($_GET['error'])) {
+  if ($_GET['error']) {
+    echo '<br /><br />';
+    if ($_GET['error'] == 1)
+      echo '<b>WARNING: Zip Code is a required Field, please re-enter the data with a zip code <b/><br/><br />';
+    else if ($_GET['error'] == 2)
+      echo '<b>WARNING: Departure Date out of range - please re-enter data <b/><br /> <br />';
+    else if ($_GET['error'] == 3) 
+      echo '<b>WARNING: Return Date out of range - please re-enter data <b/><br /> <br />';
+    else if ($_GET['error'] == 4) 
+      echo '<b>WARNING: Return Date cannot be before Departure Date <b/><br /> <br />';
+    else if ($_GET['error'] == 5) 
+      echo '<b>WARNING: Trip name is a required value <b/><br /> <br />';
+    else if ($_GET['error'] == 6) 
+      echo '<b>WARNING: You entered an invalid URL for website, perhaps you are missing http:// or https:// at the front of the url.  <b/><br /> <br />';
+    else if ($_GET['error'] == 7) 
+      echo '<b>WARNING: You entered an invalid Email <b/><br /> <br />';		
+    else if ($_GET['error'] == 8) 
+      echo '<b>WARNING: You entered an invalid city string <b/><br /> <br />';		
+  }
 }
 
 // check if this is an update form
-if ($_GET['update']) {
-	$update = $_GET['update'];
+if (isset($_GET['update'])) {
+  if ($_GET['update']) {
+    $update = $_GET['update'];
+  }
 }
 
-if ($_GET['edit']) {
-	$editprofile = $_GET['edit'];
-	$sql = 'select * from users where userid="'.$fbid.'"';
-	$result = mysql_query($sql);
-	$editrow = mysql_fetch_array($result,MYSQL_ASSOC);
-	$sql2 = 'select * from skillsselected where userid="'.$fbid.'"';
-	$result = mysql_query($sql2);
-	while ($mrow = mysql_fetch_array($result,MYSQL_ASSOC)) {
-		$skillsrow[] = $mrow['id'];
-	}
-	$sql2 = 'select * from regionsselected where userid="'.$fbid.'"';
-	$result = mysql_query($sql2);
-	while ($mrow = mysql_fetch_array($result,MYSQL_ASSOC)) {
-		$regionsrow[] = $mrow['id'];
-	}
-	$sql2 = 'select * from usstatesselected where userid="'.$fbid.'"';
-	$result = mysql_query($sql2);
-	while ($mrow = mysql_fetch_array($result,MYSQL_ASSOC)) {
-		$usstatesrow[] = $mrow['id'];
-	}
-	$sql2 = 'select * from countriesselected where userid="'.$fbid.'"';
-	$result = mysql_query($sql2);
-	while ($mrow = mysql_fetch_array($result,MYSQL_ASSOC)) {
-		$countriesrow[] = $mrow['id'];
-	}
-	$sql2 = 'select * from durationsselected where userid="'.$fbid.'"';
-	$result = mysql_query($sql2);
-	
-	while ($mrow = mysql_fetch_array($result,MYSQL_ASSOC)) {
-		$durationsrow[] = $mrow['id'];
-	}
-	$sql = 'select * from trips where id="'.$update.'"';
-	$result = mysql_query($sql);
-	$triprow = mysql_fetch_array($result,MYSQL_ASSOC);
+if (isset($_GET['edit'])) {
+  if ($_GET['edit']) {
+    $editprofile = $_GET['edit'];
+    $sql = 'select * from users where userid="'.$fbid.'"';
+    $result = mysql_query($sql);
+    $editrow = mysql_fetch_array($result,MYSQL_ASSOC);
+    $sql2 = 'select * from skillsselected where userid="'.$fbid.'"';
+    $result = mysql_query($sql2);
+    while ($mrow = mysql_fetch_array($result,MYSQL_ASSOC)) {
+      $skillsrow[] = $mrow['id'];
+    }
+    $sql2 = 'select * from regionsselected where userid="'.$fbid.'"';
+    $result = mysql_query($sql2);
+    while ($mrow = mysql_fetch_array($result,MYSQL_ASSOC)) {
+      $regionsrow[] = $mrow['id'];
+    }
+    $sql2 = 'select * from usstatesselected where userid="'.$fbid.'"';
+    $result = mysql_query($sql2);
+    while ($mrow = mysql_fetch_array($result,MYSQL_ASSOC)) {
+      $usstatesrow[] = $mrow['id'];
+    }
+    $sql2 = 'select * from countriesselected where userid="'.$fbid.'"';
+    $result = mysql_query($sql2);
+    while ($mrow = mysql_fetch_array($result,MYSQL_ASSOC)) {
+      $countriesrow[] = $mrow['id'];
+    }
+    $sql2 = 'select * from durationsselected where userid="'.$fbid.'"';
+    $result = mysql_query($sql2);
+
+    while ($mrow = mysql_fetch_array($result,MYSQL_ASSOC)) {
+      $durationsrow[] = $mrow['id'];
+    }
+    $sql = 'select * from trips where id="'.$update.'"';
+    $result = mysql_query($sql);
+    $triprow = mysql_fetch_array($result,MYSQL_ASSOC);
+  }
+} else {
+  $editprofile = false;
+  $triprow = array(); // this is horrible. I'm so sorry, code -zack
 }
 
 if ((!$is_trip) && (!$is_volunteer) && (!$is_mission)) {
    echo 'You should choose your profile to be either volunteer or a mission or you should create a trip <br /><br />';
    echo 'Check the link and try again <br /><br />';
    echo"<a href='welcome.php'>Go Back to the Welcome Page</a>";
-
-}
-else {
-session_start();
-if ($is_trip) {
- $_SESSION["mytype"] = 2;
- echo '<br /><br/><b> Use the form below to create your trip. after creating the trip, be sure to share it with your friends. </b><br /><br />';
- 
- //echo 'Main Trip:'.$_SESSION["mytype"].'<br />';
- 
+} else {
+  session_start();
+  if ($is_trip) {
+    $_SESSION["mytype"] = 2;
+    echo '<br /><br/><b> Use the form below to create your trip. after creating the trip, be sure to share it with your friends. </b><br /><br />';
+    //echo 'Main Trip:'.$_SESSION["mytype"].'<br />';
 }
 else if ($is_volunteer) {
   $_SESSION["mytype"] = 1;
@@ -239,35 +241,35 @@ else
 <?php
 
 function cmc_about($name_label, $url_label, $about_label,$editprofile,$editrow) {
-  if (($editprofile) && (!empty($editrow['organization']))) 
-  echo '<fb:editor-text name="name" value="'.$editrow['organization'].'" label="'.$name_label.'"/>';
-  else if (($editprofile) && (!empty($editrow['tripname'])))
-  echo '<fb:editor-text name="name" value="'.$editrow['tripname'].'" label="'.$name_label.'"/>';
-  else
-  echo '<fb:editor-text name="name" label="'.$name_label.'"/>';
+ if (($editprofile) && (!empty($editrow['organization']))) 
+   echo '<fb:editor-text name="name" value="'.$editrow['organization'].'" label="'.$name_label.'"/>';
+ else if (($editprofile) && (!empty($editrow['tripname'])))
+   echo '<fb:editor-text name="name" value="'.$editrow['tripname'].'" label="'.$name_label.'"/>';
+ else
+   echo '<fb:editor-text name="name" label="'.$name_label.'"/>';
 
-  if (($editprofile) && (!empty($editrow['website'])))
-  echo '<fb:editor-text name="url" value="'.$editrow['website'].'" label="'.$url_label.'"/>';
-  else
-  echo '<fb:editor-text name="url" label="'.$url_label.'"/>';
-  
-  if (($editprofile) && (!empty($editrow['aboutme'])))
-  echo '<fb:editor-text name="about" value="'.$editrow['aboutme'].'" label="'.$about_label.'"/>';
-  else if (($editprofile) && (!empty($editrow['tripdesc'])))
-  echo '<fb:editor-text name="about" value="'.$editrow['tripdesc'].'" label="'.$about_label.'"/>';
-  else
-  echo '<fb:editor-textarea name="about" label="'.$about_label.'"/>';
+ if (($editprofile) && (!empty($editrow['website'])))
+   echo '<fb:editor-text name="url" value="'.$editrow['website'].'" label="'.$url_label.'"/>';
+ else
+   echo '<fb:editor-text name="url" label="'.$url_label.'"/>';
+
+ if (($editprofile) && (!empty($editrow['aboutme'])))
+   echo '<fb:editor-text name="about" value="'.$editrow['aboutme'].'" label="'.$about_label.'"/>';
+ else if (($editprofile) && (!empty($editrow['tripdesc'])))
+   echo '<fb:editor-text name="about" value="'.$editrow['tripdesc'].'" label="'.$about_label.'"/>';
+ else
+   echo '<fb:editor-textarea name="about" label="'.$about_label.'"/>';
 }
 
 if ($editprofile) {
-if (!$is_trip) {
-echo '<fb:editor-custom name="toggle" label="Change from Missionary to Mission-Goer or vice-versa">';
-echo '<select name="toggle" id="toggle">';
-echo '<option value="0">No</option>';
-echo '<option value="1">Yes</option>';
-echo '</select>';
-echo '</fb:editor-custom>';
-}
+  if (!$is_trip) {
+    echo '<fb:editor-custom name="toggle" label="Change from Missionary to Mission-Goer or vice-versa">';
+    echo '<select name="toggle" id="toggle">';
+    echo '<option value="0">No</option>';
+    echo '<option value="1">Yes</option>';
+    echo '</select>';
+    echo '</fb:editor-custom>';
+  }
 }
 
 
@@ -351,6 +353,11 @@ cmc_needed_custom('skills', 'id', 'id', 'skilldesc', 'Spiritual Service',
 <?php 
 if ($editprofile) {
 if ($is_trip) {
+if (!strcmp($triprow['religion'],"  "))
+echo '<option selected="selected" value="">  </option>';
+else
+echo '<option value="">  </option>';
+
 if (!strcmp($triprow['religion'],"Secular"))
 echo '<option selected="selected" value="Secular">Secular</option>';
 else
@@ -375,6 +382,11 @@ echo '</select>';
 echo '</fb:editor-custom>';
 }
 else {
+if (!strcmp($editrow['religion'],"  "))
+echo '<option selected="selected" value="">  </option>';
+else
+echo '<option value="">  </option>';
+
 if (!strcmp($editrow['religion'],"Secular"))
 echo '<option selected="selected" value="Secular">Secular</option>';
 else
@@ -402,6 +414,7 @@ echo '</fb:editor-custom>';
 else {
 ?>
 
+<option value="">   </option>'
 <option value="Secular">Secular</option>
 <option value="Christian: Protestant">Christian: Protestant</option>
 <option value="Christian: Roman Catholic" >Christian: Roman Catholic</option>
@@ -554,7 +567,7 @@ if (!$is_trip) {
 <fb:editor-custom name="state" label="State">
 <select name="state" id="state">
 <?php
-
+echo '<option value="">   </option>';
 cmc_fetch_opts('select id, longname from usstates;', 'id', 'id', 'longname',$editprofile,$usstatesrow);
 ?>
 </select>
@@ -708,9 +721,9 @@ echo '<fb:editor-text name="email" label="Email Address"/>';
 
 if (!$is_trip) {
 if (($editprofile) && (!empty($editrow['missionsexperience'])))
-echo '<fb:editor-textarea name="misexp" label="My Missions Experience" value="'.$editrow['missionsexperience'].'"/>';
+echo '<fb:editor-text name="misexp" label="My Missions Experience" value="'.$editrow["missionsexperience"].'"/>';
 else
-echo '<fb:editor-textarea name="misexp" label="My Missions Experience"/>';
+echo '<fb:editor-text name="misexp" label="My Missions Experience"/>';
 }
 ?>
 

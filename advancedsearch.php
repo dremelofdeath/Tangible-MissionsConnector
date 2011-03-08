@@ -170,10 +170,17 @@ if (empty($osvalue)) {
 echo '<option name="otherskills" value="Any">Any</option>';
 echo '<option name="otherskills" value="General Help/Labor">General Help/Labor</option>';
 echo '<option name="otherskills" value="Team Leader/Primary Organizer">Team Leader/Primary Organizer</option>';
-echo '<option name="otherskills" value="Business Management Expertise">Business Management Expertise</option>';
-echo '<option name="otherskills" value="Skilled Construction">Skilled Construction</option>';
-echo '<option name="otherskills" value="Computer Science">Computer Science</option>';
-echo '<option name="otherskills" value="Legal Expertise">Legal Expertise</option>';
+echo '<option name="otherskills" value="Accounting and/or Business Management">Accounting and/or Business Management</option>';
+echo '<option name="otherskills" value="Skilled Construction and/or Maintenance">Skilled Construction and/or Maintenance</option>';
+echo '<option name="otherskills" value="Computer Science/Other Technical">Computer Science/Other Technical</option>';
+echo '<option name="otherskills" value="Agriculture and/or Animal Husbandry">Agriculture and/or Animal Husbandry</option>';
+echo '<option name="otherskills" value="Mechanic">Mechanic</option>';
+echo '<option name="otherskills" value="Office/Secretarial">Office/Secretarial</option>';
+echo '<option name="otherskills" value="Teaching">Teaching</option>';
+echo '<option name="otherskills" value="Veterinary">Veterinary</option>';
+echo '<option name="otherskills" value="Water Supply Improvement">Water Supply Improvement</option>';
+echo '<option name="otherskills" value="Writing and/or Translating">Writing and/or Translating</option>';
+echo '<option name="otherskills" value="Engineering">Engineering</option>';
 }
 else {
 if (!strcmp($osvalue,"Any"))
@@ -191,26 +198,60 @@ echo '<option selected="selected" name="otherskills" value="Team Leader/Primary 
 else
 echo '<option name="otherskills" value="Team Leader/Primary Organizer">Team Leader/Primary Organizer</option>';
 
-if (!strcmp($osvalue,"Business Management Expertise"))
-echo '<option selected="selected" name="otherskills" value="Business Management Expertise">Business Management Expertise</option>';
+if (!strcmp($osvalue,"Accounting and/or Business Management"))
+echo '<option selected="selected" name="otherskills" value="Accounting and/or Business Management">Accounting and/or Business Management</option>';
 else
-echo '<option name="otherskills" value="Business Management Expertise">Business Management Expertise</option>';
+echo '<option name="otherskills" value="Accounting and/or Business Management">Accounting and/or Business Management</option>';
 
-if (!strcmp($osvalue,"Skilled Construction"))
-echo '<option selected="selected" name="otherskills" value="Skilled Construction">Skilled Construction</option>';
+if (!strcmp($osvalue,"Skilled Construction and/or Maintenance"))
+echo '<option selected="selected" name="otherskills" value="Skilled Construction and/or Maintenance">Skilled Construction and/or Maintenance</option>';
 else
-echo '<option name="otherskills" value="Skilled Construction">Skilled Construction</option>';
+echo '<option name="otherskills" value="Skilled Construction and/or Maintenance">Skilled Construction and/or Maintenance</option>';
 
-if (!strcmp($osvalue,"Computer Science"))
-echo '<option selected="selected" name="otherskills" value="Computer Science">Computer Science</option>';
+if (!strcmp($osvalue,"Computer Science/Other Technical"))
+echo '<option selected="selected" name="otherskills" value="Computer Science/Other Technical">Computer Science/Other Technical</option>';
 else
-echo '<option name="otherskills" value="Computer Science">Computer Science</option>';
+echo '<option name="otherskills" value="Computer Science/Other Technical">Computer Science/Other Technical</option>';
 
-if (!strcmp($osvalue,"Legal Expertise"))
-echo '<option selected="selected" name="otherskills" value="Legal Expertise">Legal Expertise</option>';
+if (!strcmp($osvalue,"Agriculture and/or Animal Husbandry"))
+echo '<option selected="selected" name="otherskills" value="Agriculture and/or Animal Husbandry">Agriculture and/or Animal Husbandry</option>';
 else
-echo '<option name="otherskills" value="Legal Expertise">Legal Expertise</option>';
+echo '<option name="otherskills" value="Agriculture and/or Animal Husbandry">Agriculture and/or Animal Husbandry</option>';
 
+if (!strcmp($osvalue,"Mechanic"))
+echo '<option selected="selected" name="otherskills" value="Mechanic">Mechanic</option>';
+else
+echo '<option name="otherskills" value="Mechanic">Mechanic</option>';
+
+if (!strcmp($osvalue,"Office/Secretarial"))
+echo '<option selected="selected" name="otherskills" value="Office/Secretarial">Office/Secretarial</option>';
+else
+echo '<option name="otherskills" value="Office/Secretarial">Office/Secretarial</option>';
+
+if (!strcmp($osvalue,"Teaching"))
+echo '<option selected="selected" name="otherskills" value="Teaching">Teaching</option>';
+else
+echo '<option name="otherskills" value="Teaching">Teaching</option>';
+
+if (!strcmp($osvalue,"Veterinary"))
+echo '<option selected="selected" name="otherskills" value="Veterinary">Veterinary</option>';
+else
+echo '<option name="otherskills" value="Veterinary">Veterinary</option>';
+
+if (!strcmp($osvalue,"Water Supply Improvement"))
+echo '<option selected="selected" name="otherskills" value="Water Supply Improvement">Water Supply Improvement</option>';
+else
+echo '<option name="otherskills" value="Water Supply Improvement">Water Supply Improvement</option>';
+
+if (!strcmp($osvalue,"Writing and/or Translating"))
+echo '<option selected="selected" name="otherskills" value="Writing and/or Translating">Writing and/or Translating</option>';
+else
+echo '<option name="otherskills" value="Writing and/or Translating">Writing and/or Translating</option>';
+
+if (!strcmp($osvalue,"Engineering"))
+echo '<option selected="selected" name="otherskills" value="Engineering">Engineering</option>';
+else
+echo '<option name="otherskills" value="Engineering">Engineering</option>';
 }
 ?>
 </select>
@@ -222,10 +263,11 @@ echo '<option name="otherskills" value="Legal Expertise">Legal Expertise</option
 <?php
 if (empty($ssvalue)) {
 echo '<option name="spiritserv" value="Any">Any</option>';
-echo '<option name="spiritserv" value="Team Spiritual Leader/Pastor">Team Spiritual Leader/Pastor</option>';
-echo '<option name="spiritserv" value="Spiritual Outreach Director">Spiritual Outreach Director</option>';
+echo '<option name="spiritserv" value="Team Spiritual Leader">Team Spiritual Leader</option>';
+echo '<option name="spiritserv" value="Individual Outreach (Prayer or Counseling)">Individual Outreach (Prayer or Counseling)</option>';
 echo '<option name="spiritserv" value="Evangelism">Evangelism</option>';
-echo '<option name="spiritserv" value="Worship Leader">Worship Leader</option>';
+echo '<option name="spiritserv" value="Worship Team">Worship Team</option>';
+echo '<option name="spiritserv" value="Public Speaking">Public Speaking</option>';
 }
 else {
 if (!strcmp($ssvalue,"Any"))
@@ -233,26 +275,30 @@ echo '<option selected="selected" name="spiritserv" value="Any">Any</option>';
 else
 echo'<option name="spiritserv" value="Any">Any</option>';
 
-if (!strcmp($ssvalue,"Team Spiritual Leader/Pastor"))
-echo '<option selected="selected" name="spiritserv" value="Team Spiritual Leader/Pastor">Team Spiritual Leader/Pastor</option>';
+if (!strcmp($ssvalue,"Team Spiritual Leader"))
+echo '<option selected="selected" name="spiritserv" value="Team Spiritual Leader">Team Spiritual Leader</option>';
 else
-echo '<option name="spiritserv" value="Team Spiritual Leader/Pastor">Team Spiritual Leader/Pastor</option>';
+echo '<option name="spiritserv" value="Team Spiritual Leader">Team Spiritual Leader</option>';
 
-if (!strcmp($ssvalue,"Spiritual Outreach Director"))
-echo '<option selected="selected" name="spiritserv" value="Spiritual Outreach Director">Spiritual Outreach Director</option>';
+if (!strcmp($ssvalue,"Individual Outreach (Prayer or Counseling)"))
+echo '<option selected="selected" name="spiritserv" value="Individual Outreach (Prayer or Counseling)">Individual Outreach (Prayer or Counseling)</option>';
 else
-echo '<option name="spiritserv" value="Spiritual Outreach Director">Spiritual Outreach Director</option>';
+echo '<option name="spiritserv" value="Individual Outreach (Prayer or Counseling)">Individual Outreach (Prayer or Counseling)</option>';
 
 if (!strcmp($ssvalue,"Evangelism"))
 echo '<option selected="selected" name="spiritserv" value="Evangelism">Evangelism</option>';
 else
 echo '<option name="spiritserv" value="Evangelism">Evangelism</option>';
 
-if (!strcmp($ssvalue,"Worship Leader"))
-echo '<option selected="selected" name="spiritserv" value="Worship Leader">Worship Leader</option>';
+if (!strcmp($ssvalue,"Worship Team"))
+echo '<option selected="selected" name="spiritserv" value="Worship Team">Worship Team</option>';
 else
-echo '<option name="spiritserv" value="Worship Leader">Worship Leader</option>';
+echo '<option name="spiritserv" value="Worship Team">Worship Team</option>';
 
+if (!strcmp($ssvalue,"Public Speaking"))
+echo '<option selected="selected" name="spiritserv" value="Public Speaking">Public Speaking</option>';
+else
+echo '<option name="spiritserv" value="Public Speaking">Public Speaking</option>';
 }
 
 ?>
@@ -386,7 +432,7 @@ for ($i=0;$i<50;$i++) {
 }
 
 }
-  
+
   $year = (int)date("Y");
   $year = $year + 0;
 
@@ -548,8 +594,8 @@ if($result = mysql_query($sql)){
 <option value="Any">Any</option>
 
 <?php
-//$con = mysql_connect(localhost,"arena", "***arena!password!getmoney!getpaid***");
-$con = mysql_connect(localhost,"poornima", "MYdata@1");
+$con = mysql_connect(localhost,"arena", "***arena!password!getmoney!getpaid***");
+//$con = mysql_connect(localhost,"poornima", "MYdata@1");
 	if(!$con)
 	{
 		die('Could not connect: ' .  mysql_error());

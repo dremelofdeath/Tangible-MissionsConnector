@@ -40,8 +40,13 @@ if (isset($_GET['update']))
 
 //$update = $_SESSION["update"];
 
+// BUG #81010922: Fixing the security vulnerability where a user can inject HTML 
+// code into their profile
+$saferequest = cmc_safe_request_strip();
+
+
 // Zip code is a required field - return to makeprofile and prompt for the zipcode if the country is USA
-if (empty($_REQUEST['zip']) && (!strcmp($_REQUEST['country'],'United States'))) {
+if (empty($saferequest['zip']) && (!strcmp($saferequest['country'],'United States'))) {
 if ($isreceiver==0)
 	echo "<fb:redirect url='makeprofile.php?type=mission&error=1' />";
 else if ($isreceiver==1)
@@ -55,18 +60,18 @@ $info = $fb->api_client->users_getInfo($fbid, 'name', 'email', 'about_me');
 for($i=0; $i < count($info); $i++) {
   $record = $info[$i];
   $name = $record['name']; 
-  $email = $record['email'].", ".$_REQUEST['email']; 
+  $email = $record['email'].", ".$saferequest['email']; 
   //$phone = $info[0]['phone']; 
-  $aboutme = $record['about_me'].", ".$_REQUEST['aboutme']; 
+  $aboutme = $record['about_me'].", ".$saferequest['aboutme']; 
 }
 
 //$sql = "SELECT name, email, about_me FROM user WHERE uid ='".$fbid."'";
 //echo $facebook->api_client->fql_query($sql);
 if (!$is_trip) {
 
-if (!empty($_REQUEST["toggle"])) {
+if (!empty($saferequest["toggle"])) {
 
-if ($_REQUEST["toggle"] == 1) {
+if ($saferequest["toggle"] == 1) {
    $sql = 'select * from users where userid="'.$fbid.'"';
    $result = mysql_query($sql);
    $row = mysql_fetch_array($result);
@@ -87,6 +92,19 @@ if ($_REQUEST["toggle"] == 1) {
 }
 }
 
+// function to validate user input
+function validateString($num)
+{
+if (strlen($num==0)) 
+return -1;
+else {
+//if ((preg_match("<iframe",trim($num))) || (stristr($num,"iframe")))
+if (preg_match("#^[a-zA-Z0-9 ]+$#i",trim($num)))
+return 1;
+else
+return 0;
+}
+}
 
 $sql = "SELECT userid FROM users WHERE userid='".$fbid."'";
 $result = mysql_query($sql) or die(mysql_error());
@@ -97,77 +115,100 @@ if($num_userids > 0){
   
   $sql = 'UPDATE users SET name="'.$name.'"';
   
-  if (!empty($_REQUEST['name']))
-   $sql = $sql.', organization="'.$_REQUEST['name'].'"';
+  if (!empty($saferequest['name']))
+   $sql = $sql.', organization="'.$saferequest['name'].'"';
  
    $sql = $sql.', isreceiver="'.$isreceiver.'"';
    if ($update) {
    
-   if (empty($_REQUEST['zip']))
+   if (empty($saferequest['zip']))
 	$sql = $sql.', zipcode=NULL';
    else
-    $sql = $sql.', zipcode="'.$_REQUEST["zip"].'"';
+    $sql = $sql.', zipcode="'.$saferequest["zip"].'"';
 	
-   if (empty($_REQUEST['phone']))
+   if (empty($saferequest['phone']))
 	$sql = $sql.', phone=NULL';
    else
-    $sql = $sql.', phone="'.$_REQUEST["phone"].'"';
+    $sql = $sql.', phone="'.$saferequest["phone"].'"';
 	
-   if (empty($_REQUEST['email']))
+   if (empty($saferequest['email']))
 	$sql = $sql.', email=NULL';
    else
-    $sql = $sql.', email="'.$_REQUEST["email"].'"';	
+    $sql = $sql.', email="'.$saferequest["email"].'"';	
 	
-   if (empty($_REQUEST['misexp']))
+   if (empty($saferequest['misexp']))
 	$sql = $sql.', missionsexperience=NULL';
    else
-    $sql = $sql.', missionsexperience="'.$_REQUEST["misexp"].'"';
+    $sql = $sql.', missionsexperience="'.$saferequest["misexp"].'"';
 	
-   if (empty($_REQUEST['relg']))
+   if (empty($saferequest['relg']))
 	$sql = $sql.', religion=NULL';
    else
-    $sql = $sql.', religion="'.$_REQUEST["relg"].'"';
+    $sql = $sql.', religion="'.$saferequest["relg"].'"';
 	
-   if (empty($_REQUEST['about']))
+   if (empty($saferequest['about']))
 	$sql = $sql.', aboutme=NULL';
    else
-    $sql = $sql.', aboutme="'.$_REQUEST["about"].'"';
+    $sql = $sql.', aboutme="'.$saferequest["about"].'"';
 	
-   if (empty($_REQUEST['state']))
+   if (empty($saferequest['state']))
 	$sql = $sql.', state=NULL';
    else
-    $sql = $sql.', state="'.$_REQUEST["state"].'"';
-	
-   if (empty($_REQUEST['city']))
-	$sql = $sql.', city=NULL';
-   else
-    $sql = $sql.', city="'.$_REQUEST["city"].'"';
+    $sql = $sql.', state="'.$saferequest["state"].'"';
 
-   if (empty($_REQUEST['url']))
+
+   $mycity = strip_tags($saferequest['city']);
+   if (empty($mycity))
+	$sql = $sql.', city=NULL';
+   else {
+      if (validateString($mycity)==0) {
+      //if (validateString(mysql_real_escape_string($saferequest['city']))==0) {
+	if ($isreceiver==0)
+		echo "<fb:redirect url='makeprofile.php?type=mission&edit=1&error=8' />";
+	else if ($isreceiver==1)
+		echo "<fb:redirect url='makeprofile.php?type=volunteer&edit=1&error=8' />";
+       }
+    $sql = $sql.', city="'.$saferequest["city"].'"';
+   }
+
+   if (empty($saferequest['url']))
 	$sql = $sql.', website=NULL';
    else
-    $sql = $sql.', website="'.$_REQUEST["url"].'"';
+    $sql = $sql.', website="'.$saferequest["url"].'"';
 	
    }
    else {
-   if (!empty($_REQUEST['zip']))
-   $sql = $sql.', zipcode="'.$_REQUEST["zip"].'"';
-   if (!empty($_REQUEST['phone']))
-   $sql = $sql.', phone = "'.$_REQUEST["phone"].'"';
-   if (!empty($_REQUEST['email']))
-   $sql = $sql.', email = "'.$_REQUEST["email"].'"';
-   if (!empty($_REQUEST['misexp']))
-   $sql = $sql.', missionsexperience = "'.$_REQUEST["misexp"].'"';
-   if (!empty($_REQUEST['relg']))
-    $sql = $sql.', religion = "'.$_REQUEST["relg"].'"';
-    if (!empty($_REQUEST['about']))
-    $sql = $sql.', aboutme = "'.$_REQUEST["about"].'"';
-    if (!empty($_REQUEST['state']))
-    $sql = $sql.',state ="'.$_REQUEST['state'].'"';
-   if (!empty($_REQUEST['city']))
-    $sql = $sql.', city ="'.$_REQUEST['city'].'"';
-   if (!empty($_REQUEST['url']))
-    $sql = $sql.', website = "'.$_REQUEST['url'].'"';
+   if (!empty($saferequest['zip']))
+   $sql = $sql.', zipcode="'.$saferequest["zip"].'"';
+   if (!empty($saferequest['phone']))
+   $sql = $sql.', phone = "'.$saferequest["phone"].'"';
+   if (!empty($saferequest['email']))
+   $sql = $sql.', email = "'.$saferequest["email"].'"';
+   if (!empty($saferequest['misexp']))
+   $sql = $sql.', missionsexperience = "'.$saferequest["misexp"].'"';
+   if (!empty($saferequest['relg']))
+    $sql = $sql.', religion = "'.$saferequest["relg"].'"';
+    if (!empty($saferequest['about']))
+    $sql = $sql.', aboutme = "'.$saferequest["about"].'"';
+    if (!empty($saferequest['state']))
+    $sql = $sql.',state ="'.$saferequest['state'].'"';
+    //$mycity = mysql_real_escape_string($saferequest['city']);
+    $mycity = strip_tags($saferequest['city']);
+
+   if (!empty($mycity)) {
+   //if (!empty(mysql_real_escape_string($saferequest['city']))) {
+      //if (validateString(mysql_real_escape_string($saferequest['city']))==0) {
+      if (validateString($mycity)==0) {
+	if ($isreceiver==0)
+		echo "<fb:redirect url='makeprofile.php?type=mission&error=8' />";
+	else if ($isreceiver==1)
+		echo "<fb:redirect url='makeprofile.php?type=volunteer&error=8' />";
+       }
+    else
+    $sql = $sql.', city ="'.$saferequest['city'].'"';
+    }
+   if (!empty($saferequest['url']))
+    $sql = $sql.', website = "'.$saferequest['url'].'"';
 
 	}
 	
@@ -177,14 +218,14 @@ if($num_userids > 0){
   $sql = 'INSERT INTO users '.
     '(userid, name, organization, isreceiver, state, city, zipcode, phone, email, missionsexperience,'.
     ' religion, aboutme, website, partnersite) '.
-    'VALUES ("'.$fbid.'","'.$name.'","'.$_REQUEST['name'].'","'.$isreceiver.'","'.$_REQUEST['state'].'","'.$_REQUEST['city'].'","'.$_REQUEST["zip"].'","'.
-    $_REQUEST["phone"].'","'.$email.'","'.$_REQUEST["misexp"].'","'.
-    $_REQUEST["relg"].'","'.$_REQUEST['about'].'","'.$_REQUEST['url'].'","0")';
+    'VALUES ("'.$fbid.'","'.$name.'","'.$saferequest['name'].'","'.$isreceiver.'","'.$saferequest['state'].'","'.strip_tags($saferequest['city']).'","'.strip_tags($saferequest["zip"]).'","'.
+    strip_tags($saferequest["phone"]).'","'.strip_tags($saferequest["email"]).'","'.strip_tags($saferequest["misexp"]).'","'.
+    $saferequest["relg"].'","'.$saferequest['about'].'","'.$saferequest['url'].'","0")';
 } else {
   die("Run for the hills! " . mysql_error());
 }
 
-//  $sql = $sql."(userid, name, isreceiver, zipcode, phone, email, missionsexperience, religion, aboutme, website, partnersite) VALUES ('".$fbid."','".$tid."','0','".$_REQUEST['zip']."','".$_REQUEST['phone']."','".$_REQUEST['email']."','".$_REQUEST['misexp']."','".$_REQUEST['relg']."','".$_REQUEST['aboutme']."','".$_REQUEST['website']."','0')";
+//  $sql = $sql."(userid, name, isreceiver, zipcode, phone, email, missionsexperience, religion, aboutme, website, partnersite) VALUES ('".$fbid."','".$tid."','0','".$saferequest['zip']."','".$saferequest['phone']."','".$saferequest['email']."','".$saferequest['misexp']."','".$saferequest['relg']."','".$saferequest['aboutme']."','".$saferequest['website']."','0')";
 //  if($idcount<>0){
 //    $sql=$sql."WHERE userid='".$fbid."'";}
    //mysql_fetch_array($result) or die(mysql_error());
@@ -204,17 +245,17 @@ if ($is_trip) {
 if (empty($update)) {
 $changed=0;
 $sql = 'select * from trips where creatorid="'.$fbid.'"';
-if (!empty($_REQUEST['name'])) {
-  $sql = $sql.' and tripname="'.$_REQUEST['name'].'"';
+if (!empty($saferequest['name'])) {
+  $sql = $sql.' and tripname="'.$saferequest['name'].'"';
   //$changed = 1;
 }
-//if (!empty($_REQUEST['about'])){
-//  $sql = $sql.' and tripdesc="'.$_REQUEST['about'].'"';
+//if (!empty($saferequest['about'])){
+//  $sql = $sql.' and tripdesc="'.$saferequest['about'].'"';
   //if ($changed==0)
   //	$changed = 1;
 //}
-//if (!empty($_REQUEST['destination'])) {
-//  $sql = $sql.' and destination="'.$_REQUEST['destination'].'"';
+//if (!empty($saferequest['destination'])) {
+//  $sql = $sql.' and destination="'.$saferequest['destination'].'"';
   //if ($changed==0)
   //	$changed = 1;
 //}
@@ -245,8 +286,10 @@ $sql1 = '';
 
 $namemod = 0;
 
-if (!empty($_REQUEST['name'])){
-	$tripname = $_REQUEST['name'];
+$tripname = strip_tags($saferequest['name']);
+//if (!empty($saferequest['name'])){
+if (!empty($tripname)){
+	//$tripname = $saferequest['name'];
 	if ($update) {
 	$namemod = 1;
 	$sql1 = $sql1.'tripname="'.$tripname.'"';
@@ -263,8 +306,10 @@ else {
 	echo '<fb:redirect url="makeprofile.php?type=trip&error=5" />';
 }
 
-if (!empty($_REQUEST['about'])) {
-	$tripdesc = $_REQUEST['about'];
+$tripdesc = strip_tags($saferequest['about']);
+//if (!empty($saferequest['about'])) {
+if (!empty($tripdesc)) {
+	//$tripdesc = $saferequest['about'];
 	if ($update) {
 	if ($namemod)
 	$sql1 = $sql1.',tripdesc="'.$tripdesc.'"';
@@ -297,8 +342,10 @@ else
 	return true;
 }
 
-if (!empty($_REQUEST['phone'])) {
-	$tripphone = $_REQUEST['phone'];
+$tripphone = strip_tags($saferequest['phone']);
+//if (!empty($saferequest['phone'])) {
+if (!empty($tripphone)) {
+	//$tripphone = $saferequest['phone'];
 	if ($update) {
 	if ($namemod)
 	$sql1 = $sql1.',phone="'.$tripphone.'"';
@@ -323,18 +370,6 @@ else {
 	}
 }
 
-// function to validate user input
-function validateString($num)
-{
-if (strlen($num==0)) 
-return 1;
-else {
-if (preg_match("/^[a-zA-Z0-9!@_]+$/",trim($num)))
-return 1;
-else
-return 0;
-}
-}
 
 function validateemailid($email) {
 if (strlen($email)==0) {
@@ -381,8 +416,10 @@ return true;
 }
 
 
-if (!empty($_REQUEST['email'])) {
-	$tripemail = $_REQUEST['email'];
+$tripemail = strip_tags($saferequest['email']);
+//if (!empty($saferequest['email'])) {
+if (!empty($tripemail)) {
+	//$tripemail = $saferequest['email'];
 	if (!check_email_address($tripemail)) {
 		if ($update)
 		echo '<fb:redirect url="makeprofile.php?type=trip&edit=1&update='.$update.'&error=7" />';
@@ -421,8 +458,10 @@ function isValidURL($url)
 return preg_match('|^http(s)?://[a-z0-9-]+(.[a-z0-9-]+)*(:[0-9]+)?(/.*)?$|i', $url);
 }
 
-if (!empty($_REQUEST['url'])) {
-	$tripurl = $_REQUEST['url'];
+$tripurl = strip_tags($saferequest['url']);
+//if (!empty($saferequest['url'])) {
+if (!empty($tripurl)) {
+	//$tripurl = $saferequest['url'];
 	if (!isValidURL($tripurl)) {
 		if ($update)
 		echo '<fb:redirect url="makeprofile.php?type=trip&edit=1&update='.$update.'&error=6" />';
@@ -455,8 +494,8 @@ else {
 	}	
 	}
 }
-if (!empty($_REQUEST['dur'])) {
-	$tripdurid = $_REQUEST['dur'];
+if (!empty($saferequest['dur'])) {
+	$tripdurid = $saferequest['dur'];
 	if ($update) {
 	if ($namemod)
 	$sql1 = $sql1.',durationid="'.$tripdurid[0].'"';
@@ -482,8 +521,8 @@ else {
 }
 
 
-if (isset($_REQUEST['stage'])) {
-	$tripstage = $_REQUEST['stage'];
+if (isset($saferequest['stage'])) {
+	$tripstage = $saferequest['stage'];
 	if ($update) {
 	if ($namemod)
 	$sql1 = $sql1.',isinexecutionstage="'.$tripstage.'"';
@@ -508,8 +547,8 @@ else {
 	}
 }
 /*
-if (!empty($_REQUEST['fintype'])) {
-  $fintype = $_REQUEST['fintype'];
+if (!empty($saferequest['fintype'])) {
+  $fintype = $saferequest['fintype'];
   if ($fintype == 1) { 
   	$paidstr = ' This is a self-paid trip.';
 	if ($update) {
@@ -526,8 +565,8 @@ if (!empty($_REQUEST['fintype'])) {
 	}
   }
   else {
-	if (!empty($_REQUEST['financing'])) {
-		$financingby = $_REQUEST['financing'];
+	if (!empty($saferequest['financing'])) {
+		$financingby = $saferequest['financing'];
 	if ($update) {
 	if ($namemod)
 	$sql1 = $sql1.',notes="'.$financingby.'"';
@@ -565,7 +604,7 @@ if (!empty($_REQUEST['fintype'])) {
 $_SESSION['paidstr'] = $paidstr;
 */
 
-//echo 'DEPARTING: '.$_REQUEST['DepartMonth'].' '.$_REQUEST['DepartDay'].'<br />';
+//echo 'DEPARTING: '.$saferequest['DepartMonth'].' '.$saferequest['DepartDay'].'<br />';
 
 function getdatestring($year,$month,$date) {
 
@@ -692,12 +731,12 @@ else if ($year2 == $year1) {
 
 }
 
-if ((!empty($_REQUEST['DepartYear'])) && (!empty($_REQUEST['DepartMonth'])) && (!empty($_REQUEST['DepartDay']))) {
+if ((!empty($saferequest['DepartYear'])) && (!empty($saferequest['DepartMonth'])) && (!empty($saferequest['DepartDay']))) {
         //$thisyear = date("Y");
 
-	validate_date(1,$_REQUEST['DepartYear'],$_REQUEST['DepartMonth'],$_REQUEST['DepartDay'],$update);
+	validate_date(1,$saferequest['DepartYear'],$saferequest['DepartMonth'],$saferequest['DepartDay'],$update);
 
-	$tripdpt = getdatestring($_REQUEST['DepartYear'],$_REQUEST['DepartMonth'],$_REQUEST['DepartDay']);
+	$tripdpt = getdatestring($saferequest['DepartYear'],$saferequest['DepartMonth'],$saferequest['DepartDay']);
 
 	if ($update) {
 	if ($namemod)
@@ -713,12 +752,12 @@ if ((!empty($_REQUEST['DepartYear'])) && (!empty($_REQUEST['DepartMonth'])) && (
 	$sql2 = $sql2.',"'.$tripdpt.'"';
 	}
 }
-if ((!empty($_REQUEST['ReturnYear'])) && (!empty($_REQUEST['ReturnMonth'])) && (!empty($_REQUEST['ReturnDay']))) {
-	validate_date(2,$_REQUEST['ReturnYear'],$_REQUEST['ReturnMonth'],$_REQUEST['ReturnDay'],$update);
+if ((!empty($saferequest['ReturnYear'])) && (!empty($saferequest['ReturnMonth'])) && (!empty($saferequest['ReturnDay']))) {
+	validate_date(2,$saferequest['ReturnYear'],$saferequest['ReturnMonth'],$saferequest['ReturnDay'],$update);
 
-	validate_return($_REQUEST['DepartYear'],$_REQUEST['DepartMonth'],$_REQUEST['DepartDay'],$_REQUEST['ReturnYear'],$_REQUEST['ReturnMonth'],$_REQUEST['ReturnDay'],$update);
+	validate_return($saferequest['DepartYear'],$saferequest['DepartMonth'],$saferequest['DepartDay'],$saferequest['ReturnYear'],$saferequest['ReturnMonth'],$saferequest['ReturnDay'],$update);
 
-	$tripret = getdatestring($_REQUEST['ReturnYear'],$_REQUEST['ReturnMonth'],$_REQUEST['ReturnDay']);
+	$tripret = getdatestring($saferequest['ReturnYear'],$saferequest['ReturnMonth'],$saferequest['ReturnDay']);
 
 	if ($update) {
 	if ($namemod)
@@ -734,8 +773,10 @@ if ((!empty($_REQUEST['ReturnYear'])) && (!empty($_REQUEST['ReturnMonth'])) && (
 	}
 }
 
-if (!empty($_REQUEST['destination'])) {
-	$tripdest = $_REQUEST['destination'];
+$tripdest = strip_tags($saferequest['destination']);
+//if (!empty($saferequest['destination'])) {
+if (!empty($tripdest)) {
+	//$tripdest = $saferequest['destination'];
 	if ($update) {
 	if ($namemod) 
 	$sql1 = $sql1.',destination="'.$tripdest.'"';
@@ -760,8 +801,8 @@ else {
 	}
 }
 
-if (!empty($_REQUEST['country'])) {
-	$tripcountry = $_REQUEST['country'];
+if (!empty($saferequest['country'])) {
+	$tripcountry = $saferequest['country'];
 	$sql5 = 'select * from countries where id="'.$tripcountry[0].'"';
 	$result5 = mysql_query($sql5);
 	$row5 = mysql_fetch_array($result5);
@@ -789,8 +830,10 @@ else {
 	}
 }
 
-if (!empty($_REQUEST['numpeople'])) {
-	$tripnump = $_REQUEST['numpeople'];
+$tripnump = strip_tags($saferequest['numpeople']);
+//if (!empty($saferequest['numpeople'])) {
+if (!empty($tripnump)) {
+	//$tripnump = $saferequest['numpeople'];
 	if ($update) {
 	if ($namemod)
 	$sql1 = $sql1.',numpeople="'.$tripnump.'"';
@@ -815,8 +858,10 @@ else {
 	}
 }
 
-if (!empty($_REQUEST['zip'])) {
-	$tripzip = $_REQUEST['zip'];
+$tripzip = strip_tags($saferequest['zip']);
+//if (!empty($saferequest['zip'])) {
+if (!empty($tripzip)) {
+	//$tripzip = $saferequest['zip'];
 	if ($update) {
 	if ($namemod)
 	$sql1 = $sql1.',zipcode="'.$tripzip.'"';
@@ -841,8 +886,8 @@ else {
 	}
 }
 
-if (!empty($_REQUEST['relg'])) {
-	$triprelg = $_REQUEST['relg'];
+if (!empty($saferequest['relg'])) {
+	$triprelg = $saferequest['relg'];
 	if ($update) {
 	if ($namemod)
 	$sql1 = $sql1.',religion="'.$triprelg.'"';
@@ -895,12 +940,12 @@ if ($update) {
 else {
 
 $sql = 'select max(id) as tripid from trips where creatorid="'.$fbid.'"';
-//if (!empty($_REQUEST['destination']))
-//	$sql = $sql.' and destination="'.$_REQUEST['destination'].'"';
-//if (!empty($_REQUEST['about']))
-//	$sql = $sql.' and tripdesc="'.$_REQUEST['about'].'"';
+//if (!empty($saferequest['destination']))
+//	$sql = $sql.' and destination="'.$saferequest['destination'].'"';
+//if (!empty($saferequest['about']))
+//	$sql = $sql.' and tripdesc="'.$saferequest['about'].'"';
 
-//$sql = 'select id from trips where creatorid="'.$fbid.'" and destination="'.$_REQUEST['destination'].'" and tripdesc="'.$_REQUEST['about'].'"';
+//$sql = 'select id from trips where creatorid="'.$fbid.'" and destination="'.$saferequest['destination'].'" and tripdesc="'.$saferequest['about'].'"';
 //echo $sql.'<br />';
 $result = mysql_query($sql);
 while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
@@ -933,117 +978,117 @@ mysql_query("DELETE FROM countriesselected WHERE userid='".$fbid."'") or die(mys
 mysql_query("DELETE FROM usstatesselected WHERE userid='".$fbid."'") or die(mysql_error());
 mysql_query("DELETE FROM durationsselected WHERE userid='".$fbid."'") or die(mysql_error());
 
-if (isset($_REQUEST['medfacil'])) {
-$medfacil = $_REQUEST['medfacil'];
+if (isset($saferequest['medfacil'])) {
+$medfacil = $saferequest['medfacil'];
 foreach($medfacil as $ms) {
   $sql = "INSERT INTO skillsselected VALUES ('".$fbid."','".$ms."')";
   mysql_query($sql);
   if(!$result){
-    echo "SQL Error: ".mysql_error()." ";
+    echo "<b><br/>==SQL Error==</b><br/>".mysql_error()."<br/><br/>Query was:<br/>".$sql;
   }
 }
 }
 
-if (isset($_REQUEST['nonmedfacil'])) {
-$nonmedfacil = $_REQUEST['nonmedfacil'];
+if (isset($saferequest['nonmedfacil'])) {
+$nonmedfacil = $saferequest['nonmedfacil'];
 foreach($nonmedfacil as $ms) {
   $sql = "INSERT INTO skillsselected VALUES ('".$fbid."','".$ms."')";
   mysql_query($sql);
   if(!$result){
-    echo "SQL Error: ".mysql_error()." ";
+    echo "<b><br/>==SQL Error==</b><br/>".mysql_error()."<br/><br/>Query was:<br/>".$sql;
   }
 }
 }
 
-if (isset($_REQUEST['medskills'])) {
-$medskills = $_REQUEST['medskills'];
+if (isset($saferequest['medskills'])) {
+$medskills = $saferequest['medskills'];
 foreach($medskills as $ms) {
   $sql = "INSERT INTO skillsselected VALUES ('".$fbid."','".$ms."')";
   mysql_query($sql);
   if(!$result){
-    echo "SQL Error: ".mysql_error()." ";
+    echo "<b><br/>==SQL Error==</b><br/>".mysql_error()."<br/><br/>Query was:<br/>".$sql;
   }
 }
 }
 
-if (isset($_REQUEST['otherskills'])) {
-$otherskills=$_REQUEST['otherskills'];
+if (isset($saferequest['otherskills'])) {
+$otherskills=$saferequest['otherskills'];
 foreach($otherskills as $ms) {
   $sql = "INSERT INTO skillsselected VALUES ('".$fbid."','".$ms."')";
   $result = mysql_query($sql);
   if(!$result) {
-    echo "SQL Error: ".mysql_error()." ";
+    echo "<b><br/>==SQL Error==</b><br/>".mysql_error()."<br/><br/>Query was:<br/>".$sql;
   }
 }
 }
 
-if (isset($_REQUEST['spiritserv'])) {
-$relgskills=$_REQUEST['spiritserv'];
+if (isset($saferequest['spiritserv'])) {
+$relgskills=$saferequest['spiritserv'];
 foreach($relgskills as $ms) {
   $sql = "INSERT INTO skillsselected VALUES ('".$fbid."','".$ms."')";
   $result = mysql_query($sql);
   if(!$result) {
-    echo "SQL Error: ".mysql_error()." ";
+    echo "<b><br/>==SQL Error==</b><br/>".mysql_error()."<br/><br/>Query was:<br/>".$sql;
   }
 }
 }
 
-if (isset($_REQUEST['region'])) {
-$region=$_REQUEST['region'];
+if (isset($saferequest['region'])) {
+$region=$saferequest['region'];
 foreach($region as $ms) {
   $sql = "INSERT INTO regionsselected VALUES ('".$fbid."','".$ms."')";
   $result = mysql_query($sql);
   if(!$result) {
-    echo "SQL Error: ".mysql_error()." ";
+    echo "<b><br/>==SQL Error==</b><br/>".mysql_error()."<br/><br/>Query was:<br/>".$sql;
   }
 }
 }
 
-if (isset($_REQUEST['state'])) {
-$mystate = $_REQUEST['state'];
+if (isset($saferequest['state'])) {
+$mystate = $saferequest['state'];
 //print_r($mystate);
 //foreach($mystate as $ms) {
   $sql = "INSERT INTO usstatesselected VALUES ('".$fbid."','".$mystate."')";
   $result = mysql_query($sql);
   if(!$result) {
-    echo "SQL Error: ".mysql_error()." ";
+    echo "<b><br/>==SQL Error==</b><br/>".mysql_error()."<br/><br/>Query was:<br/>".$sql;
   }
 //}
 }
 
-if (isset($_REQUEST['country'])) {
-$country = $_REQUEST['country'];
+if (isset($saferequest['country'])) {
+$country = $saferequest['country'];
 foreach($country as $ms) {
   $sql = "INSERT INTO countriesselected VALUES ('".$fbid."','".$ms."')";
   $result = mysql_query($sql);
   if(!$result) {
-    echo "SQL Error: ".mysql_error()." ";
+    echo "<b><br/>==SQL Error==</b><br/>".mysql_error()."<br/><br/>Query was:<br/>".$sql;
   }
 }
 }
 
-if (isset($_REQUEST['dur'])) {
-$dur = $_REQUEST['dur'];
+if (isset($saferequest['dur'])) {
+$dur = $saferequest['dur'];
 foreach($dur as $ms) {
   $sql = "INSERT INTO durationsselected VALUES ('".$fbid."','".$ms."')";
   $result = mysql_query($sql);
   if(!$result) {
-    echo "SQL Error: ".mysql_error()." ";
+    echo "<b><br/>==SQL Error==</b><br/>".mysql_error()."<br/><br/>Query was:<br/>".$sql;
   }
 }
 }
 
 if ($is_trip) {
-if ($update)
-echo "<fb:redirect url='profile.php?type=trip&update=".$update." />";
-else
-echo "<fb:redirect url='profile.php?type=trip&tripid=".$tripid." />";
+	if ($update)
+		echo "<fb:redirect url='profile.php?type=trip&update=".$update." />";
+	else
+		echo "<fb:redirect url='profile.php?type=trip&tripid=".$tripid." />";
 }
 else if ($isreceiver==0) {
-echo "<fb:redirect url='profile.php?type=volunteer' />";
+	echo "<fb:redirect url='profile.php?type=volunteer' />";
 }
 else if ($isreceiver) {
-echo "<fb:redirect url='profile.php?type=mission' />";
+	echo "<fb:redirect url='profile.php?type=mission' />";
 }
 
 

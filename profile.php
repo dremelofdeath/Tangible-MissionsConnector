@@ -38,41 +38,43 @@ $is_mission = false;
 $is_trip = false;
 
 
-if($_GET['type'] == "volunteer") $is_volunteer = true;
-if($_GET['type'] == "mission") $is_mission = true;
-if($_GET['type'] == "trip") {
-$is_trip = true;
-if (isset($_GET['tripid']))
-	$tripid = $_GET['tripid'];
-if (isset($_GET['update'])) {
-	$update = $_GET['update'];
-	$tripid = $update;
-}
+if(isset($_GET['type'])) {
+  if($_GET['type'] == "volunteer") $is_volunteer = true;
+  if($_GET['type'] == "mission") $is_mission = true;
+  if($_GET['type'] == "trip") {
+    $is_trip = true;
+    if (isset($_GET['tripid']))
+      $tripid = $_GET['tripid'];
+    if (isset($_GET['update'])) {
+      $update = $_GET['update'];
+      $tripid = $update;
+    }
+  }
 }
 
 function cmc_profile_render_id_join($title2,$title,$desc, $descdb, $selecteddb, $fbid, &$msg, $is_trip,&$k) {
   $sql = "SELECT ".$desc." FROM ".$descdb.
-		 " JOIN ".$selecteddb." ON ".$descdb.".id = ".$selecteddb.".id".
-		 " WHERE ".$selecteddb.".userid='".$fbid."'";
+     " JOIN ".$selecteddb." ON ".$descdb.".id = ".$selecteddb.".id".
+     " WHERE ".$selecteddb.".userid='".$fbid."'";
   if($result = mysql_query($sql)) {
     $i=0;
     while($row= mysql_fetch_array($result)) {
 
-	if ($i==0) {
-		if ($k==0) {
-			echo "<b>".$title2."</b>:<br/>";
-			$k++;
-		}
-		echo "<b>".$title."</b>:<br/>";
-	}
-	
-	$i++;
-	
+  if ($i==0) {
+    if ($k==0) {
+      echo "<b>".$title2."</b>:<br/>";
+      $k++;
+    }
+    echo "<b>".$title."</b>:<br/>";
+  }
+  
+  $i++;
+  
       if ($is_trip) {
- 	$msg = $msg.' '.$row[$desc];
+  $msg = $msg.' '.$row[$desc];
       }
       echo $row[$desc];
-	  echo "<br/>";
+    echo "<br/>";
     }
   } else {
     echo "SQL Error ".mysql_error()." ";
@@ -81,8 +83,8 @@ function cmc_profile_render_id_join($title2,$title,$desc, $descdb, $selecteddb, 
 
 function cmc_profile_render_skills($title, $type, $fbid) {
   $sql = "SELECT skilldesc FROM skills".
-	     " JOIN skillsselected ON skills.id = skillsselected.id".
-	     " WHERE skills.type=".$type." AND skillsselected.userid='".$fbid."'";
+       " JOIN skillsselected ON skills.id = skillsselected.id".
+       " WHERE skills.type=".$type." AND skillsselected.userid='".$fbid."'";
   if($result = mysql_query($sql)) {
     $i=0;
     while($row= mysql_fetch_array($result)){
@@ -92,7 +94,7 @@ function cmc_profile_render_skills($title, $type, $fbid) {
       }
       $i++;
       echo $row['skilldesc'];
-	  echo "<br/>";
+    echo "<br/>";
     }
   } else {
     echo "SQL Error ".mysql_error()." ";
@@ -102,51 +104,49 @@ function cmc_profile_render_skills($title, $type, $fbid) {
 
 <script LANGUAGE="javascript">
 
-function postMessage1(mUid, mTarget, mMsg, mCaption, mDesc, mLink){
-     FB.ui(
-            {
-	    method: 'stream.publish',
-	    auto_publish: true,
-	    message: mMsg,
-	    uid: mUid,
-	    target_id: mTarget,
-	    attachment: {
-	    	name: 'Test',
-		caption: mCaption,
-		description: (mDesc),
-		href: mLink,
-		action_links: [
-		{ text: 'test', href: mLink }
-		]
-	    },
-	function(response) {
-		if (response && response.post_id) {
-			alert('Post was published.');
-		} else {
-			alert('Post was not published.');
-		}
-	}
-	}
-	);
+function postMessage1(mUid, mTarget, mMsg, mCaption, mDesc, mLink) {
+  FB.ui(
+    {
+      method: 'stream.publish',
+      auto_publish: true,
+      message: mMsg,
+      uid: mUid,
+      target_id: mTarget,
+      attachment: {
+        name: 'Test',
+        caption: mCaption,
+        description: (mDesc),
+        href: mLink,
+        action_links: [ { text: 'test', href: mLink } ]
+      },
+      function(response) {
+        if (response && response.post_id) {
+          alert('Post was published.');
+        } else {
+          alert('Post was not published.');
+        }
+      }
+    }
+  );
 }
 
-function postMessage2(mUid, mMsg, mCaption, mDesc, mLink, mName){
-
-    FB.api('/'+mUid+'/feed', 'post', {
-        message: mMsg,
-	name: mName,
-	caption: mCaption,
-	description: (mDesc),
-	link: mLink
+function postMessage2(mUid, mMsg, mCaption, mDesc, mLink, mName) {
+  FB.api('/'+mUid+'/feed', 'post',
+    {
+      message: mMsg,
+      name: mName,
+      caption: mCaption,
+      description: (mDesc),
+      link: mLink
     },
     function(response) {
-	if (!response || response.error) {
-	alert('Error occured');
-	} else {
-	alert('Post ID: ' + response);
-	}
+      if (!response || response.error) {
+        alert('Error occured');
+      } else {
+        alert('Post ID: ' + response);
+      }
     }
-    ); 
+  ); 
 }
 </script>
 
@@ -171,14 +171,16 @@ if(mysql_num_rows($result) != 0) {
 
   if (empty($name)) {
         //echo 'USERID:'.$showuserid.'<br />';
-	$info = $fb->api_client->users_getInfo($showuserid, 'name,email');
-  	$record = $info[0];
-    	$name = $record['name'];
-	$myemail = $record['email'];
-	echo '<b> '.$name.' is a member of Christian Missions Connector, but this name was not updated when profile was created <b/> <br />';
-	echo 'Updating the name in the profiles database ...<br />';
-	$sql2 = 'update users set name="'.$name.'" where userid="'.$showuserid.'"';
-	$result2 = mysql_query($sql2);
+  $info = $fb->api_client->users_getInfo($showuserid, 'name,email');
+    $record = $info[0];
+      $name = $record['name'];
+  $myemail = $record['email'];
+  echo '<center>';
+  echo '<b> '.$name."'s name was not updated when their profile was created.<br />";
+  echo 'Updating the name in the profiles database... ';
+  $sql2 = 'update users set name="'.$name.'" where userid="'.$showuserid.'"';
+  $result2 = mysql_query($sql2);
+  echo 'done!</b><br/><br/></center>';
   } 
 /*
 if ($GLOBALS["trip"]) {
@@ -211,34 +213,37 @@ else {
 
  // now put the trip information into a string for input into a news feed
  if ($is_trip) {
-	if ($update)
-	$message = $name.' updated the trip ';
-	else
-	$message=$name.' is making a trip ';	
+  if ($update)
+  $message = $name.' updated the trip ';
+  else
+  $message=$name.' is making a trip ';  
  }
 
  if (empty($volstring)) {
-	if ($showuserid==$fbid) {
-		echo "<fb:profile-pic uid=".$showuserid." linked='true' /> <br /><br />".$name."";
-	}
+  if ($showuserid==$fbid) {
+    echo "<fb:profile-pic uid=".$showuserid." linked='true' /> <br /><br />".$name."";
+  }
  }
  else 
-	echo "<fb:profile-pic uid=".$showuserid." linked='true' /> <br /><br /><fb:name uid=".$showuserid." linked='true' shownetwork='true' />";
+  echo "<fb:profile-pic uid=".$showuserid." linked='true' /> <br /><br /><fb:name uid=".$showuserid." linked='true' shownetwork='true' />";
 
   echo $volstring.'<b/>'.$partnerstring.'<br/><br /><br />';
 
+  if ($isleader == 1) {
   if (!empty($organization))
-  	echo "<b>Agency Name: </b> $organization<br/>"; 
+    echo "<b>Agency Name: </b> $organization<br/>"; 
   if (!empty($website))
-  	echo "<b>Agency Website: </b> $website<br/>";
+    echo "<b>Agency Website: </b> $website<br/>";
   if (!empty($aboutme))
-  	echo "<b>About My Agency: </b> $aboutme<br/>";
+    echo "<b>About My Agency: </b> $aboutme<br/>";
+  
+  }
   if (!empty($zip))
-  	echo "<b>Zipcode: </b> $zip<br/>"; 
+    echo "<b>Zipcode: </b> $zip<br/>"; 
   if (!empty($email))
-  	echo "<b>Email: </b> $email<br/>";
+    echo "<b>Email: </b> $email<br/>";
   if (!empty($phone))
-  	echo "<b>Phone: </b> $phone<br/>";
+    echo "<b>Phone: </b> $phone<br/>";
 
   if (!empty($misexp))
   echo "<b>Missions Experience: </b> $misexp<br/>";
@@ -257,56 +262,56 @@ else {
   echo "<br/><br/><br/>";
   
   //if (!empty($state)) {
- // 	echo "<b>State: </b> $state<br/>"; 
+ //   echo "<b>State: </b> $state<br/>"; 
   //}
   $pp=-1;
   cmc_profile_render_id_join("","State",'longname', 'usstates', 'usstatesselected', $showuserid, $message, $is_trip,$pp);
   echo "<br/>";
 
   if (!empty($city)) {
-  	echo "<b>City: </b> $city<br/>"; 
+    echo "<b>City: </b> $city<br/>"; 
   }
 
   
   if ($is_trip) {
-  	$message = $message.' with following parameters: ';
-  	// Update the string to have this trip information
-	$sql = 'select tripname,tripdesc,phone,email,departure,returning,zipcode from trips where id="'.$tripid.'"';
-	$result = mysql_query($sql);
-	$row = mysql_fetch_array($result,MYSQL_ASSOC);
-  	if (!empty($row['tripname']))
-		$message = $message.'Name: '.$row['tripname'].' ';
-  	if (!empty($row['tripdesc']))
-		$message = $message.'Description: '.$row['tripdesc'].' ';
-  	if (!empty($row['phone']))
-		$message = $message.'Phone: '.$row['phone'].' ';
-  	if (!empty($row['email']))
-		$message = $message.'Email: '.$row['email'].' ';
-  	if (!empty($row['departure'])) {
-		$departn = explode(' ',$row['departure']);
-		$newdp = explode('-',$departn[0]);
-		//$depart = date('Y-m-d', $departn);
-	        //echo 'depart '.$depart.'<br />';
+    $message = $message.' with following parameters: ';
+    // Update the string to have this trip information
+  $sql = 'select tripname,tripdesc,phone,email,departure,returning,zipcode from trips where id="'.$tripid.'"';
+  $result = mysql_query($sql);
+  $row = mysql_fetch_array($result,MYSQL_ASSOC);
+    if (!empty($row['tripname']))
+    $message = $message.'Name: '.$row['tripname'].' ';
+    if (!empty($row['tripdesc']))
+    $message = $message.'Description: '.$row['tripdesc'].' ';
+    if (!empty($row['phone']))
+    $message = $message.'Phone: '.$row['phone'].' ';
+    if (!empty($row['email']))
+    $message = $message.'Email: '.$row['email'].' ';
+    if (!empty($row['departure'])) {
+    $departn = explode(' ',$row['departure']);
+    $newdp = explode('-',$departn[0]);
+    //$depart = date('Y-m-d', $departn);
+          //echo 'depart '.$depart.'<br />';
 
-		//$depdate = explode(' ',$row['departure']);
-		$message = $message.'Departure: '.$newdp[1].'-'.$newdp[2].'-'.$newdp[0].' ';
-	}
-  	if (!empty($row['returning'])) {
-		//$return = date('m-d-Y', $row['returning']);
-		$returnn = explode(' ',$row['returning']);
-		$newret = explode('-',$returnn[0]);
-		//$retdate = explode(' ',$row['returning']);
-		$message = $message.'Returning: '.$newret[1].'-'.$newret[2].'-'.$newret[0].' ';
-		//$message = $message.'Returning: '.$retdate[0].' ';
-	}
-  	if (!empty($row['zipcode']))
-		$message = $message.'Zipcode: '.$row['zipcode'].' ';
+    //$depdate = explode(' ',$row['departure']);
+    $message = $message.'Departure: '.$newdp[1].'-'.$newdp[2].'-'.$newdp[0].' ';
+  }
+    if (!empty($row['returning'])) {
+    //$return = date('m-d-Y', $row['returning']);
+    $returnn = explode(' ',$row['returning']);
+    $newret = explode('-',$returnn[0]);
+    //$retdate = explode(' ',$row['returning']);
+    $message = $message.'Returning: '.$newret[1].'-'.$newret[2].'-'.$newret[0].' ';
+    //$message = $message.'Returning: '.$retdate[0].' ';
+  }
+    if (!empty($row['zipcode']))
+    $message = $message.'Zipcode: '.$row['zipcode'].' ';
 
   }
   else
-  	$message = '';
+    $message = '';
 
-  //echo "<b>Geographic Areas of Interest:</b><br/>";	
+  //echo "<b>Geographic Areas of Interest:</b><br/>"; 
   //echo "<b>Regions:</b><br/>";
   $kk=0;
   cmc_profile_render_id_join("Geographic Areas of Interest","Regions",'name', 'regions', 'regionsselected', $showuserid, $message, $is_trip,$kk);
@@ -358,16 +363,16 @@ else {
   //echo 'MY MESSAGE='.$message.'<br />';
 
   if ($is_trip) {
-	// Does the user have permission to publish their messages
-	// If not, they should be prompted to allow access
-	$res = $fb->api_client->users_hasAppPermission('publish_stream',null);
+  // Does the user have permission to publish their messages
+  // If not, they should be prompted to allow access
+  $res = $fb->api_client->users_hasAppPermission('publish_stream',null);
 
-	if (!$res) {
-	?>
+  if (!$res) {
+  ?>
 
-	<script type="text/javascript">
-	Facebook.showPermissionDialog("read_stream,publish_stream,manage_pages,offline_access");
-	</script>
+  <script type="text/javascript">
+  Facebook.showPermissionDialog("read_stream,publish_stream,manage_pages,offline_access");
+  </script>
 
 
 <?php
@@ -406,8 +411,8 @@ function callback (post_id, exception) {
 
 <?php
 
-//	echo "<script type=\"text/javascript\"  Facebook.streamPublish('Test Message', null, null,'305928355832','',callback,true,'')>";
-	//echo "<script type=\"text/javascript\"  Facebook.streamPublish(".$message.", null, null,'".$appid."',null,null,true,null)>";
+//  echo "<script type=\"text/javascript\"  Facebook.streamPublish('Test Message', null, null,'305928355832','',callback,true,'')>";
+  //echo "<script type=\"text/javascript\"  Facebook.streamPublish(".$message.", null, null,'".$appid."',null,null,true,null)>";
   //echo '</script>';
 
   //$action_links = array( array('text' => 'App Feed', 'href' => 'http://graph.facebook.com/305928355832/feed'));
@@ -422,46 +427,46 @@ function stream_callback(){
 
   $_SESSION['tripid'] = $tripid;
   if (!isset($_SESSION['lmsg'])) {
-	/*
-  	if (isset($_SESSION['paidstr']))
-		$message = $message.$_SESSION['paidstr'];
-		*/
+  /*
+    if (isset($_SESSION['paidstr']))
+    $message = $message.$_SESSION['paidstr'];
+    */
   $fb->api_client->stream_publish($message,null,null,$appid,$appid);
 
-	/*
-	if (!empty($friends)) {
-	foreach ($friends as $currentfriend) {
-	echo '<script type="text/javascript">';
-	echo "Facebook.streamPublish('".$message."', null, null,'".$currentfriend."','',null,'true')";
-	echo '</script>';
-	}
-	}
-	*/
+  /*
+  if (!empty($friends)) {
+  foreach ($friends as $currentfriend) {
+  echo '<script type="text/javascript">';
+  echo "Facebook.streamPublish('".$message."', null, null,'".$currentfriend."','',null,'true')";
+  echo '</script>';
+  }
+  }
+  */
 
   //$fb->api_client->stream_publish($message,null,null,$sampleid,$fbid);
-  $_SESSION['msg'] = $message;
+  $_SESSION['lmsg'] = $message;
   }
   else {
-	/*
-  	if (isset($_SESSION['paidstr']))
-		$message = $message.$_SESSION['paidstr'];
-	*/
-  	if (strcmp($message,$_SESSION['msg'])) {
-  	$fb->api_client->stream_publish($message,null,null,$appid,$appid);
+  /*
+    if (isset($_SESSION['paidstr']))
+    $message = $message.$_SESSION['paidstr'];
+  */
+    if (strcmp($message,$_SESSION['lmsg'])) {
+    $fb->api_client->stream_publish($message,null,null,$appid,$appid);
 
-	/*
-	if (!empty($friends)) {
-	foreach ($friends as $currentfriend) {
-	echo '<script type="text/javascript">';
-	echo 'Facebook.streamPublish("'.$message.'", null, null,"'.$currentfriend.'","",null,true)';
-	echo '</script>';
-	}
-	}
-	*/
+  /*
+  if (!empty($friends)) {
+  foreach ($friends as $currentfriend) {
+  echo '<script type="text/javascript">';
+  echo 'Facebook.streamPublish("'.$message.'", null, null,"'.$currentfriend.'","",null,true)';
+  echo '</script>';
+  }
+  }
+  */
 
-  	//$fb->api_client->stream_publish($message,null,null,$sampleid,$fbid);
-  	$_SESSION['msg'] = $message;  
-  	}
+    //$fb->api_client->stream_publish($message,null,null,$sampleid,$fbid);
+    $_SESSION['lmsg'] = $message;  
+    }
   }
 
   echo "<h1>Some Trip Actions for you:</h1><br/>";

@@ -71,8 +71,8 @@ return $retval;
 <?php
 $profileid = $fbid;
 
-//$con = mysql_connect(localhost,"arena", "***arena!password!getmoney!getpaid***");
-$con = mysql_connect(localhost,"poornima", "MYdata@1");
+$con = mysql_connect(localhost,"arena", "***arena!password!getmoney!getpaid***");
+//$con = mysql_connect(localhost,"poornima", "MYdata@1");
 if(!$con) {
   die('Could not connect: ' .  mysql_error());
 }
@@ -82,14 +82,17 @@ mysql_select_db("missionsconnector", $con);
 session_start();
 $value = $_SESSION['locvalue'];
 
+$saferequest = cmc_safe_request_strip();
+
 if ($value==1) {
 // get the zip and search radius from form
-if (isset($_REQUEST['zip'])) {
-	$zipcode = $_REQUEST['zip'];
+
+$zipcode = $saferequest['zip'];
+if (isset($zipcode)) {
 	$_SESSION['zip'] = $zipcode;
 }
-if (isset($_REQUEST['searchradius'])) {
-	$searchradius = $_REQUEST['searchradius'];
+if (isset($saferequest['searchradius'])) {
+	$searchradius = $saferequest['searchradius'];
 	$_SESSION['searchradius'] = $searchradius;	
 }
 
@@ -97,7 +100,6 @@ if ((empty($zipcode)) || (empty($searchradius))) {
   echo "<fb:redirect url='searchbyzip.php?error=1' />";
 }
 else { 
-//if (isset($_REQUEST['zip'])) {
 
 	$result = getZipsWithin($zipcode,$searchradius,$dists);
 	//sort according to increasing distances
@@ -114,16 +116,16 @@ else {
 }
 else if ($value==2) {
 // This part is for non-USA locations not based on zip code
-if (isset($_REQUEST['country'])) {
-	$loc1country = $_REQUEST['country'];
+$loc1country = $saferequest['country'];
+if (isset($saferequest['country'])) {
 	$_SESSION['lcountry'] = $loc1country;
 }
-if (isset($_REQUEST['state'])){
-	$loc1state = $_REQUEST['state'];
+$loc1state = $saferequest['state'];
+if (isset($loc1state)){
 	$_SESSION['lstate'] = $loc1state;	
 }
-if (isset($_REQUEST['city'])) {
-	$loc1city = $_REQUEST['city'];
+$loc1city = $saferequest['city'];
+if (isset($loc1city)) {
 	$_SESSION['lcity'] = $loc1city;
 }
 

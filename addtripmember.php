@@ -14,14 +14,29 @@ $fbid = $fb->require_login("publish_stream");
 //$fbid=$user;
 $tid=$_REQUEST['tripid'];
 
-//$con=mysql_connect(localhost,"arena","***arena!password!getmoney!getpaid***");
-$con=mysql_connect(localhost,"poornima","MYdata@1");
+$con=mysql_connect(localhost,"arena","***arena!password!getmoney!getpaid***");
+//$con=mysql_connect(localhost,"poornima","MYdata@1");
 	if(!$con)
 	{
 		die('Could not connect: ' .  mysql_error());
 	}
 	
 	mysql_select_db("missionsconnector", $con);
+
+	// first check that the user has a CMC profile - otherwise redirect user to create a profile
+	$sql = 'select * from users where userid="'.$fbid.'"';
+	$result = mysql_query($sql);
+	$numrows = mysql_num_rows($result);
+
+	if ($numrows==0) {
+	// This means user does not have a CMC profile
+	echo '<br /><br /> You do not have a Christian Missions Profile Yet!! <br /><br />';
+	echo"<b>Getting started</b> is simple and takes about 2 minutes. The first step is to create a profile for yourself or your organization by clicking the blue highlighted link below <br/><br /><center><a href='http://apps.facebook.com/missionsconnector/new.php'>Create your profile</a></center><br /><br />";
+
+	}
+
+	else {
+
 
 	$sql = 'INSERT INTO tripmembers (userid,tripid,isadmin,invited,accepted) VALUES ("'.$fbid.'","'.$tid.'","0","1","1")';
 	if($result = mysql_query($sql)){
@@ -102,7 +117,7 @@ $con=mysql_connect(localhost,"poornima","MYdata@1");
 		
 
 echo "<fb:redirect url='http://apps.facebook.com/missionsconnector/profile.php?id=".$fbid."' />";
-		  
+	}	  
 	//	$nexturl="http://apps.facebook.com/missionsconnector//trips.php";
 //  header("Location:".$nexturl);
 ?>
