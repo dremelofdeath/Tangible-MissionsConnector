@@ -1,6 +1,6 @@
 <?php
 
-include_once '../facebook/facebook.php';
+include_once 'facebook/facebook.php';
 include_once 'config.php';
 
 function echo_dashboard($fbid,$appadminids) {

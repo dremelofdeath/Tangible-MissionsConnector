@@ -5,7 +5,7 @@
 // 
 //require_once 'facebook.php';
 
-include_once '../facebook/facebook.php';
+include_once 'facebook/facebook.php';
 include_once 'config.php';
 include_once 'common.php';
 $fb = cmc_startup($appapikey, $appsecret,0);

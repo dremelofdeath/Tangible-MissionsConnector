@@ -1,6 +1,6 @@
 <?php
 
-include_once '../facebook/facebook.php';
+include_once 'facebook/facebook.php';
 include_once 'common.php';
 
 ob_start();
