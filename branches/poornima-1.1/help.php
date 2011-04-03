@@ -10,8 +10,9 @@ include_once 'config.php';
 include_once 'common.php';
 $fb = cmc_startup($appapikey, $appsecret,0);
 
-$facebook = new Facebook($appapikey, $appsecret);
-$user_id = $facebook->require_login("publish_stream,read_stream");
+//$facebook = new Facebook($appapikey, $appsecret);
+$user_id = get_user_id($fb);
+//$user_id = $facebook->require_login("publish_stream,read_stream");
 
 
 echo "

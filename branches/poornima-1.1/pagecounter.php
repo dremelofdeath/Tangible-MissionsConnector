@@ -32,7 +32,18 @@ $con = arena_connect();
 // not to win any awards.
 
 $facebook = new Facebook($appapikey, $appsecret);
-$fbid = $facebook->require_login($required_permissions = 'publish_stream');
+
+$mysession = $facebook->getSession();
+if ($mysession) {
+     echo '<a href="' . $facebook->getLogoutUrl() . '">Logout</a>';
+}
+else {
+     echo '<a href="' . $facebook->getLoginUrl(array('req_perms' => 'read_stream,publish_stream,email,user_photos', 'display'=>'popup')) . '">Login</a>';
+}
+$fbid = $facebook->getUser();
+
+
+//$fbid = $facebook->require_login($required_permissions = 'publish_stream');
 
 //$uniquepage = "uniquehitcounter.txt";
 

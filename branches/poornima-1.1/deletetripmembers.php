@@ -9,7 +9,12 @@ include_once 'common.php';
 ob_start();
 
 $fb = cmc_startup($appapikey, $appsecret,0);
-$fbid = $fb->require_login("publish_stream");
+
+// will be changed
+$response = array('response' => array('hasError' => false, 'welcomemessage' => 'Welcome to CMC', 'uid' => 100000022664372));
+$somejson = json_encode($response);
+
+$fbid = get_user_id($somejson);
 
 ?>
 
@@ -36,9 +41,9 @@ if ($result = mysql_query($sql)) {
 	else {
 ?>
 
-<fb:editor
-action="http://apps.facebook.com/missionsconnector/deletetripmembers.php" method='post'>
-<fb:editor-custom name="TripMembers" label="Current Trip Members you would like to delete"><br/><br />
+<form action="http://apps.facebook.com/missionsconnector/deletetripmembers.php" method='post'>
+
+<p>Current Trip Members you would like to delete</p><br/><br />
 
 <?php
 
@@ -53,8 +58,8 @@ action="http://apps.facebook.com/missionsconnector/deletetripmembers.php" method
 
 ?>
 
-<fb:editor-button value="Submit" name="submit"/>
-</fb:editor>
+<input type="submit" value="Submit">
+<form>
 
 <?php
 }
@@ -87,18 +92,21 @@ if ($result = mysql_query($sql)) {
 	echo $row['name'].' has been removed from the trip members of this trip <br />';
 
   // now update recent activity
-  $res = $fb->api_client->users_hasAppPermission('publish_stream',null);
-  if (!$res) {
+  //$res = $fb->api_client->users_hasAppPermission('publish_stream',null);
+  //if (!$res) {
   ?>
 
   <script type="text/javascript">
 	Facebook.showPermissionDialog("read_stream,publish_stream,manage_pages,offline_access");
   </script>
 <?php
-}	
+//}
+  /*
 	$info = $fb->api_client->users_getInfo($fbid, 'name', 'email');
 	$record = $info[0];
 	$name = $record['name'];
+  */
+  $name = get_name_from_fb_using_curl($fbid);
 
 	$sql2 = 'select * from trips where id="'.$dtripid.'"';
 	$result2 = mysql_query($sql2);
@@ -112,7 +120,15 @@ if ($result = mysql_query($sql)) {
 
 
 	if (!isset($_SESSION['dpmsg'])) {
-		$fb->api_client->stream_publish($message,null,null,$appid,$appid);
+?>
+
+        <script type="text/javascript">
+              Facebook.streamPublish(<?PHP $message ?>,null,null,<?php $appid ?>,' ',null,true,<?php $appid ?>);
+            </script>
+
+<?php
+		//$fb->api_client->stream_publish($message,null,null,$appid,$appid);
+
         /*
 	if (!empty($friends)) {
 	foreach ($friends as $currentfriend) {
@@ -126,7 +142,14 @@ if ($result = mysql_query($sql)) {
 	}
 	else {
 		if (strcmp($message,$_SESSION['dpmsg'])) {
-		$fb->api_client->stream_publish($message,null,null,$appid,$appid);
+   ?>
+          <script type="text/javascript">
+                Facebook.streamPublish(<?PHP $message ?>,null,null,<?php $appid ?>,' ',null,true,<?php $appid ?>);
+              </script>
+
+    <?php            
+		//$fb->api_client->stream_publish($message,null,null,$appid,$appid);
+
         /*
 	if (!empty($friends)) {
 	foreach ($friends as $currentfriend) {
@@ -142,7 +165,7 @@ if ($result = mysql_query($sql)) {
 
 	$_SESSION['dtripid'] = '';
 
-	echo "<fb:redirect url='tripoptions.php' />";
+  header("Location: tripoptions.php");
 }
 else {
 	echo "MYSQL Error <br/>";

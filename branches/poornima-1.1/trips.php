@@ -8,7 +8,8 @@
 include_once 'common.php';
 
 $fb = cmc_startup($appapikey, $appsecret);
-$fbid = $fb->require_login();
+$fbid = get_user_id($fb);
+//$fbid = $fb->require_login();
 
 ?>
 <br/><br/>

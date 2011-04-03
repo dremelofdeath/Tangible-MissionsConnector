@@ -13,7 +13,22 @@ include_once 'common.php';
 ob_start();
 
 $fb = cmc_startup($appapikey, $appsecret,0);
-$fbid = $fb->require_login();
+
+$response = array('response' => array('hasError' => false, 'profilemsg' => 'Welcome to your CMC Profile', 'uid' => 100000022664372));
+$somejson = json_encode($response);
+
+// During actual implementation, $somejson will come from frontend
+// through either get or post
+$mydataobj = json_decode($somejson);
+
+// Now process the json object
+if ($mydataobj->{'response'}->{'hasError'}) {
+   // have appropriate response if there is an error
+echo 'Error <br />';
+}
+else {
+   $fbid = $mydataobj->{'response'}->{'uid'};
+}
 
 $con = arena_connect();
 
@@ -171,10 +186,16 @@ if(mysql_num_rows($result) != 0) {
 
   if (empty($name)) {
         //echo 'USERID:'.$showuserid.'<br />';
-  $info = $fb->api_client->users_getInfo($showuserid, 'name,email');
+
+       // This call is no longer supported
+       //$info = $fb->api_client->users_getInfo($showuserid, 'name,email');
+
+    // Get the name information directly from the facebook profile pages
+    $name = get_name_from_fb_using_curl($showuserid);
+    /*
     $record = $info[0];
-      $name = $record['name'];
-  $myemail = $record['email'];
+    $name = $record['name'];
+    */
   echo '<center>';
   echo '<b> '.$name."'s name was not updated when their profile was created.<br />";
   echo 'Updating the name in the profiles database... ';
@@ -221,11 +242,13 @@ else {
 
  if (empty($volstring)) {
   if ($showuserid==$fbid) {
-    echo "<fb:profile-pic uid=".$showuserid." linked='true' /> <br /><br />".$name."";
+    echo '<a href="http://www.facebook.com/profile.php?id='.$showuserid.'"><img src="http://graph.facebook.com/'.$showuserid.'/picture" /></a>';
+    //echo "<fb:profile-pic uid=".$showuserid." linked='true' /> <br /><br />".$name."";
   }
  }
  else 
-  echo "<fb:profile-pic uid=".$showuserid." linked='true' /> <br /><br /><fb:name uid=".$showuserid." linked='true' shownetwork='true' />";
+    echo '<a href="http://www.facebook.com/profile.php?id='.$showuserid.'"><img src="http://graph.facebook.com/'.$showuserid.'/picture" /></a>';
+  //echo "<fb:profile-pic uid=".$showuserid." linked='true' /> <br /><br /><fb:name uid=".$showuserid." linked='true' shownetwork='true' />";
 
   echo $volstring.'<b/>'.$partnerstring.'<br/><br /><br />';
 
@@ -349,12 +372,19 @@ else {
     //$curtid=key($curtrip);
     echo "<br/><a href='profileT.php?tripid=".$key."'>".$curtrip."</a>";
 
+    echo "<form action='share.php?tripid=".$key."' method='get'>";
+    echo '<input type="button" name="share" value="Share">';
+    echo '</form>';
+    echo "<br /><br />";
+
+    /*
     echo "<fb:editor action='share.php?tripid=".$key."' method='get'>";
     echo '<fb:editor-buttonset> ';
     echo "<fb:editor-button value='Share' name='share'/>";
     echo '</fb:editor-buttonset>';
     echo "</fb:editor>";
     echo "<br /><br />";
+    */
   }
   }
 
@@ -365,18 +395,30 @@ else {
   if ($is_trip) {
   // Does the user have permission to publish their messages
   // If not, they should be prompted to allow access
-  $res = $fb->api_client->users_hasAppPermission('publish_stream',null);
+  //$res = $fb->getApiUrl->users_hasAppPermission('publish_stream',null);
 
-  if (!$res) {
+  //if (!$res) {
   ?>
 
   <script type="text/javascript">
-  Facebook.showPermissionDialog("read_stream,publish_stream,manage_pages,offline_access");
+  
+  function callback (perms) {
+   if (!perms) {
+      message('You did not grant the special permission to post to friends wall without being prompted.');
+  } else {
+        message('You can now publish to walls without being prompted.');
+  }
+  }
+
+  Facebook.showPermissionDialog("read_stream,publish_stream,manage_pages,offline_access",callback);
+
+
+
   </script>
 
 
 <?php
-}
+//}
 /*
    echo '<SCRIPT LANGUAGE="javascript"><!--n';
    echo "postmessage2(".$fbid.",".$appid.",".$message.",Trips News,Missions Connector Trips Wall,http://apps.facebook.com/missionsconnector/tripswall.php);n";
@@ -431,7 +473,14 @@ function stream_callback(){
     if (isset($_SESSION['paidstr']))
     $message = $message.$_SESSION['paidstr'];
     */
-  $fb->api_client->stream_publish($message,null,null,$appid,$appid);
+   ?>
+
+    <script type="text/javascript">
+    Facebook.streamPublish(<?PHP $message ?>,null,null,<?php $appid ?>,' ',null,true,<?php $appid ?>);
+    </script>
+
+    <?php
+  //$fb->api_client->stream_publish($message,null,null,$appid,$appid);
 
   /*
   if (!empty($friends)) {
@@ -452,7 +501,14 @@ function stream_callback(){
     $message = $message.$_SESSION['paidstr'];
   */
     if (strcmp($message,$_SESSION['lmsg'])) {
-    $fb->api_client->stream_publish($message,null,null,$appid,$appid);
+      ?>
+
+    <script type="text/javascript">
+    Facebook.streamPublish(<?PHP $message ?>,null,null,<?php $appid ?>,' ',null,true,<?php $appid ?>);
+    </script>
+
+      <?php
+    //$fb->api_client->stream_publish($message,null,null,$appid,$appid);
 
   /*
   if (!empty($friends)) {

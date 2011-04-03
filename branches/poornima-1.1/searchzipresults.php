@@ -9,7 +9,8 @@ include_once 'common.php';
 ob_start();
 
 $fb = cmc_startup($appapikey, $appsecret,0);
-$fbid = $fb->require_login("publish_stream,read_stream");
+$fbid = get_user_id($fb);
+//$fbid = $fb->require_login("publish_stream,read_stream");
 
 // function to claculate the distance between two locations
 function haversine($lat, $lng, $lat2, $lng2) {

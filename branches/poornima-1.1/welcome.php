@@ -26,8 +26,9 @@ if (!isset($_SESSION['hits'])) {
 }
 */
 
-$fb = cmc_startup($appapikey, $appsecret,0);
-$fbid = $fb->require_login($required_permissions = 'publish_stream');
+$fb = cmc_startup($appapikey, $appsecret,1);
+//$fbid = $fb->require_login($required_permissions = 'publish_stream');
+$fbid = $fb->getUser();
 
 
 if (isset($_GET['error'])) {

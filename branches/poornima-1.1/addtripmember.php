@@ -9,7 +9,23 @@ include_once 'common.php';
 ob_start();
 
 $fb = cmc_startup($appapikey, $appsecret,0);
-$fbid = $fb->require_login("publish_stream");
+$response = array('response' => array('hasError' => false, 'addtripmembermsg' => 'Add Trip Member', 'uid' => 100000022664372));
+$somejson = json_encode($response);
+
+// During actual implementation, $somejson will come from frontend
+// through either get or post
+$mydataobj = json_decode($somejson);
+
+// Now process the json object
+if ($mydataobj->{'response'}->{'hasError'}) {
+     // have appropriate response if there is an error
+  echo 'Error <br />';
+}
+else {
+     $fbid = $mydataobj->{'response'}->{'uid'};
+}
+
+//$fbid = $fb->require_login("publish_stream");
 
 //$fbid=$user;
 $tid=$_REQUEST['tripid'];
@@ -46,20 +62,35 @@ $con=mysql_connect(localhost,"arena","***arena!password!getmoney!getpaid***");
 	$row2 = mysql_fetch_array($result2,MYSQL_ASSOC);
 
   // now update recent activity
-  $res = $fb->api_client->users_hasAppPermission('publish_stream',null);
-  if (!$res) {
+  //$res = $fb->api_client->users_hasAppPermission('publish_stream',null);
+  //if (!$res) {
   ?>
 
   <script type="text/javascript">
-	Facebook.showPermissionDialog("read_stream,publish_stream,manage_pages,offline_access");
+
+  function callback (perms) {
+       if (!perms) {
+               message('You did not grant the special permission to post to friends wall without being prompted.');
+                 } else {
+                           message('You can now publish to walls without being prompted.');
+                             }
+         }
+
+    Facebook.showPermissionDialog("read_stream,publish_stream,manage_pages,offline_access",callback);
   </script>
+
 <?php
-}	
+//}	
 	
-	
- 	$info = $fb->api_client->users_getInfo($fbid, 'name', 'email');
+	  /*
+ 	  $info = $fb->api_client->users_getInfo($fbid, 'name', 'email');
   	$record = $info[0];
    	$name = $record['name'];
+    */
+
+      // Get the name information directly from the facebook profile pages
+      $name = get_name_from_fb_using_curl($fbid);
+
     	$message = 'Tripmember: '.$name.' has been added to the trip: '.$row2['tripname'];
 
        	session_start();
@@ -69,7 +100,15 @@ $con=mysql_connect(localhost,"arena","***arena!password!getmoney!getpaid***");
 
 
         if (!isset($_SESSION['apmsg'])) {
-	   $fb->api_client->stream_publish($message,null,null,$appid,$appid);
+        ?>
+
+              <script type="text/javascript">
+                  Facebook.streamPublish(<?PHP $message ?>,null,null,<?php $appid ?>,' ',null,true,<?php $appid ?>);
+            </script>
+
+        <?php
+
+	   //$fb->api_client->stream_publish($message,null,null,$appid,$appid);
         /*
 	if (!empty($friends)) {
 	foreach ($friends as $currentfriend) {
@@ -82,8 +121,16 @@ $con=mysql_connect(localhost,"arena","***arena!password!getmoney!getpaid***");
 	   $_SESSION['apmsg'] = $message;
 	}
 	else {
-		if (strcmp($message,$_SESSION['apmsg'])) {
-		$fb->api_client->stream_publish($message,null,null,$appid,$appid);
+		if (strcmp($message,$_SESSION['apmsg'])) { 
+      ?>
+    
+        <script type="text/javascript">
+        Facebook.streamPublish(<?PHP $message ?>,null,null,<?php $appid ?>,' ',null,true,<?php $appid ?>);
+        </script>
+
+    <?php
+		//$fb->api_client->stream_publish($message,null,null,$appid,$appid);
+
 	/*
 	if (!empty($friends)) {
 	foreach ($friends as $currentfriend) {
@@ -115,8 +162,9 @@ $con=mysql_connect(localhost,"arena","***arena!password!getmoney!getpaid***");
 		 }
 	
 		
+   header('"Location: /profile.php?id='.$fbid.'"');
 
-echo "<fb:redirect url='http://apps.facebook.com/missionsconnector/profile.php?id=".$fbid."' />";
+   //echo "<fb:redirect url='http://apps.facebook.com/missionsconnector/profile.php?id=".$fbid."' />";
 	}	  
 	//	$nexturl="http://apps.facebook.com/missionsconnector//trips.php";
 //  header("Location:".$nexturl);

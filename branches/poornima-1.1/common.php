@@ -1,6 +1,5 @@
 <?php
-
-include_once 'facebook/facebook.php';
+require 'facebook/facebook.php';
 include_once 'config.php';
 
 function echo_dashboard($fbid,$appadminids) {
@@ -73,7 +72,6 @@ function displayprofilepic($facebook,$fbid) {
 //link to the orignal picture in  the array (key = src_big)
 
 }
-
 
 // here for reference because I have no idea what it does --zack <3
 //$tabstring="<fb:tabs><fb:tab-item href='http://apps.facebook.com/missionsconnector/index.php' title='Invite'/><fb:tab-item href='http://apps.facebook.com/missionsconnector/searchform.php' title='Find New Connections'/><fb:tab-item href='http://apps.facebook.com/missionsconnector//profile.php?id='".$profileid."' title='My Profile'/><fb:tab-item href='http://apps.facebook.com/missionsconnector//mynetwork.php' title='People in My Network'/><fb:tab-item href='http://apps.facebook.com/missionsconnector//trips.php' title='My Trips'/></fb:tabs>";
@@ -259,10 +257,48 @@ function cmc_safe_request_strip() {
 	return $returnArrayMap;
 }
 
+function get_name_from_fb_using_curl($fbid) {
+ 
+  $urlx = 'http://graph.facebook.com/'.$fbid.'/';
+  $process = curl_init($urlx);
+  curl_setopt($process, CURLOPT_RETURNTRANSFER, TRUE);
+  $user = json_decode(curl_exec($process));
+  curl_close($process);
+  $name = $user->{'name'};
+
+  return $name;
+
+}
+
+
+function get_user_id($responseobj) {
+// During actual implementation, $somejson will come from frontend
+// through either get or post
+$mydataobj = json_decode($responseobj);
+
+// Now process the json object
+if ($mydataobj->{'response'}->{'hasError'}) {
+   // have appropriate response if there is an error
+   echo 'Error <br />';
+   $fbid = null;
+}
+else {
+   $fbid = $mydataobj->{'response'}->{'uid'};
+}
+
+return $fbid;
+
+}
+
 // Make sure to call this function at the top of every CMC page. It will return 
 // the application's Facebook object.
 function cmc_startup($appapikey, $appsecret,$val) {
-  $facebook = new Facebook($appapikey, $appsecret);
+
+  //$facebook = new Facebook($appapikey, $appsecret,true);
+  
+  $facebook = new Facebook(array( 'appId' => $appapikey, 'secret' => $appsecret, 'cookie' => true, ));
+
+  //$facebook->setSession(null,true);
   $params = array(
     'canvas'     => 1,
     'fbconnect'  => 0,
@@ -270,9 +306,63 @@ function cmc_startup($appapikey, $appsecret,$val) {
     'cancel_url' => 'http://www.facebook.com/',
     'req_perms'  => 'publish_stream, status_update, offline_acces'
   );
-  //$login_url = $facebook->getLoginUrl($params);
 
-  $fbid = $facebook->require_login("publish_stream,read_stream");
+
+  // The userid should come from the JAVASCRIPT SDK Facebook FrontEnd
+  // This should come as a JSON Object, so we should first decode the JSON object and then get
+  // facebook userid and other details
+  
+  $response = array('response' => array('hasError' => false, 'welcomemessage' => 'Welcome to CMC', 'uid' => 100000022664372));
+  $somejson = json_encode($response);
+
+  $fbid = get_user_id($somejson);
+
+  /*
+  // During actual implementation, $somejson will come from frontend
+  // through either get or post
+  $mydataobj = json_decode($somejson);
+
+  // Now process the json object
+  if ($mydataobj->{'response'}->{'hasError'}) {
+    // have appropriate response if there is an error
+    echo 'Error <br />';
+  }
+  else { 
+    $fbid = $mydataobj->{'response'}->{'uid'};
+  }
+  */
+
+  /* 
+  $params  =   array(
+      'method'  => 'users.hasapppermission',
+      'uids'    => $fbid,
+      'canvas'     => 1,
+      'fbconnect'  => 0,
+      'next'       => URL_CANVAS,
+      'cancel_url' => 'http://www.facebook.com/',
+      'req_perms'  => 'publish_stream, status_update, offline_acces',
+      'callback'=> ''
+   );
+
+  if ($facebook->api($params)) {
+    echo 'User has app permission <br />';
+  }
+  else {
+    echo 'User does not have app permission <br />';
+  }
+  */
+  ?>
+
+  <script type="text/javascript">
+  if (FB.Facebook.apiClient.users_hasAppPermission('publish_stream')) {
+    document.write("<b>User has publish permissions</b>");
+  }
+  </script>
+
+  <?php
+  //if ($facebook->getApiUrl('users.hasapppermission'))
+  //  echo 'User has app permission <br />';
+  //$fbid = get_user_id($facebook);
 
   // create app admin ids - facebook ids of people who have admin rights for this application
   $appadminids = array();
@@ -286,7 +376,12 @@ function cmc_startup($appapikey, $appsecret,$val) {
     echo_dashboard($fbid,$appadminids);
     echo_tabbar($appadminids,$fbid);
     if ($val==1) {
-      echo "<fb:profile-pic uid=".$fbid." linked='true' /> <br /><fb:name uid=".$fbid." linked='true' shownetwork='true' /><br/><br/>";  
+      // display profile picture only if $val is 1 
+
+      echo '<a href="http://www.facebook.com/profile.php?id='.$fbid.'"><img src="http://graph.facebook.com/'.$fbid.'/picture" /></a>';
+
+      //echo '<img src="http://graph.facebook.com/'.$fbid.'/picture">';
+      //echo "<fb:profile-pic uid=".$fbid." linked='true' /> <br /><fb:name uid=".$fbid." linked='true' shownetwork='true' /><br/><br/>";  
       //$profile_pic =  "http://graph.facebook.com/".$fbid."/picture";
       //echo "<img src=\"" . $profile_pic . "\" /><br />";
     }
@@ -299,3 +394,5 @@ function cmc_startup($appapikey, $appsecret,$val) {
 }
 
 ?>
+
+

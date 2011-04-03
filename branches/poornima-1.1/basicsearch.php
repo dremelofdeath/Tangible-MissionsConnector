@@ -8,11 +8,14 @@
 include_once 'common.php';
 
 $fb = cmc_startup($appapikey, $appsecret,0);
-$fbid = $fb->require_login("publish_stream,read_stream");
+//The next two lines will be changed later  
+$response = array('response' => array('hasError' => false, 'welcomemessage' => 'Welcome to CMC', 'uid' => 100000022664372));
+$somejson = json_encode($response);
+$fbid = get_user_id($somejson);
+
 ?>
 
-<fb:editor
-action="http://apps.facebook.com/missionsconnector/searchresults.php?adv=0" method='get'>
+<form action="http://apps.facebook.com/missionsconnector/searchresults.php?adv=0" method='get'>
 
 <?php
 /*
@@ -36,10 +39,8 @@ for($i=0; $i < count($info); $i++) {
 <br/><br/>
 
 
-<fb:editor-text name="keys" label="Enter any keywords"/>
+<p>Enter any Keywords</p><input type="text" maxlength="200" name="keys">
 
-<fb:editor-buttonset>
-<fb:editor-button value="Submit" name="submit"/>
-</fb:editor-buttonset>
+<input type="submit" value="Submit">
 
-</fb:editor>
+</form>

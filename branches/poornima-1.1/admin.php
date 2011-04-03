@@ -3,7 +3,8 @@ include_once 'common.php';
 //include_once 'pagecounter.php';
 
 $fb = cmc_startup($appapikey, $appsecret,0);
-$fbid = $fb->require_login($required_permissions = 'publish_stream');
+$fbid = get_user_id($fb);
+//$fbid = $fb->require_login($required_permissions = 'publish_stream');
 
 // create app admin ids - facebook ids of people who have admin rights for this application
 $appadminids = array();

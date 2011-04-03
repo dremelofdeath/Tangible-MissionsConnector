@@ -8,13 +8,19 @@
 include_once 'common.php';
 
 $fb = cmc_startup($appapikey, $appsecret,0);
-$fbid = $fb->require_login("publish_stream,read_stream");
+
+// These 2 lines will be replaced by some object obtained from UI
+$response = array('response' => array('hasError' => false, 'message' => 'Advanced Search', 'uid' => 100000022664372));
+$somejson = json_encode($response);
+
+$fbid = get_user_id($somejson);
+
+//$fbid = $fb->require_login("publish_stream,read_stream");
 
 ?>
 <br/><br/>
 
-<fb:editor
-action="http://apps.facebook.com/missionsconnector/searchresults.php?adv=1" method='get'>
+<form action="http://apps.facebook.com/missionsconnector/searchresults.php?adv=1" method='get'>
 
 <?php //leaders,volunteers, or trips? 
 
@@ -58,18 +64,17 @@ if (isset($_GET['fill'])) {
 		$ssvalue = $_GET['ss'];
 }
 
+echo 'I am searching for:<br/>';
 ?>
-<fb:editor-custom name="type" label="I am searching for"><br/>
+
 <label for="type">Active Mission Organizers</label><input type="radio" name="type" id="type" value="1" selected />
 <label for="type">Volunteers</label><input type="radio" name="type" id="type" value="2" selected />
 <label for="type">Upcoming Mission Trips</label><input type="radio" name="type" id="type" value="3" selected />
-</fb:editor-custom>
-
 
 <?php //skills 
 ?>
-<fb:editor-custom label="Medical Skills" name="medskills">
-<select name="medskills" id="medskills" multiple="true">
+<p>Medical Skills</p>
+<select name="medskills[]" id="medskills" multiple="multiple">
 <?php
 if (empty($medskillsvalue)) {
 echo '<option  value="Any">Any</option>';
@@ -161,10 +166,9 @@ echo '<option  value="Other">Other</option>';
 }
 ?>
 </select>
-</fb:editor-custom>
 
-<fb:editor-custom label="Non-Medical Skills" name="otherskills">
-<select name="otherskills" id="otherskills" multiple="true">;
+<p>Non-Medical Skills</p>
+<select name="otherskills[]" id="otherskills" multiple="multiple">;
 <?php
 if (empty($osvalue)) {
 echo '<option name="otherskills" value="Any">Any</option>';
@@ -255,11 +259,10 @@ echo '<option name="otherskills" value="Engineering">Engineering</option>';
 }
 ?>
 </select>
-</fb:editor-custom>
 
 
-<fb:editor-custom name="spiritserv" label="Spiritual Service" value="Spiritual Service">
-<select name="spiritserv" id="spiritserv" multiple="true">
+<p>Spiritual Service</p>
+<select name="spiritserv[]" id="spiritserv" multiple="multiple">
 <?php
 if (empty($ssvalue)) {
 echo '<option name="spiritserv" value="Any">Any</option>';
@@ -303,13 +306,10 @@ echo '<option name="spiritserv" value="Public Speaking">Public Speaking</option>
 
 ?>
 </select>
-</fb:editor-custom>
-
-
 
 <?php //affiliation 
 ?>
-<fb:editor-custom name="relg" label="Religious Affiliation">
+<p>Religious Affiliation</p>
 <select name="relg" >
 <?php 
 if (empty($religionvalue)) {
@@ -343,10 +343,9 @@ echo '<option name="relg" value="Christian: Roman Catholic" >Christian: Roman Ca
 ?>
 
 </select>
-</fb:editor-custom>
 
 
-<fb:editor-custom name="partner" label="Is a CMC Partner" value="true">
+<p>Is a CMC Partner</p>
 <?php
 if (empty($partnervalue)) {
 echo "<input type=\"radio\" name=\"partner\" value=\"true\"/>Is a CMC Partner<br/>";
@@ -363,11 +362,6 @@ echo "<input checked=\"checked\" type=\"radio\" name=\"partner\" value=\"false\"
 }
 }
 ?>
-
-</fb:editor-custom>
-
-
-
 
 <?php //dates and duration 
 
@@ -436,8 +430,7 @@ for ($i=0;$i<50;$i++) {
   $year = (int)date("Y");
   $year = $year + 0;
 
-  //<fb:editor-date label="Departure Date" name="depart"/>
-  echo '<fb:editor-custom name="Departure" label="Departure">';
+  echo '<p>Departure</p>';
   echo '<select name="DepartYear" id="DepartYear">';
   year_display($year,1,$dy);
   echo '</select>';
@@ -448,9 +441,8 @@ for ($i=0;$i<50;$i++) {
   echo '<select name="DepartDay" id="DepartDay">';
   day_display(1,$dd);
   echo '</select>';
-  echo '</fb:editor-custom>';
 
-  echo '<fb:editor-custom name="Return" label="Return">';
+  echo '<p>Return</p>';
   echo '<select name="ReturnYear" id="ReturnYear">';
   year_display($year,2,$ry);
   echo '</select>';
@@ -460,12 +452,10 @@ for ($i=0;$i<50;$i++) {
   echo '<select name="ReturnDay" id="ReturnDay">';
   day_display(2,$rd);
   echo '</select>';
-  echo '</fb:editor-custom>';
-  //<fb:editor-date label="Return Date" name="return" />
 
 ?>
 
-<fb:editor-custom label="Duration" name="dur">
+<p>Duration</p>
 <select name="dur" >
 
 <?php
@@ -499,22 +489,22 @@ echo '<option name="dur" value="Long Term: 2+ Years">Long Term: 2+ Years</option
 }
 ?>
 </select>
-</fb:editor-custom>
 
 <?php //location 
 if (!empty($zipvalue))
-echo '<fb:editor-text label="Home Zip Code" value="'.$zipvalue.'" name="zip"/>';
+echo '<p>Home Zip Code</p> <input type="text" maxlength="5" value="'.$zipvalue.'" name="zip"><br/>';
 else {
 ?>
 
-<fb:editor-text label="Home Zip Code" name="zip"/>
+<p>Home Zip Code</p> <input type="text" maxlength="5" name="zip"><br />
+
 <?php //must be between 00000-99999 
 }
 ?>
 
 
-<fb:editor-custom name="region" label="Regions Served">
-<select name="region" multiple="true">
+<p>Regions Served</p><br/>
+<select name="region[]" multiple="multiple">
 
 <?php
 if (empty($regionvalue)) {
@@ -567,9 +557,6 @@ echo '<option name="region" value="North America" >North America</option>';
 }
 ?>
 </select>
-</fb:editor-custom>
-
-
 
 
 <?php/*
@@ -589,8 +576,8 @@ if($result = mysql_query($sql)){
 ?>
 
 
-<fb:editor-custom name="country" label="Countries Served">
-<select name="country" multiple="true">
+<p>Countries Served</p><br/>
+<select name="country[]" multiple="multiple">
 <option value="Any">Any</option>
 
 <?php
@@ -612,20 +599,19 @@ echo "<option name='country' id='country' value='".$row['longname']."'>".$row['l
 }}
 ?>
 </select>
-</fb:editor-custom>
 
 <?php
 if (!empty($nm))
-echo '<fb:editor-text name="name" value="'.$nm.'" label="Individual or Organization Name"/>';
+echo '<p>Individual or Organization Name</p> <input type="text" maxlength="500" name="name" value="'.$nm.'"><br />';
 else {
 ?>
 
-<fb:editor-text name="name" label="Individual or Organization Name"/>
+<p>Individual or Organization Name</p> <input type="text" maxlength="500" name="name"><br />
 <?php
 }
 ?>
-<fb:editor-buttonset>
-<fb:editor-button value="Submit" name="submit"/>
-</fb:editor-buttonset>
 
-</fb:editor>
+<input type="submit" value="Submit">
+
+
+</form>

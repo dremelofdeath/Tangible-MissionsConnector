@@ -20,8 +20,9 @@ $fb = cmc_startup($appapikey, $appsecret,0);
 <?php 
  $app_name="Christian Missions Connector"; $app_url="missionsconnector"; 
 $invite_href = "welcome.php"; // Rename this as needed 
-$fb->require_frame();
-$user = $fb->require_login("publish_stream");
+//$fb->require_frame();
+$user = get_user_id($fb);
+//$user = $fb->require_login("publish_stream");
 if(isset($_REQUEST['ids'])) {
 	echo "<center>Thank you for inviting ".sizeof($_REQUEST['ids'])." of your friends on <b><a href=\"http://apps.facebook.com/".$app_url."/\">".$app_name."</a></b>.<br><br>\n";
 	echo "<h2><a href=\"http://apps.facebook.com/".$app_url."/\">Click here to return to ".$app_name."</a>.</h2></center>";

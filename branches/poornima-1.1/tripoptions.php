@@ -8,7 +8,8 @@
 include_once 'common.php';
 
 $fb = cmc_startup($appapikey, $appsecret,0);
-$fbid = $fb->require_login("publish_stream");
+$fbid = get_user_id($fb);
+//$fbid = $fb->require_login("publish_stream");
 
 echo '<b>You have the following trip options: </b><br /><br />';
 
