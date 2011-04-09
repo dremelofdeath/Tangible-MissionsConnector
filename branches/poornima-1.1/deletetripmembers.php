@@ -3,179 +3,100 @@
 // File: 'trips.php'
 //  shows all trips the user is a member of
 //
-//require_once 'facebook.php';
 
 include_once 'common.php';
-ob_start();
 
-$fb = cmc_startup($appapikey, $appsecret,0);
+$con = arena_connect();
 
-// will be changed
-$response = array('response' => array('hasError' => false, 'welcomemessage' => 'Welcome to CMC', 'uid' => 100000022664372));
-$somejson = json_encode($response);
+$saferequest = cmc_safe_request_strip();
+$has_error = FALSE;
+$err_msg = '';
 
-$fbid = get_user_id($somejson);
+if (array_key_exists('tripid', $saferequest) && array_key_exists('fbid', $saferequest)) {
+  // both tripid and facebook userid should be provided
+  $tid = $saferequest['tid'];
+  $fbid = $saferequest['fbid'];
+} 
+else if (array_key_exists('Tripmembers', $saferequest) && array_key_exists('tripid', $saferequest)) {
+  // both tripid and facebook userid should be provided
+  $tid = $saferequest['tid'];
+  $tripmembers = $saferequest['Tripmembers'];
+}
+else {
+  // error case: neither are defined
+  $has_error = TRUE;
+  $err_msg = "Neither required parameters was defined.";
+}
 
-?>
+$json = array();
 
-<?php
+if (!$has_error) {
 
-if (isset($_GET)) {
-$tripid = $_GET['tripid'];
+if (isset($fbid)) {
 
-$sql = 'select userid from tripmembers where userid !="'.$fbid.'" and accepted="1" and tripid="'.$tripid.'"';
-
-//echo $sql.'<br />';
-
-if ($result = mysql_query($sql)) {
+$sql = 'select userid from tripmembers where userid !="'.$fbid.'" and accepted="1" and tripid="'.$tid.'"';
+$result = mysql_query($sql,$con);
+if (!$result) {
+    $has_error = TRUE;
+    $err_msg = "Can't query (query was '$query'): " . mysql_error();
+}
+else {
 	$numrows = mysql_num_rows($result);
 	if ($numrows==0) {
-		$sql2 = 'select * from tripmembers where userid="'.$fbid.'" and accepted="1" and tripid="'.$tripid.'"';
-		$result2 = mysql_query($sql2);
+		$sql2 = 'select * from tripmembers where userid="'.$fbid.'" and accepted="1" and tripid="'.$tid.'"';
+		$result2 = mysql_query($sql2,$con);
+		if (!$result2) {
+		    $has_error = TRUE;
+			$err_msg = "Can't query (query was '$query'): " . mysql_error();
+		}
+		else {
 		$numrows2 = mysql_num_rows($result2);
 		if ($numrows2==1) {
-			echo '<br />You are the only person in this trip<br />';
-			echo "<br/><a href='deletetrips.php?tripid=".$tripid."'>Delete this trip instead?</a><br/><br/>"; 
+			$has_error =  TRUE;
+			$err_msg = 'You are the only person in this trip'; 
+		}
 		}
 	}
-	else {
-?>
-
-<form action="http://apps.facebook.com/missionsconnector/deletetripmembers.php" method='post'>
-
-<p>Current Trip Members you would like to delete</p><br/><br />
-
-<?php
-
-	while ($currenttripmembers = mysql_fetch_array($result,MYSQL_ASSOC)) {
-	$sql = 'select name from users where userid ="'.$currenttripmembers['userid'].'"';
-        //echo $sql.'<br />';
-	
-	$result2 = mysql_query($sql);
-	$row2 = mysql_fetch_array($result2,MYSQL_ASSOC);
-	echo '<label for="TripMembers">Name:'.$row2['name'].'</label><input type="radio" name="TripMembers" id="TripMembers" value="'.$currenttripmembers['userid'].'" selected />';
-        }
-
-?>
-
-<input type="submit" value="Submit">
-<form>
-
-<?php
 }
 }
-session_start();
-$_SESSION['dtripid'] = $tripid;
+else if (isset($tripmembers)) {
 
+// Now we can delete members from the trip - which means updating the tripmembers table in the database
+
+if (is_array($tripmembers)) {
+	while ($thistrip = current($tripmembers)) {
+			$sql = 'delete from tripmembers where userid="'.$thistrip.'" and tripid="'.$tid.'"';
+			$result = mysql_query($sql,$con);
+			if (!result) {
+				$has_error = TRUE;
+				$err_msg = "Can't query (query was '$query'): " . mysql_error();
+				continue 1;
+			}
+			next($tripmembers);
+	}
 }
 else {
- echo 'TRIP not identified, please select trip so that trip members may be removed <br />';
- echo '<a href="welcome.php">Go back to Application home</a><br />';
-}
 
-if (isset($_POST['TripMembers'])) {
+$sql = 'delete from tripmembers where userid="'.$tripmembers.'" and tripid="'.$tid.'"';
+$result = mysql_query($sql,$con);
 
-// This is the tripid selected
-$tripmembers = $_POST['TripMembers'];
-session_start();
-$dtripid = $_SESSION['dtripid'];
-// Now we can delete this member from the trip - which means updating the tripmembers table in the database
-
-//Get Person's name
-$sql = 'select name from users where userid="'.$tripmembers.'"';
-$result = mysql_query($sql);
-$row = mysql_fetch_array($result,MYSQL_ASSOC);
-
-if (!empty($dtripid)) {
-$sql = 'delete from tripmembers where userid="'.$tripmembers.'" and tripid="'.$dtripid.'"';
-if ($result = mysql_query($sql)) {
-	echo $row['name'].' has been removed from the trip members of this trip <br />';
-
-  // now update recent activity
-  //$res = $fb->api_client->users_hasAppPermission('publish_stream',null);
-  //if (!$res) {
-  ?>
-
-  <script type="text/javascript">
-	Facebook.showPermissionDialog("read_stream,publish_stream,manage_pages,offline_access");
-  </script>
-<?php
-//}
-  /*
-	$info = $fb->api_client->users_getInfo($fbid, 'name', 'email');
-	$record = $info[0];
-	$name = $record['name'];
-  */
-  $name = get_name_from_fb_using_curl($fbid);
-
-	$sql2 = 'select * from trips where id="'.$dtripid.'"';
-	$result2 = mysql_query($sql2);
-	$row2 = mysql_fetch_array($result2,MYSQL_ASSOC);
-	$message = 'Trip member: '.$row['name'].' has been deleted from the trip: '.$row2['tripname'];
-
-	session_start();
-  	
-	// get a list of friends who are using the CMC app
-    	//$friends=$fb->api_client->friends_getAppUsers();
-
-
-	if (!isset($_SESSION['dpmsg'])) {
-?>
-
-        <script type="text/javascript">
-              Facebook.streamPublish(<?PHP $message ?>,null,null,<?php $appid ?>,' ',null,true,<?php $appid ?>);
-            </script>
-
-<?php
-		//$fb->api_client->stream_publish($message,null,null,$appid,$appid);
-
-        /*
-	if (!empty($friends)) {
-	foreach ($friends as $currentfriend) {
-	echo '<script type="text/javascript">';
-	echo 'Facebook.streamPublish("'.$message.'", null, null,"'.$currentfriend.'","",null,true)';
-	echo '</script>';
-	}
-	}
-	*/
-		$_SESSION['dpmsg'] = $message;
-	}
-	else {
-		if (strcmp($message,$_SESSION['dpmsg'])) {
-   ?>
-          <script type="text/javascript">
-                Facebook.streamPublish(<?PHP $message ?>,null,null,<?php $appid ?>,' ',null,true,<?php $appid ?>);
-              </script>
-
-    <?php            
-		//$fb->api_client->stream_publish($message,null,null,$appid,$appid);
-
-        /*
-	if (!empty($friends)) {
-	foreach ($friends as $currentfriend) {
-	echo '<script type="text/javascript">';
-	echo 'Facebook.streamPublish("'.$message.'", null, null,"'.$currentfriend.'","",null,true)';
-	echo '</script>';
-	}
-	}
-	*/
-		$_SESSION['dpmsg'] = $message;
-		}
-	}
-
-	$_SESSION['dtripid'] = '';
-
-  header("Location: tripoptions.php");
-}
-else {
-	echo "MYSQL Error <br/>";
+if (!result) {
+	$has_error = TRUE;
+	$err_msg = "Can't query (query was '$query'): " . mysql_error();
 }
 }
-else {
-	echo "WARNING: No trip identified. Not deleting any trip members <br /><br/>";
-	echo "<a href='tripoptions.php'> Go back to trip options</a><br /><br />";
+
 }
+
 }
+
+$json['has_error'] = $has_error;
+
+if ($has_error) {
+  $json['err_msg'] = $err_msg;
+}
+
+echo json_encode($json);
 
 ?>
 

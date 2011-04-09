@@ -1,16 +1,33 @@
 <?php
 include_once 'common.php';
-//include_once 'pagecounter.php';
 
-$fb = cmc_startup($appapikey, $appsecret,0);
-$fbid = get_user_id($fb);
-//$fbid = $fb->require_login($required_permissions = 'publish_stream');
+$con = arena_connect();
+$saferequest = cmc_safe_request_strip();
 
-// create app admin ids - facebook ids of people who have admin rights for this application
+$has_error = FALSE;
+$err_msg = '';
+
+if (array_key_exists('fbid', $saferequest)) {
+  // both tripid and facebook userid should be provided
+  $fbid = $saferequest['fbid'];
+} else {
+  // error case: neither are defined
+  $has_error = TRUE;
+  $err_msg = "Facebook id was not defined.";
+}
+
+// get admins of CMC from the database - We need to create this table first
 $appadminids = array();
-$appadminids[] = 100000022664372;
-$appadminids[] = 707283972;
-$appadminids[] = 25826994;
+
+$sql = 'select * from cmcadmins';
+$result = mysql_query($sql,$con);
+if (!$result) {
+	$has_error = TRUE;
+	$err_msg = "Can't query (query was '$query'): " . mysql_error();
+}
+else {
+	$appadminids = mysql_fetch_array($result,MYSQL_NUM);
+}
 
 $allow=0;
 for ($i=0;$i<count($appadminids);$i++) {
@@ -21,11 +38,13 @@ for ($i=0;$i<count($appadminids);$i++) {
 }
 
 if (!$allow) {
-  echo "<fb:redirect url='welcome.php?error=1' />"; 
+  $has_error = TRUE;
+  $err_msg = "No Administrative privileges";
 } else {
 
-  process_admin_commands();
+  process_admin_commands($saferequest);
 
+  /*
   echo "Welcome to the Christian Missions Connector's Administrative Area <br /><br />";
   numhits();
   echo "<br />";
@@ -48,7 +67,10 @@ if (!$allow) {
   echo "  <input type='text' id='admin_scrub_userid' name='userid' />";
   echo "  <input type='submit' value='Scrub this user' />";
   echo "</form>";
+  */
+  
 }
+
 
 function numhits() {
   // sum up all the user specific hits
