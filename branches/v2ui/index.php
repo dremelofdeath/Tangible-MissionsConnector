@@ -85,7 +85,9 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
     <?php cmc_jquery_startup("1.5.1", "1.8.10", "mint-choc"); ?>
     <link rel="stylesheet" href="fcbkcomplete-style.css" type="text/css"
           media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="tipTip.css" type="text/css" />
     <script src="jquery.fcbkcomplete.js" type="text/javascript"></script>
+    <script src="jquery.tipTip.js" type="text/javascript"></script>
     <div id="fb-root"></div>
     <script src="https://connect.facebook.net/en_US/all.js"></script>
     <script type="text/javascript">
@@ -165,18 +167,40 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
           cache : true,
           complete_text : "Start typing...",
           filter_hide : true,
-          //filter_selected : true, // We want this feature, but it's busted.
+          filter_selected : true,
           firstselected : true, // circumvent a selection bug
           height : 6,
           maxshownitems : 5,
           newel : true,
           // custom (i.e. undocumented) options here
-          cmc_zipcode_detect : true,
           //cmc_icon_class : "ui-icon ui-icon-search" // broken.
+          cmc_zipcode_detect : true
+        });
+
+        $("#search-tipbar-left .tipbar-link").tipTip({
+          activation: 'focus',
+          keepAlive: true,
+          maxWidth: '230px',
+          forceWidth: true,
+          delay: 0,
+          defaultPosition: 'bottom',
+          forcePosition: true,
+          content: $("#search-tipbar-left .tipbar-content").html()
+        });
+
+        $("#search-tipbar-right .tipbar-link").tipTip({
+          activation: 'focus',
+          keepAlive: true,
+          maxWidth: '230px',
+          forceWidth: true,
+          delay: 0,
+          defaultPosition: 'bottom',
+          forcePosition: true,
+          content: $("#search-tipbar-right .tipbar-content").html()
         });
 
         $("#cmc-search-icon").click(function() {
-          $("#search-box").children("form").children("ul").children("li.bit-input").children("input").focus();
+          $("#cmc-search-box").children("ul").children("li.bit-input").children(".maininput").focus();
         });
 
         CMC.ajaxNotifyStart();
@@ -249,14 +273,31 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         width: 75px;
       }
 
-      .cmc-search-icon {
+      #search-box {
         position: relative;
+        left: -0.7em;
+        width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .cmc-search-icon {
+        position: absolute;
         float: right;
         clear: both;
         right: -5px;
         margin-top: 7px;
         margin-left: 0px;
         vertical-align: middle;
+      }
+
+      .tipbar-link {
+        text-decoration: none;
+      }
+
+      .tipbar-content h4, #recent-searches h4, #saved-searches h4 {
+        margin-top: 5px !important;
+        margin-bottom: 3px !important;
       }
       
       h1.cmc-big-button-text {
@@ -334,9 +375,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
             </p>
           </div>
           <h1>
-            <a href="#" onclick="CMC.page('#no-profile', '#make-profile');">
-              Create a Profile Now &gt;&gt;
-            </a>
+            <a href="#" onclick="CMC.page('#no-profile', '#make-profile');">Create a Profile Now &gt;&gt;</a>
           </h1>
         </div>
       </div>
@@ -344,54 +383,65 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         <p>Proin elit arcu, rutrum commodo, vehicula tempus, commodo a, risus. Curabitur nec arcu. Donec sollicitudin mi sit amet mauris. Nam elementum quam ullamcorper ante. Etiam aliquet massa et lorem. Mauris dapibus lacus auctor risus. Aenean tempor ullamcorper leo. Vivamus sed magna quis ligula eleifend adipiscing. Duis orci. Aliquam sodales tortor vitae ipsum. Aliquam nulla. Duis aliquam molestie erat. Ut et mauris vel pede varius sollicitudin. Sed ut dolor nec orci tincidunt interdum. Phasellus ipsum. Nunc tristique tempus lectus.</p>
       </div>
       <div id="search-tab">
-        <div id="search-box" style="width: 500px; margin-left: auto; margin-right: auto">
+        <div id="search-box">
           <div id="search-tipbar" style="position: relative; height: 16px">
             <div id="search-tipbar-left" style="position: absolute; left: 2px;">
-              Search history...
+              <a class="tipbar-link" href="#">Search history...</a>
+              <div class="tipbar-content" style="display: none">
+                <div id="recent-searches">
+                  <h4>Recent Searches</h4>
+                  <p>You have no recent searches. Perform a search first!</p>
+                </div>
+                <div id="search-history-spacer" style="display: block; height: 3px;"></div>
+                <div id="saved-searches">
+                  <h4>Saved Searches</h4>
+                  <p>You haven't saved any searches yet. Perform a search, then click the save icon.</p>
+                </div>
+              </div>
             </div>
             <div id="search-tipbar-right" style="position: absolute; right: -9px;">
-              Need some help?
+              <a class="tipbar-link" href="#">Need some help?</a>
+              <div class="tipbar-content" style="display: none">
+                This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test.
+              </div>
             </div>
           </div>
           <div id="search-box-box">
-            <div id="cmc-search-icon" class="ui-icon ui-icon-search cmc-search-icon">
-            </div>
+            <div id="cmc-search-icon" class="ui-icon ui-icon-search cmc-search-icon"></div>
             <div id="cmc-search-box">
-              <form>
-                <select id="search-box-select" name="search-box-select">
-                  <option value="1">Advanced Practice Nursing</option>
-                  <option value="2">Dental Professional</option>
-                  <option value="3">Medical Educator</option>
-                  <option value="4">Mental Health Professional</option>
-                  <option value="5">Nurse</option>
-                  <option value="6">Optometrist or Opthalmologist</option>
-                  <option value="7">Pharmacist</option>
-                  <option value="8">Physician</option>
-                  <option value="9">Physician Assistant</option>
-                  <option value="10">Physical or Occupational Therapist</option>
-                  <option value="11">Public Health/Community Development Worker</option>
-                  <option value="12">Speech Therapist</option>
-                  <option value="13">Other</option>
-                  <option value="14">General Help/Labor</option>
-                  <option value="15">Team Leader/Primary Organizer</option>
-                  <option value="16">Account and/or Business Management</option>
-                  <option value="17">Skilled Construction and/or Maintenance</option>
-                  <option value="18">Computer Science/Other Technical</option>
-                  <option value="19">Agriculture and/or Animal Husbandry</option>
-                  <option value="45">Mechanic</option>
-                  <option value="46">Office/Secretarial</option>
-                  <option value="47">Teaching</option>
-                  <option value="48">Veterinary</option>
-                  <option value="49">Water Supply Improvement</option>
-                  <option value="50">Writing and/or Translating</option>
-                  <option value="52">Engineering</option>
-                  <option value="20">Team Spiritual Leader</option>
-                  <option value="21">Individual Outreach (Prayer or Counseling)</option>
-                  <option value="22">Evangelism</option>
-                  <option value="44">Worship Team</option>
-                  <option value="51">Public Speaking</option>
-                </select>
-              </form>
+              <select id="search-box-select" name="search-box-select">
+                <option value="1">Advanced Practice Nursing</option>
+                <option value="2">Dental Professional</option>
+                <option value="3">Medical Educator</option>
+                <option value="4">Mental Health Professional</option>
+                <option value="5">Nurse</option>
+                <option value="6">Optometrist or Opthalmologist</option>
+                <option value="7">Pharmacist</option>
+                <option value="8">Physician</option>
+                <option value="9">Physician Assistant</option>
+                <option value="10">Physical or Occupational Therapist</option>
+                <option value="11">Public Health/Community Development Worker</option>
+                <option value="12">Speech Therapist</option>
+                <option value="13">Other</option>
+                <option value="14">General Help/Labor</option>
+                <option value="15">Team Leader/Primary Organizer</option>
+                <option value="16">Account and/or Business Management</option>
+                <option value="17">Skilled Construction and/or Maintenance</option>
+                <option value="18">Computer Science/Other Technical</option>
+                <option value="19">Agriculture and/or Animal Husbandry</option>
+                <option value="45">Mechanic</option>
+                <option value="46">Office/Secretarial</option>
+                <option value="47">Teaching</option>
+                <option value="48">Veterinary</option>
+                <option value="49">Water Supply Improvement</option>
+                <option value="50">Writing and/or Translating</option>
+                <option value="52">Engineering</option>
+                <option value="20">Team Spiritual Leader</option>
+                <option value="21">Individual Outreach (Prayer or Counseling)</option>
+                <option value="22">Evangelism</option>
+                <option value="44">Worship Team</option>
+                <option value="51">Public Speaking</option>
+              </select>
             </div>
           </div>
         </div>

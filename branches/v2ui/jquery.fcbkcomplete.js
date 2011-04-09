@@ -60,6 +60,7 @@
                adding options for zipcode detection (zack)
                bugfix for blank elements (zack)
                delete by closebutton now triggers fade animation (zack)
+               bugfix for the first focus bug (zack)
 
  */
 /* Coded by: emposha <admin@emposha.com>, Zachary Murray <zack@tangiblesoft.net> */
@@ -128,7 +129,7 @@ jQuery(function($) {
                 complete = $(document.createElement("div"));
                 complete.addClass("facebook-auto");
                 complete.append('<div class="ui-state-default ui-corner-all default">' + options.complete_text + "</div>");
-                complete.hover(function() {options.complete_hover = 0;}, function() {options.complete_hover = 1;});
+                complete.hover(function() {complete_hover = 0;}, function() {complete_hover = 1;});
                 
                 feed = $(document.createElement("ul"));
                 feed.attr("id", elemid + "_feed");
@@ -180,10 +181,11 @@ jQuery(function($) {
                 if (!maxItems()) {
                     return false;
                 }
-                var li = document.createElement("li");
-                var txt = document.createTextNode(title);
-                var aclose = document.createElement("a");
-                var liclass = "ui-button ui-corner-all ui-state-default bit-box" + (locked ? " locked": "");
+                var li = document.createElement("li"),
+                    txt = document.createTextNode(title),
+                    aclose = document.createElement("a"),
+                    liclass = "ui-button ui-corner-all ui-state-default bit-box" + (locked ? " locked": ""),
+                    _item;
 
                 $(li).attr({
                     "class": liclass,
@@ -243,7 +245,6 @@ jQuery(function($) {
 
                 if (!preadded) {
                     $("#" + elemid + "_annoninput").remove();
-                    var _item;
                     addInput(focusme);
                     if (element.children("option[value=" + value + "]").length) {
                         _item = element.children("option[value=" + value + "]");
@@ -254,7 +255,7 @@ jQuery(function($) {
                         }
                     }
                     else{
-                        var _item = $(document.createElement("option"));
+                        _item = $(document.createElement("option"));
                         _item.attr("value", value).get(0).setAttribute("selected", "selected");
                         _item.attr("value", value).attr("selected", "selected");
                         _item.attr("value", value).addClass("selected");
@@ -286,9 +287,9 @@ jQuery(function($) {
             }
 
             function addInput(focusme) {
-                var li = $(document.createElement("li"));
-                var input = $(document.createElement("input"));
-                var getBoxTimeout = 0;
+                var li = $(document.createElement("li")),
+                    input = $(document.createElement("input")),
+                    getBoxTimeout = 0;
 
                 li.attr({
                     "class": "bit-input",
@@ -307,7 +308,7 @@ jQuery(function($) {
                 });
 
                 input.blur(function() {
-                    if (options.complete_hover) {
+                    if (complete_hover) {
                       complete.fadeOut("fast");
                     }
                     else {
@@ -388,7 +389,7 @@ jQuery(function($) {
                         counter = 0;
 
                         // changed by zack: adding zipcode detection
-                        if (options.cmc_zipcode_detect && etext == "26101") {
+                        if (options.cmc_zipcode_detect && etext.match(/^(?:\d{5}(?=-\d{4}(?!\S))|\d{5}(?!\S))/) != null) {
                             addZipcodeMembers(etext);
                             bindEvents();
                         } else // end zack's changes for zipcode
@@ -434,14 +435,46 @@ jQuery(function($) {
 
               addTextItem(etext);
 
-              var content = '';
-              //content += '<li class="ui-state-default ui-corner-all" rel="' + /*object.value*/ 'Within 20 miles of 26101 (Parkersburg, WV)' + '">' + /*itemIllumination(object.key, etext)*/ 'Within 20 miles of 26101 (Parkersburg, WV)' + '</li>';
-              var list;
-              for(var each in list = [10, 25, 50, 100]) {
-                content += '<li class="ui-state-default ui-corner-all" rel="' + /*object.value*/ 'Within ' + list[each] + ' miles of 26101 (Parkersburg, WV)' + '">' + /*itemIllumination(object.key, etext)*/ 'Within ' + list[each] + ' miles of 26101 (Parkersburg, WV)' + '</li>';
-              }
+              if (!zipcode_request_in_progress) {
+                zipcode_request_in_progress = true;
+                $.ajax(options.zipcode_target, {
+                  data: { z: etext.substr(0, 5) },
+                  dataType: "json",
+                  success: function(response, textStatus) {
+                    var content = '', value;
+                    if(!response.has_error) {
+                      for(var each in options.zipcode_distances) {
+                        value = '!!z:' + response.zipcode + ':' + options.zipcode_distances[each];
+                        content += '<li class="ui-state-default ui-corner-all" rel="' + value + '">';
+                        value = 'Within ' + options.zipcode_distances[each] + ' miles of ' + etext.substr(0, 5) + ' (' + response.city + ')';
+                        content += itemIllumination(value, etext.match(/\d{5}/));
+                        content += '</li>';
+                      }
 
-              feed.append(content);
+                      feed.append(content);
+
+                      if (options.firstselected) {
+                        focuson = feed.children("li:visible:first");
+                        focuson.addClass("ui-state-hover auto-focus");
+                      }
+
+                      if (counter > options.height) {
+                        feed.css({
+                          "height": (options.height * 24) + "px",
+                          "overflow": "auto"
+                        });
+                      } else {
+                        feed.css("height", "auto");
+                      }
+
+                      bindEvents();
+                    }
+                  },
+                  complete: function() {
+                    zipcode_request_in_progress = false;
+                  }
+                });
+              }
               
               if (options.firstselected) {
                 focuson = feed.children("li:visible:first");
@@ -480,14 +513,13 @@ jQuery(function($) {
                     });
                 }
 
-                var maximum = options.maxshownitems < cache.length ? options.maxshownitems: cache.length;
-                var filter = "i";
+                var maximum = options.maxshownitems < cache.length ? options.maxshownitems: cache.length,
+                    filter = "i", myregexp, match;
+
                 if (options.filter_case) {
                     filter = "";
                 }
 
-                var myregexp,
-                match;
                 try{
                     myregexp = eval('/(?:^|;)\\s*(\\d+)\\s*:[^;]*?' + etext + '[^;]*/g' + filter);
                     match = myregexp.exec(search_string);
@@ -741,6 +773,8 @@ jQuery(function($) {
                 attachto: null,
                 delay: 350,
                 cmc_zipcode_detect: false,
+                zipcode_distances: [10, 25, 50, 100],
+                zipcode_target: "zipcode.php",
                 cmc_icon_class: false
             },
             opt);
@@ -756,6 +790,7 @@ jQuery(function($) {
             var focuson = null;
             var deleting = 0;
             var complete_hover = 1;
+            var zipcode_request_in_progress = false;
 
             var element = $(this);
             var elemid = element.attr("id");
