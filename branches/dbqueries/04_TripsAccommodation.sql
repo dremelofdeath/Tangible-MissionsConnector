@@ -1,0 +1,1 @@
+ALTER TABLE trips add accommodationlevel varchar(256) AFTER destination;

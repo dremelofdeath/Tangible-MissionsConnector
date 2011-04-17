@@ -1,0 +1,1 @@
+insert into skills (skilldesc,type) VALUES ("Medical Student", "1");

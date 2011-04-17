@@ -1,0 +1,2 @@
+CREATE TABLE languages (id smallint(6) not null auto_increment, 3letter char(3) NOT NULL COMMENT 'ISO 639-2 Code', 2letter varchar(2) default NULL COMMENT 'ISO 639-1 Code', englishname varchar(255) default NULL,frenchname varchar(255) default NULL, PRIMARY KEY  (id)) type=InnoDB DEFAULT CHARSET=utf8;
+create table languagesselected(userid bigint(20) not null, id smallint(6) not null, FOREIGN KEY (userid) REFERENCES users(userid), FOREIGN KEY (id) REFERENCES languages(id)) type=InnoDB;

@@ -1,0 +1,1 @@
+ALTER TABLE users add Languages varchar(1024) AFTER aboutme;
