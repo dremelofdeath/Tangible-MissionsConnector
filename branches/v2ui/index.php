@@ -1,3 +1,4 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <?php
 
 // put PHP code here
@@ -15,17 +16,28 @@ function cmc_library_load_jquery_ui($ver) {
   cmc_js_load($src);
 }
 
-function cmc_library_load_jquery_ui_theme($ver, $theme) {
-  $href = 'http://ajax.googleapis.com/ajax/libs/jqueryui/';
-  $href .= $ver;
-  $href .= '/themes/';
-  $href .= $theme;
-  $href .= '/jquery-ui.css';
+function cmc_library_load_jquery_ui_theme($ver, $theme, $custom=false) {
+  $href = '';
+  if($custom) {
+    // NOTE: $theme is ignored for custom themes -- perhaps allow multiple 
+    // custom themes in the future? -zack
+    $href .= 'css/custom-theme/jquery-ui-' . $ver . '.custom.css';
+  } else {
+    $href .= 'http://ajax.googleapis.com/ajax/libs/jqueryui/';
+    $href .= $ver;
+    $href .= '/themes/';
+    $href .= $theme;
+    $href .= '/jquery-ui.css';
+  }
   echo '<link type="text/css" href="'.$href.'" rel="stylesheet" />';
 }
 
 function cmc_jquery_startup($jquery_version, $jquery_ui_version, $theme) {
-  cmc_library_load_jquery_ui_theme($jquery_ui_version, $theme);
+  if($theme == 'custom' || $theme == 'custom-theme') {
+    cmc_library_load_jquery_ui_theme($jquery_ui_version, $theme, true);
+  } else {
+    cmc_library_load_jquery_ui_theme($jquery_ui_version, $theme);
+  }
   cmc_library_load_jquery($jquery_version);
   cmc_library_load_jquery_ui($jquery_ui_version);
   echo "\n";
@@ -82,7 +94,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
   <body>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <!-- Include jQuery stuff and link stylesheet to the specified theme -->
-    <?php cmc_jquery_startup("1.5.1", "1.8.10", "mint-choc"); ?>
+    <?php cmc_jquery_startup("1.5.1", "1.8.11", "custom-theme"); ?>
     <link rel="stylesheet" href="fcbkcomplete-style.css" type="text/css"
           media="screen" charset="utf-8" />
     <link rel="stylesheet" href="tipTip.css" type="text/css" />
@@ -97,12 +109,39 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         loggedInUser : false,
         friends : false,
         requestsOutstanding : 0,
+        dialogsOpen : 0,
+        version : "1.9.18",
 
         // methods
         page : function(from, to) {
           $(from).hide("drop", {direction: 'left'}, 250, function() {
             $(to).show("drop", {direction: 'right'}, 250, null);
           });
+        },
+
+        closeAllDialogs : function(except) {
+          $(".ui-dialog:visible").each(function() {
+            $(this).children(".ui-dialog-content").each(function() {
+              if (this != except) {
+                $(this).dialog('close');
+              }
+            });
+          });
+        },
+
+        dialogOpen : function(dialog) {
+          CMC.dialogsOpen++;
+          CMC.closeAllDialogs(dialog);
+          if ($.support.opacity && CMC.dialogsOpen == 1) {
+            $("#tabs, #cmc-footer").fadeTo('fast', 0.5);
+          }
+        },
+
+        dialogClose : function(dialog) {
+          if ($.support.opacity && CMC.dialogsOpen == 1) {
+            $("#tabs, #cmc-footer").fadeTo('fast', 1.0);
+          }
+          CMC.dialogsOpen--;
         },
 
         showAjaxSpinner : function() {
@@ -127,6 +166,22 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
               CMC.hideAjaxSpinner();
             }
           }
+        },
+
+        recalculateTextareaLimit : function(messageID, labelID, limit, customText) {
+          var len = $(messageID).val().length;
+          limit = limit || 300;
+          customText = customText || " characters left";
+          $(labelID).html((300 - len) + customText);
+        },
+
+        recalculateProblemMessageLimit : function(limit) {
+          CMC.recalculateTextareaLimit(
+            "#report-problem-message",
+            "#report-problem-characters-left",
+            limit
+          );
+          $("#report-problem-characters-left").fadeIn();
         }
       };
 
@@ -199,6 +254,10 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
           content: $("#search-tipbar-right .tipbar-content").html()
         });
 
+        if ($.browser.msie && parseInt($.browser.version, 10) <= 7) {
+          $("#tiptip_content").css("background-color", "black");
+        }
+
         $("#cmc-search-icon").click(function() {
           $("#cmc-search-box").children("ul").children("li.bit-input").children(".maininput").focus();
         });
@@ -216,11 +275,93 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
           }
         });
 
-        // this should be the last thing that happens
-        $("#loading").fadeOut(function() {
-          $("#tabs").hide().fadeIn();
+        $("#copyrights-dialog").dialog({
+          autoOpen: false,
+          draggable: false,
+          position: [227, 50],
+          resizable: false,
+          title: "Christian Missions Connector v" + CMC.version,
+          open: function() {
+            CMC.dialogOpen(this);
+          },
+          close: function() {
+            CMC.dialogClose(this);
+          }
         });
 
+        $("#copyrights").click(function() {
+          $("#copyrights-dialog").dialog('open');
+        });
+
+        $("#report-problem-dialog").dialog({
+          autoOpen: false,
+          draggable: false,
+          position: [177, 90],
+          resizable: false,
+          width: 400,
+          open: function() {
+            CMC.dialogOpen(this);
+          },
+          close: function() {
+            CMC.dialogClose(this);
+            if ($("#report-problem-message").val().length <= 0) {
+              $("#report-problem-characters-left").hide();
+            }
+          }
+        });
+
+        $("#report-problem").click(function() {
+          $("#report-problem-dialog").dialog('open');
+        });
+
+        $("#report-problem-submit")
+          .button()
+          .click(function() {
+            void false;
+          });
+
+        $("#report-problem-characters-left").hide();
+
+        $("#report-problem-message")
+          .click(function() {
+            CMC.recalculateProblemMessageLimit();
+          })
+          .keyup(function() {
+            CMC.recalculateProblemMessageLimit();
+          })
+          .keypress(function() {
+            CMC.recalculateProblemMessageLimit();
+          });
+
+        // this should be the last thing that happens
+        $("#loading").fadeOut(function() {
+          $("#tabs").hide().fadeIn(function() {
+            $("#cmc-footer").hide().delay(150).fadeIn();
+          });
+        });
+
+      });
+    </script>
+    <script type="text/javascript">
+      $(function() {
+        $("#secret-hideout-dialog").dialog({
+          autoOpen: false,
+          draggable: false,
+          position: [25, 25],
+          resizable: false,
+          height: 465,
+          width: 700,
+          open: function() {
+            CMC.dialogOpen(this);
+          },
+          close: function() {
+            CMC.dialogClose(this);
+          }
+        });
+
+        $("#secret-hideout").click(function() {
+          $("#secret-hideout-dialog").dialog('open');
+        });
       });
     </script>
     <!-- Custom CSS markup goes here -->
@@ -240,6 +381,15 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
 
       #tabs {
         height: 500px;
+      }
+
+      #ajax-spinner {
+        position: absolute;
+        float: right;
+        top: 5px;
+        right: 2px;
+        margin-top: 6px;
+        margin-right: 5px;
       }
 
       .cmc-infobar {
@@ -299,6 +449,11 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         margin-top: 5px !important;
         margin-bottom: 3px !important;
       }
+
+      .inner-tipbar-content li {
+        margin: 15px;
+        line-height: 0px;
+      }
       
       h1.cmc-big-button-text {
         margin-bottom: 5px;
@@ -310,6 +465,27 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
 
       a.cmc-button-link {
         text-decoration: none;
+      }
+
+      #cmc-footer a {
+        text-decoration: none;
+        color: #102030;
+      }
+
+      #cmc-footer .leftside {
+        position: absolute;
+        left: 8px;
+      }
+
+      #cmc-footer .rightside {
+        position: absolute;
+        right: 8px;
+      }
+
+      #report-problem-characters-left {
+        float: right;
+        margin-top: 7px;
+        margin-right: 14px;
       }
       
     </style>
@@ -329,10 +505,10 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         <li><a href="#search-tab">Search</a></li>
         <li><a href="#network-tab">My Network</a></li>
         <li><a href="#invite-tab">Invite</a></li>
-        <div id="ajax-spinner" style="float: right; margin-top: 6px; margin-right: 5px;">
-          <img src="ajax-spinner.gif" />
-        </div>
       </ul>
+      <div id="ajax-spinner">
+        <img src="ajax-spinner.gif" />
+      </div>
       <div id="welcome-tab">
         <h1>Welcome to Christian Missions Connector.</h1>
         <p>Are you interested in missions work? Do you want to connect with people and organizations who share your passion for missions? Whether you want to find a missions organization, start a mission team, join a mission team or just connect with others who have a passion for missions, Christian Missions Connector can help.</p>
@@ -399,10 +575,17 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                 </div>
               </div>
             </div>
-            <div id="search-tipbar-right" style="position: absolute; right: -9px;">
+            <div id="search-tipbar-right" style="position: absolute; right: -10px;">
               <a class="tipbar-link" href="#">Need some help?</a>
               <div class="tipbar-content" style="display: none">
-                This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test. This is a test.
+                <div class="inner-tipbar-content">
+                  Type in the characteristics of the sort of volunteer or mission trip you are looking for. Try searching for things like:
+                    <li>Profession (ex, translator)</li>
+                    <li>Skills (ex, computer science)</li>
+                    <li>Countries (ex, Nicaragua)</li>
+                    <li>US Zip Code (ex, 98034)</li>
+                    <li>...and more!</li>
+                </div>
               </div>
             </div>
           </div>
@@ -453,6 +636,39 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
       <div id="invite-tab">
         <p>Mauris eleifend est et turpis. Duis id erat. Suspendisse potenti. Aliquam vulputate, pede vel vehicula accumsan, mi neque rutrum erat, eu congue orci lorem eget lorem. Vestibulum non ante. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Fusce sodales. Quisque eu urna vel enim commodo pellentesque. Praesent eu risus hendrerit ligula tempus pretium. Curabitur lorem enim, pretium nec, feugiat nec, luctus a, lacus.</p>
         <p>Duis cursus. Maecenas ligula eros, blandit nec, pharetra at, semper at, magna. Nullam ac lacus. Nulla facilisi. Praesent viverra justo vitae neque. Praesent blandit adipiscing velit. Suspendisse potenti. Donec mattis, pede vel pharetra blandit, magna ligula faucibus eros, id euismod lacus dolor eget odio. Nam scelerisque. Donec non libero sed nulla mattis commodo. Ut sagittis. Donec nisi lectus, feugiat porttitor, tempor ac, tempor vitae, pede. Aenean vehicula velit eu tellus interdum rutrum. Maecenas commodo. Pellentesque nec elit. Fusce in lacus. Vivamus a libero vitae lectus hendrerit hendrerit.</p>
+      </div>
+    </div>
+    <div id="cmc-footer" style="display: none">
+      <div class="leftside">
+        <a href="#" id="secret-hideout">Admin</a> :
+        <a href="#" id="report-problem">Report a Problem</a> : <a href="#" id="contact-link">Contact Us</a>
+      </div>
+      <div class="rightside">
+        <a href="#" id="copyrights">Copyrights</a> :
+        <a href="http://www.tangiblesoft.net/" target="_blank" id="tangible-link">Tangible, LLC</a>
+      </div>
+    </div>
+    <!-- Dialogs and such should go here -->
+    <div id="dialogs" style="display: none">
+      <div id="copyrights-dialog" title="Copyrights">
+        <p>Christian Missions Connector is Copyright 2009-2011 Tangible, LLC. All rights reserved.</p>
+        <p>Christian Missions Connector uses the jQuery and jQuery UI libraries. For more information, visit <a href="http://www.jquery.com" target="_blank">www.jquery.com</a>.</p>
+        <p>Portions adapted from FCBKcomplete 2.7.5 and TipTip 1.3. FCBKcomplete is Copyright 2010 Emposha (<a href="http://www.emposha.com" target="_blank">www.emposha.com</a>). TipTip is Copyright 2011 Drew Wilson (<a href="http://code.drewwilson.com/entry/tiptip-jquery-plugin" target="_blank">code.drewwilson.com</a>). Both are used and modified with permission under the <a href="http://www.opensource.org/licenses/mit-license.php" target="_blank">MIT license.</a></p>
+        <p>Contains content obtained from The Noun Project (<a href="http://www.thenounproject.com" target="_blank">www.thenounproject.com</a>). "Community" reproduced under the Creative Commons Attribution 3.0 Unported license. For licensing information, please visit <a href="http://creativecommons.org/licenses/by/3.0/" target="_blank">http://creativecommons.org/licenses/by/3.0/</a>.</p>
+        <p>"Arriving Flights" by Roger Cook and Don Shanosky, 1974. Obtained from the public domain. </p>
+      </div>
+      <div id="report-problem-dialog" title="What seems to be the matter?">
+        <p>Tell us what's wrong, and we'll look into it right away.</p>
+        <form id="report-problem-form">
+          <textarea id="report-problem-message" height="4" cols="55" style="width: 98%;"></textarea>
+          <div style="float: right; margin-right: 1px;" id="report-problem-submit">Submit</div>
+          <div id="report-problem-characters-left" class="ui-state-disabled">
+            300 characters left<!-- just some placeholder text -->
+          </div>
+        </form>
+      </div>
+      <div id="secret-hideout-dialog" title="Administration">
+        <p>This is an area for magical unicorns and rainbows.</p>
       </div>
     </div>
     <!-- Do not place HTML markup below this line -->
