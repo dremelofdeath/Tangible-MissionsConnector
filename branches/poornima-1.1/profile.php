@@ -40,8 +40,7 @@ $sql = 'select * from users where userid="'.$showuserid.'"';
 $result = mysql_query($sql,$con);
 
 if(!$result) {
- 	$has_error = TRUE;
-	$err_msg = "Can't query (query was '$query'): " . mysql_error();
+ 	setjsonmysqlerror($has_error,$err_msg,$sql);
 }
 else {
 
@@ -63,8 +62,7 @@ function cmc_profile_render_id_join($title2,$title,$desc, $descdb, $selecteddb, 
      " WHERE ".$selecteddb.".userid='".$fbid."'";
   $result = mysql_query($sql,$con);
   if (!$result) {
-    $has_error = TRUE;
-	$err_msg = "Can't query (query was '$query'): " . mysql_error();
+    setjsonmysqlerror($has_error,$err_msg,$sql);
   }
   else {
     $i=0;
@@ -95,8 +93,7 @@ function cmc_profile_render_skills($title, $type, $fbid,&$has_error,&$err_msg,&$
        " WHERE skills.type=".$type." AND skillsselected.userid='".$fbid."'";
   $result = mysql_query($sql,$con);
   if (!$result) {
-  	$has_error = TRUE;
-	$err_msg = "Can't query (query was '$query'): " . mysql_error();
+  	setjsonmysqlerror($has_error,$err_msg,$sql);
   }
   else {
     $i=0;
@@ -138,8 +135,7 @@ if(mysql_num_rows($result) != 0) {
   $sql2 = 'update users set name="'.$name.'" where userid="'.$showuserid.'"';
   $result2 = mysql_query($sql2,$con);
   if (!$result2) {
-  		$has_error = TRUE;
-		$err_msg = "Can't query (query was '$query'): " . mysql_error();
+  		setjsonmysqlerror($has_error,$err_msg,$sql2);
   }
   
   } 
@@ -212,8 +208,7 @@ if(mysql_num_rows($result) != 0) {
       $sql2 = 'select tripname from trips where id="'.$tid.'"';
       $result2 = mysql_query($sql2,$con);
 	  if (!$result2) {
-	  		$has_error = TRUE;
-			$err_msg = "Can't query (query was '$query'): " . mysql_error();
+	  		setjsonmysqlerror($has_error,$err_msg,$sql2);
 			continue 1;
 	  }
 	  else {
@@ -224,8 +219,7 @@ if(mysql_num_rows($result) != 0) {
     }
 	$json['trips'] = $trips;
   } else {
-  		$has_error = TRUE;
-		$err_msg = "Can't query (query was '$query'): " . mysql_error();
+  		setjsonmysqlerror($has_error,$err_msg,$sql);
   }
   
 } else {
