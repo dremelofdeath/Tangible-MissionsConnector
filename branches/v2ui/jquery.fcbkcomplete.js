@@ -246,8 +246,8 @@ jQuery(function($) {
                 if (!preadded) {
                     $("#" + elemid + "_annoninput").remove();
                     addInput(focusme);
-                    if (element.children("option[value=" + value + "]").length) {
-                        _item = element.children("option[value=" + value + "]");
+                    if (element.children("option[value=\"" + value + "\"]").length) {
+                        _item = element.children("option[value=\"" + value + "\"]");
                         _item.get(0).setAttribute("selected", "selected");
                         _item.attr("selected", "selected");
                         if (!_item.hasClass("selected")) {
