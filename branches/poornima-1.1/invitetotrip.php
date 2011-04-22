@@ -13,11 +13,12 @@ $saferequest = cmc_safe_request_strip();
 $has_error = FALSE;
 $err_msg = '';
 
-if (array_key_exists('ids', $saferequest) && array_key_exists('fbid', $saferequest) && array_key_exists('tripid', $saferequest)) {
+if (array_key_exists('ids', $saferequest) && array_key_exists('fbid', $saferequest) && array_key_exists('tripid', $saferequest) && array_key_exists('type', $saferequest)) {
   // invitation ids, tripid and facebook userid should be provided
   $tripid = $saferequest['tripid'];
   $fbid = $saferequest['fbid'];
   $selectedids = $saferequest['ids'];
+  $membertype = $saferequest['type'];
 } 
 else if (array_key_exists('fbid', $saferequest) && array_key_exists('tripid', $saferequest)) {
   $tripid = $saferequest['tripid'];
@@ -64,6 +65,7 @@ return $timeDiff/86400;
 }
 
 
+if (!$has_error) {
    // Modify the trip members table based on user invitations
    if (isset($selectedids)) {
  	
@@ -79,8 +81,7 @@ return $timeDiff/86400;
 	$sql2 = 'select * from notifications where id="'.$fbid.'"';
 	$result2 = mysql_query($sql2,$con);
 	if (!$result2) {
-	    $has_error = TRUE;
-		$err_msg = "Can't query (query was '$query'): " . mysql_error();
+	    setjsonmysqlerror($has_error,$err_msg,$sql2);
 	}
 	else {
 		$numrows = mysql_num_rows($result2);
@@ -88,8 +89,7 @@ return $timeDiff/86400;
 			$sql2 = 'insert into notifications (id,starttime,notifications) VALUES ("'.$fbid.'","'.$today.'","'.count($selectedids).'")';
 			$result2 = mysql_query($sql2,$con);
 			if (!$result2) {
-				$has_error = TRUE;
-				$err_msg = "Can't query (query was '$query'): " . mysql_error();
+				setjsonmysqlerror($has_error,$err_msg,$sql2);
 			}
 		}
 		else {
@@ -111,8 +111,7 @@ return $timeDiff/86400;
 
 			$result2 = mysql_query($sql2,$con);
 			if (!$result2) {
-				$has_error = TRUE;
-				$err_msg = "Can't query (query was '$query'): " . mysql_error();
+				setjsonmysqlerror($has_error,$err_msg,$sql2);
 			}
 		}
 
@@ -122,25 +121,22 @@ return $timeDiff/86400;
 			$result = mysql_query($sql,$con);
 			
 			if (!$result) {
-				$has_error = TRUE;
-				$err_msg = "Can't query (query was '$query'): " . mysql_error();
+				setjsonmysqlerror($has_error,$err_msg,$sql);
 			}
 			else {
 				$numrows = mysql_num_rows($result);
 				if ($numrows > 0) {
-					$sql = 'UPDATE tripmembers set invited="1" where userid="'.$selected.'" and tripid="'.$tripid.'"';
+					$sql = 'UPDATE tripmembers set invited="1" where userid="'.$selected.'" and tripid="'.$tripid.'" and type="'.$membertype.'"';
 					$result = mysql_query($sql,$con);
 					if (!$result) {
-						$has_error = TRUE;
-						$err_msg = "Can't query (query was '$query'): " . mysql_error();
+						setjsonmysqlerror($has_error,$err_msg,$sql);
 					}
 				}
 				else {
-					$sql = 'INSERT into tripmembers (userid, tripid,invited) VALUES ("'.$selected.'","'.$tripid.'","1")';
+					$sql = 'INSERT into tripmembers (userid, tripid,invited,type) VALUES ("'.$selected.'","'.$tripid.'","1","'.$membertype.'")';
 					$result = mysql_query($sql,$con);
 					if (!$result) {
-						$has_error = TRUE;
-						$err_msg = "Can't query (query was '$query'): " . mysql_error();
+						setjsonmysqlerror($has_error,$err_msg,$sql);
 					}
 				}
 			}
@@ -153,8 +149,7 @@ return $timeDiff/86400;
 	$sql = 'select * from notifications where id="'.$fbid.'"';
 	$result = mysql_query($sql,$con);
 	if (!$result) {
-		$has_error = TRUE;
-		$err_msg = "Can't query (query was '$query'): " . mysql_error();	
+		setjsonmysqlerror($has_error,$err_msg,$sql);	
 	}
 	else {
 		$numrows = mysql_num_rows($result);
@@ -187,8 +182,7 @@ return $timeDiff/86400;
 		$myfriends=array();
 		$result = mysql_query($sql,$con);
 		if (!$result) {
-			$has_error = TRUE;
-			$err_msg = "Can't query (query was '$query'): " . mysql_error();
+			setjsonmysqlerror($has_error,$err_msg,$sql);
 		}
 		else {
 			while ($invitedfriends = mysql_fetch_array($result,MYSQL_ASSOC)) {
@@ -202,8 +196,7 @@ return $timeDiff/86400;
    $sql = 'select tripname,tripdesc,destination,departure,returning,religion from trips where id="'.$tripid.'"';
    $result = mysql_query($sql,$con);
    if (!$result) {
-		$has_error = TRUE;
-		$err_msg = "Can't query (query was '$query'): " . mysql_error();
+		setjsonmysqlerror($has_error,$err_msg,$sql);
    }
    else {
 	$row = mysql_fetch_array($result);
@@ -230,6 +223,7 @@ else if ($value == 5) { // remove self from a trip
   echo "<fb:redirect url='removeself.php?tripid=".$tripid."' />";
 }
 */
+}
 
 $json['has_error'] = $has_error;
 

@@ -7,13 +7,13 @@
 
 include_once 'common.php';
 
-$fb = cmc_startup($appapikey, $appsecret,0);
-$fbid = get_user_id($fb);
-//$fbid = $fb->require_login("publish_stream,read_stream");
+$con = arena_connect();
 
-?>
+$saferequest = cmc_safe_request_strip();
+$has_error = FALSE;
+$err_msg = '';
 
-<?php
+$json = array();
 
 function getdatestring($year,$month,$date) {
 
@@ -31,12 +31,6 @@ $res = $year.'-'.$smonth.'-'.$sdate.' '.'00:00:00';
 return $res;
 }
 
-
-
-//$today = date("F j,Y");
-
-
-
 $todayy = date("Y");
 $todaym = date("m");
 $todayd = date("d");
@@ -44,30 +38,34 @@ $today = getdatestring($todayy,$todaym,$todayd);
 
 // get all trips that are in the future
 $sql = 'select * from trips where departure >="'.$today.'"';
-//echo $sql.'<br />';
+$result = mysql_query($sql,$con);
 
-if ($result = mysql_query($sql)) {
+if ($result) {
 
    $numrows = mysql_num_rows($result);
+	$json['tripnames'] = array();
+	$json['tripids'] = array();
 
-   if ($numrows==0) {
-	echo "There are no upcoming trips <br/>";
-	echo "<a href='welcome.php'>Go back to welcome page</a><br /><br />";
+   if ($numrows!=0) {
+  	while ($row = mysql_fetch_array($result)) {
+		$json['tripnames'][] = $row['tripname'];
+		$json['tripids'][] = $row['id'];
+  	}
    }
-   else {
-   echo "<br/>If you would like to search within upcoming trips, <a href='advancedsearch.php'><b>click here</b></a><br/><br/>";
-  echo '<br /><b>These are the upcoming trips: <b/> <br /><br />';
-  while ($row = mysql_fetch_array($result)) {
-	echo "<br/><a href='profileT.php?tripid=".$row['id']."'>".$row['tripname']."</a><br/><br/>";
-
-  }
-  }
  
 }
 else {
-	echo '<b>MYSQL Error </b><br />';
-	//echo "<fb:redirect url='tripoptions.php' />";
+ 	setjsonmysqlerror($has_error,$err_msg,$sql);
 }
+
+
+$json['has_error'] = $has_error;
+
+if ($has_error) {
+  $json['err_msg'] = $err_msg;
+}
+
+echo json_encode($json);
 
 ?>
 

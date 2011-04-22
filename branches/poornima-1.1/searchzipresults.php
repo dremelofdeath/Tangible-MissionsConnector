@@ -74,8 +74,7 @@ function getZipInfo($zip,&$has_error,&$err_msg,$con) {
 $sql  = "SELECT * FROM zipcodes WHERE zipcode='" . $zip . "'";
 $query = mysql_query($sql,$con);
 if (!$query) {
-	$has_error = TRUE;
-	$err_msg = "Can't query (query was '$query'): " . mysql_error();
+	setjsonmysqlerror($has_error,$err_msg,$sql);
 	return FALSE;
 }
 else {
@@ -96,8 +95,7 @@ $sql = "SELECT zipcode, latitude, longitude from zipcodes";
 
 $query = mysql_query($sql,$con);
 if (!$query) {
-	$has_error = TRUE;
-	$err_msg = "Can't query (query was '$query'): " . mysql_error();
+	setjsonmysqlerror($has_error,$err_msg,$sql);
 	return FALSE;
 }
 else {
@@ -163,8 +161,7 @@ $sql='select users.userid,users.name,users.country,users.state,users.city,users.
 $result = mysql_query($sql,$con);
 
 if (!$result) {
-	$has_error = TRUE;
-	$err_msg = "Can't query (query was '$query'): " . mysql_error();
+	setjsonmysqlerror($has_error,$err_msg,$sql);
 }
 else {
     $num_rows = mysql_num_rows($result);
@@ -256,8 +253,7 @@ for ($i=0;$i<count($dists);$i++) {
 	$sql = 'SELECT * from users WHERE zipcode="'.$result[$i].'"';
 	$res = mysql_query($sql,$con);
 	if (!$res) {
-		$has_error = TRUE;
-		$err_msg = "Can't query (query was '$query'): " . mysql_error();
+		setjsonmysqlerror($has_error,$err_msg,$sql);
 	}
 	else {
 		$numrows = mysql_num_rows($res);

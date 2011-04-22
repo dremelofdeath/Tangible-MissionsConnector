@@ -73,8 +73,7 @@ if (isset($selectedids)) {
  
  $result = mysql_query($sql,$con);
  if (!result) {
- 	$has_error = TRUE;
-	$err_msg = "Can't query (query was '$query'): " . mysql_error();
+ 	setjsonmysqlerror($has_error,$err_msg,$sql);
  }
  else {
  $row = mysql_fetch_array($result,MYSQL_ASSOC);
@@ -119,8 +118,7 @@ if (!empty($row['zipcode']))
 	$sql2 = 'select * from notifications where id="'.$fbid.'"';
 	$result2 = mysql_query($sql2,$con);
 	if (!$result2) {
-		$has_error = TRUE;
-		$err_msg = "Can't query (query was '$query'): " . mysql_error();
+		setjsonmysqlerror($has_error,$err_msg,$sql2);
 	}
 	else {
 		$numrows = mysql_num_rows($result2);
@@ -128,8 +126,7 @@ if (!empty($row['zipcode']))
 			$sql2 = 'insert into notifications (id,starttime,notifications) VALUES ("'.$fbid.'","'.$today.'","'.count($selectedids).'")';
 			$result2 = mysql_query($sql2,$con);
 			if (!$result2) {
-				$has_error = TRUE;
-				$err_msg = "Can't query (query was '$query'): " . mysql_error();
+				setjsonmysqlerror($has_error,$err_msg,$sql2);
 			}
 		}
 		else {
@@ -151,8 +148,7 @@ if (!empty($row['zipcode']))
 
 			$result2 = mysql_query($sql2,$con);
 			if (!$result2) {
-				$has_error = TRUE;
-				$err_msg = "Can't query (query was '$query'): " . mysql_error();
+				setjsonmysqlerror($has_error,$err_msg,$sql2);
 			}
 		}  
 		if (!$has_error) {
@@ -161,8 +157,7 @@ if (!empty($row['zipcode']))
 				$sql = 'select * from tripwallinvites where userid="'.$selected.'" and tripid="'.$tripid.'"';
 				$result = mysql_query($sql,$con);
 				if (!$result) {
-					$has_error = TRUE;
-					$err_msg = "Can't query (query was '$query'): " . mysql_error();
+					setjsonmysqlerror($has_error,$err_msg,$sql);
 				}
 				else {
 					$numrows = mysql_num_rows($result);
@@ -170,8 +165,7 @@ if (!empty($row['zipcode']))
 						$sql = 'INSERT into tripwallinvites (userid, tripid) VALUES ("'.$selected.'","'.$tripid.'")';
 						$result = mysql_query($sql,$con);
 						if (!$result) {
-							$has_error = TRUE;
-							$err_msg = "Can't query (query was '$query'): " . mysql_error();
+							setjsonmysqlerror($has_error,$err_msg,$sql);
 						}
 					}
 				}
@@ -192,8 +186,7 @@ else {
    $result = mysql_query($sql,$con);
    
 	if (!$result) {
-		$has_error = TRUE;
-		$err_msg = "Can't query (query was '$query'): " . mysql_error();	
+		setjsonmysqlerror($has_error,$err_msg,$sql);	
 	}
 	else {
 		$numrows = mysql_num_rows($result);
@@ -216,8 +209,7 @@ else {
 		$myfriends=array();
 		$result = mysql_query($sql,$con);
 		if (!$result) {
-			$has_error = TRUE;
-			$err_msg = "Can't query (query was '$query'): " . mysql_error();
+			setjsonmysqlerror($has_error,$err_msg,$sql);
 		}
 		else {
 			while ($invitedfriends = mysql_fetch_array($result,MYSQL_ASSOC)) {

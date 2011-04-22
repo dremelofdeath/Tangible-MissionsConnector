@@ -13,14 +13,15 @@ $saferequest = cmc_safe_request_strip();
 $has_error = FALSE;
 $err_msg = '';
 
-if (array_key_exists('tid', $saferequest) && array_key_exists('fbid', $saferequest)) {
+if (array_key_exists('tid', $saferequest) && array_key_exists('fbid', $saferequest) && array_key_exists('type', $saferequest)) {
   // both tripid and facebook userid should be provided
   $tid = $saferequest['tid'];
   $fbid = $saferequest['fbid'];
+  $membertype = $saferequest['type'];
 } else {
-  // error case: neither are defined
+  // error case
   $has_error = TRUE;
-  $err_msg = "Neither required parameters was defined.";
+  $err_msg = "The required parameters was defined.";
 }
 
 $json = array();
@@ -31,8 +32,7 @@ if (!$has_error) {
 	$sql = 'select * from users where userid="'.$fbid.'"';
 	$result = mysql_query($sql,$con);
 	if (!$result) {
-    $has_error = TRUE;
-    $err_msg = "Can't query (query was '$query'): " . mysql_error();
+    		setjsonmysqlerror($has_error,$err_msg,$sql);
     } else {
 	
 	$numrows = mysql_num_rows($result);
@@ -41,30 +41,24 @@ if (!$has_error) {
 	// This means user does not have a CMC profile
 	
 	$has_error = TRUE;
-    $err_msg = "No CMC Profile";
-	/*
-	echo '<br /><br /> You do not have a Christian Missions Profile Yet!! <br /><br />';
-	echo"<b>Getting started</b> is simple and takes about 2 minutes. The first step is to create a profile for yourself or your organization by clicking the blue highlighted link below <br/><br /><center><a href='http://apps.facebook.com/missionsconnector/new.php'>Create your profile</a></center><br /><br />";
-	*/
+    	$err_msg = "No CMC Profile";
 	}
 
 	else {
 
 
-	$sql = 'INSERT INTO tripmembers (userid,tripid,isadmin,invited,accepted) VALUES ("'.$fbid.'","'.$tid.'","0","1","1")';
+	$sql = 'INSERT INTO tripmembers (userid,tripid,isadmin,invited,accepted,type) VALUES ("'.$fbid.'","'.$tid.'","0","1","1","'.$membertype.'")';
 	$result = mysql_query($sql,$con);
 	
 	if(!result){	
-	    $has_error = TRUE;
-		$err_msg = "Can't query (query was '$query'): " . mysql_error();
+	    setjsonmysqlerror($has_error,$err_msg,$sql);
 	}
 	else {
 	// update number of people in trips table
 	$sql = 'select numpeople from trips where id="'.$tid.'"';
 	$result = mysql_query($sql,$con);
 	if (!$result) {
-	    $has_error = TRUE;
-		$err_msg = "Can't query (query was '$query'): " . mysql_error();
+	    setjsonmysqlerror($has_error,$err_msg,$sql);
 	}
 	else {
 		$row = mysql_fetch_array($result);
@@ -73,8 +67,7 @@ if (!$has_error) {
 		$sql2 = 'update trips set numpeople="'.$numpeople.'" where id="'.$tid.'"';
 		$result2 = mysql_query($sql2,$con);
 		if (!$result2) {
-			$has_error = TRUE;
-			$err_msg = "Can't query (query was '$query'): " . mysql_error();
+			setjsonmysqlerror($has_error,$err_msg,$sql2);
 		}
 	}
 

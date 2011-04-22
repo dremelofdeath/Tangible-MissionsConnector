@@ -7,36 +7,64 @@
 
 include_once 'common.php';
 
-$fb = cmc_startup($appapikey, $appsecret,0);
-$fbid = get_user_id($fb);
-//$fbid = $fb->require_login("publish_stream");
+$con = arena_connect();
 
-if (!empty($_GET)) {
+$saferequest = cmc_safe_request_strip();
+$has_error = FALSE;
+$err_msg = '';
 
-$tripid = $_GET['id'];
-$isadmin = $_GET['admin'];
+if (array_key_exists('tripid', $saferequest) && array_key_exists('fbid', $saferequest) && array_key_exists('isadmin', $saferequest) && array_key_exists('type', $saferequest)) {
+  // invitation ids, tripid and facebook userid should be provided
+  $isadmin = $saferequest['isadmin'];
+  $fbid = $saferequest['fbid'];
+  $tripid = $saferequest['tripid'];
+  $membertype = $saferequest['type'];
+} 
+else {
+  // error case: all needed variables are not defined
+  $has_error = TRUE;
+  $err_msg = "Required parameters not defined.";
+}
+
+$json = array();
+
+if (!$has_error) {
+
 $today = date("F j, Y");
 
 // first check that the user has a CMC profile - otherwise redirect user to create a profile
 $sql = 'select * from users where userid="'.$fbid.'"';
-$result = mysql_query($sql);
-$numrows = mysql_num_rows($result);
-
-if ($numrows==0) {
-// This means user does not have a CMC profile
-echo '<br /><br /> You do not have a Christian Missions Profile Yet!! <br /><br />';
-echo"<b>Getting started</b> is simple and takes about 2 minutes. The first step is to create a profile for yourself or your organization by clicking the blue highlighted link below <br/><br /><center><a href='http://apps.facebook.com/missionsconnector/new.php'>Create your profile</a></center><br /><br />";								        
+$result = mysql_query($sql,$con);
+if (!$result) {
+ 	setjsonmysqlerror($has_error,$err_msg,$sql);
 }
 else {
+	$numrows = mysql_num_rows($result);
 
+	if ($numrows==0) {
+		// This means user does not have a CMC profile
+		$has_error = TRUE;
+		$err_msg = "No CMC Profile Yet";
+	}
+	else {
 
-$sql = 'insert into tripmembers (userid, tripid, isadmin, invited, accepted, datejoined) VALUES ("'.$fbid.'","'.$tripid.'","'.$isadmin.'","1","0","'.$today.'")';
+		$sql = 'insert into tripmembers (userid, tripid, isadmin, invited, accepted, type, datejoined) VALUES ("'.$fbid.'","'.$tripid.'","'.$isadmin.'","1","0","'.$membertype.'","'.$today.'")';
 
-//echo $sql.'<br >';
-$result = mysql_query($sql);
+		$result = mysql_query($sql,$con);
+		if (!$result) {
+			setjsonmysqlerror($has_error,$err_msg,$sql);
+		}
+	}
 }
 
-echo "<fb:redirect url='welcome.php' />";
-
 }
+
+$json['has_error'] = $has_error;
+
+if ($has_error) {
+  $json['err_msg'] = $err_msg;
+}
+
+echo json_encode($json);
+
 ?>

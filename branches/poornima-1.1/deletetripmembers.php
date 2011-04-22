@@ -37,8 +37,7 @@ if (isset($fbid)) {
 $sql = 'select userid from tripmembers where userid !="'.$fbid.'" and accepted="1" and tripid="'.$tid.'"';
 $result = mysql_query($sql,$con);
 if (!$result) {
-    $has_error = TRUE;
-    $err_msg = "Can't query (query was '$query'): " . mysql_error();
+    setjsonmysqlerror($has_error,$err_msg,$sql);
 }
 else {
 	$numrows = mysql_num_rows($result);
@@ -46,8 +45,7 @@ else {
 		$sql2 = 'select * from tripmembers where userid="'.$fbid.'" and accepted="1" and tripid="'.$tid.'"';
 		$result2 = mysql_query($sql2,$con);
 		if (!$result2) {
-		    $has_error = TRUE;
-			$err_msg = "Can't query (query was '$query'): " . mysql_error();
+		    setjsonmysqlerror($has_error,$err_msg,$sql2);
 		}
 		else {
 		$numrows2 = mysql_num_rows($result2);
@@ -64,12 +62,11 @@ else if (isset($tripmembers)) {
 // Now we can delete members from the trip - which means updating the tripmembers table in the database
 
 if (is_array($tripmembers)) {
-	while ($thistrip = current($tripmembers)) {
-			$sql = 'delete from tripmembers where userid="'.$thistrip.'" and tripid="'.$tid.'"';
+	while ($mytrip = current($tripmembers)) {
+			$sql = 'delete from tripmembers where userid="'.$mytrip.'" and tripid="'.$tid.'"';
 			$result = mysql_query($sql,$con);
 			if (!result) {
-				$has_error = TRUE;
-				$err_msg = "Can't query (query was '$query'): " . mysql_error();
+				setjsonmysqlerror($has_error,$err_msg,$sql);
 				continue 1;
 			}
 			next($tripmembers);
@@ -81,8 +78,7 @@ $sql = 'delete from tripmembers where userid="'.$tripmembers.'" and tripid="'.$t
 $result = mysql_query($sql,$con);
 
 if (!result) {
-	$has_error = TRUE;
-	$err_msg = "Can't query (query was '$query'): " . mysql_error();
+	setjsonmysqlerror($has_error,$err_msg,$sql);
 }
 }
 

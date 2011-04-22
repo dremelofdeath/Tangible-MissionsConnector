@@ -6,160 +6,131 @@
 //require_once 'facebook.php';
 
 include_once 'common.php';
-ob_start();
 
-$fb = cmc_startup($appapikey, $appsecret,0);
-$fbid = get_user_id($fb);
-//$fbid = $fb->require_login("publish_stream");
+$con = arena_connect();
 
-function pubmessage($fb,$fbid,$tripid,$appid) {
- 
- $info = $fb->api_client->users_getInfo($fbid, 'name', 'email');
- $record = $info[0];
- $name = $record['name'];
- 
- $sql2 = 'select * from trips where id="'.$tripid.'"';
- $result2 = mysql_query($sql2);
- $row2 = mysql_fetch_array($result2,MYSQL_ASSOC);
- $message = $name.' has joined the trip:'.$row2['tripname'];
- 
-  session_start();
-  
-  // get a list of friends who are using the CMC app
-  //$friends=$fb->api_client->friends_getAppUsers();
+$saferequest = cmc_safe_request_strip();
+$has_error = FALSE;
+$err_msg = '';
 
-  if (!isset($_SESSION['tamsg'])) {
-  $fb->api_client->stream_publish($message,null,null,$appid,$appid);
-        /*
-	if (!empty($friends)) {
-	foreach ($friends as $currentfriend) {
-	echo '<script type="text/javascript">';
-	echo 'Facebook.streamPublish("'.$message.'", null, null,"'.$currentfriend.'","",null,true)';
-	echo '</script>';
-	}
-	}
-	*/
-  $_SESSION['tamsg'] = $message;
-  }
-  else {
-  	if (strcmp($message,$_SESSION['tamsg'])) {
-  	$fb->api_client->stream_publish($message,null,null,$appid,$appid);
-        /*
-	if (!empty($friends)) {
-	foreach ($friends as $currentfriend) {
-	echo '<script type="text/javascript">';
-	echo 'Facebook.streamPublish("'.$message.'", null, null,"'.$currentfriend.'","",null,true)';
-	echo '</script>';
-	}
-	}
-	*/
-  	$_SESSION['tamsg'] = $message;  
-  	}
-  } 
-  
+if (array_key_exists('tripid', $saferequest) && array_key_exists('fbid', $saferequest) && array_key_exists('isadmin', $saferequest) && array_key_exists('type', $saferequest)) {
+  // invitation ids, tripid and facebook userid should be provided
+  $isadmin = $saferequest['isadmin'];
+  $fbid = $saferequest['fbid'];
+  $tripid = $saferequest['tripid'];
+  $membertype = $saferequest['type'];
+} 
+else {
+  // error case: all needed variables are not defined
+  $has_error = TRUE;
+  $err_msg = "Required parameters not defined.";
 }
 
-if (!empty($_GET)) {
+$json = array();
 
-$tripid = $_GET['id'];
-$isadmin = $_GET['admin'];
+if (!$has_error) {
+
 $today = date("F j, Y");
 
 $sql = 'select userid from tripmembers where userid="'.$fbid.'" and tripid="'.$tripid.'"';
-$result = mysql_query($sql);
-$numrows = mysql_num_rows($result);
+$result = mysql_query($sql,$con);
 
-if ($numrows > 0) {
- $sql = 'update tripmembers set accepted="1", datejoined="'.$today.'", isadmin="'.$isadmin.'" where userid="'.$fbid.'" and tripid="'.$tripid.'"';
- $result = mysql_query($sql);
- 
-	// Does the user have permission to publish their messages
-	// If not, they should be prompted to allow access
-	$res = $fb->api_client->users_hasAppPermission('publish_stream',null);
-
-	if (!$res) {
-	?>
-
-	<script type="text/javascript">
-	Facebook.showPermissionDialog("read_stream,publish_stream,manage_pages,offline_access");
-	</script>
-
-
-<?php
-}
- 
- pubmessage($fb,$fbid,$tripid,$appid);
- 
-// now update number of people in trips table
-
- $sql = 'select numpeople from trips where id="'.$tripid.'"';
- if ($result = mysql_query($sql)) {
- 	$row = mysql_fetch_array($result,MYSQL_ASSOC);
-	$numpeople = $row['numpeople']+0;
- }
- // increment the number of people in this trip
- $numpeople++;
- $sql = 'update trips set numpeople="'.$numpeople.'" where id="'.$tripid.'"';
- $result = mysql_query($sql);
-
- //mysql_free_result($result);
-
+if (!$result) {
+ 	setjsonmysqlerror($has_error,$err_msg,$sql);
 }
 else {
+	$numrows = mysql_num_rows($result);
 
-   // first check that the user has a CMC profile - otherwise redirect user to create a profile
-   $sql = 'select * from users where userid="'.$fbid.'"';
-   $result = mysql_query($sql);
-   $numrows = mysql_num_rows($result);
+	if ($numrows > 0) {
+ 	$sql = 'update tripmembers set accepted="1", type="'.$membertype.'", datejoined="'.$today.'", isadmin="'.$isadmin.'" where userid="'.$fbid.'" and tripid="'.$tripid.'"';
+ 		$result = mysql_query($sql,$con);
+ 		if (!$result) {
+ 			setjsonmysqlerror($has_error,$err_msg,$sql);
+		}
 
-   if ($numrows==0) {
-	// This means user does not have a CMC profile
-	echo '<br /><br /> You do not have a Christian Missions Profile Yet!! <br /><br />';
-	echo"<b>Getting started</b> is simple and takes about 2 minutes. The first step is to create a profile for yourself or your organization by clicking the blue highlighted link below <br/><br /><center><a href='http://apps.facebook.com/missionsconnector/new.php'>Create your profile</a></center><br /><br />";
+		if (!$has_error) {
+		// now update number of people in trips table
+ 		$sql = 'select numpeople from trips where id="'.$tripid.'"';
+		$result = mysql_query($sql,$con);
+ 		if ($result) {
+ 			$row = mysql_fetch_array($result,MYSQL_ASSOC);
+			$numpeople = $row['numpeople']+0;
 
-   }
-   else {
+ 			// increment the number of people in this trip
+ 			$numpeople++;
+ 			$sql = 'update trips set numpeople="'.$numpeople.'" where id="'.$tripid.'"';
+ 			$result = mysql_query($sql,$con);
+			if (!$result) {
+ 				setjsonmysqlerror($has_error,$err_msg,$sql);
+			}
+ 		}
+		else 
+			setjsonmysqlerror($has_error,$err_msg,$sql);
+
+		} // has_error
+
+	}
+	else {
+
+   		// first check that the user has a CMC profile - otherwise let the user know that he/she needs to create a CMC profile first
+   		$sql = 'select * from users where userid="'.$fbid.'"';
+   		$result = mysql_query($sql,$con);
+		if (!$result) {
+			setjsonmysqlerror($has_error,$err_msg,$sql);
+		}
+
+		if (!$has_error) {
+   		$numrows = mysql_num_rows($result);
+
+   		if ($numrows==0) {
+			// This means user does not have a CMC profile
+			$has_error = TRUE;
+			$err_msg = "User does not have a CMC profile";
+   		}
+   		else {
 
 
-$sql = 'insert into tripmembers (userid, tripid, isadmin, invited, accepted, datejoined) VALUES ("'.$fbid.'","'.$tripid.'","'.$isadmin.'","1","1","'.$today.'")';
+			$sql = 'insert into tripmembers (userid, tripid, isadmin, invited, accepted, type, datejoined) VALUES ("'.$fbid.'","'.$tripid.'","'.$isadmin.'","1","1","'.$membertype.'","'.$today.'")';
 
-//echo $sql.'<br >';
+			$result = mysql_query($sql,$con);
+			if ($result) {
+			// now update number of people in trips table
 
-$result = mysql_query($sql);
+ 			$sql = 'select numpeople from trips where id="'.$tripid.'"';
+			$result = mysql_query($sql,$con);
+  			if ($result) {
+  				$row = mysql_fetch_array($result,MYSQL_ASSOC);
+				$numpeople = $row['numpeople']+0;
 
-// now update number of people in trips table
+  				// increment the number of people in this trip
+  				$numpeople++;
+  				$sql = 'update trips set numpeople="'.$numpeople.'" where id="'.$tripid.'"';
+  				$result = mysql_query($sql,$con);
+				if (!$result) {
+ 					setjsonmysqlerror($has_error,$err_msg,$sql);
+				}
+  			}
+			else {
+				setjsonmysqlerror($has_error,$err_msg,$sql);
+			}
+			}
+			else {
+				setjsonmysqlerror($has_error,$err_msg,$sql);
+			}
 
- $sql = 'select numpeople from trips where id="'.$tripid.'"';
-  if ($result = mysql_query($sql)) {
-  	$row = mysql_fetch_array($result,MYSQL_ASSOC);
-	$numpeople = $row['numpeople']+0;
-  }
-  // increment the number of people in this trip
-  $numpeople++;
-  $sql = 'update trips set numpeople="'.$numpeople.'" where id="'.$tripid.'"';
-  $result = mysql_query($sql);
-  
-	// Does the user have permission to publish their messages
-	// If not, they should be prompted to allow access
-	$res = $fb->api_client->users_hasAppPermission('publish_stream',null);
-
-	if (!$res) {
-	?>
-
-	<script type="text/javascript">
-	Facebook.showPermissionDialog("read_stream,publish_stream,manage_pages,offline_access");
-	</script>
-
-
-<?php
+		}
+		} // has_error
+	}
 }
 
-  pubmessage($fb,$fbid,$tripid,$appid);
-
-}
 }
 
-echo "<fb:redirect url='welcome.php' />";
+$json['has_error'] = $has_error;
 
+if ($has_error) {
+  $json['err_msg'] = $err_msg;
 }
+
+echo json_encode($json);
+
 ?>

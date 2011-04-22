@@ -8,13 +8,22 @@ $has_error = FALSE;
 $err_msg = '';
 
 if (array_key_exists('fbid', $saferequest)) {
-  // both tripid and facebook userid should be provided
+  // facebook userid should be provided in the least
   $fbid = $saferequest['fbid'];
-} else {
-  // error case: neither are defined
+} 
+else if ((array_key_exists('fbid', $saferequest)) && (array_key_exists('userid', $saferequest)) && (array_key_exists('cmd', $saferequest))) {
+  // both userid and facebook userid should be provided
+  $fbid = $saferequest['fbid'];
+  $usertopurge = $saferequest['userid'];
+  $cmd = $saferequest['cmd'];
+}
+else {
+  // error case
   $has_error = TRUE;
   $err_msg = "Facebook id was not defined.";
 }
+
+if (!$has_error) {
 
 // get admins of CMC from the database - We need to create this table first
 $appadminids = array();
@@ -26,7 +35,10 @@ if (!$result) {
 	$err_msg = "Can't query (query was '$query'): " . mysql_error();
 }
 else {
-	$appadminids = mysql_fetch_array($result,MYSQL_NUM);
+	$appadminids = array();
+	while ($row = mysql_fetch_array($result,MYSQL_ASSOC)) {
+		$appadminids[] = $row['userid'];
+	}
 }
 
 $allow=0;
@@ -42,65 +54,49 @@ if (!$allow) {
   $err_msg = "No Administrative privileges";
 } else {
 
-  process_admin_commands($saferequest);
+  process_admin_commands($cmd,$usertopurge,$con,$has_error,$err_msg);
 
-  /*
-  echo "Welcome to the Christian Missions Connector's Administrative Area <br /><br />";
-  numhits();
-  echo "<br />";
+  $numhits = numhits($con,$has_error,$err_msg);
 
-  echo "<form action='admin.php' method='POST'>";
-  echo "  <input type='hidden' name='cmd' value='purgeuser' />";
-  echo "  <label for='admin_purge_userid'>";
-  echo "    Purge a user from the database: ";
-  echo "  </label>";
-  echo "  <input type='text' id='admin_purge_userid' name='userid' />";
-  echo "  <input type='submit' value='Purge this user' />";
-  echo "</form>";
-  echo "<br />";
-
-  echo "<form action='admin.php' method='POST'>";
-  echo "  <input type='hidden' name='cmd' value='scrubuser' />";
-  echo "  <label for='admin_scrub_userid'>";
-  echo "    Scrub a user's profile data: ";
-  echo "  </label>";
-  echo "  <input type='text' id='admin_scrub_userid' name='userid' />";
-  echo "  <input type='submit' value='Scrub this user' />";
-  echo "</form>";
-  */
+  if (!$has_error)
+  	$json['numhits'] = $numhits;
   
 }
 
+}
 
-function numhits() {
+function numhits($con,&$has_error,&$err_msg) {
   // sum up all the user specific hits
   $sql = "select * from hits";
-  $result = mysql_query($sql);
+  $result = mysql_query($sql,$con);
+  if (!$result) {
+	setjsonmysqlerror($has_error,$err_msg,$sql);
+	return -1;
+  }
+  else {
   $unique_hits = 0;
   while ($row = mysql_fetch_array($result)) {
     $unique_hits = $unique_hits + $row['count'];
   }
-
-  //$uniquepage = "uniquehitcounter.txt";
-  //$unique_hits = file($uniquepage);
-  //$unique_hits[0] = $unique_hits[0] + 0;
-  print "<b>This application has been accessed ".$unique_hits." times</b><br />";
+  return $unique_hits;
+  }
 }
 
-function process_admin_commands() {
-  if(isset($_REQUEST["cmd"])) {
-    switch($_REQUEST["cmd"]) {
-      case "purgeuser": process_admin_purgeuser(); break;
-      case "purgeuser4real": process_admin_purgeuser4real(); break;
-      case "scrubuser": process_admin_scrubuser(); break;
-      case "scrubuser4real": process_admin_scrubuser4real(); break;
+function process_admin_commands($cmd,$usertopurge,$con,&$has_error,&$err_msg) {
+  if(isset($cmd)) {
+    switch($cmd) {
+      case "purgeuser": process_admin_purgeuser($usertopurge,$con); break;
+      case "purgeuser4real": process_admin_purgeuser4real($usertopurge,$con,$has_error,$err_msg); break;
+      case "scrubuser": process_admin_scrubuser($usertopurge,$con); break;
+      case "scrubuser4real": process_admin_scrubuser4real($usertopurge,$con,$has_error,$err_msg); break;
       default: break;
     }
   }
 }
 
-function process_admin_purgeuser() {
-  $usertopurge = $_REQUEST["userid"];
+// This can be removed from the backend - no forms or any user interaction on the backend
+/*
+function process_admin_purgeuser($usertopurge,$con) {
   echo "<br />";
   echo "<center>";
   echo "  <font color='red'>";
@@ -116,27 +112,29 @@ function process_admin_purgeuser() {
   echo "  <br />";
   echo "</center>";
 }
+*/
 
-function process_admin_purgeuser4real() {
-  $usertopurge = $_REQUEST["userid"];
-  $resultcode = db_purge_user_by_id($usertopurge);
-  echo "<br />";
-  echo "<center>";
+function process_admin_purgeuser4real($usertopurge,$con,&$has_error,&$err_msg) {
+  $resultcode = db_purge_user_by_id($usertopurge,$con,$has_error,$err_msg);
+  if (!$has_error) {
   if($resultcode == 0) {
-    echo "  <b>Warning: User ID:".$usertopurge." could not be found in the databases.</b><br/>";
+	$has_error = TRUE;
+	$err_msg = "User ID:".$usertopurge." could not be found in the databases";
   } else if($resultcode > 1) {
-    echo "  <b>Warning: Multiple results for ID:".$usertopurge.". Did not delete anything. Please check the DB.</b><br/>";
+	$has_error = TRUE;
+	$err_msg = "Multiple results for ID::".$usertopurge.". Did not delete anything. Please check the DB.";
   } else if($resultcode == 1) {
-    echo "  <b>User ID:".$usertopurge." has been successfully purged.</b><br/>";
+
   } else {
-    echo "  <b>CATASTROPHIC FAILURE: Negative number of users. Something really horrible just happened.</b><br/>";
+	$has_error = TRUE;
+	$err_msg = "CATASTROPHIC FAILURE: Negative number of users. Something really horrible just happened";
   }
-  echo "  <br />";
-  echo "</center>";
+  }
 }
 
-function process_admin_scrubuser() {
-  $usertopurge = $_REQUEST["userid"];
+// This can be removed from the backend as well
+/*
+function process_admin_scrubuser($usertopurge,$con) {
   echo "<br />";
   echo "<center>";
   echo "  <b>You are scrubbing the user ID:".$usertopurge.".<br/>";
@@ -149,23 +147,32 @@ function process_admin_scrubuser() {
   echo "  <br />";
   echo "</center>";
 }
+*/
 
-function process_admin_scrubuser4real() {
-  $usertopurge = $_REQUEST["userid"];
-  $resultcode = db_scrub_user_by_id($usertopurge);
-  echo "<br />";
-  echo "<center>";
+function process_admin_scrubuser4real($usertopurge,$con,&$has_error,&$err_msg) {
+  $resultcode = db_scrub_user_by_id($usertopurge,$con,$has_error,$err_msg);
+  if (!$has_error) {
   if($resultcode == 0) {
-    echo "  <b>Warning: User ID:".$usertopurge." could not be found in the databases.</b><br/>";
+	$has_error = TRUE;
+	$err_msg = "User ID:".$usertopurge." could not be found in the databases";
   } else if($resultcode > 1) {
-    echo "  <b>Warning: Multiple results for ID:".$usertopurge.". Did not delete anything. Please check the DB.</b><br/>";
+	$has_error = TRUE;
+	$err_msg = "Multiple results for ID::".$usertopurge.". Did not delete anything. Please check the DB.";
   } else if($resultcode == 1) {
-    echo "  <b>User ID:".$usertopurge." has been successfully scrubbed.</b><br/>";
+
   } else {
-    echo "  <b>CATASTROPHIC FAILURE: Negative number of users. Something really horrible just happened.</b><br/>";
+	$has_error = TRUE;
+	$err_msg = "CATASTROPHIC FAILURE: Negative number of users. Something really horrible just happened";
   }
-  echo "  <br />";
-  echo "</center>";
+  }
 }
+
+$json['has_error'] = $has_error;
+
+if ($has_error) {
+  $json['err_msg'] = $err_msg;
+}
+
+echo json_encode($json);
 
 ?>

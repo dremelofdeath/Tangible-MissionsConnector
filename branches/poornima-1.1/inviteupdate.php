@@ -7,24 +7,35 @@
 
 include_once 'common.php';
 
-$fb = cmc_startup($appapikey, $appsecret,0);
-$fbid = get_user_id($fb);
-//$fbid = $fb->require_login("publish_stream");
+$con = arena_connect();
 
-if (!empty($_GET)) {
+$saferequest = cmc_safe_request_strip();
+$has_error = FALSE;
+$err_msg = '';
 
-$tripid = $_GET['tripid'];
-$isadmin = $_GET['admin'];
+if (array_key_exists('tripid', $saferequest) && array_key_exists('fbid', $saferequest) && array_key_exists('isadmin', $saferequest) && array_key_exists('type', $saferequest)) {
+  // invitation ids, tripid and facebook userid should be provided
+  $isadmin = $saferequest['isadmin'];
+  $fbid = $saferequest['fbid'];
+  $tripid = $saferequest['tripid'];
+  $membertype = $saferequest['type'];
+} 
+else {
+  // error case: all needed variables are not defined
+  $has_error = TRUE;
+  $err_msg = "Required parameters not defined.";
+}
 
-$sql = 'select * from tripmembers where ';
+$json = array();
 
-$sql = 'insert into tripmembers (userid, tripid, isadmin, invited, accepted, datejoined) VALUES ("'.$fbid.'","'.$tripid.'","'.$isadmin.'","1","1","'.$today.'")';
+if (!$has_error) {
 
-//echo $sql.'<br >';
+$sql = 'insert into tripmembers (userid, tripid, isadmin, invited, accepted, type, datejoined) VALUES ("'.$fbid.'","'.$tripid.'","'.$isadmin.'","1","1","'.$membertype.'","'.$today.'")';
 
-$result = mysql_query($sql);
+$result = mysql_query($sql,$con);
 
-
-echo "<fb:redirect url='welcome.php' />";
+if (!$result) {
+	setjsonmysqlerror($has_error,$err_msg,$sql);
+}
 
 }

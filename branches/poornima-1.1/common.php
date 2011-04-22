@@ -2,52 +2,8 @@
 require 'facebook/facebook.php';
 include_once 'config.php';
 
-function echo_dashboard($fbid,$appadminids) {
-  echo '<fb:dashboard>';
-  echo '  <fb:action href="index.php">Home</fb:action>';
-  $adminlink = 0;
-  for ($i=0;$i<count($appadminids);$i++) {
-    if ($appadminids[$i] == $fbid) {
-      $adminlink = 1;
-      continue 1;
-    }
-  }
-  if ($adminlink) {
-    echo '  <fb:action href="admin.php"><b>Admin</b></fb:action>';
-  }
-
-  echo '  <fb:help href="about.php">Contact Us</fb:action>';
-  echo '  <fb:help href="help.php">Help & FAQ</fb:action>';
-  echo ' <fb:help href="donate.php">Donate</fb:action>';
-
-  //check if a profile already exists
-  $sql = 'select * from users where userid="'.$fbid.'"';
-  if ($result = mysql_query($sql)) {
-    $numrows = mysql_num_rows($result);
-    if ($numrows > 0) {
-      while ($row = mysql_fetch_array($result,MYSQL_ASSOC)) {
-        $isreceiver = $row['isreceiver'];
-        if ($isreceiver) {
-          echo '  <fb:create-button href="makeprofile.php?type=mission&update=1&edit=1">';
-          echo '    Edit your Christian Missions Connector Profile';
-          echo '  </fb:create-button>';
-        } else {
-          echo '  <fb:create-button href="makeprofile.php?type=volunteer&update=1&edit=1">';
-          echo '    Edit your Christian Missions Connector Profile';
-          echo '  </fb:create-button>';
-        }
-      }
-    } else {
-      echo '  <fb:create-button href="new.php">';
-      echo '    Create your Christian Missions Connector Profile';
-      echo '  </fb:create-button>';
-    }
-  } else {
-    echo "SQL Error ".mysql_error()." ";
-  }
-  echo '</fb:dashboard>';
-}
-
+// This function is not needed in the new backend
+/*
 // function to display profile picture
 function displayprofilepic($facebook,$fbid) {
 
@@ -72,35 +28,10 @@ function displayprofilepic($facebook,$fbid) {
 //link to the orignal picture in  the array (key = src_big)
 
 }
+*/
 
 // here for reference because I have no idea what it does --zack <3
 //$tabstring="<fb:tabs><fb:tab-item href='http://apps.facebook.com/missionsconnector/index.php' title='Invite'/><fb:tab-item href='http://apps.facebook.com/missionsconnector/searchform.php' title='Find New Connections'/><fb:tab-item href='http://apps.facebook.com/missionsconnector//profile.php?id='".$profileid."' title='My Profile'/><fb:tab-item href='http://apps.facebook.com/missionsconnector//mynetwork.php' title='People in My Network'/><fb:tab-item href='http://apps.facebook.com/missionsconnector//trips.php' title='My Trips'/></fb:tabs>";
-
-function echo_tabbar($appadminids,$fbid) {
-  echo '<fb:tabs>';
-  /*
-  $adminlink = 0;
-  for ($i=0;$i<count($appadminids);$i++) {
-  if ($appadminids[$i] == $fbid) {
-    $adminlink = 1;
-    continue 1;
-  }
-  }
-  if ($adminlink) {
-  echo '  <fb:tab-item href="admin.php" title="Admin"/>';
-  }
-  */
-  echo '  <fb:tab-item href="welcome.php" title="Welcome!"/>';
-  echo '  <fb:tab-item href="profile.php" title="My Profile"/>';
-  echo '  <fb:tab-item href="searchform.php" title="Find New Connections"/>';
-  echo '  <fb:tab-item href="searchtrips.php" title="View Upcoming Trips"/>';
-  echo '  <fb:tab-item href="mynetwork.php" title="People in My Network"/>';  
-  echo '  <fb:tab-item href="invite.php" title="Invite"/>';
-  //echo '  <fb:tab-item href="help.php" title="Help & FAQ"/>';
-  //echo '  <fb:tab-item href="donate.php" title="Donate"/>';
-  echo ' <fb:tab-item href="tripoptions.php" title = "Manage Trips"/>';
-  echo '</fb:tabs>';
-}
 
 function arena_connect() {
   $host = "localhost";
@@ -136,17 +67,27 @@ function db_check_user($fbid) {
   return $has_used_before;
 }
 
+function setjsonmysqlerror(&$has_error,&$err_msg,$query) {
+ 	$has_error = TRUE;
+	$err_msg = "Can't query (query was '$query'): " . mysql_error();
+}
+
 // Removes every trace of a given user's information from the Tangible servers.
 // param $userid: the Facebook user ID of the user to purge.
 // Returns the number of users that were found. Only deletes user information if 
 // the query is unambiguous (i.e., there is only one row found that matches the 
 // user ID. It will not delete anything if there would be more than one 
 // deletion.
-function db_purge_user_by_id($userid) {
+function db_purge_user_by_id($userid,$con,&$has_error,&$err_msg) {
   // First, let's see if the user exists before we try anything at all.
   $query = "SELECT userid FROM users WHERE userid='".$userid."'";
-  $result = mysql_query($query) or die(mysql_error());
+  $result = mysql_query($query,$con);
 
+  if (!$result) {
+	setjsonmysqlerror($has_error,$err_msg,$query);
+	return -1;
+  }
+  else {
   $num_userids = mysql_num_rows($result);
 
   $ret = -1;
@@ -161,32 +102,56 @@ function db_purge_user_by_id($userid) {
     // only one result! burn him!
     // note: it must happen in this order to satisfy foreign key contraints
     $query = "DELETE FROM countriesselected WHERE userid='".$userid."'";
-    mysql_query($query) or die(mysql_error());
+    $result = mysql_query($query,$con);
+    if (!$result)
+	setjsonmysqlerror($has_error,$err_msg,$query);
     $query = "DELETE FROM durationsselected WHERE userid='".$userid."'";
-    mysql_query($query) or die(mysql_error());
+    $result = mysql_query($query,$con);
+    if (!$result)
+	setjsonmysqlerror($has_error,$err_msg,$query);
     $query = "DELETE FROM hits WHERE userid='".$userid."'";
-    mysql_query($query) or die(mysql_error());
+    $result = mysql_query($query,$con);
+    if (!$result)
+	setjsonmysqlerror($has_error,$err_msg,$query);
     $query = "DELETE FROM notifications WHERE id='".$userid."'";
-    mysql_query($query) or die(mysql_error());
+    $result = mysql_query($query,$con);
+    if (!$result)
+	setjsonmysqlerror($has_error,$err_msg);
     $query = "DELETE FROM regionsselected WHERE userid='".$userid."'";
-    mysql_query($query) or die(mysql_error());
+    $result = mysql_query($query,$con);
+    if (!$result)
+	setjsonmysqlerror($has_error,$err_msg,$query);
     $query = "DELETE FROM skillsselected WHERE userid='".$userid."'";
-    mysql_query($query) or die(mysql_error());
+    $result = mysql_query($query,$con);
+    if (!$result)
+	setjsonmysqlerror($has_error,$err_msg,$query);
     $query = "DELETE FROM tripmembers WHERE userid='".$userid."'";
-    mysql_query($query) or die(mysql_error());
+    $result = mysql_query($query,$con);
+    if (!$result)
+	setjsonmysqlerror($has_error,$err_msg,$query);
     $query = "DELETE FROM trips WHERE creatorid='".$userid."'";
-    mysql_query($query) or die(mysql_error());
+    $result = mysql_query($query,$con);
+    if (!$result)
+	setjsonmysqlerror($has_error,$err_msg,$query);
     $query = "DELETE FROM tripwallinvites WHERE userid='".$userid."'";
-    mysql_query($query) or die(mysql_error());
+    $result = mysql_query($query,$con);
+    if (!$result)
+	setjsonmysqlerror($has_error,$err_msg,$query);
     $query = "DELETE FROM usstatesselected WHERE userid='".$userid."'";
-    mysql_query($query) or die(mysql_error());
+    $result = mysql_query($query,$con);
+    if (!$result)
+	setjsonmysqlerror($has_error,$err_msg,$query);
     $query = "DELETE FROM users WHERE userid='".$userid."'";
-    mysql_query($query) or die(mysql_error());
+    $result = mysql_query($query,$con);
+    if (!$result)
+	setjsonmysqlerror($has_error,$err_msg,$query);
     $ret = 1;
   } else {
-    die("PANIC: Something horrible is happening. Negative number of rows returned.");
+	$has_error = TRUE;
+	$err_msg = "Something horrible is happening. Negative number of rows returned";
   }
   return $ret;
+   }
 }
 
 // Removes every trace of a given user's information from the Tangible servers.
@@ -195,11 +160,16 @@ function db_purge_user_by_id($userid) {
 // the query is unambiguous (i.e., there is only one row found that matches the 
 // user ID. It will not delete anything if there would be more than one 
 // deletion.
-function db_scrub_user_by_id($userid) {
+function db_scrub_user_by_id($userid,$con,&$has_error,&$err_msg) {
   // First, let's see if the user exists before we try anything at all.
   $query = "SELECT userid FROM users WHERE userid='".$userid."'";
-  $result = mysql_query($query) or die(mysql_error());
+  $result = mysql_query($query,$con);
 
+  if (!$result) {
+	setjsonmysqlerror($has_error,$err_msg,$query);
+	return -1;
+  }
+  else {
   $num_userids = mysql_num_rows($result);
 
   $ret = -1;
@@ -213,25 +183,39 @@ function db_scrub_user_by_id($userid) {
   } else if($num_userids == 1) {
     // only one result! burn him!
     $query = "DELETE FROM countriesselected WHERE userid='".$userid."'";
-    mysql_query($query) or die(mysql_error());
+    $result = mysql_query($query,$con);
+    if (!$result)
+	setjsonmysqlerror($has_error,$err_msg,$query);
     $query = "DELETE FROM durationsselected WHERE userid='".$userid."'";
-    mysql_query($query) or die(mysql_error());
+    $result = mysql_query($query,$con);
+    if (!$result)
+	setjsonmysqlerror($has_error,$err_msg,$query);
     $query = "DELETE FROM regionsselected WHERE userid='".$userid."'";
-    mysql_query($query) or die(mysql_error());
+    $result = mysql_query($query,$con);
+    if (!$result)
+	setjsonmysqlerror($has_error,$err_msg,$query);
     $query = "DELETE FROM skillsselected WHERE userid='".$userid."'";
-    mysql_query($query) or die(mysql_error());
+    $result = mysql_query($query,$con);
+    if (!$result)
+	setjsonmysqlerror($has_error,$err_msg,$query);
     $query = "DELETE FROM usstatesselected WHERE userid='".$userid."'";
-    mysql_query($query) or die(mysql_error());
+    $result = mysql_query($query,$con);
+    if (!$result)
+	setjsonmysqlerror($has_error,$err_msg,$query);
 		$query = "UPDATE LOW_PRIORITY users ".
 			       "SET name=NULL, organization=NULL, isreceiver=NULL, state=NULL, city=NULL, zipcode=NULL, ".
 						 "phone=NULL, fbphone=NULL, email=NULL, missionsexperience=NULL, religion=NULL,".
 						 "aboutme=NULL, website=NULL, partnersite=NULL WHERE userid='".$userid."' LIMIT 1";
-    mysql_query($query) or die(mysql_error());
+    $result = mysql_query($query,$con);
+    if (!$result)
+	setjsonmysqlerror($has_error,$err_msg,$query);
     $ret = 1;
   } else {
-    die("PANIC: Something horrible is happening. Negative number of rows returned.");
+	$has_error = TRUE;
+	$err_msg = "Something horrible is happening. Negative number of rows returned";
   }
   return $ret;
+  }
 }
 
 /**
@@ -270,26 +254,8 @@ function get_name_from_fb_using_curl($fbid) {
 
 }
 
-
-function get_user_id($responseobj) {
-// During actual implementation, $somejson will come from frontend
-// through either get or post
-$mydataobj = json_decode($responseobj);
-
-// Now process the json object
-if ($mydataobj->{'response'}->{'hasError'}) {
-   // have appropriate response if there is an error
-   echo 'Error <br />';
-   $fbid = null;
-}
-else {
-   $fbid = $mydataobj->{'response'}->{'uid'};
-}
-
-return $fbid;
-
-}
-
+// There is no need for this function in the new backend. 
+/*
 // Make sure to call this function at the top of every CMC page. It will return 
 // the application's Facebook object.
 function cmc_startup($appapikey, $appsecret,$val) {
@@ -317,52 +283,19 @@ function cmc_startup($appapikey, $appsecret,$val) {
 
   $fbid = get_user_id($somejson);
 
-  /*
+  
   // During actual implementation, $somejson will come from frontend
   // through either get or post
-  $mydataobj = json_decode($somejson);
+  //$mydataobj = json_decode($somejson);
 
   // Now process the json object
-  if ($mydataobj->{'response'}->{'hasError'}) {
+  //if ($mydataobj->{'response'}->{'hasError'}) {
     // have appropriate response if there is an error
-    echo 'Error <br />';
-  }
-  else { 
-    $fbid = $mydataobj->{'response'}->{'uid'};
-  }
-  */
-
-  /* 
-  $params  =   array(
-      'method'  => 'users.hasapppermission',
-      'uids'    => $fbid,
-      'canvas'     => 1,
-      'fbconnect'  => 0,
-      'next'       => URL_CANVAS,
-      'cancel_url' => 'http://www.facebook.com/',
-      'req_perms'  => 'publish_stream, status_update, offline_acces',
-      'callback'=> ''
-   );
-
-  if ($facebook->api($params)) {
-    echo 'User has app permission <br />';
-  }
-  else {
-    echo 'User does not have app permission <br />';
-  }
-  */
-  ?>
-
-  <script type="text/javascript">
-  if (FB.Facebook.apiClient.users_hasAppPermission('publish_stream')) {
-    document.write("<b>User has publish permissions</b>");
-  }
-  </script>
-
-  <?php
-  //if ($facebook->getApiUrl('users.hasapppermission'))
-  //  echo 'User has app permission <br />';
-  //$fbid = get_user_id($facebook);
+  //  echo 'Error <br />';
+  //}
+  //else { 
+  //  $fbid = $mydataobj->{'response'}->{'uid'};
+ // }
 
   // create app admin ids - facebook ids of people who have admin rights for this application
   $appadminids = array();
@@ -377,13 +310,7 @@ function cmc_startup($appapikey, $appsecret,$val) {
     echo_tabbar($appadminids,$fbid);
     if ($val==1) {
       // display profile picture only if $val is 1 
-
       echo '<a href="http://www.facebook.com/profile.php?id='.$fbid.'"><img src="http://graph.facebook.com/'.$fbid.'/picture" /></a>';
-
-      //echo '<img src="http://graph.facebook.com/'.$fbid.'/picture">';
-      //echo "<fb:profile-pic uid=".$fbid." linked='true' /> <br /><fb:name uid=".$fbid." linked='true' shownetwork='true' /><br/><br/>";  
-      //$profile_pic =  "http://graph.facebook.com/".$fbid."/picture";
-      //echo "<img src=\"" . $profile_pic . "\" /><br />";
     }
   }
   //displayprofilepic($facebook,$fbid);
@@ -392,6 +319,7 @@ function cmc_startup($appapikey, $appsecret,$val) {
 
   return $facebook;
 }
+*/
 
 ?>
 

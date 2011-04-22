@@ -32,8 +32,7 @@ if (isset($tripid)) {
 $sql = 'select * from tripmembers where tripid="'.$tripid.'"';
 $result = mysql_query($sql,$con);
 if (!$result) {
-	$has_error = TRUE;
-	$err_msg = "Can't query (query was '$query'): " . mysql_error();
+	setjsonmysqlerror($has_error,$err_msg,$sql);
 }
 else {
 	$numrows = mysql_num_rows($result);
@@ -46,8 +45,7 @@ else {
 		$result = mysql_query($sql,$con);
 		
 		if (!$result) {
-			$has_error = TRUE;
-			$err_msg = "Can't query (query was '$query'): " . mysql_error();
+			setjsonmysqlerror($has_error,$err_msg,$sql);
 		}
 		else {
 
@@ -55,8 +53,7 @@ else {
 		$sql = 'select * from trips where id="'.$tripid.'"';
 		$result = mysql_query($sql,$con);
 		if (!$result) {
-			$has_error = TRUE;
-			$err_msg = "Can't query (query was '$query'): " . mysql_error();
+			setjsonmysqlerror($has_error,$err_msg,$sql);
 		}
 		else {
 			$row = mysql_fetch_array($result);
@@ -66,8 +63,7 @@ else {
 			$sql = 'update trips set numpeople="'.$numpeople.' where id="'.$tripid.'"';
 			$result = mysql_query($sql,$con);
 			if (!$result) {
-				$has_error = TRUE;
-				$err_msg = "Can't query (query was '$query'): " . mysql_error();
+				setjsonmysqlerror($has_error,$err_msg,$sql);
 			}
 		}
 		}
