@@ -33,6 +33,8 @@ if (!$result) {
 else {
 
   $num_rows = mysql_num_rows($result);
+
+  if ($num_rows > 0) {
   while($row= mysql_fetch_array($result)) {
     $name = $row['tripname'];
 	if (!empty($name))
@@ -59,7 +61,7 @@ else {
 		if (!empty($email))
 			$json['email'] = $email;
 		$web=$row['website'];		
-		$dur=$row['duration'];
+		$dur=$row['durationid'];
 		if (!empty($dur))
 			$json['duration'] = $dur;
 		$stage=$row['isinexecutionstage'];
@@ -121,6 +123,11 @@ if ($numrows>0) {
 else {
 	$json['member'] = false;
 }
+}
+}
+else {
+  $has_error = TRUE;
+  $err_msg = "No trip identified";
 }
 
 }

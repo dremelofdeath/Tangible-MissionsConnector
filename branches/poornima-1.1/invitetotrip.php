@@ -200,11 +200,17 @@ if (!$has_error) {
    }
    else {
 	$row = mysql_fetch_array($result);
+  if (!empty($row['tripname']))
 	$json['tripname'] = $row['tripname'];
+  if (!empty($row['tripdesc']))
 	$json['tripdesc'] = $row['tripdesc'];
+  if (!empty($row['destination']))
 	$json['destination'] = $row['destination'];
+  if (!empty($row['departure']))
 	$json['departure'] = $row['departure'];
+  if (!empty($row['returning']))
 	$json['returning'] = $row['returning'];
+  if (!empty($row['religion']))
 	$json['religion'] = $row['religion'];
    }
 

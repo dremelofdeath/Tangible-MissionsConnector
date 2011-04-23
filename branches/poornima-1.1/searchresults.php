@@ -492,26 +492,34 @@ else {
 		// Find the distances and order them in ascending order
 		if (isset($myzipcode)) {
 		$myzipinfo = getZipInfo($myzipcode,$has_error,$err_msg,$con);
+    $dists = array();
+    $goodfriends = array();
+
 		for ($i=0;$i<count($zipnow);$i++) {
 		    // if zipcode is not known, make the distance very big
-			if ($zipnow[$i] == 0)
-				$dists[$i] = 1000000000;
+			if ($zipnow[$i] == 0) {
+				$dists[] = 1000000000;
+        $goodfriends[] = $friends[$i];
+      }
 			else {
 
 			$otherzipinfo = getZipInfo($zipnow[$i],$has_error,$err_msg,$con);
-			$dists[$i] = haversine($myzipinfo->latitude,$myzipinfo->longitude,$otherzipinfo->latitude,$otherzipinfo->longitude);
+      if ($otherzipinfo) {
+			  $dists[] = haversine($myzipinfo->latitude,$myzipinfo->longitude,$otherzipinfo->latitude,$otherzipinfo->longitude);
+        $goodfriends[] = $friends[$i];
+      }
 			}
 		}	
 
 	        // now sort the results in ascending order according to distance	
 		if (!empty($dists))
-			array_multisort($dists, SORT_ASC, SORT_NUMERIC,$friends);
+			array_multisort($dists, SORT_ASC, SORT_NUMERIC,$goodfriends);
 
 		}	
 	
 	
 		$json['searchids'] = array();
-    		foreach ($friends as $currentfriend){
+    		foreach ($goodfriends as $currentfriend){
       			if (($currentfriend > 0) && ($currentfriend != $fbid)) {
 	  			$json['searchids'][] = $currentfriend;
      			}
@@ -549,31 +557,38 @@ else {
     	if($num_rows==0){
 		// nothing to display
     	}
-	else {		  
-		  
+ 	    else {		  
+
 		// the friends list needs to be sorted according to distance -- new version
 		// We now have the user zip code and the list of search zip codes
 		// Find the distances and order them in ascending order
 		if (isset($myzipcode)) {
 		$myzipinfo = getZipInfo($myzipcode,$has_error,$err_msg,$con);
+    $dists = array();
+    $goodfriends = array();
+
 		for ($i=0;$i<count($zipnow);$i++) {
 		    // if zipcode is not known, make the distance very big
-			if ($zipnow[$i] == 0)
-				$dists[$i] = 1000000000;
+			if ($zipnow[$i] == 0) {
+				$dists[] = 1000000000;
+        $goodfriends[] = $friends[$i];
+      }
 			else {
 
 			$otherzipinfo = getZipInfo($zipnow[$i],$has_error,$err_msg,$con);
-			$dists[$i] = haversine($myzipinfo->latitude,$myzipinfo->longitude,$otherzipinfo->latitude,$otherzipinfo->longitude);
+      if ($otherzipinfo) {
+			$dists[] = haversine($myzipinfo->latitude,$myzipinfo->longitude,$otherzipinfo->latitude,$otherzipinfo->longitude);
+      $goodfriends[] = $friends[$i];
+      }
 			}
 		}
 	        // now sort the results in ascending order according to distance	
 		if (!empty($dists))
-			array_multisort($dists, SORT_ASC, SORT_NUMERIC,$friends);
-
+			array_multisort($dists, SORT_ASC, SORT_NUMERIC,$goodfriends);
 		}	
 		
 		$json['searchids'] = array();
-          	foreach ($friends as $currentfriend) {
+          	foreach ($goodfriends as $currentfriend) {
 	    		if (($currentfriend > 0) && ($currentfriend!=$fbid)) {
 				$json['searchids'][] = $currentfriend;
 	    		}

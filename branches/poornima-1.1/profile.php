@@ -17,16 +17,14 @@ $saferequest = cmc_safe_request_strip();
 $has_error = FALSE;
 $err_msg = '';
 
-if (array_key_exists('userid', $saferequest) && array_key_exists('fbid', $saferequest) && array_key_exists('type', $saferequest)) {
+if (array_key_exists('userid', $saferequest) && array_key_exists('fbid', $saferequest)) {
   // invitation ids, tripid and facebook userid should be provided
   $showuserid = $saferequest['userid'];
   $fbid = $saferequest['fbid'];
-  $type = $saferequest['type'];
 } 
-else if (array_key_exists('fbid', $saferequest) && array_key_exists('type', $saferequest)) {
+else if (array_key_exists('fbid', $saferequest)) {
   $fbid = $saferequest['fbid'];
   $showuserid = $fbid;
-  $type = $saferequest['type'];
 }
 else {
   // error case: all needed variables are not defined
@@ -36,6 +34,8 @@ else {
 
 $json = array();
 
+if (!$has_error) {
+
 $sql = 'select * from users where userid="'.$showuserid.'"';
 $result = mysql_query($sql,$con);
 
@@ -44,19 +44,7 @@ if(!$result) {
 }
 else {
 
-$is_volunteer = false;
-$is_mission = false;
-$is_trip = false;
-
-if(isset($type)) {
-  if($type == "volunteer") $is_volunteer = true;
-  if($type == "mission") $is_mission = true;
-  if($type == "trip") {
-    $is_trip = true;
-  }
-}
-
-function cmc_profile_render_id_join($title2,$title,$desc, $descdb, $selecteddb, $fbid, &$msg, $is_trip,&$k,&$has_error,&$err_msg,&$json,$con) {
+function cmc_profile_render_id_join($title2,$title,$desc, $descdb, $selecteddb, $fbid, &$msg, &$k,&$has_error,&$err_msg,&$json,$con) {
   $sql = "SELECT ".$desc." FROM ".$descdb.
      " JOIN ".$selecteddb." ON ".$descdb.".id = ".$selecteddb.".id".
      " WHERE ".$selecteddb.".userid='".$fbid."'";
@@ -77,10 +65,6 @@ function cmc_profile_render_id_join($title2,$title,$desc, $descdb, $selecteddb, 
   }
   
   $i++;
-  
-      if ($is_trip) {
-  $msg = $msg.' '.$row[$desc];
-      }
 	  
 	  $json[$title2][$title][] = $row[$desc];
     }
@@ -140,15 +124,12 @@ if(mysql_num_rows($result) != 0) {
   
   } 
 
+  if (!empty($name))
+	$json['name'] = $name;
+
   if ($isleader == 1) {
-    if ($showuserid==$fbid)
-    $volstring = " are leading missions";
-    else
     $volstring = " is leading missions";
   } else {
-    if ($showuserid==$fbid)
-    $volstring = " are a volunteer";
-    else
     $volstring = " is a volunteer";   
   }
   $json['volstring'] = $volstring;
@@ -185,19 +166,19 @@ if(mysql_num_rows($result) != 0) {
   cmc_profile_render_skills("Spiritual Skills", '3', $showuserid,$has_error,$err_msg,$json,$con);
   
   $pp=-1;
-  cmc_profile_render_id_join("","State",'longname', 'usstates', 'usstatesselected', $showuserid, $message, $is_trip,$pp,$has_error,$err_msg,$json,$con);
+  cmc_profile_render_id_join("","State",'longname', 'usstates', 'usstatesselected', $showuserid, $message, $pp,$has_error,$err_msg,$json,$con);
 
   if (!empty($city)) {
 	$json['city'] = $city;
   }
   
   $kk=0;
-  cmc_profile_render_id_join("Geographic Areas of Interest","Regions",'name', 'regions', 'regionsselected', $showuserid, $message, $is_trip,$kk,$has_error,$err_msg,$json,$con);
+  cmc_profile_render_id_join("Geographic Areas of Interest","Regions",'name', 'regions', 'regionsselected', $showuserid, $message, $kk,$has_error,$err_msg,$json,$con);
 
-  cmc_profile_render_id_join("Geographic Areas of Interest","Countries",'longname', 'countries', 'countriesselected', $showuserid, $message, $is_trip,$kk,$has_error,$err_msg,$json,$con);
+  cmc_profile_render_id_join("Geographic Areas of Interest","Countries",'longname', 'countries', 'countriesselected', $showuserid, $message, $kk,$has_error,$err_msg,$json,$con);
 
   $pp=-1;
-  cmc_profile_render_id_join("","Preferred Duration of Mission Trips",'name', 'durations', 'durationsselected', $showuserid, $message, $is_trip,$pp,$has_error,$err_msg,$json,$con);
+  cmc_profile_render_id_join("","Preferred Duration of Mission Trips",'name', 'durations', 'durationsselected', $showuserid, $message, $pp,$has_error,$err_msg,$json,$con);
 
   $trips = array();
   $sql = "select tripid from tripmembers where userid='".$showuserid."'";
@@ -225,6 +206,8 @@ if(mysql_num_rows($result) != 0) {
 } else {
   		$has_error = TRUE;
 		$err_msg = "User does not have a CMC profile";
+}
+
 }
 
 }
