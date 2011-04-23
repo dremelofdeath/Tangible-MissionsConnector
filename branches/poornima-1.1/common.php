@@ -1,6 +1,5 @@
 <?php
 require 'facebook/facebook.php';
-include_once 'config.php';
 
 // This function is not needed in the new backend
 /*
