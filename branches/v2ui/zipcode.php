@@ -2,6 +2,8 @@
 
 include "../poornima/common.php";
 
+header('Content-type: application/json');
+
 $con = arena_connect();
 
 $saferequest = cmc_safe_request_strip();
