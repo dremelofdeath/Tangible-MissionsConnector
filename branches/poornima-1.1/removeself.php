@@ -21,22 +21,42 @@ if (array_key_exists('tripid', $saferequest) && array_key_exists('fbid', $safere
 else {
   // error case: neither required variable is defined
   $has_error = TRUE;
-  $err_msg = "Neither required parameters was defined.";
+  $err_msg = "Required parameters not defined.";
 }
 
 $json = array();
 
 if (!$has_error) {
+
+// check the existence of the trip
+$sql = 'select * from trips where id="'.$tripid.'"';
+$result = mysql_query($sql,$con);
+if (!$result) {
+  setjsonmysqlerror($has_error,$err_msg,$sql);
+}
+else {
+
+ $numrows = mysql_num_rows($result);
+
+ if ($numrows == 0) {
+    $has_error = TRUE;
+    $err_msg = "No Trip exists with the specified ID";
+ }
+ else {
 if (isset($tripid)) {
 
-$sql = 'select * from tripmembers where tripid="'.$tripid.'"';
+$sql = 'select * from tripmembers where tripid="'.$tripid.'" and userid="'.$fbid.'"';
 $result = mysql_query($sql,$con);
 if (!$result) {
 	setjsonmysqlerror($has_error,$err_msg,$sql);
 }
 else {
 	$numrows = mysql_num_rows($result);
-	if ($numrows==1) {
+  if ($numrows==0) {
+		$has_error = TRUE;
+		$err_msg = "You are not a member of this trip";
+  }
+  else if ($numrows==1) {
 		$has_error = TRUE;
 		$err_msg = "You are the the only person on this trip, delete trip instead";
 	}
@@ -68,6 +88,9 @@ else {
 		}
 		}
 	}
+}
+
+}
 }
 
 }

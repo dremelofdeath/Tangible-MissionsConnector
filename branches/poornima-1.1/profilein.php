@@ -36,8 +36,13 @@ if ($myobj["profiletype"]==1) {
 }
 else if ($myobj["profiletype"] == 2) {
  $is_trip = 1;
- if (isset($myobj['membertype']))
+ if (isset($myobj['membertype'])) {
  	$membertype = $myobj['membertype'];
+  if (($membertype < 1) || ($membertype > 3)) {
+    $has_error = TRUE;
+    $err_msg = "Member Type can be 1 or 2 or 3";
+  }
+ }
  else
 	$membertype = 1;
 
@@ -50,7 +55,7 @@ else {
 if (($isreceiver == 0) || ($isreceiver==1)) {
 	if (isset($myobj['country'])) {
 		if ((!isset($myobj['zip'])) && (!strcmp($myobj['country'],'United States'))) {
-			$has_error = TRUE;
+			  $has_error = TRUE;
   			$err_msg = "If country is USA, zip code is a required field";
 		}
 	}
@@ -70,15 +75,17 @@ if ($myobj["toggle"] == 1) {
    $sql = 'select * from users where userid="'.$fbid.'"';
    $result = mysql_query($sql,$con);
    if (!$result) {
- 	setjsonmysqlerror($has_error,$err_msg,$sql);
+ 	  setjsonmysqlerror($has_error,$err_msg,$sql);
    }
-   else {  
+   else {
+   $numrows = mysql_num_rows($result);
+   if ($numrows > 0) {
    $row = mysql_fetch_array($result);
    $misreceiver = $row['isreceiver'];
    if ($misreceiver == 1) {
    	$newrecr = 0;
-	$sql2 = 'UPDATE users SET isreceiver="'.$newrecr.'" where userid="'.$fbid.'"';
-	$result = mysql_query($sql2,$con);
+	  $sql2 = 'UPDATE users SET isreceiver="'.$newrecr.'" where userid="'.$fbid.'"';
+	  $result = mysql_query($sql2,$con);
    	if (!$result) {
  		setjsonmysqlerror($has_error,$err_msg,$sql2);
    	}
@@ -96,6 +103,7 @@ if ($myobj["toggle"] == 1) {
 		$isreceiver = $newrecr;
    }
 
+   }
    }
 }
 }
@@ -883,7 +891,6 @@ $sql = $sql.$sql1.') '.$sql2.')';
 }
 
 //echo 'Main SQL string: '.$sql.'<br />';
-
 
 $result = mysql_query($sql,$con);
 if (!$result) {

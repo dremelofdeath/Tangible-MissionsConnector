@@ -13,11 +13,15 @@ $saferequest = cmc_safe_request_strip();
 $has_error = FALSE;
 $err_msg = '';
 
-if (array_key_exists('tid', $saferequest) && array_key_exists('fbid', $saferequest) && array_key_exists('type', $saferequest)) {
+if (array_key_exists('tripid', $saferequest) && array_key_exists('fbid', $saferequest) && array_key_exists('type', $saferequest)) {
   // both tripid and facebook userid should be provided
-  $tid = $saferequest['tid'];
+  $tid = $saferequest['tripid'];
   $fbid = $saferequest['fbid'];
   $membertype = $saferequest['type'];
+  if (($membertype < 1) || ($membertype > 3)) {
+    $has_error = TRUE;
+    $err_msg = "Trip Member Type can only be 1 or 2 or 3";
+  }
 } else {
   // error case
   $has_error = TRUE;
@@ -39,14 +43,27 @@ if (!$has_error) {
 
 	if ($numrows==0) {
 	// This means user does not have a CMC profile
-	
-	$has_error = TRUE;
+	    $has_error = TRUE;
     	$err_msg = "No CMC Profile";
 	}
 
 	else {
 
+  // check that a trip with tid exists, if not throw an error message
+  $sql = 'select * from trips where id="'.$tid.'"';
+  $result = mysql_query($sql,$con);
+  if (!$result) {
+    setjsonmysqlerror($has_error,$err_msg,$sql);
+  }
+  else {
+  
+  $numrows = mysql_num_rows($result);
 
+  if ($numrows == 0) {
+    $has_error = TRUE;
+    $err_msg = "Trip with the specified ID does not exist";
+  }
+  else {
 	$sql = 'INSERT INTO tripmembers (userid,tripid,isadmin,invited,accepted,type) VALUES ("'.$fbid.'","'.$tid.'","0","1","1","'.$membertype.'")';
 	$result = mysql_query($sql,$con);
 	
@@ -71,7 +88,9 @@ if (!$has_error) {
 		}
 	}
 
+  }
 	}
+  }
 	}
 	}
 }	

@@ -19,6 +19,10 @@ if (array_key_exists('tripid', $saferequest) && array_key_exists('fbid', $safere
   $fbid = $saferequest['fbid'];
   $tripid = $saferequest['tripid'];
   $membertype = $saferequest['type'];
+    if (($membertype < 1) || ($membertype > 3)) {
+          $has_error = TRUE;
+              $err_msg = "Member type can only be 1 or 2 or 3";
+    }
 } 
 else {
   // error case: all needed variables are not defined

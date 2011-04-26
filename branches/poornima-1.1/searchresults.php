@@ -215,6 +215,36 @@ if (isset($searchkeys['dur'])) {
 
 }
 
+function update_searchtables($fbid,$keywords,$stype,$con,&$has_error,&$err_msg) {
+	// The searchtype=1 signifies that it is basic search
+	$sql = 'insert into searches (userid,searchtype) VALUES ("'.$fbid.'","'.$stype.'")';
+	$result = mysql_query($sql,$con);
+	if (!$result) {
+		setjsonmysqlerror($has_error,$err_msg,$sql);
+	}
+	else {
+		$sql2 = 'select max(searchid) as searchid from searches where userid="'.$fbid.'"';
+		$result2 = mysql_query($sql2,$con);
+		if (!$result2) {
+			setjsonmysqlerror($has_error,$err_msg,$sql2);
+		}
+		else {
+		while ($row = mysql_fetch_array($result2, MYSQL_ASSOC)) {
+			$searchid = $row['searchid'] + 0;  
+			break;
+		}
+		// Now insert into searchterms table
+		$sql2 = 'insert into searchterms (searchid,searchquery) VALUES ("'.$searchid.'","'.$keywords.'")';
+		$result2 = mysql_query($sql2,$con);
+		if (!$result2) {
+			setjsonmysqlerror($has_error,$err_msg,$sql2);
+		}
+		}
+		
+	}
+
+}
+
 if (!$has_error) {
 $profileid = $fbid;
 
@@ -449,6 +479,13 @@ else {
 }
 
 }
+
+// if the keywords is empty, store this information into searches tables
+if (!$has_error) {
+  $stype = 1;
+  update_searchtables($fbid,$keywords,$stype,$con,$has_error,$err_msg);
+}
+
 }
 
 }
@@ -526,7 +563,7 @@ else {
 		}
 	
 	}
-
+	
       }
 
       //Volunteers
@@ -664,7 +701,14 @@ else {
 	  
 
 }
-	     
+
+	// store the mysql query information into searches tables
+	if (!$has_error) {
+  $stype = 2;
+  update_searchtables($fbid,$sql,$stype,$con,$has_error,$err_msg);
+
+}
+
 }
 
 }

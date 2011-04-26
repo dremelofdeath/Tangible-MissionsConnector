@@ -33,6 +33,14 @@ if (!$result) {
     setjsonmysqlerror($has_error,$err_msg,$sql);
 }
 else {
+
+  $numrows = mysql_num_rows($result);
+
+  if ($numrows == 0) {
+    $has_error = TRUE;
+    $err_msg = "No Trips to match the tripid";
+  }
+  else {
 	$row = mysql_fetch_array($result,MYSQL_ASSOC);
 	$tripname = $row['tripname'];
 	
@@ -57,6 +65,7 @@ else {
 	else {
     		setjsonmysqlerror($has_error,$err_msg,$sql);
 	}
+  }
 }
 
 }
