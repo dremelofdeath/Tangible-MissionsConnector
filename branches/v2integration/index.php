@@ -229,7 +229,8 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
           newel : true,
           // custom (i.e. undocumented) options here
           //cmc_icon_class : "ui-icon ui-icon-search" // broken.
-          cmc_zipcode_detect : true
+          cmc_zipcode_detect : true,
+          zipcode_target : "api/zipcode.php"
         });
 
         $("#search-tipbar-left .tipbar-link").tipTip({

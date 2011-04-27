@@ -1,6 +1,6 @@
 <?php
 
-include "../poornima/common.php";
+include "common.php";
 
 header('Content-type: application/json');
 
