@@ -23,33 +23,50 @@ $saferequest = cmc_safe_request_strip();
 $has_error = FALSE;
 $err_msg = '';
 
-if (array_key_exists('fbid', $saferequest) && array_key_exists('adv',$saferequest)) {
+/*
+// Used for testing only - should be removed from the final version
+$arr = array ("name"=>"murray");
+$json = json_encode($arr);
+$json = base64_encode($json);
+*/
+
+if (array_key_exists('fbid', $saferequest)) {
   $fbid = $saferequest['fbid'];
-  $adv = $saferequest['adv'];
-  // basic search
-  if ($adv == 0) {
-	if (array_key_exists('keys',$saferequest))
-		$keywords = $saferequest['keys'];
-	else {
-  		$has_error = TRUE;
-  		$err_msg = "Keys not defined for basic search";
-	}
-  }
-  //advanced search
-  else {
-	if (array_key_exists('type',$saferequest) && array_key_exists('searchkeys',$saferequest)) {
-		$type = $saferequest['type'];
-		// The advanced search fields are assumed to be sent from front-end to bank-end in a json-encoded object
-		// It is first json_decoded here, and then used by the code here
-		$searchkeys = json_decode($saferequest['searchkeys']);
+	if (array_key_exists('searchkeys',$saferequest)) {
+		
+  // The search fields are assumed to be sent from front-end to back-end in a json-encoded + base64_encoded object
+  // It is first base64_decoded, then json_decoded here, and then used by the code
+
+  $searchkeys = base64_decode($saferequest['searchkeys']);
+	$searchkeys = json_decode($searchkeys);
+  
+  // The two lines below are also used for testing only - need to be removed in the final version
+  //$searchkeys = base64_decode($json);
+	//$searchkeys = json_decode($searchkeys);
+
+    switch(json_last_error())
+    {
+      case JSON_ERROR_DEPTH:
+         $has_error = TRUE;
+         $err_msg = "Maximum stack depth exceeded";
+         break;
+      case JSON_ERROR_CTRL_CHAR:
+         $has_error = TRUE;
+         $err_msg = "Unexpected control character found";
+          break;
+      case JSON_ERROR_SYNTAX:
+         $has_error = TRUE;
+         $err_msg = "Syntax error, malformed JSON";
+          break;
+      case JSON_ERROR_NONE:
+          break;
+      }
+
 	}
 	else {
   		$has_error = TRUE;
   		$err_msg = "Search type and/or search fields not defined for advanced search";
 	}
-
-  }
-
 }
 else {
   // error case: all needed variables are not defined
@@ -95,6 +112,35 @@ if(mysql_num_rows($query) < 1)
 }
 } //end getZipInfo
 
+function getZipsWithin($zip,$miles,&$dists,&$has_error,&$err_msg,$con) {
+if(($zipInfo = getZipInfo($zip,$has_error,$err_msg,$con)) === FALSE)
+	return FALSE;
+	        
+$sql = "SELECT zipcode, latitude, longitude from zipcodes";
+
+$query = mysql_query($sql,$con);
+if (!$query) {
+	setjsonmysqlerror($has_error,$err_msg,$sql);
+	return FALSE;
+}
+else {
+$dists = array();
+$retval = array();
+$i=0;
+while ($res = mysql_fetch_array($query,MYSQL_ASSOC)) {
+	$distance = haversine($zipInfo->latitude,$zipInfo->longitude,$res["latitude"],$res["longitude"]);
+	if ($distance <= $miles) {
+		$dists[$i] = $distance;
+		$retval[$i] = $res["zipcode"];
+		$i++;
+	}
+}
+											    
+return $retval;
+}
+
+} //end zipsWithin
+
 function get_rest_of_string(&$sql3,&$sql1,&$sql2,$val,$searchkeys) {
 
 $skills = 0;
@@ -102,21 +148,51 @@ $sql2 = '';
 $sql1 = ' ';
 $sql3='';
 $usersinc=0;
+$firstone = 0;
 
-if (isset($searchkeys['relg'])) {
+/*
+For name or general keyword, only the user names are searched with a "%like% statement in the mysql query.
+For other search items, exact criteria (for example religion id etc. are used)
+*/
+
+if (isset($searchkeys->{'name'})) {
+  if ($val ==1) {
+        $usersinc = 1;
+  	$sql1 = ',users';
+  	$sql3 = $sql3.' and users.name like "%'.$searchkeys->{'name'}.'%"';
+  }
+  else {
+  	$sql3 = $sql3.' users.name like "%'.$searchkeys->{'name'}.'%"';
+    $firstone = 1;
+  }
+}
+if (isset($searchkeys->{'relg'})) {
   if (strcmp($searchkeys['relg'],"Any")) {
   if ($val ==1) {
         $usersinc = 1;
   	$sql1 = ',users';
-  	$sql3 = $sql3.' and users.religion="'.$searchkeys['relg'].'"';
+  	$sql3 = $sql3.' and users.religion="'.$searchkeys->{'relg'}.'"';
   }
-  else
-  	$sql3 = $sql3.' and users.religion="'.$searchkeys['relg'].'"';
+  else {
+    if ($firstone == 1)
+  	$sql3 = $sql3.' and users.religion="'.$searchkeys->{'relg'}.'"';
+    else {
+  	$sql3 = $sql3.' users.religion="'.$searchkeys->{'relg'}.'"';
+    $firstone = 1;
+    }
+  }
   }
 }
-if (isset($searchkeys['medskills'])) {
-  if (strcmp($searchkeys['medskills'],"Any")) {
-  $sql3 = $sql3.' and skills.skilldesc="'.$searchkeys['medskills'].'"';
+if (isset($searchkeys->{'medskills'})) {
+  if ($searchkeys->{'medskills'} != 0) {
+  
+  if ($firstone==1)  
+  $sql3 = $sql3.' and skills.id="'.$searchkeys->{'medskills'}.'"';
+  else {
+  $sql3 = $sql3.' skills.id="'.$searchkeys->{'medskills'}.'"';
+  $firstone = 1;
+  }
+
   $sql2 = $sql2.' and skills.id=skillsselected.id and users.userid=skillsselected.userid';
   	if ($val==1) {
   if ($usersinc == 0) {
@@ -129,9 +205,16 @@ if (isset($searchkeys['medskills'])) {
   $skills = 1;
   }
 }
-if (isset($searchkeys['otherskills'])) {
-  if (strcmp($searchkeys['otherskills'],"Any")) {
-  $sql3 = $sql3.' and skills.skilldesc="'.$searchkeys['otherskills'].'"';
+if (isset($searchkeys->{'otherskills'})) {
+  if ($searchkeys->{'otherskills'} != 0) {
+
+  if ($firstone==1)
+  $sql3 = $sql3.' and skills.id="'.$searchkeys->{'otherskills'}.'"';
+  else {
+  $sql3 = $sql3.' skills.id="'.$searchkeys->{'otherskills'}.'"';
+  $firstone=1;
+  }
+
   if ($skills==0) {
   	$sql2 = $sql2.' and skills.id=skillsselected.id and users.userid=skillsselected.userid';
 
@@ -148,9 +231,16 @@ if (isset($searchkeys['otherskills'])) {
   }
   }
 }
-if (isset($searchkeys['spiritserv'])) {
-  if (strcmp($searchkeys['spiritserv'],"Any")) {
-  $sql3 = $sql3.' and skills.skilldesc="'.$searchkeys['spiritserv'].'"';
+if (isset($searchkeys->{'spiritserv'})) {
+  if ($searchkeys->{'spiritserv'} != 0) {
+
+  if ($firstone==1)
+  $sql3 = $sql3.' and skills.id="'.$searchkeys->{'spiritserv'}.'"';
+  else {
+  $sql3 = $sql3.' skills.id="'.$searchkeys->{'spiritserv'}.'"';
+  $firstone = 1;
+  }
+
   if ($skills==0) {
   	$sql2 = $sql2.' and skills.id=skillsselected.id and users.userid=skillsselected.userid';
   	if ($val==1) {
@@ -166,9 +256,16 @@ if (isset($searchkeys['spiritserv'])) {
   }
   }
 }
-if (isset($searchkeys['country'])) {
-  if (strcmp($searchkeys['country'],"Any")) {
-  $sql3 = $sql3.' and countries.longname="'.$searchkeys['country'].'"';
+if (isset($searchkeys->{'country'})) {
+  if ($searchkeys->{'country'} != 0) {
+
+  if ($firstone==1)
+  $sql3 = $sql3.' and countries.id="'.$searchkeys->{'country'}.'"';
+  else {
+  $sql3 = $sql3.' countries.id="'.$searchkeys->{'country'}.'"';
+  $firstone=1;
+  }
+
   	if ($val==1) {
   if ($usersinc == 0) {
   	$sql1 = $sql1.',users,countries,countriesselected';
@@ -181,9 +278,16 @@ if (isset($searchkeys['country'])) {
   $sql2 = $sql2.' and countries.id=countriesselected.id and users.userid=countriesselected.userid';
   }
 }
-if (isset($searchkeys['region'])) {
-  if (strcmp($searchkeys['region'],"Any")) {
-  $sql3 = $sql3.' and regions.name="'.$searchkeys['region'].'"';
+if (isset($searchkeys->{'region'})) {
+  if ($searchkeys->{'region'} != 0) {
+
+  if ($firstone==1)  
+  $sql3 = $sql3.' and regions.id="'.$searchkeys->{'region'}.'"';
+  else {
+  $sql3 = $sql3.' regions.id="'.$searchkeys->{'region'}.'"';
+  $firstone = 1;
+  }
+
   if ($val==1) {
   if ($usersinc == 0) {
   	$sql1 = $sql1.',users,regions,regionsselected';
@@ -196,9 +300,16 @@ if (isset($searchkeys['region'])) {
   $sql2 = $sql2.' and regions.id=regionsselected.id and users.userid=regionsselected.userid';
   }
 }
-if (isset($searchkeys['dur'])) {
-  if (strcmp($searchkeys['dur'],"Any")) {
-  $sql3 = $sql3.' and durations.name="'.$searchkeys['dur'].'"';
+if (isset($searchkeys->{'dur'})) {
+  if ($searchkeys->{'dur'} != 0) {
+
+  if ($firstone==1)
+  $sql3 = $sql3.' and durations.id="'.$searchkeys->{'dur'}.'"';
+  else {
+  $sql3 = $sql3.' durations.id="'.$searchkeys->{'dur'}.'"';
+  $firstone = 1;
+  }
+
   	if ($val==1) {
   if ($usersinc == 0) {
   	$sql1 = $sql1.',users,durations,durationsselected';
@@ -212,12 +323,29 @@ if (isset($searchkeys['dur'])) {
   }
 }
 
+}
+
+function getzipsearchstring($result,$dists,$con,&$has_error,&$err_msg,&$sqlstr,&$sqlstr2) {
+
+$j=0;
+$sqlstr = 'where users.zipcode in (';
+$sqlstr2 = ' order by field(users.zipcode, ';
+
+for ($i=0;$i<count($dists);$i++) {
+	if ($i==(count($dists)-1)) {
+		$sqlstr = $sqlstr.$result[$i].')';
+		$sqlstr2 = $sqlstr2.$result[$i].')';
+	}
+	else {
+		$sqlstr = $sqlstr.$result[$i].', ';
+		$sqlstr2 = $sqlstr2.$result[$i].', ';
+	}
+}
 
 }
 
-function update_searchtables($fbid,$keywords,$stype,$con,&$has_error,&$err_msg) {
-	// The searchtype=1 signifies that it is basic search
-	$sql = 'insert into searches (userid,searchtype) VALUES ("'.$fbid.'","'.$stype.'")';
+function update_searchtables($fbid,$keywords,$con,&$has_error,&$err_msg) {
+	$sql = 'insert into searches (userid) VALUES ("'.$fbid.'")';
 	$result = mysql_query($sql,$con);
 	if (!$result) {
 		setjsonmysqlerror($has_error,$err_msg,$sql);
@@ -230,11 +358,12 @@ function update_searchtables($fbid,$keywords,$stype,$con,&$has_error,&$err_msg) 
 		}
 		else {
 		while ($row = mysql_fetch_array($result2, MYSQL_ASSOC)) {
-			$searchid = $row['searchid'] + 0;  
+			$searchid = $row['searchid']+0;  
 			break;
 		}
+
 		// Now insert into searchterms table
-		$sql2 = 'insert into searchterms (searchid,searchquery) VALUES ("'.$searchid.'","'.$keywords.'")';
+		$sql2 = "insert into searchterms (searchid,searchquery) VALUES ('".$searchid."','".$keywords."')";
 		$result2 = mysql_query($sql2,$con);
 		if (!$result2) {
 			setjsonmysqlerror($has_error,$err_msg,$sql2);
@@ -248,7 +377,22 @@ function update_searchtables($fbid,$keywords,$stype,$con,&$has_error,&$err_msg) 
 if (!$has_error) {
 $profileid = $fbid;
 
-// get the zipcode of the current user
+// This means that the user specified a zipcode constraint in the search keys
+if (isset($searchkeys->{'z'})) {
+	$zipdata = $searchkeys->{'z'};
+	if (count($zipdata)!=2) {
+		$has_error = TRUE;
+		$err_msg = "zipcode data should have zipcode and search-radius";
+	}
+	else {
+		// Zip code entered by user
+		$myzipcode = $zipdata[0];
+		// search radius entered by user
+		$searchradius = $zipdata[1];
+	}
+}
+else {
+// get the zipcode of the current user if zipcode and search radius are not included in the search string
 $sql = 'select zipcode from users where userid="'.$fbid.'"';
 $result = mysql_query($sql,$con);
 if (!$result) {
@@ -260,455 +404,73 @@ if ($numrows != 0) {
 $row = mysql_fetch_array($result,MYSQL_ASSOC);
 $myzipcode = $row['zipcode'];
 }
-
+}
 }
 
 $json['results'] = array();
 
-// This is for basic search
-if ($adv==0) {
-
-if (!empty($keywords)) {
-
-if (strstr($keywords,',')) {
- $keys = explode(",",$keywords);
-}
-else if (strstr($keywords,' ')) {
- $keys = explode(" ",$keywords);
-}
-else 
- $keys = explode(" ",$keywords);
-
-$clauses1=array();
-$clauses2=array();
-$clauses3=array();
-$clauses4=array();
-$clauses5=array();
-$clauses6=array();
-$clauses7=array();
-$clauses8=array();
-$clauses9=array();
-foreach($keys as $term)
-{
-  //remove any chars you don't want to be searching - adjust to suit your requirements
-  $clean=trim(preg_replace('/[^a-z0-9]/i', '', $term));   
-  if (!empty($clean)) {
-	//note use of mysql_escape_string - while not strictly required
-	//in this example due to the preg_replace earlier, it's good
-	//practice to sanitize your DB inputs in case you modify that filter...
-	$clauses1[]="name like '%".mysql_real_escape_string($clean)."%'";
-	$clauses2[]="state like '%".mysql_real_escape_string($clean)."%'";
-	$clauses3[]="city like '%".mysql_real_escape_string($clean)."%'";
-	$clauses4[]="zipcode like '%".mysql_real_escape_string($clean)."%'";
-	$clauses5[]="phone like '%".mysql_real_escape_string($clean)."%'";
-	$clauses6[]="email like '%".mysql_real_escape_string($clean)."%'";
-	$clauses7[]="religion like '%".mysql_real_escape_string($clean)."%'";
-	$clauses8[]="website like '%".mysql_real_escape_string($clean)."%'";
-	$clauses9[]="organization like '%".mysql_real_escape_string($clean)."%'";
-  }
-}
-		
-$filter1 = '(';
-if (!empty($clauses1))
-	$filter1 = $filter1.implode(' AND ',$clauses1);
-if (!empty($clauses2))
-	$filter1 = $filter1.' OR '.implode(' AND ',$clauses2);
-if (!empty($clauses3))
-	$filter1 = $filter1.' OR '.implode(' AND ',$clauses3);
-if (!empty($clauses4))
-	$filter1 = $filter1.' OR '.implode(' AND ',$clauses4);
-if (!empty($clauses5))
-	$filter1 = $filter1.' OR '.implode(' AND ',$clauses5);
-if (!empty($clauses6))
-	$filter1 = $filter1.' OR '.implode(' AND ',$clauses6);
-if (!empty($clauses7))
-	$filter1 = $filter1.' OR '.implode(' AND ',$clauses7);
-if (!empty($clauses8))
-	$filter1 = $filter1.' OR '.implode(' AND ',$clauses8);
-if (!empty($clauses9))
-	$filter1 = $filter1.' OR '.implode(' AND ',$clauses9);
-
-$filter1 = $filter1.')';
-
-$filter = '(';
-if (!empty($clauses1))
-	$filter = $filter.implode(' OR ',$clauses1);
-if (!empty($clauses2))
-	$filter = $filter.' OR '.implode(' OR ',$clauses2);
-if (!empty($clauses3))
-	$filter = $filter.' OR '.implode(' OR ',$clauses3);
-if (!empty($clauses4))
-	$filter = $filter.' OR '.implode(' OR ',$clauses4);
-if (!empty($clauses5))
-	$filter = $filter.' OR '.implode(' OR ',$clauses5);
-if (!empty($clauses6))
-	$filter = $filter.' OR '.implode(' OR ',$clauses6);
-if (!empty($clauses7))
-	$filter = $filter.' OR '.implode(' OR ',$clauses7);
-if (!empty($clauses8))
-	$filter = $filter.' OR '.implode(' OR ',$clauses8);
-if (!empty($clauses9))
-	$filter = $filter.' OR '.implode(' OR ',$clauses9);
-
-$filter = $filter.')';
-
-	//build and execute the required SQL
-	if (!strcmp($filter1,'()')) {
-	$sql4 = '';
-	}
-	else {
-	
-	// get the matches with an 'AND' operator first
-	$sql='select * from users where userid!="'.$fbid.'" and '.$filter1;
-
-	$result = mysql_query($sql,$con);
-	if (!$result) {
-		setjsonmysqlerror($has_error,$err_msg,$sql);
-	}
-	else {
-	$numrows1 = mysql_num_rows($result);
-	if ($numrows1>0) {
-	        // store zipcodes and row numbers, then sort
-		$k=0;
-		while ($row = mysql_fetch_array($result,MYSQL_NUM)) {
-			$storerowa[$k] = $k;
-			$storeida[$k] = $row[0];
-			$storenamea[$k] = $row[1];
-			$zipnowa[$k] = $row[6];
-			$k++;
-		}
-
-		// We now have the user zip code and the list of search zip codes
-		// Find the distances and order them in ascending order
-		if (isset($myzipcode)) {
-		$myzipinfo = getZipInfo($myzipcode,$has_error,$err_msg,$con);
-		for ($i=0;$i<count($zipnowa);$i++) {
-			if ($zipnowa[$i] == 0)
-				$zipnowa[$i] = $myzipcode;
-
-			$otherzipinfo = getZipInfo($zipnowa[$i],$has_error,$err_msg,$con);
-			$distsa[$i] = haversine($myzipinfo->latitude,$myzipinfo->longitude,$otherzipinfo->latitude,$otherzipinfo->longitude);
-		}
-
-	        // now sort the results in ascending order according to distance	
-		array_multisort($distsa, SORT_ASC, SORT_NUMERIC,$storerowa,$zipnowa,$storeida,$storenamea);
-		}
-		
-		// now print the results
-		$sql4 = '';
-
-		for ($j=0;$j<count($storerowa);$j++) {
-		        if ($storeida[$j]!=0) {
-				// store the results into a json array
-				$json['results'][] = $storeida[$j];
-
-				if ($j==0)
-				$sql4 = $sql4.strval($storeida[$j]);
-				else
-				$sql4 = $sql4.','.strval($storeida[$j]);
-			}
-
-		}
-		mysql_free_result($result);			
-		
-	}
-	}
-        }
-
-
-	if (empty($sql4) && (!strcmp($filter,'()'))) {
-		
-	}
-	else {
-
-	if (!empty($sql4))
-	$sql='select * from users where userid!="'.$fbid.'" and userid NOT IN('.$sql4.') and '.$filter;
-	else 
-	$sql='select * from users where userid!="'.$fbid.'" and '.$filter;
-		
-	$result = mysql_query($sql,$con);
-
-	if ($result) {
-	$numrows = mysql_num_rows($result);
-	if (($numrows ==0) && (empty($sql4))) {
-
-	}
-	else if ($numrows==0) {
-	
-	}
-	else {
-
-	    // store zipcodes and row numbers, then sort
-		$k=0;
-		while ($row = mysql_fetch_array($result,MYSQL_NUM)) {
-			$storerow[$k] = $k;
-			$storeid[$k] = $row[0];
-			$storename[$k] = $row[1];
-			$zipnow[$k] = $row[6];
-			$k++;
-		}
-
-		// We now have the user zip code and the list of search zip codes
-		// Find the distances and order them in ascending order
-		if (isset($myzipcode)) {
-		$myzipinfo = getZipInfo($myzipcode,$has_error,$err_msg,$con);
-		for ($i=0;$i<count($zipnow);$i++) {
-			if ($zipnow[$i] == 0)
-				$zipnow[$i] = $myzipcode;
-
-			$otherzipinfo = getZipInfo($zipnow[$i],$has_error,$err_msg,$con);
-			$dists[$i] = haversine($myzipinfo->latitude,$myzipinfo->longitude,$otherzipinfo->latitude,$otherzipinfo->longitude);
-		}
-
-	        // now sort the results in ascending order according to distance	
-		array_multisort($dists, SORT_ASC, SORT_NUMERIC,$storerow,$zipnow,$storeid,$storename);
-		}
-		
-		// now print the results
-		for ($j=0;$j<count($storerow);$j++) {
-		        if ($storeid[$j]!=0) {
-				$json['results'][] = $storeid[$j];
-			}
-
-		}
-		mysql_free_result($result);
-	}
-}
-else {
-	setjsonmysqlerror($has_error,$err_msg,$sql);
-}
-
-}
-
-// if the keywords is empty, store this information into searches tables
+// This is main algorithm for generating search results
 if (!$has_error) {
-  $stype = 1;
-  update_searchtables($fbid,$keywords,$stype,$con,$has_error,$err_msg);
-}
-
-}
-
-}
-// This is for advanced search
-else {
-
-if($type==1){
+  
+  // if searchradius is not defined, simply use users zipcode to sort the results
   $friends=array();
-
   $sql='select users.userid,users.zipcode from users';
 
-  get_rest_of_string($sql3,$sql1,$sql2,0,$searchkeys);
-  $sql = $sql.$sql1.' where isreceiver="1"'.$sql3.$sql2;
-  $result = mysql_query($sql,$con);
+  get_rest_of_string($sql3,$sql1,$sql2,0,$searchkeys);  
 
+  /*
+  if (!isset($searchradius)) {
+	// if search radius is not set, this means general search without the specification of zipcode
+	// In this case, assign a huge number so that all relevant zip codes are included
+	$searchradius = 1000;
+  }
+  */
+
+  if (isset($searchradius)) {
+  	$result = getZipsWithin($myzipcode,$searchradius,$dists,$has_error,$err_msg,$con);
+	//sort according to increasing distances
+	if (!$result) {
+	    $has_error = TRUE;
+		$err_msg = "Entered zipcode is not valid";
+	}
+	else {
+		array_multisort($dists, SORT_ASC,SORT_NUMERIC, $result);
+    // this call gets additional filter strings for the mysql query
+		getzipsearchstring($result,$dists,$con,$has_error,$err_msg,$sql4,$sql5);
+	}
+  }
+  else {
+	// In this case no sorting is done, simply sends the relevant data to the front-end
+	$sql4 = ' where ';
+	$sql5 = '';
+  }
+  
+  $sql = $sql.$sql1.$sql4.$sql5.$sql3.$sql2;
+
+  $result = mysql_query($sql,$con);
+  
 if($result) {
     $num_rows = mysql_num_rows($result);
-    $j = 0;
-    while($row= mysql_fetch_array($result,MYSQL_ASSOC)){
-      $id = $row['userid'];
-      $friends[$j] = $id;
-	  if (empty($row['zipcode']))
-		$zipnow[$j] = 0;
-		else
-		$zipnow[$j] = $row['zipcode'];
-		
-      $j++;
-     }
+    if($num_rows==0){
+	// Nothing to display or return, just stores the sql query in the database
+    }
+	else {
+		$json['searchids'] = array();
+		while($row= mysql_fetch_array($result,MYSQL_ASSOC)) {
+			$json['searchids'][] = $row['userid'];
+		}
+	}
+	
+
+	// store the mysql query information into searches tables
+	if (!$has_error) {
+		update_searchtables($fbid,$sql,$con,$has_error,$err_msg);
+	}
 }
 else {
       setjsonmysqlerror($has_error,$err_msg,$sql);
 }
-
-    if($num_rows==0){
-	// Nothing to display or return
-    }
-	else {
 	
-	// the friends list needs to be sorted according to distance -- new version
-		// We now have the user zip code and the list of search zip codes
-		// Find the distances and order them in ascending order
-		if (isset($myzipcode)) {
-		$myzipinfo = getZipInfo($myzipcode,$has_error,$err_msg,$con);
-    $dists = array();
-    $goodfriends = array();
-
-		for ($i=0;$i<count($zipnow);$i++) {
-		    // if zipcode is not known, make the distance very big
-			if ($zipnow[$i] == 0) {
-				$dists[] = 1000000000;
-        $goodfriends[] = $friends[$i];
-      }
-			else {
-
-			$otherzipinfo = getZipInfo($zipnow[$i],$has_error,$err_msg,$con);
-      if ($otherzipinfo) {
-			  $dists[] = haversine($myzipinfo->latitude,$myzipinfo->longitude,$otherzipinfo->latitude,$otherzipinfo->longitude);
-        $goodfriends[] = $friends[$i];
-      }
-			}
-		}	
-
-	        // now sort the results in ascending order according to distance	
-		if (!empty($dists))
-			array_multisort($dists, SORT_ASC, SORT_NUMERIC,$goodfriends);
-
-		}	
-	
-	
-		$json['searchids'] = array();
-    		foreach ($goodfriends as $currentfriend){
-      			if (($currentfriend > 0) && ($currentfriend != $fbid)) {
-	  			$json['searchids'][] = $currentfriend;
-     			}
-		}
-	
-	}
-	
-      }
-
-      //Volunteers
-      if($type==2){
-        $friends=array();
-  	
-  	$sql='select users.userid,users.zipcode from users';
-	get_rest_of_string($sql3,$sql1,$sql2,0,$searchkeys);
-  	$sql = $sql.$sql1.' where isreceiver="0"'.$sql3.$sql2;
-	$result = mysql_query($sql,$con);
-        if($result){
-        	$num_rows = mysql_num_rows($result);
-	 	$j=0;
-          	while($row= mysql_fetch_array($result,MYSQL_ASSOC)) {
-            		$id = $row['userid'];
-            		$friends[$j] = $id;  
-	     		if (empty($row['zipcode']))
-				$zipnow[$j] = 0;
-			else
-				$zipnow[$j] = $row['zipcode'];
-	    		$j++;
-          	}
-	  }
-	  else {
-          	setjsonmysqlerror($has_error,$err_msg,$sql);
-          }
-
-    	if($num_rows==0){
-		// nothing to display
-    	}
- 	    else {		  
-
-		// the friends list needs to be sorted according to distance -- new version
-		// We now have the user zip code and the list of search zip codes
-		// Find the distances and order them in ascending order
-		if (isset($myzipcode)) {
-		$myzipinfo = getZipInfo($myzipcode,$has_error,$err_msg,$con);
-    $dists = array();
-    $goodfriends = array();
-
-		for ($i=0;$i<count($zipnow);$i++) {
-		    // if zipcode is not known, make the distance very big
-			if ($zipnow[$i] == 0) {
-				$dists[] = 1000000000;
-        $goodfriends[] = $friends[$i];
-      }
-			else {
-
-			$otherzipinfo = getZipInfo($zipnow[$i],$has_error,$err_msg,$con);
-      if ($otherzipinfo) {
-			$dists[] = haversine($myzipinfo->latitude,$myzipinfo->longitude,$otherzipinfo->latitude,$otherzipinfo->longitude);
-      $goodfriends[] = $friends[$i];
-      }
-			}
-		}
-	        // now sort the results in ascending order according to distance	
-		if (!empty($dists))
-			array_multisort($dists, SORT_ASC, SORT_NUMERIC,$goodfriends);
-		}	
-		
-		$json['searchids'] = array();
-          	foreach ($goodfriends as $currentfriend) {
-	    		if (($currentfriend > 0) && ($currentfriend!=$fbid)) {
-				$json['searchids'][] = $currentfriend;
-	    		}
-          	}
-
-    	}
-
-	}
-
-	// This mean trip search results
-            if($type==3){
-
-	function getdatestring($year,$month,$date,$hour,$min,$sec) {
-
-	if ($month<10)
-        	$smonth = strval($month);
-	else
-	        $smonth = strval($month);
-
-	if ($date<10)
-		$sdate = strval($date);
-	else
-		$sdate = strval($date);
-
-	$res = $year.'-'.$smonth.'-'.$sdate.' '.strval($hour).':'.strval($min).':'.strval($sec);
-
-	return $res;
-	}
-
-        $todayy = date("Y");
-	$todaym = date("m");
-	$todayd = date("d");
-	$todayH = date("H");
-	$todayi = date("i");
-	$todays = date("s");
-
-	$today = getdatestring($todayy,$todaym,$todayd,$todayH,$todayi,$todays);
-	$unixtime = strtotime($today);
-
-	$triparray=array();
-
-	$sql='select distinct trips.tripname, trips.id from trips';
-	$sql4 = ' where trips.departure >="'.$today.'"';
-	get_rest_of_string($sql3,$sql1,$sql2,1,$searchkeys);
-  		$sql = $sql.$sql1.$sql4.$sql3.$sql2;
-	 
-	  $result = mysql_query($sql,$con);
-
-	  if($result){
-		$numrows = mysql_num_rows($result);
-		if ($numrows == 0) {
-
-		}
-		else {
-		$tstoreid = array();
-		$tstorename = array();
-		$json['tripids'] = array();
-		$json['tripnames'] = array();
-                while($row= mysql_fetch_array($result,MYSQL_NUM)){
-                  $id = $row[1];
-                  $name=$row[0];
-		  $tstoreid[] = $id;
-		  $tstorename[] = $name;
-		  $json['tripids'][] = $id;
-		  $json['tripnames'][] = $name;
-		    }		
-		 }
-	 }
-	else {
-               setjsonmysqlerror($has_error,$err_msg,$sql);
-        }
-		    
-	  
-
-}
-
-	// store the mysql query information into searches tables
-	if (!$has_error) {
-  $stype = 2;
-  update_searchtables($fbid,$sql,$stype,$con,$has_error,$err_msg);
-
-}
-
 }
 
 }
