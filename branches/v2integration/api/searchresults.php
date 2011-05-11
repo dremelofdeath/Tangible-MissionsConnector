@@ -78,70 +78,84 @@ else {
 
 $json = array();
 
-function haversine($lat, $lng, $lat2, $lng2) {
-  $radius = 6378100; // radius of earth in meters
-  $latDist = $lat - $lat2;
-  $lngDist = $lng - $lng2;
-  $latDistRad = deg2rad($latDist);
-  $lngDistRad = deg2rad($lngDist);
-  $sinLatD = sin($latDistRad/2.0);
-  $sinLngD = sin($lngDistRad/2.0);
-  $cosLat1 = cos(deg2rad($lat));
-  $cosLat2 = cos(deg2rad($lat2));
-  $a = $sinLatD*$sinLatD + $cosLat1*$cosLat2*$sinLngD*$sinLngD;
-  if($a<0) $a = -1*$a;
-  $c = 2*atan2(sqrt($a), sqrt(1-$a));
-  $distance = $radius*$c;
-  $distance = $distance/1609.0;
-
-  return $distance;
+/**
+* Formats portion of the WHERE clause for a SQL statement.
+* SELECTs points within the $distance radius
+*
+* Retrieved from: http://www.davidus.sk/web/main/index/article_id/8
+* --zack
+*
+* @param float $lat Decimal latitude
+* @param float $lon Decimal longitude
+* @param float $distance Distance in kilometers
+* @return string
+*/
+function mysqlHaversine($lat = 0, $lon = 0) {
+  return ('
+    (6372.797 * (2 *
+    ATAN2(
+      SQRT(
+        SIN(('.($lat*1).' * (PI()/180)-latitude*(PI()/180))/2) *
+        SIN(('.($lat*1).' * (PI()/180)-latitude*(PI()/180))/2) +
+        COS(latitude* (PI()/180)) *
+        COS('.($lat*1).' * (PI()/180)) *
+        SIN(('.($lon*1).' * (PI()/180)-longitude*(PI()/180))/2) *
+        SIN(('.($lon*1).' * (PI()/180)-longitude*(PI()/180))/2)
+      ),
+      SQRT(1-(
+        SIN(('.($lat*1).' * (PI()/180)-latitude*(PI()/180))/2) *
+        SIN(('.($lat*1).' * (PI()/180)-latitude*(PI()/180))/2) +
+        COS(latitude* (PI()/180)) *
+        COS('.($lat*1).' * (PI()/180)) *
+        SIN(('.($lon*1).' * (PI()/180)-longitude*(PI()/180))/2) *
+        SIN(('.($lon*1).' * (PI()/180)-longitude*(PI()/180))/2)
+      ))
+    )
+  ))');
 }
 
 // function to get zip info
 function getZipInfo($zip,&$has_error,&$err_msg,$con) {
-$sql  = "SELECT * FROM zipcodes WHERE zipcode='" . $zip . "'";
-$query = mysql_query($sql,$con);
-if (!$query) {
-	setjsonmysqlerror($has_error,$err_msg,$sql);
-	return FALSE;
-}
-else {
-if(mysql_num_rows($query) < 1)
-        return FALSE;
+  $sql  = "SELECT * FROM zipcodes WHERE zipcode='" . $zip . "'";
+  $query = mysql_query($sql,$con);
+  if (!$query) {
+    setjsonmysqlerror($has_error,$err_msg,$sql);
+    return FALSE;
+  }
+  else {
+    if(mysql_num_rows($query) < 1)
+      return FALSE;
 
-	$zipInfo = mysql_fetch_object($query);
-	return $zipInfo;
-}
+    $zipInfo = mysql_fetch_object($query);
+    return $zipInfo;
+  }
 } //end getZipInfo
 
-function getZipsWithin($zip,$miles,&$dists,&$has_error,&$err_msg,$con) {
-if(($zipInfo = getZipInfo($zip,$has_error,$err_msg,$con)) === FALSE)
-	return FALSE;
-	        
-$sql = "SELECT zipcode, latitude, longitude from zipcodes";
+function getZipsWithin($zip, $miles, &$has_error, &$err_msg, $con) {
+  if(($zipInfo = getZipInfo($zip,$has_error,$err_msg,$con)) === FALSE)
+    return FALSE;
 
-$query = mysql_query($sql,$con);
-if (!$query) {
-	setjsonmysqlerror($has_error,$err_msg,$sql);
-	return FALSE;
-}
-else {
-$dists = array();
-$retval = array();
-$i=0;
-while ($res = mysql_fetch_array($query,MYSQL_ASSOC)) {
-	$distance = haversine($zipInfo->latitude,$zipInfo->longitude,$res["latitude"],$res["longitude"]);
-	if ($distance <= $miles) {
-		$dists[$i] = $distance;
-		$retval[$i] = $res["zipcode"];
-		$i++;
-	}
-}
-											    
-return $retval;
-}
+  $sql = "SELECT zipcode, "
+    .mysqlHaversine($zipInfo->latitude, $zipInfo->longitude)." AS distance"
+    ." FROM zipcodes"
+    ." HAVING distance <= ".$miles
+    ." ORDER BY distance;";
 
-} //end zipsWithin
+  $query = mysql_query($sql, $con);
+
+  if (!$query) {
+    setjsonmysqlerror($has_error,$err_msg,$sql);
+    return FALSE;
+  }
+
+  $retval = array();
+
+  while($row = mysql_fetch_row($query)) {
+    $retval[] = $row[0];
+  }
+
+  return $retval;
+}
 
 function get_rest_of_string(&$sql3,&$sql1,&$sql2,$val,$searchkeys) {
 
@@ -334,14 +348,14 @@ if (isset($searchkeys->{'dur'})) {
 
 }
 
-function getzipsearchstring($result,$dists,$con,&$has_error,&$err_msg,&$sqlstr,&$sqlstr2) {
+function getzipsearchstring($result,$con,&$has_error,&$err_msg,&$sqlstr,&$sqlstr2) {
 
 $j=0;
 $sqlstr = ' and users.zipcode in (';
 $sqlstr2 = ' order by field(users.zipcode, ';
 
-for ($i=0;$i<count($dists);$i++) {
-	if ($i==(count($dists)-1)) {
+for ($i=0;$i<count($result);$i++) {
+	if ($i==(count($result)-1)) {
 		$sqlstr = $sqlstr.$result[$i].')';
 		$sqlstr2 = $sqlstr2.$result[$i].')';
 	}
@@ -384,113 +398,115 @@ function update_searchtables($fbid,$keywords,$con,&$has_error,&$err_msg) {
 }
 
 if (!$has_error) {
-$profileid = $fbid;
+  $profileid = $fbid;
 
-// This means that the user specified a zipcode constraint in the search keys
-if (isset($searchkeys->{'z'})) {
-	$zipdata = $searchkeys->{'z'};
-	if (count($zipdata)!=2) {
-		$has_error = TRUE;
-		$err_msg = "zipcode data should have zipcode and search-radius";
-	}
-	else {
-		// Zip code entered by user
-		$myzipcode = $zipdata[0];
-		// search radius entered by user
-		$searchradius = $zipdata[1];
-    if ($searchradius > 500) {
+  // This means that the user specified a zipcode constraint in the search keys
+  if (isset($searchkeys->{'z'})) {
+    $zipdata = $searchkeys->{'z'};
+    if (count($zipdata)!=2) {
       $has_error = TRUE;
-      $err_msg = "Search radius too big, reduce to below 500 miles";
+      $err_msg = "zipcode data should have zipcode and search-radius";
     }
+    else {
+      // Zip code entered by user
+      $myzipcode = $zipdata[0];
+      // search radius entered by user
+      $searchradius = $zipdata[1];
+      if ($searchradius > 500) {
+        $has_error = TRUE;
+        $err_msg = "Search radius too big, reduce to below 500 miles";
+      }
 
-	}
-}
-else {
-// get the zipcode of the current user if zipcode and search radius are not included in the search string
-$sql = 'select zipcode from users where userid="'.$fbid.'"';
-$result = mysql_query($sql,$con);
-if (!$result) {
-	setjsonmysqlerror($has_error,$err_msg,$sql);
-}
-else {
-$numrows = mysql_num_rows($result);
-if ($numrows != 0) {
-$row = mysql_fetch_array($result,MYSQL_ASSOC);
-$myzipcode = $row['zipcode'];
-}
-}
-}
+    }
+  }
+  else {
+    // get the zipcode of the current user if zipcode and search radius are not included in the search string
+    $sql = 'select zipcode from users where userid="'.$fbid.'"';
+    $result = mysql_query($sql,$con);
+    if (!$result) {
+      setjsonmysqlerror($has_error,$err_msg,$sql);
+    }
+    else {
+      $numrows = mysql_num_rows($result);
+      if ($numrows != 0) {
+        $row = mysql_fetch_array($result,MYSQL_ASSOC);
+        $myzipcode = $row['zipcode'];
+      }
+    }
+  }
 
-$json['results'] = array();
+  $json['results'] = array();
 
-// This is main algorithm for generating search results
-if (!$has_error) {
-  
-  // if searchradius is not defined, simply use users zipcode to sort the results
-  $friends=array();
-  $sql='select users.userid,users.zipcode from users';
+  // This is main algorithm for generating search results
+  if (!$has_error) {
 
-  get_rest_of_string($sql3,$sql1,$sql2,0,$searchkeys);  
+    // if searchradius is not defined, simply use users zipcode to sort the results
+    $friends=array();
+    $sql='select users.userid,users.zipcode from users';
+
+    get_rest_of_string($sql3,$sql1,$sql2,0,$searchkeys);  
 
   /*
   if (!isset($searchradius)) {
-	// if search radius is not set, this means general search without the specification of zipcode
-	// In this case, assign a huge number so that all relevant zip codes are included
-	$searchradius = 1000;
+  // if search radius is not set, this means general search without the specification of zipcode
+  // In this case, assign a huge number so that all relevant zip codes are included
+  $searchradius = 1000;
   }
-  */
+   */
 
-  if (isset($searchradius)) {
-  	$result = getZipsWithin($myzipcode,$searchradius,$dists,$has_error,$err_msg,$con);
-	//sort according to increasing distances
-	if (!$result) {
-	    $has_error = TRUE;
-		$err_msg = "Entered zipcode is not valid";
-	}
-	else {
-		array_multisort($dists, SORT_ASC,SORT_NUMERIC, $result);
-    // this call gets additional filter strings for the mysql query
-		getzipsearchstring($result,$dists,$con,$has_error,$err_msg,$sql4,$sql5);
-	}
-  }
-  else {
-	// In this case no sorting is done, simply sends the relevant data to the front-end
-	$sql4 = ' where ';
-	$sql5 = '';
-  }
-
-  if (isset($searchradius)) 
-  $sql = $sql.$sql1.' where '.$sql3.$sql2.$sql4.$sql5;
-  else
-  $sql = $sql.$sql1.$sql4.$sql5.$sql3.$sql2;
-
-  //echo $sql.'<br />';
-
-  $result = mysql_query($sql,$con);
-  
-if($result) {
-    $num_rows = mysql_num_rows($result);
-    if($num_rows==0){
-	// Nothing to display or return, just stores the sql query in the database
+    if (isset($searchradius)) {
+      $result = getZipsWithin($myzipcode,$searchradius,$has_error,$err_msg,$con);
+      if (!$result) {
+        $has_error = TRUE;
+        $err_msg = "Entered zipcode is not valid."
+          . ($err_msg && $err_msg != "" ? " (Internal error: ".$err_msg.")" : "");
+        // this should suppress an annoying warning from PHP that I don't want 
+        // to bother fixing right now --zack
+        $sql4 = $sql5 = ''; // warning fix after isset($searchradius) below
+      }
+      else {
+        // this call gets additional filter strings for the mysql query
+        getzipsearchstring($result,$con,$has_error,$err_msg,$sql4,$sql5);
+      }
     }
-	else {
-		$json['searchids'] = array();
-		while($row= mysql_fetch_array($result,MYSQL_ASSOC)) {
-			$json['searchids'][] = $row['userid'];
-		}
-	}
-	
+    else {
+      // In this case no sorting is done, simply sends the relevant data to the front-end
+      $sql4 = ' where ';
+      $sql5 = '';
+    }
 
-	// store the mysql query information into searches tables
-	if (!$has_error) {
-		update_searchtables($fbid,$sql,$con,$has_error,$err_msg);
-	}
-}
-else {
+    if (isset($searchradius)) 
+      $sql = $sql.$sql1.' where '.$sql3.$sql2.$sql4.$sql5;
+    else
+      $sql = $sql.$sql1.$sql4.$sql5.$sql3.$sql2;
+
+    //echo $sql.'<br />';
+
+    $result = mysql_query($sql,$con);
+
+    if($result) {
+      $num_rows = mysql_num_rows($result);
+      if($num_rows==0){
+        // Nothing to display or return, just stores the sql query in the database
+      }
+      else {
+        $json['searchids'] = array();
+        while($row= mysql_fetch_array($result,MYSQL_ASSOC)) {
+          $json['searchids'][] = $row['userid'];
+        }
+      }
+
+
+      // store the mysql query information into searches tables
+      if (!$has_error) {
+        update_searchtables($fbid,$sql,$con,$has_error,$err_msg);
+      }
+    }
+    else {
       setjsonmysqlerror($has_error,$err_msg,$sql);
-}
-	
-}
+    }
+
+  }
 
 }
 
