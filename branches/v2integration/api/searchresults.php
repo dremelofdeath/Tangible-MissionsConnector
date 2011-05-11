@@ -348,10 +348,14 @@ if (isset($searchkeys->{'dur'})) {
 
 }
 
-function getzipsearchstring($result,$con,&$has_error,&$err_msg,&$sqlstr,&$sqlstr2) {
+function getzipsearchstring($result,$con,&$has_error,&$err_msg,&$sqlstr,&$sqlstr2,$sql3) {
 
 $j=0;
-$sqlstr = ' and users.zipcode in (';
+if (empty($sql3))
+  $sqlstr = ' users.zipcode in (';
+else
+  $sqlstr = ' and users.zipcode in (';
+
 $sqlstr2 = ' order by field(users.zipcode, ';
 
 for ($i=0;$i<count($result);$i++) {
@@ -435,7 +439,7 @@ if (!$has_error) {
     }
   }
 
-  $json['results'] = array();
+  //$json['results'] = array();
 
   // This is main algorithm for generating search results
   if (!$has_error) {
@@ -466,7 +470,7 @@ if (!$has_error) {
       }
       else {
         // this call gets additional filter strings for the mysql query
-        getzipsearchstring($result,$con,$has_error,$err_msg,$sql4,$sql5);
+        getzipsearchstring($result,$con,$has_error,$err_msg,$sql4,$sql5,$sql3);
       }
     }
     else {
