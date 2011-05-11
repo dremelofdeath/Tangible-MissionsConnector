@@ -162,7 +162,14 @@ if (isset($searchkeys->{'name'})) {
   	$sql3 = $sql3.' and users.name like "%'.$searchkeys->{'name'}.'%"';
   }
   else {
-  	$sql3 = $sql3.' users.name like "%'.$searchkeys->{'name'}.'%"';
+    $pieces = explode(" ", $searchkeys->{'name'});
+  	$sql3 = $sql3.' users.name like "%';
+    for ($i=0;$i<count($pieces);$i++) {
+      if ($i==(count($pieces)-1))
+        $sql3 = $sql3.$pieces[$i].'%"';
+      else
+        $sql3 = $sql3.$pieces[$i].'%';
+    }
     $firstone = 1;
   }
 }
@@ -328,7 +335,7 @@ if (isset($searchkeys->{'dur'})) {
 function getzipsearchstring($result,$dists,$con,&$has_error,&$err_msg,&$sqlstr,&$sqlstr2) {
 
 $j=0;
-$sqlstr = 'where users.zipcode in (';
+$sqlstr = ' and users.zipcode in (';
 $sqlstr2 = ' order by field(users.zipcode, ';
 
 for ($i=0;$i<count($dists);$i++) {
@@ -389,6 +396,11 @@ if (isset($searchkeys->{'z'})) {
 		$myzipcode = $zipdata[0];
 		// search radius entered by user
 		$searchradius = $zipdata[1];
+    if ($searchradius > 500) {
+      $has_error = TRUE;
+      $err_msg = "Search radius too big, reduce to below 500 miles";
+    }
+
 	}
 }
 else {
@@ -444,8 +456,13 @@ if (!$has_error) {
 	$sql4 = ' where ';
 	$sql5 = '';
   }
-  
+
+  if (isset($searchradius)) 
+  $sql = $sql.$sql1.' where '.$sql3.$sql2.$sql4.$sql5;
+  else
   $sql = $sql.$sql1.$sql4.$sql5.$sql3.$sql2;
+
+  //echo $sql.'<br />';
 
   $result = mysql_query($sql,$con);
   
