@@ -7,6 +7,8 @@
 
 include_once 'common.php';
 
+header('Content-type: application/json');
+
 // create a results object
 class resultsObj{
     var $name;
