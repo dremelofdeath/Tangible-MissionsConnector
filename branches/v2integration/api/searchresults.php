@@ -57,6 +57,11 @@ if (array_key_exists('fbid', $saferequest)) {
 	  if (array_key_exists('page',$saferequest) && (array_key_exists('perpage',$saferequest))) {
 			$page = $saferequest['page'];
 			$perpage = $saferequest['perpage'];
+
+      if (($page<1) || ($perpage<1)) {
+        $has_error = TRUE;
+        $err_msg = "Page number should be greater than 0 and results per page should be greater than 0";
+      }
 	  }
 	  
 	}
