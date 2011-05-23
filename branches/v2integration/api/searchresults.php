@@ -25,13 +25,6 @@ $saferequest = cmc_safe_request_strip();
 $has_error = FALSE;
 $err_msg = '';
 
-/*
-// Used for testing only - should be removed from the final version
-$arr = array ("name"=>"murray");
-$json = json_encode($arr);
-$json = base64_encode($json);
-*/
-
 if (array_key_exists('fbid', $saferequest)) {
   $fbid = $saferequest['fbid'];
 	if (array_key_exists('searchkeys',$saferequest)) {
@@ -39,12 +32,8 @@ if (array_key_exists('fbid', $saferequest)) {
   // The search fields are assumed to be sent from front-end to back-end in a json-encoded + base64_encoded object
   // It is first base64_decoded, then json_decoded here, and then used by the code
 
-  $searchkeys = base64_decode($saferequest['searchkeys']);
+    $searchkeys = base64_decode($saferequest['searchkeys']);
 	$searchkeys = json_decode($searchkeys);
-  
-  // The two lines below are also used for testing only - need to be removed in the final version
-  //$searchkeys = base64_decode($json);
-	//$searchkeys = json_decode($searchkeys);
 
     switch(json_last_error())
     {
@@ -63,7 +52,13 @@ if (array_key_exists('fbid', $saferequest)) {
       case JSON_ERROR_NONE:
           break;
       }
-
+	  
+	  // If page and perpage are given in the arguments, then get that information
+	  if (array_key_exists('page',$saferequest) && (array_key_exists('perpage',$saferequest))) {
+			$page = $saferequest['page'];
+			$perpage = $saferequest['perpage'];
+	  }
+	  
 	}
 	else {
   		$has_error = TRUE;
@@ -439,8 +434,6 @@ if (!$has_error) {
     }
   }
 
-  //$json['results'] = array();
-
   // This is main algorithm for generating search results
   if (!$has_error) {
 
@@ -484,7 +477,11 @@ if (!$has_error) {
     else
       $sql = $sql.$sql1.$sql4.$sql5.$sql3.$sql2;
 
-    //echo $sql.'<br />';
+	if (isset($page) && isset($perpage)) {
+	// counting the page offset
+	$offset = ($page - 1) * $perpage;
+	$sql = $sql." LIMIT ".$offset.",".$perpage;
+	}
 
     $result = mysql_query($sql,$con);
 
