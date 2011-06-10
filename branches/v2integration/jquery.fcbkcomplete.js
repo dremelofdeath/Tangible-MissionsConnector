@@ -276,10 +276,10 @@ jQuery(function($) {
                 if (!item.hasClass('locked')) {                    
                     item.fadeOut("fast");
                     if (options.onremove) {
-                        var _item = element.children("option[value=" + item.attr("rel") + "]");
+                        var _item = element.children("option[value=\"" + item.attr("rel") + "\"]");
                         funCall(options.onremove, _item)
                     }
-                    element.children('option[value="' + item.attr("rel") + '"]').removeAttr("selected").removeClass("selected");
+                    element.children('option[value=\""' + item.attr("rel") + '"\"]').removeAttr("selected").removeClass("selected");
                     item.remove();
                     element.change();
                     deleting = 0;
@@ -531,7 +531,7 @@ jQuery(function($) {
                 while (match != null && maximum > 0) {
                     var id = match[1];
                     var object = cache[id];
-                    if (options.filter_selected && element.children("option[value=" + object.value + "]").hasClass("selected")) {
+                    if (options.filter_selected && element.children("option[value=\"" + object.value + "\"]").hasClass("selected")) {
                         //nothing here...
                         }
                     else{
@@ -734,7 +734,9 @@ jQuery(function($) {
                         _object += "\"_" + item.get(0).attributes[i].nodeName + "\": \"" + item.get(0).attributes[i].nodeValue + "\",";
                     }
                 }
-                _object = "{" + _object + " notinuse: 0}";
+                // removing the notinuse parameter, it's useless and breaks jQuery.parseJSON(). --zack
+                // also, substring() is fixing a trailing comma --zack
+                _object = "{" + _object.substring(0, _object.length-1) + "}";
                 func.call(func, _object);
             }
 

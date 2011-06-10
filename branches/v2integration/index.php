@@ -100,10 +100,26 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
     <link rel="stylesheet" href="tipTip.css" type="text/css" />
     <script src="jquery.fcbkcomplete.js" type="text/javascript"></script>
     <script src="jquery.tipTip.js" type="text/javascript"></script>
+    <!-- imagesLoaded plugin obtained from https://gist.github.com/268257 -->
+    <script src="jquery.imagesLoaded.js" type="text/javascript"></script>
     <div id="fb-root"></div>
     <script src="https://connect.facebook.net/en_US/all.js"></script>
+    <script src="base64.js"></script>
+    <script src="json2-min.js"></script>
     <script type="text/javascript">
       // JavaScript code goes here
+
+      // first things first, some browser compatibility hacks
+      // add Object.keys() support to browsers that do not have it
+      if(!Object.keys) Object.keys = function(o){
+        if (o !== Object(o))
+          throw new TypeError('Object.keys called on non-object');
+        var ret=[],p;
+        for(p in o) if(Object.prototype.hasOwnProperty.call(o,p)) ret.push(p);
+        return ret;
+      }
+      
+      // the main CMC object
       var CMC = {
         // variables
         loggedInUser : false,
@@ -111,6 +127,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         requestsOutstanding : 0,
         dialogsOpen : 0,
         version : "1.9.18",
+        SearchState : {},
 
         // methods
         page : function(from, to) {
@@ -165,6 +182,8 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
             if (CMC.requestsOutstanding == 0) {
               CMC.hideAjaxSpinner();
             }
+          } else {
+            // this is a bug, and needs to be logged. --zack
           }
         },
 
@@ -172,7 +191,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
           var len = $(messageID).val().length;
           limit = limit || 300;
           customText = customText || " characters left";
-          $(labelID).html((300 - len) + customText);
+          $(labelID).html((limit - len) + customText);
         },
 
         recalculateProblemMessageLimit : function(limit) {
@@ -182,6 +201,140 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
             limit
           );
           $("#report-problem-characters-left").fadeIn();
+        },
+
+        handleSearchSelect : function(item) {
+          var value = jQuery.parseJSON(item)._value;
+          if (value.substring(0,2) == "!!") {
+            // this is a special value, we handle these differently
+            if (value.substring(2,3) == "z") { // this detection could definitely be better
+              // it's a zipcode
+              if (CMC.SearchState.z == undefined) {
+                CMC.SearchState.z = [value.substring(4,9), value.substring(10, value.length)];
+              } else {
+                // we have a problem, you can't have more than one zipcode
+              }
+            }
+          } else {
+            // this is a text item
+          }
+          CMC.search();
+        },
+
+        handleSearchRemove : function(item) {
+          var value = jQuery.parseJSON(item)._value;
+          if (value.substring(0,2) == "!!") {
+            // this is a special value, we handle these differently
+            if (value.substring(2,3) == "z") {
+              // it's a zipcode. we don't care what it is, just nuke it
+              delete CMC.SearchState.z;
+            }
+          } else {
+            // this is a text item
+          }
+          CMC.search();
+        },
+
+        search : function () {
+          $(".cmc-search-result").each(function () { $(this).fadeOut('fast'); });
+          if (Object.keys(CMC.SearchState).length == 0) {
+            // search is now blank. hide the results panels
+            $("#cmc-search-results-title").fadeOut();
+            $("#cmc-search-results-noresultmsg").fadeOut();
+          } else {
+            // otherwise, we have a new search to perform
+            CMC.ajaxNotifyStart(); // one for good measure, we want the spinner for the whole search
+            $.ajax({
+              url: "api/searchresults.php",
+              data: {
+                fbid: "25826994",
+                searchkeys: encode64(JSON.stringify(CMC.SearchState))
+              },
+              dataType: "json",
+              success: function(data, textStatus, jqXHR) {
+                if(data.has_error !== undefined && data.has_error !== null) {
+                  if(data.has_error) {
+                    // we have a known error, handle it
+                  } else {
+                    if(data.searchids === undefined) {
+                      // hm, this is strange. probably means no results, but we 
+                      // might consider logging this in the future. --zack
+                      CMC.showSearchResults(null);
+                    } else if(data.searchids === null) {
+                      // this should DEFINITELY mean that we have no results
+                      CMC.showSearchResults(null);
+                    } else {
+                      CMC.getDataForEachFBID(data.searchids, function (results) {
+                        CMC.showSearchResults(results);
+                      });
+                    }
+                  }
+                } else {
+                  // an unknown error occurred? do something!
+                }
+              }
+            });
+
+            $("#cmc-search-results-title").fadeIn();
+          }
+        },
+
+        getDataForEachFBID : function (fbids, callback) {
+          var results = new Array(fbids.length), requestsCompleted = 0, idPosMap = {};
+          var __notifyComplete = function () {
+            requestsCompleted++;
+            if (requestsCompleted == fbids.length) {
+              callback(results);
+            }
+          };
+          for(var each in fbids) {
+            idPosMap[fbids[each]] = each;
+            CMC.ajaxNotifyStart();
+            FB.api('/' + fbids[each], function (response) {
+              CMC.ajaxNotifyComplete();
+              results[idPosMap[response.id]] = response;
+              __notifyComplete();
+            });
+          }
+        },
+
+        showSearchResults : function (results) {
+          if (results === undefined) {
+            // this is a bug! do NOT pass this function undefined! say null to 
+            // inform it that you have no results!
+          } else if (results == null) {
+            // no results
+            $("#cmc-search-results-noresultmsg").fadeIn();
+          } else {
+            var imageLoadsCompleted = 0, __notifyImageLoadCompleted = function() {
+              imageLoadsCompleted++;
+              if(imageLoadsCompleted == results.length) {
+                for(var each in results) {
+                  $("#cmc-search-result-" + each)
+                    .delay(25 * each)
+                    .show("drop", {direction: "right", distance: 50}, 250, null);
+                }
+                CMC.ajaxNotifyComplete(); // finish the one we started at the beginning of the search
+              } else if (imageLoadsCompleted >= results.length) {
+                // loading more images than we have results for? bug. log it.
+              }
+            };
+            for(var each in results) {
+              var id = "#cmc-search-result-" + each;
+              CMC.ajaxNotifyStart();
+              $(id).children(".result-name").html(results[each].name);
+              $(id).children("div.result-picture").children("img").remove();
+              $("<img />")
+                .attr("src", "http://graph.facebook.com/"+results[each].id+"/picture")
+                .attr("cmcid", id)
+                .addClass("srpic")
+                .one('load', function() {
+                  $($(this).attr("cmcid")).children("div.result-picture").append($(this));
+                  CMC.ajaxNotifyComplete();
+                  __notifyImageLoadCompleted();
+                });
+            } // end for
+          } // end else
         }
       };
 
@@ -227,6 +380,8 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
           height : 6,
           maxshownitems : 5,
           newel : true,
+          onselect : function (item) { CMC.handleSearchSelect(item); },
+          onremove : function (item) { CMC.handleSearchRemove(item); },
           // custom (i.e. undocumented) options here
           //cmc_icon_class : "ui-icon ui-icon-search" // broken.
           cmc_zipcode_detect : true,
@@ -262,6 +417,13 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         $("#cmc-search-icon").click(function() {
           $("#cmc-search-box").children("ul").children("li.bit-input").children(".maininput").focus();
         });
+
+        $("#cmc-search-results-pagingctl-prev").button({ text: false, icons: { primary: "ui-icon-circle-triangle-w" }});
+        $("#cmc-search-results-pagingctl-next").button({ text: false, icons: { primary: "ui-icon-circle-triangle-e" }});
+
+        $("#cmc-search-results-title").hide();
+        $("#cmc-search-results-noresultmsg").hide();
+        $(".cmc-search-result").each(function () { $(this).hide(); });
 
         CMC.ajaxNotifyStart();
         FB.getLoginStatus(function(response) {
@@ -468,6 +630,69 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         text-decoration: none;
       }
 
+      #cmc-search-results-title {
+        margin-bottom: 24px;
+      }
+
+      #cmc-search-results-pagingctl {
+        position: absolute;
+        right: 18px;
+        margin-top: -1px;
+      }
+
+      #cmc-search-results-pagingctl-text {
+        position: relative;
+        display: inline-block;
+        top: -8px;
+        margin-right: 0.1em;
+        text-align: center;
+        vertical-align: middle;
+        height: 20px;
+        width: 75px !important;
+      }
+
+      .cmc-pagingctl-button {
+        height: 20px;
+        width: 20px !important;
+      }
+
+      .cmc-search-result {
+        height: 60px;
+        width: 200px;
+        position: relative;
+      }
+
+      .cmc-search-result .result-picture {
+        display: inline;
+        float: left;
+        margin-right: 7px;
+        width: 50px;
+        height: 50px;
+      }
+
+      .cmc-search-result .result-name {
+        font-weight: bold;
+      }
+
+      .cmc-search-result-col {
+        display: block;
+        position: absolute;
+      }
+
+      #cmc-search-result-col-0 {
+        margin-left: 0px;
+      }
+
+      #cmc-search-result-col-1 {
+        left: 0px;
+        margin-left: 50%;
+      }
+
+      img.srloading {
+        margin-left: 17px;
+        margin-top: 13px;
+      }
+
       #cmc-footer a {
         text-decoration: none;
         color: #102030;
@@ -629,7 +854,89 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
             </div>
           </div>
         </div>
-        <h1>Search Results:</h1>
+        <div id="cmc-search-results-spacer" style="display: block; height: 16px"></div>
+        <div id="cmc-search-results">
+          <div id="cmc-search-results-title" style="display: none">
+            <div id="cmc-search-results-pagingctl">
+              <div id="cmc-search-results-pagingctl-prev" class="cmc-pagingctl-button"></div>
+              <div id="cmc-search-results-pagingctl-text" class="ui-state-default ui-corner-all">
+                <!-- placeholder text, should be localized elsewhere -->
+                <span class="ui-button-text">page 0</span>
+              </div>
+              <div id="cmc-search-results-pagingctl-next" class="cmc-pagingctl-button"></div>
+            </div>
+            <h1 id="cmc-search-results-title-text">Search Results:</h1>
+          </div>
+          <div id="cmc-search-results-subtitles">
+            <h2 id="cmc-search-results-noresultmsg" style="display: none">Sorry, no results were found. :(</h2>
+          </div>
+          <div id="cmc-search-result-list">
+            <div id="cmc-search-result-col-0" class="cmc-search-result-col">
+              <div id="cmc-search-result-0" class="cmc-search-result">
+                <div class="result-picture">
+                  <img src="ajax-spinner.gif" class="srpic srloading"/>
+                </div>
+                <div class="result-name">Search Result</div>
+              </div>
+              <div id="cmc-search-result-1" class="cmc-search-result">
+                <div class="result-picture">
+                  <img src="ajax-spinner.gif" class="srpic srloading"/>
+                </div>
+                <div class="result-name">Search Result</div>
+              </div>
+              <div id="cmc-search-result-2" class="cmc-search-result">
+                <div class="result-picture">
+                  <img src="ajax-spinner.gif" class="srpic srloading"/>
+                </div>
+                <div class="result-name">Search Result</div>
+              </div>
+              <div id="cmc-search-result-3" class="cmc-search-result">
+                <div class="result-picture">
+                  <img src="ajax-spinner.gif" class="srpic srloading"/>
+                </div>
+                <div class="result-name">Search Result</div>
+              </div>
+              <div id="cmc-search-result-4" class="cmc-search-result">
+                <div class="result-picture">
+                  <img src="ajax-spinner.gif" class="srpic srloading"/>
+                </div>
+                <div class="result-name">Search Result</div>
+              </div>
+            </div>
+            <div id="cmc-search-result-col-1" class="cmc-search-result-col">
+              <div id="cmc-search-result-5" class="cmc-search-result">
+                <div class="result-picture">
+                  <img src="ajax-spinner.gif" class="srpic srloading"/>
+                </div>
+                <div class="result-name">Search Result</div>
+              </div>
+              <div id="cmc-search-result-6" class="cmc-search-result">
+                <div class="result-picture">
+                  <img src="ajax-spinner.gif" class="srpic srloading"/>
+                </div>
+                <div class="result-name">Search Result</div>
+              </div>
+              <div id="cmc-search-result-7" class="cmc-search-result">
+                <div class="result-picture">
+                  <img src="ajax-spinner.gif" class="srpic srloading"/>
+                </div>
+                <div class="result-name">Search Result</div>
+              </div>
+              <div id="cmc-search-result-8" class="cmc-search-result">
+                <div class="result-picture">
+                  <img src="ajax-spinner.gif" class="srpic srloading"/>
+                </div>
+                <div class="result-name">Search Result</div>
+              </div>
+              <div id="cmc-search-result-9" class="cmc-search-result">
+                <div class="result-picture">
+                  <img src="ajax-spinner.gif" class="srpic srloading"/>
+                </div>
+                <div class="result-name">Search Result</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <div id="network-tab">
         <p>Morbi tincidunt, dui sit amet facilisis feugiat, odio metus gravida ante, ut pharetra massa metus id nunc. Duis scelerisque molestie turpis. Sed fringilla, massa eget luctus malesuada, metus eros molestie lectus, ut tempus eros massa ut dolor. Aenean aliquet fringilla sem. Suspendisse sed ligula in ligula suscipit aliquam. Praesent in eros vestibulum mi adipiscing adipiscing. Morbi facilisis. Curabitur ornare consequat nunc. Aenean vel metus. Ut posuere viverra nulla. Aliquam erat volutpat. Pellentesque convallis. Maecenas feugiat, tellus pellentesque pretium posuere, felis lorem euismod felis, eu ornare leo nisi vel felis. Mauris consectetur tortor et purus.</p>
