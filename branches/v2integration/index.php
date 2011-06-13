@@ -127,6 +127,8 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         requestsOutstanding : 0,
         dialogsOpen : 0,
         version : "1.9.18",
+        searchPageCache : [],
+        currentDisplayedSearchPage : 0,
         SearchState : {},
 
         // methods
@@ -236,6 +238,9 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         },
 
         search : function () {
+          CMC.searchPageCache = [];
+          CMC.currentDisplayedSearchPage = 1;
+          CMC.updateSearchPagingControls();
           $(".cmc-search-result").each(function () { $(this).fadeOut('fast'); });
           if (Object.keys(CMC.SearchState).length == 0) {
             // search is now blank. hide the results panels
@@ -248,7 +253,9 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
               url: "api/searchresults.php",
               data: {
                 fbid: "25826994",
-                searchkeys: encode64(JSON.stringify(CMC.SearchState))
+                searchkeys: encode64(JSON.stringify(CMC.SearchState)),
+                page: CMC.currentDisplayedSearchPage,
+                perpage: 20
               },
               dataType: "json",
               success: function(data, textStatus, jqXHR) {
@@ -264,14 +271,27 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                       // this should DEFINITELY mean that we have no results
                       CMC.showSearchResults(null);
                     } else {
-                      CMC.getDataForEachFBID(data.searchids, function (results) {
+                      var searchResults = data.searchids.length > 10 ? data.searchids.slice(0, 10) : data.searchids;
+                      CMC.searchPageCache[1] = data.searchids.length > 10 ? data.searchids.slice(10) : null;
+                      CMC.getDataForEachFBID(searchResults, function (results) {
+                        CMC.searchPageCache[0] = results;
                         CMC.showSearchResults(results);
                       });
+                      if (data.searchids.length > 10 ) {
+                        CMC.getDataForEachFBID(CMC.searchPageCache[1], function (results) {
+                          CMC.searchPageCache[1] = results;
+                        });
+                      }
                     }
                   }
                 } else {
                   // an unknown error occurred? do something!
                 }
+                CMC.updateSearchPagingControls();
+              },
+              error: function(jqXHR, textStatus, errorThrown) {
+                CMC.ajaxNotifyComplete();
+                // we might also want to log this or surface an error message or something
               }
             });
 
@@ -302,18 +322,14 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
           if (results === undefined) {
             // this is a bug! do NOT pass this function undefined! say null to 
             // inform it that you have no results!
-          } else if (results == null) {
+          } else if (results == null || results.length == 0) {
             // no results
             $("#cmc-search-results-noresultmsg").fadeIn();
           } else {
             var imageLoadsCompleted = 0, __notifyImageLoadCompleted = function() {
               imageLoadsCompleted++;
               if(imageLoadsCompleted == results.length) {
-                for(var each in results) {
-                  $("#cmc-search-result-" + each)
-                    .delay(25 * each)
-                    .show("drop", {direction: "right", distance: 50}, 250, null);
-                }
+                CMC.animateShowSearchResults(results);
                 CMC.ajaxNotifyComplete(); // finish the one we started at the beginning of the search
               } else if (imageLoadsCompleted >= results.length) {
                 // loading more images than we have results for? bug. log it.
@@ -335,6 +351,126 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                 });
             } // end for
           } // end else
+        },
+
+        animateShowSearchResults : function (results) {
+          for(var each in results) {
+            $("#cmc-search-result-" + each)
+              .delay(25 * each)
+              .show("drop", {direction: "right", distance: 50}, 250, null);
+          }
+        },
+
+        navigateToNextSearchPage : function () {
+          var fadesCompleted = 0, imagesDeleted = 0, searchIndex = ++CMC.currentDisplayedSearchPage - 1, interval;
+          CMC.updateSearchPagingControls();
+          $(".cmc-search-result").each(function () {
+            $(this).fadeOut('fast', function () {
+              fadesCompleted++;
+              if (fadesCompleted == $(".cmc-search-result").length) {
+                $(".result-picture").each(function () {
+                  imagesDeleted++;
+                  $(this).children("img").remove();
+                  if (imagesDeleted == $(".result-picture").length) {
+                    if (CMC.searchPageCache[searchIndex] !== undefined) {
+                      CMC.showSearchResults(CMC.searchPageCache[searchIndex]);
+                    } else {
+                      // if it's not ready yet, set a timeout to check on it
+                      interval = setInterval(function () {
+                        if (CMC.searchPageCache[searchIndex] !== undefined) {
+                          CMC.showSearchResults(CMC.searchPageCache[searchIndex]);
+                          clearInterval(interval);
+                        }
+                      }, 250);
+                    }
+                  }
+                });
+              }
+            });
+          });
+          if(CMC.searchPageCache[searchIndex + 1] === undefined) {
+            // this is a page that we haven't cached yet
+            CMC.ajaxNotifyStart();
+            $.ajax({
+              url: "api/searchresults.php",
+              data: {
+                fbid: "25826994",
+                searchkeys: encode64(JSON.stringify(CMC.SearchState)),
+                page: searchIndex + 2, // page on the server is off by one
+                perpage: 10
+              },
+              dataType: "json",
+              success: function(data, textStatus, jqXHR) {
+                if(data.has_error !== undefined && data.has_error !== null) {
+                  if(data.has_error) {
+                    // we have a known error, handle it
+                  } else {
+                    if(data["searchids"] === undefined) {
+                      // hm, this is strange. probably means no results, but we 
+                      // might consider logging this in the future. --zack
+                      CMC.searchPageCache[searchIndex + 1] = null;
+                    } else if(data.searchids == null) {
+                      // this should DEFINITELY mean that we have no results
+                      CMC.searchPageCache[searchIndex + 1] = null;
+                    } else {
+                      CMC.getDataForEachFBID(data.searchids, function (results) {
+                        CMC.searchPageCache[searchIndex + 1] = results;
+                      });
+                    }
+                  }
+                } else {
+                  CMC.searchPageCache[searchIndex + 1] = null; // this should stop the interval check
+                  // an unknown error occurred? do something!
+                }
+                CMC.updateSearchPagingControls();
+                CMC.ajaxNotifyComplete();
+              },
+              error: function(jqXHR, textStatus, errorThrown) {
+                CMC.ajaxNotifyComplete();
+                CMC.searchPageCache.push(null); // this should (hopefully) stop the interval check
+                // we might also want to log this or surface an error message or something
+              }
+            });
+          }
+        },
+
+        navigateToPreviousSearchPage : function () {
+          var fadesCompleted = 0, imagesDeleted = 0;
+          CMC.currentDisplayedSearchPage--;
+          CMC.updateSearchPagingControls();
+          if (CMC.searchPageCache[CMC.currentDisplayedSearchPage - 1] !== undefined) {
+            $(".cmc-search-result").each(function () {
+              $(this).fadeOut('fast', function () {
+                fadesCompleted++;
+                if (fadesCompleted == $(".cmc-search-result").length) {
+                  $(".result-picture").each(function () {
+                    imagesDeleted++;
+                    $(this).children("img").remove();
+                    if (imagesDeleted == $(".result-picture").length) {
+                      CMC.showSearchResults(CMC.searchPageCache[CMC.currentDisplayedSearchPage - 1]);
+                    }
+                  });
+                }
+              });
+            });
+          } else {
+            // something went horribly, horribly wrong, and we should probably know about it
+          }
+          CMC.updateSearchPagingControls();
+        },
+
+        updateSearchPagingControls : function () {
+          $("#cmc-search-results-pagingctl-text").children(".ui-button-text").html("page " + CMC.currentDisplayedSearchPage);
+          if (CMC.currentDisplayedSearchPage <= 1) {
+            $("#cmc-search-results-pagingctl-prev").button("disable");
+          } else {
+            $("#cmc-search-results-pagingctl-prev").button("enable");
+          }
+          if (CMC.searchPageCache[CMC.currentDisplayedSearchPage] != null) {
+            $("#cmc-search-results-pagingctl-next").button("enable");
+          } else {
+            $("#cmc-search-results-pagingctl-next").button("disable");
+          }
         }
       };
 
@@ -418,8 +554,21 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
           $("#cmc-search-box").children("ul").children("li.bit-input").children(".maininput").focus();
         });
 
-        $("#cmc-search-results-pagingctl-prev").button({ text: false, icons: { primary: "ui-icon-circle-triangle-w" }});
-        $("#cmc-search-results-pagingctl-next").button({ text: false, icons: { primary: "ui-icon-circle-triangle-e" }});
+        $("#cmc-search-results-pagingctl-prev")
+          .button({ text: false, icons: { primary: "ui-icon-circle-triangle-w" }})
+          .click(function () {
+            if (!$("#cmc-search-results-pagingctl-prev").button("option", "disabled")) {
+              CMC.navigateToPreviousSearchPage();
+            }
+          });
+
+        $("#cmc-search-results-pagingctl-next")
+          .button({ text: false, icons: { primary: "ui-icon-circle-triangle-e" }})
+          .click(function () {
+            if (!$("#cmc-search-results-pagingctl-next").button("option", "disabled")) {
+              CMC.navigateToNextSearchPage();
+            }
+          });
 
         $("#cmc-search-results-title").hide();
         $("#cmc-search-results-noresultmsg").hide();
