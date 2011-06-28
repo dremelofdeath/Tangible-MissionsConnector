@@ -89,12 +89,12 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
 <html>
   <head>
     <meta charset="utf-8">
-    <title><?php echo STR_APP_NAME; ?></title>
+    <title>Christian Missions Connector</title>
   </head>
   <body>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <!-- Include jQuery stuff and link stylesheet to the specified theme -->
-    <?php cmc_jquery_startup("1.5.1", "1.8.11", "custom-theme"); ?>
+    <?php cmc_jquery_startup("1.6.1", "1.8.11", "custom-theme"); ?>
     <link rel="stylesheet" href="fcbkcomplete-style.css" type="text/css"
           media="screen" charset="utf-8" />
     <link rel="stylesheet" href="tipTip.css" type="text/css" />
@@ -130,8 +130,89 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         searchPageCache : [],
         currentDisplayedSearchPage : 0,
         SearchState : {},
+        // startup configuration settings
+        StartupConfig : {
+          attachDebugLogHandlersByDefault : true
+        },
 
         // methods
+        performStartupActions : function () {
+          if (this.StartupConfig.attachDebugLogHandlersByDefault) {
+            this.attachDebugHandlers(this.DebugMode);
+          }
+        },
+
+        DebugMode : {
+          log : function(output, whereTo) {
+            var content = '(' + (new Date()).getTime() + ') ' + output;
+            if (whereTo === undefined) whereTo = "#debug-log";
+            $(whereTo)
+              .val($(whereTo).val() + content + "\n")
+              .scrollTop(99999)
+              .scrollTop($(whereTo).scrollTop()*12);
+          },
+
+          error : function(errmsg) {
+            var message = "ERROR: " + errmsg;
+            this.log(message);
+          },
+
+          assert : function(condition, bugmsg) {
+            if (!condition) {
+              var message = "ASSERT FAILED!\nIf you're reporting this, please use this message:\n" + bugmsg;
+              this.log(message);
+            }
+          },
+
+          beginFunction : function(fnName) {
+            this.log("begin function: " + fnName);
+            // check for scope corruption
+            this.assert(this === CMC, "Scope corruption detected! this === CMC failed!");
+          },
+
+          endFunction : function(fnName, fnReturnValue) {
+            if (fnReturnValue !== undefined) {
+              this.log("end function: " + fnName + ", returning " + fnReturnValue.toString());
+            } else {
+              this.log("end function: " + fnName);
+            }
+          }
+        },
+
+        log : $.noop,
+        error : $.noop,
+        assert : $.noop,
+        beginFunction : $.noop,
+        endFunction : $.noop,
+
+        attachDebugHandlers : function(handlerSet) {
+          if ("log" in handlerSet) {
+            this.log = handlerSet.log;
+          }
+          if ("error" in handlerSet) {
+            this.error = handlerSet.error;
+          }
+          if ("assert" in handlerSet) {
+            this.assert = handlerSet.assert;
+          }
+          if ("beginFunction" in handlerSet) {
+            this.beginFunction = handlerSet.beginFunction;
+          }
+          if ("endFunction" in handlerSet) {
+            this.endFunction = handlerSet.endFunction;
+          }
+          $("#debug-section").show();
+        },
+
+        detachDebugHandlers : function() {
+          this.log = $.noop;
+          this.error = $.noop;
+          this.assert = $.noop;
+          this.beginFunction = $.noop;
+          this.endFunction = $.noop;
+          $("#debug-section").hide();
+        },
+
         page : function(from, to) {
           $(from).hide("drop", {direction: 'left'}, 250, function() {
             $(to).show("drop", {direction: 'right'}, 250, null);
@@ -149,18 +230,18 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         },
 
         dialogOpen : function(dialog) {
-          CMC.dialogsOpen++;
-          CMC.closeAllDialogs(dialog);
-          if ($.support.opacity && CMC.dialogsOpen == 1) {
+          this.dialogsOpen++;
+          this.closeAllDialogs(dialog);
+          if ($.support.opacity && this.dialogsOpen == 1) {
             $("#tabs, #cmc-footer").fadeTo('fast', 0.5);
           }
         },
 
         dialogClose : function(dialog) {
-          if ($.support.opacity && CMC.dialogsOpen == 1) {
+          if ($.support.opacity && this.dialogsOpen == 1) {
             $("#tabs, #cmc-footer").fadeTo('fast', 1.0);
           }
-          CMC.dialogsOpen--;
+          this.dialogsOpen--;
         },
 
         showAjaxSpinner : function() {
@@ -172,17 +253,17 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         },
 
         ajaxNotifyStart : function() {
-          if (CMC.requestsOutstanding == 0) {
-            CMC.showAjaxSpinner();
+          if (this.requestsOutstanding == 0) {
+            this.showAjaxSpinner();
           }
-          CMC.requestsOutstanding++;
+          this.requestsOutstanding++;
         },
 
         ajaxNotifyComplete : function() {
-          if (CMC.requestsOutstanding > 0) {
-            CMC.requestsOutstanding--;
-            if (CMC.requestsOutstanding == 0) {
-              CMC.hideAjaxSpinner();
+          if (this.requestsOutstanding > 0) {
+            this.requestsOutstanding--;
+            if (this.requestsOutstanding == 0) {
+              this.hideAjaxSpinner();
             }
           } else {
             // this is a bug, and needs to be logged. --zack
@@ -197,7 +278,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         },
 
         recalculateProblemMessageLimit : function(limit) {
-          CMC.recalculateTextareaLimit(
+          this.recalculateTextareaLimit(
             "#report-problem-message",
             "#report-problem-characters-left",
             limit
@@ -206,100 +287,159 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         },
 
         handleSearchSelect : function(item) {
+          this.beginFunction("handleSearchSelect");
           var value = jQuery.parseJSON(item)._value;
           if (value.substring(0,2) == "!!") {
             // this is a special value, we handle these differently
             if (value.substring(2,3) == "z") { // this detection could definitely be better
               // it's a zipcode
-              if (CMC.SearchState.z == undefined) {
-                CMC.SearchState.z = [value.substring(4,9), value.substring(10, value.length)];
+              if (this.SearchState.z == undefined) {
+                this.SearchState.z = [value.substring(4,9), value.substring(10, value.length)];
               } else {
                 // we have a problem, you can't have more than one zipcode
               }
             }
           } else {
             // this is a text item
+            // (note: we are going to handle text items as names for now)
+            this.SearchState.name = value;
           }
-          CMC.search();
+          this.search();
+          this.endFunction("handleSearchSelect");
         },
 
         handleSearchRemove : function(item) {
+          this.beginFunction("handleSearchRemove");
           var value = jQuery.parseJSON(item)._value;
           if (value.substring(0,2) == "!!") {
             // this is a special value, we handle these differently
             if (value.substring(2,3) == "z") {
               // it's a zipcode. we don't care what it is, just nuke it
-              delete CMC.SearchState.z;
+              delete this.SearchState.z;
             }
           } else {
             // this is a text item
+            // note: since we are treating text items as names, we should just 
+            // delete the name. This will need to be fixed in the future.
+            delete this.SearchState.name;
           }
-          CMC.search();
+          this.search();
+          this.endFunction("handleSearchRemove");
         },
 
         search : function () {
-          CMC.searchPageCache = [];
-          CMC.currentDisplayedSearchPage = 1;
-          CMC.updateSearchPagingControls();
+          this.beginFunction("search");
+          this.searchPageCache = [];
+          this.currentDisplayedSearchPage = 1;
+          this.updateSearchPagingControls();
+          this.animateHideSearchResults();
           $(".cmc-search-result").each(function () { $(this).fadeOut('fast'); });
-          if (Object.keys(CMC.SearchState).length == 0) {
-            // search is now blank. hide the results panels
-            $("#cmc-search-results-title").fadeOut();
-            $("#cmc-search-results-noresultmsg").fadeOut();
+          if (Object.keys(this.SearchState).length == 0) {
+            this.log("search is now blank; hide the results panels");
+            var _fadeoutsCompleted = 0, _onSearchFadeoutComplete = function () {
+              if (++_fadeoutsCompleted == 2) {
+                $("#cmc-search-results").hide();
+              }
+            };
+            $("#cmc-search-results-title").fadeOut(400, _onSearchFadeoutComplete);
+            $("#cmc-search-results-noresultmsg").fadeOut(400, _onSearchFadeoutComplete);
           } else {
-            // otherwise, we have a new search to perform
-            CMC.ajaxNotifyStart(); // one for good measure, we want the spinner for the whole search
+            this.log("we have a new search to perform");
+            this.ajaxNotifyStart(); // one for good measure, we want the spinner for the whole search
             $.ajax({
               url: "api/searchresults.php",
               data: {
                 fbid: "25826994",
-                searchkeys: encode64(JSON.stringify(CMC.SearchState)),
-                page: CMC.currentDisplayedSearchPage,
+                searchkeys: encode64(JSON.stringify(this.SearchState)),
+                page: this.currentDisplayedSearchPage,
                 perpage: 20
               },
               dataType: "json",
-              success: function(data, textStatus, jqXHR) {
-                if(data.has_error !== undefined && data.has_error !== null) {
-                  if(data.has_error) {
-                    // we have a known error, handle it
-                  } else {
-                    if(data.searchids === undefined) {
-                      // hm, this is strange. probably means no results, but we 
-                      // might consider logging this in the future. --zack
-                      CMC.showSearchResults(null);
-                    } else if(data.searchids === null) {
-                      // this should DEFINITELY mean that we have no results
-                      CMC.showSearchResults(null);
-                    } else {
-                      var searchResults = data.searchids.length > 10 ? data.searchids.slice(0, 10) : data.searchids;
-                      CMC.searchPageCache[1] = data.searchids.length > 10 ? data.searchids.slice(10) : null;
-                      CMC.getDataForEachFBID(searchResults, function (results) {
-                        CMC.searchPageCache[0] = results;
-                        CMC.showSearchResults(results);
-                      });
-                      if (data.searchids.length > 10 ) {
-                        CMC.getDataForEachFBID(CMC.searchPageCache[1], function (results) {
-                          CMC.searchPageCache[1] = results;
-                        });
-                      }
-                    }
-                  }
-                } else {
-                  // an unknown error occurred? do something!
-                }
-                CMC.updateSearchPagingControls();
-              },
-              error: function(jqXHR, textStatus, errorThrown) {
-                CMC.ajaxNotifyComplete();
-                // we might also want to log this or surface an error message or something
-              }
+              context: this,
+              success: this.onSearchSuccess,
+              error: this.onSearchError
             });
 
             $("#cmc-search-results-title").fadeIn();
           }
+          this.endFunction("search");
+        },
+
+        onSearchSuccess : function(data, textStatus, jqXHR) {
+          this.beginFunction("onSearchSuccess");
+          this.assert(data != undefined, "data is undefined in onSearchSuccess");
+          $(".cmc-search-result").each(function () {
+            $(this).hide();
+          });
+          $("#cmc-search-results").show();
+          if(data.has_error !== undefined && data.has_error !== null) {
+            if(data.has_error) {
+              // we have a known error, handle it
+              this.handleSearchSuccessHasError(data);
+            } else {
+              if(data.searchids === undefined) {
+                // hm, this is strange. probably means no results, but we 
+                // might consider logging this in the future. --zack
+                this.showSearchResults(null);
+              } else if(data.searchids === null) {
+                // this should DEFINITELY mean that we have no results
+                this.showSearchResults(null);
+              } else {
+                var searchResults = data.searchids.length > 10 ? data.searchids.slice(0, 10) : data.searchids;
+                this.searchPageCache[1] = data.searchids.length > 10 ? data.searchids.slice(10) : null;
+                this.getDataForEachFBID(searchResults, $.proxy(function (results) {
+                  this.searchPageCache[0] = results;
+                  this.showSearchResults(results);
+                }, this));
+                if (data.searchids.length > 10 ) {
+                  this.getDataForEachFBID(this.searchPageCache[1], $.proxy(function (results) {
+                    this.searchPageCache[1] = results;
+                  }, this));
+                }
+              }
+            }
+          } else {
+            // an unknown error occurred? do something!
+            this.handleSearchSuccessUnknownError(data, textStatus, jqXHR);
+          }
+          this.updateSearchPagingControls();
+          this.endFunction("onSearchSuccess");
+        },
+
+        onSearchError : function(jqXHR, textStatus, errorThrown) {
+          this.ajaxNotifyComplete();
+          // we might also want to log this or surface an error message or something
+          this.handleSearchServerError(jqXHR, textStatus, errorThrown);
+        },
+
+        handleSearchSuccessHasError : function(data) {
+          this.beginFunction("handleSearchSuccessHasError");
+          this.assert(data != undefined, "data is undefined in handleSearchSuccessHasError");
+          // we have a known error, handle it
+          if(data.err_msg !== undefined) {
+            if(data.err_msg != '') {
+              this.error("caught an error from the server while searching: \""+data.err_msg+"\"");
+            } else {
+              this.error("caught an error from the server while searching, but it was blank");
+            }
+          } else {
+            this.error("caught an error from the server while searching, but it did not return an error message");
+          }
+          this.endFunction("handleSearchSuccessHasError");
+        },
+
+        handleSearchServerError : function(jqXHR, textStatus, errorThrown) {
+          this.beginFunction("handleSearchServerError");
+          this.error("error while communicating with server (status: \""+textStatus+"\", error: \""+errorThrown+"\")");
+          this.endFunction("handleSearchServerError");
+        },
+
+        handleSearchSuccessUnknownError : function(data, textStatus, jqXHR) {
+          this.error("an unknown error occurred while trying to process a search success callback.\ndata = " + data);
         },
 
         getDataForEachFBID : function (fbids, callback) {
+          this.beginFunction("getDataForEachFBID");
           var results = new Array(fbids.length), requestsCompleted = 0, idPosMap = {};
           var __notifyComplete = function () {
             requestsCompleted++;
@@ -309,168 +449,269 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
           };
           for(var each in fbids) {
             idPosMap[fbids[each]] = each;
-            CMC.ajaxNotifyStart();
-            FB.api('/' + fbids[each], function (response) {
-              CMC.ajaxNotifyComplete();
+            this.ajaxNotifyStart();
+            FB.api('/' + fbids[each], $.proxy(function (response) {
+              this.ajaxNotifyComplete();
               results[idPosMap[response.id]] = response;
               __notifyComplete();
-            });
+            }, this));
           }
+          this.endFunction("getDataForEachFBID");
         },
 
         showSearchResults : function (results) {
+          this.beginFunction("showSearchResults");
           if (results === undefined) {
-            // this is a bug! do NOT pass this function undefined! say null to 
-            // inform it that you have no results!
+            // this is a bug! do NOT pass this function undefined! say null to inform it that you have no results!
+            this.assert(results === undefined, "undefined passed as results for showSearchResults");
           } else if (results == null || results.length == 0) {
             // no results
+            this.ajaxNotifyComplete(); // finish the one we started at the beginning of the search
             $("#cmc-search-results-noresultmsg").fadeIn();
           } else {
-            var imageLoadsCompleted = 0, __notifyImageLoadCompleted = function() {
+            var imageLoadsCompleted = 0, __notifyImageLoadCompleted = $.proxy(function() {
               imageLoadsCompleted++;
               if(imageLoadsCompleted == results.length) {
-                CMC.animateShowSearchResults(results);
-                CMC.ajaxNotifyComplete(); // finish the one we started at the beginning of the search
+                this.animateShowSearchResults(results);
+                this.ajaxNotifyComplete(); // finish the one we started at the beginning of the search
               } else if (imageLoadsCompleted >= results.length) {
-                // loading more images than we have results for? bug. log it.
+                this.assert(false, "loading more images than we have results for");
               }
-            };
+            }, this);
+            this.assert(results.length <= 10, "more than 10 results passed to showSearchResults");
+            this.assert($(".result-picture img").length == 0,
+                        "found " + $(".result-picture img").length + " junk pictures lying around");
             for(var each in results) {
               var id = "#cmc-search-result-" + each;
-              CMC.ajaxNotifyStart();
+              this.ajaxNotifyStart();
               $(id).children(".result-name").html(results[each].name);
               $(id).children("div.result-picture").children("img").remove();
               $("<img />")
                 .attr("src", "http://graph.facebook.com/"+results[each].id+"/picture")
                 .attr("cmcid", id)
                 .addClass("srpic")
-                .one('load', function() {
-                  $($(this).attr("cmcid")).children("div.result-picture").append($(this));
-                  CMC.ajaxNotifyComplete();
+                .one('load', $.proxy(function(event) {
+                  $($(event.target).attr("cmcid")).children("div.result-picture").append($(event.target));
+                  this.ajaxNotifyComplete();
                   __notifyImageLoadCompleted();
-                });
+                }, this));
             } // end for
           } // end else
+          this.endFunction("showSearchResults");
         },
 
         animateShowSearchResults : function (results) {
+          this.beginFunction("animateShowSearchResults");
+          this.log("animating resultset starting with " + results[0].name);
+          $(".cmc-search-result").queue("custom-SearchResultsQueue", []);
           for(var each in results) {
-            $("#cmc-search-result-" + each)
-              .delay(25 * each)
-              .show("drop", {direction: "right", distance: 50}, 250, null);
+            var id = "#cmc-search-result-" + each, maxSearchResults = $(".cmc-search-result").length,
+                showsCompleted = 0, _onShowComplete = $.proxy(function () {
+                  // this sure ain't the prettiest way to fix the incomplete
+                  // page quick click render bug, but it works --zack
+                  ++showsCompleted;
+                  if (showsCompleted == results.length) {
+                    if (results.length < maxSearchResults) {
+                      this.log("incomplete page, hiding the the results that need cleanup");
+                      for (var point = maxSearchResults - results.length; point > 0; point--) {
+                        // clean up the slots that weren't being shown
+                        var tempId = "#cmc-search-result-" + (maxSearchResults - point);
+                        $(tempId).delay(4 * (maxSearchResults - point)).fadeOut('fast'); // at least fade out
+                      }
+                    }
+                    if (!$("#cmc-search-results").is(":visible")) {
+                      this.log("this search has displayed, but is veiled; deleting pictures");
+                      $("img.srpic").remove();
+                    }
+                  }
+                }, this);
+            $(id).queue("custom-SearchResultsQueue", function () {
+              $(this).stop(true, true);
+            }).dequeue("custom-SearchResultsQueue");
+            $("*").clearQueue("custom-SearchResultsQueue");
+            if ($(id + " .result-picture img").length > 1) {
+              // cleanup the junk pictures, the user is clicking too quickly
+              this.log("cleaning " + ($(id + " .result-picture img").length - 1) + " junk result(s) while showing " + id);
+              while ($(id + " .result-picture img").length > 1) {
+                $(id + " .result-picture img:first").remove();
+                $(id + " .result-name div").html(""); // also kill the name
+                $(id).hide(); // this will get shown again later
+              }
+            }
+            $(id).queue("custom-SearchResultsQueue", function () {
+              var each = $(this).attr("id").split("-")[3];
+              $(this)
+                .delay(25 * each)
+                .show("drop", {direction: "right", distance: 50}, 250, _onShowComplete);
+            }).dequeue("custom-SearchResultsQueue");
           }
+          this.endFunction("animateShowSearchResults");
+        },
+
+        animateHideSearchResults : function(callback) {
+          this.beginFunction("animateHideSearchResults");
+          var fadesCompleted = 0, imagesDeleted = 0, _processFadeComplete = $.proxy(function () {
+            fadesCompleted++;
+            if (fadesCompleted == $(".cmc-search-result").length) {
+              this.log("now killing pictures in _processFadeComplete");
+              $(".result-picture").each($.proxy(function (index, element) {
+                imagesDeleted++;
+                $(element).children("img").remove();
+                if (imagesDeleted == $(".result-picture").length) {
+                  if (callback != undefined) {
+                    this.assert(typeof callback == "function", "type of callback is not a function");
+                    callback();
+                  }
+                }
+              }, this));
+            }
+          }, this);
+          $(".cmc-search-result").queue("custom-SearchResultsQueue", []);
+          $(".cmc-search-result").queue("custom-SearchResultsQueue", function () {
+            $(this).stop(true, true).fadeOut('fast', function () {
+              _processFadeComplete();
+            });
+          }).dequeue("custom-SearchResultsQueue");
+          this.endFunction("animateHideSearchResults");
         },
 
         navigateToNextSearchPage : function () {
-          var fadesCompleted = 0, imagesDeleted = 0, searchIndex = ++CMC.currentDisplayedSearchPage - 1, interval;
-          CMC.updateSearchPagingControls();
-          $(".cmc-search-result").each(function () {
-            $(this).fadeOut('fast', function () {
-              fadesCompleted++;
-              if (fadesCompleted == $(".cmc-search-result").length) {
-                $(".result-picture").each(function () {
-                  imagesDeleted++;
-                  $(this).children("img").remove();
-                  if (imagesDeleted == $(".result-picture").length) {
-                    if (CMC.searchPageCache[searchIndex] !== undefined) {
-                      CMC.showSearchResults(CMC.searchPageCache[searchIndex]);
-                    } else {
-                      // if it's not ready yet, set a timeout to check on it
-                      interval = setInterval(function () {
-                        if (CMC.searchPageCache[searchIndex] !== undefined) {
-                          CMC.showSearchResults(CMC.searchPageCache[searchIndex]);
-                          clearInterval(interval);
-                        }
-                      }, 250);
-                    }
-                  }
-                });
-              }
-            });
-          });
-          if(CMC.searchPageCache[searchIndex + 1] === undefined) {
+          this.beginFunction("navigateToNextSearchPage");
+          var searchIndex = ++this.currentDisplayedSearchPage - 1, interval;
+          this.updateSearchPagingControls();
+          this.animateHideSearchResults($.proxy(function () {
+            if (this.searchPageCache[searchIndex] !== undefined) {
+              this.showSearchResults(this.searchPageCache[searchIndex]);
+            } else {
+              this.log("next search page not ready yet, set an interval to check on it");
+              interval = setInterval($.proxy(function () {
+                this.log("listening for the next search page to cache...");
+                if (this.searchPageCache[searchIndex] !== undefined) {
+                  this.log("got it! caching the search page and clearing the interval");
+                  this.showSearchResults(this.searchPageCache[searchIndex]);
+                  clearInterval(interval);
+                }
+              }, this), 250);
+            }
+          }, this));
+          this.cacheSearchPage(searchIndex + 1);
+          this.endFunction("navigateToNextSearchPage");
+        },
+
+        cacheSearchPage : function(pageIndex) {
+          this.beginFunction("cacheSearchPage");
+          if (this.searchPageCache[pageIndex] === undefined) {
             // this is a page that we haven't cached yet
-            CMC.ajaxNotifyStart();
+            this.log("[cacheSearchPage] fetching search page " + (pageIndex + 1));
+            this.ajaxNotifyStart();
             $.ajax({
               url: "api/searchresults.php",
               data: {
                 fbid: "25826994",
-                searchkeys: encode64(JSON.stringify(CMC.SearchState)),
-                page: searchIndex + 2, // page on the server is off by one
+                searchkeys: encode64(JSON.stringify(this.SearchState)),
+                page: pageIndex + 1, // page on the server is off by one
                 perpage: 10
               },
               dataType: "json",
-              success: function(data, textStatus, jqXHR) {
-                if(data.has_error !== undefined && data.has_error !== null) {
-                  if(data.has_error) {
-                    // we have a known error, handle it
-                  } else {
-                    if(data["searchids"] === undefined) {
-                      // hm, this is strange. probably means no results, but we 
-                      // might consider logging this in the future. --zack
-                      CMC.searchPageCache[searchIndex + 1] = null;
-                    } else if(data.searchids == null) {
-                      // this should DEFINITELY mean that we have no results
-                      CMC.searchPageCache[searchIndex + 1] = null;
-                    } else {
-                      CMC.getDataForEachFBID(data.searchids, function (results) {
-                        CMC.searchPageCache[searchIndex + 1] = results;
-                      });
-                    }
-                  }
-                } else {
-                  CMC.searchPageCache[searchIndex + 1] = null; // this should stop the interval check
-                  // an unknown error occurred? do something!
-                }
-                CMC.updateSearchPagingControls();
-                CMC.ajaxNotifyComplete();
+              context: {
+                invokeData: {
+                  index: pageIndex
+                },
+                cmc: this // this is a terrible hack and I am sorry --zack
               },
-              error: function(jqXHR, textStatus, errorThrown) {
-                CMC.ajaxNotifyComplete();
-                CMC.searchPageCache.push(null); // this should (hopefully) stop the interval check
-                // we might also want to log this or surface an error message or something
-              }
+              success: this.onCacheSearchPageSuccess,
+              error: this.onCacheSearchPageServerError
             });
           }
+          this.endFunction("cacheSearchPage");
+        },
+
+        onCacheSearchPageSuccess : function(data, textStatus, jqXHR) {
+          this.cmc.beginFunction("onCacheSearchPageSuccess");
+          if (!("cmc" in this)) {
+            if (CMC) {
+              CMC.assert(false, '"cmc" not in this context for onCacheSearchPageSuccess');
+            } // if this is unavailable, god help us all
+          }
+          this.cmc.assert(data != undefined, "data is undefined in onCacheSearchPageSuccess");
+          if("has_error" in data && data["has_error"] !== undefined && data.has_error !== null) {
+            if(data.has_error) {
+              // we have a known error, handle it
+              this.cmc.handleSearchSuccessHasError(data);
+            } else {
+              this.cmc.log("[onCacheSearchPageSuccess] got data for page " + (this.invokeData.index + 1));
+              if(!("searchids" in data)) {
+                // peculiar. this is actually an important field -- why don't we have it?
+                this.cmc.log('"searchids" was missing from the data map');
+                this.cmc.searchPageCache[this.invokeData.index] = null;
+              } else if(data["searchids"] === undefined) {
+                // hm, this is strange. probably means no results, but we 
+                // might consider logging this in the future. --zack
+                this.cmc.searchPageCache[this.invokeData.index] = null;
+              } else if(data["searchids"] == null) {
+                // this should DEFINITELY mean that we have no results
+                this.cmc.searchPageCache[this.invokeData.index] = null;
+              } else {
+                this.cmc.getDataForEachFBID(data.searchids, $.proxy(function (results) {
+                  this.cmc.searchPageCache[this.invokeData.index] = results;
+                  this.cmc.updateSearchPagingControls();
+                }, this));
+              }
+            }
+          } else {
+            // an unknown error occurred? do something!
+            this.cmc.searchPageCache[this.invokeData.index] = null; // this should stop the interval check
+            // a thought from zack. if this is set to null, we'll never be able 
+            // to get this page again. just a thought, but this is a bad user 
+            // experience
+            this.cmc.handleSearchSuccessUnknownError(data, textStatus, jqXHR);
+          }
+          this.cmc.updateSearchPagingControls();
+          this.cmc.ajaxNotifyComplete();
+          this.cmc.endFunction("onCacheSearchPageSuccess");
+        },
+
+        onCacheSearchPageServerError : function(jqXHR, textStatus, errorThrown) {
+          this.beginFunction("onCacheSearchPageServerError");
+          this.ajaxNotifyComplete();
+          this.searchPageCache.push(null); // this should (hopefully) stop the interval check
+          // we might also want to log this or surface an error message or something
+          this.handleSearchServerError(jqXHR, textStatus, errorThrown);
+          this.endFunction("onCacheSearchPageServerError");
         },
 
         navigateToPreviousSearchPage : function () {
+          this.beginFunction("navigateToPreviousSearchPage");
           var fadesCompleted = 0, imagesDeleted = 0;
-          CMC.currentDisplayedSearchPage--;
-          CMC.updateSearchPagingControls();
-          if (CMC.searchPageCache[CMC.currentDisplayedSearchPage - 1] !== undefined) {
-            $(".cmc-search-result").each(function () {
-              $(this).fadeOut('fast', function () {
-                fadesCompleted++;
-                if (fadesCompleted == $(".cmc-search-result").length) {
-                  $(".result-picture").each(function () {
-                    imagesDeleted++;
-                    $(this).children("img").remove();
-                    if (imagesDeleted == $(".result-picture").length) {
-                      CMC.showSearchResults(CMC.searchPageCache[CMC.currentDisplayedSearchPage - 1]);
-                    }
-                  });
-                }
-              });
-            });
+          this.currentDisplayedSearchPage--;
+          this.updateSearchPagingControls();
+          if (this.searchPageCache[this.currentDisplayedSearchPage - 1] !== undefined) {
+            this.animateHideSearchResults($.proxy(function () {
+              this.showSearchResults(this.searchPageCache[this.currentDisplayedSearchPage - 1]);
+            }, this));
           } else {
             // something went horribly, horribly wrong, and we should probably know about it
+            this.assert(false, "stumbled on an undefined page while navigating to the previous page");
           }
-          CMC.updateSearchPagingControls();
+          this.updateSearchPagingControls();
+          this.endFunction("navigateToPreviousSearchPage");
         },
 
         updateSearchPagingControls : function () {
-          $("#cmc-search-results-pagingctl-text").children(".ui-button-text").html("page " + CMC.currentDisplayedSearchPage);
-          if (CMC.currentDisplayedSearchPage <= 1) {
+          this.beginFunction("updateSearchPagingControls");
+          this.assert(this.currentDisplayedSearchPage >= 1, "displaying search page that is negative or zero");
+          $("#cmc-search-results-pagingctl-text").children(".ui-button-text").html("page " + this.currentDisplayedSearchPage);
+          if (this.currentDisplayedSearchPage <= 1) {
             $("#cmc-search-results-pagingctl-prev").button("disable");
           } else {
             $("#cmc-search-results-pagingctl-prev").button("enable");
           }
-          if (CMC.searchPageCache[CMC.currentDisplayedSearchPage] != null) {
+          if (this.searchPageCache[this.currentDisplayedSearchPage] != null) {
             $("#cmc-search-results-pagingctl-next").button("enable");
           } else {
             $("#cmc-search-results-pagingctl-next").button("disable");
           }
+          this.endFunction("updateSearchPagingControls");
         }
       };
 
@@ -482,6 +723,26 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
       });
 
       $(function() {
+        $("#debug-log").val("=== BEGIN DEBUG OUTPUT ===\n");
+
+        CMC.log("begin load callback");
+
+        CMC.performStartupActions();
+
+        CMC.log("attaching global click event handler");
+        $('*').live('click', function(event) {
+          event.preventDefault();
+          event.stopPropagation();
+          var id = $(this).attr('id') == '' || $(this).attr('id') == undefined ? (
+                     $(this).parent().attr('id') == '' || $(this).parent().attr('id') == undefined ? (
+                       $(this).parent().parent().attr('id') == ''  || $(this).parent().parent().attr('id') == undefined ?
+                         "(unknown ID)"
+                         : $(this).parent().parent().attr('id'))
+                       : $(this).parent().attr('id'))
+                     : $(this).attr('id');
+          CMC.log("click event: " + $(this).get(0).tagName.toLowerCase() + "#" + id);
+        });
+
         $("#make-profile, #make-volunteer, #make-organizer").hide();
 
         $(".cmc-big-button").hover(
@@ -489,14 +750,15 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
           function() { $(this).removeClass('ui-state-hover'); }
         );
 
+        CMC.log("applying jQuery tabs");
         $("#tabs").tabs({
           fx: {
-            //height: 'toggle',
             opacity: 'toggle',
             duration: 'fast'
           }
         });
         
+        CMC.log("setting up ajax spinner");
         $("#ajax-spinner")
           .hide()
           .ajaxStart(function() {
@@ -506,6 +768,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
             CMC.ajaxNotifyComplete();
           });
 
+        CMC.log("configuring FCBKcomplete for search");
         $("#search-box-select").fcbkcomplete({
           addontab : true,
           cache : true,
@@ -524,6 +787,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
           zipcode_target : "api/zipcode.php"
         });
 
+        CMC.log("setting up tipbars");
         $("#search-tipbar-left .tipbar-link").tipTip({
           activation: 'focus',
           keepAlive: true,
@@ -547,6 +811,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         });
 
         if ($.browser.msie && parseInt($.browser.version, 10) <= 7) {
+          CMC.log("applying browser specific tipbar hack for IE version <= 7")
           $("#tiptip_content").css("background-color", "black");
         }
 
@@ -554,10 +819,12 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
           $("#cmc-search-box").children("ul").children("li.bit-input").children(".maininput").focus();
         });
 
+        CMC.log("building page model for search results");
+
         $("#cmc-search-results-pagingctl-prev")
           .button({ text: false, icons: { primary: "ui-icon-circle-triangle-w" }})
           .click(function () {
-            if (!$("#cmc-search-results-pagingctl-prev").button("option", "disabled")) {
+            if (!$(this).button("option", "disabled")) {
               CMC.navigateToPreviousSearchPage();
             }
           });
@@ -565,7 +832,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         $("#cmc-search-results-pagingctl-next")
           .button({ text: false, icons: { primary: "ui-icon-circle-triangle-e" }})
           .click(function () {
-            if (!$("#cmc-search-results-pagingctl-next").button("option", "disabled")) {
+            if (!$(this).button("option", "disabled")) {
               CMC.navigateToNextSearchPage();
             }
           });
@@ -574,6 +841,11 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         $("#cmc-search-results-noresultmsg").hide();
         $(".cmc-search-result").each(function () { $(this).hide(); });
 
+        // this should fix the junk picture assert on first search
+        CMC.log("clearing the placeholder images");
+        $(".result-picture img").remove();
+
+        CMC.log("attempting to get facebook login status");
         CMC.ajaxNotifyStart();
         FB.getLoginStatus(function(response) {
           CMC.ajaxNotifyComplete();
@@ -587,6 +859,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
           }
         });
 
+        CMC.log("setting up dialog boxes");
         $("#copyrights-dialog").dialog({
           autoOpen: false,
           draggable: false,
@@ -646,6 +919,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
           });
 
         // this should be the last thing that happens
+        CMC.log("load callback complete, fading in canvas");
         $("#loading").fadeOut(function() {
           $("#tabs").hide().fadeIn(function() {
             $("#cmc-footer").hide().delay(150).fadeIn();
@@ -656,6 +930,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
     </script>
     <script type="text/javascript">
       $(function() {
+        CMC.log("loading admin only code");
         $("#secret-hideout-dialog").dialog({
           autoOpen: false,
           draggable: false,
@@ -674,6 +949,8 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         $("#secret-hideout").click(function() {
           $("#secret-hideout-dialog").dialog('open');
         });
+
+        CMC.log("admin load complete");
       });
     </script>
     <!-- Custom CSS markup goes here -->
@@ -691,7 +968,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         border: 0px none;
       }
 
-      #tabs {
+      #tabs, #loading {
         height: 500px;
       }
 
@@ -702,6 +979,13 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         right: 2px;
         margin-top: 6px;
         margin-right: 5px;
+      }
+
+      #debug-section {
+        display: inline-block;
+        margin-left: 0px auto;
+        margin-top: 20px;
+        z-index: -1;
       }
 
       .cmc-infobar {
@@ -838,8 +1122,8 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
       }
 
       img.srloading {
-        margin-left: 17px;
-        margin-top: 13px;
+        z-index: -1;
+        display: none;
       }
 
       #cmc-footer a {
@@ -1127,6 +1411,12 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
       <div id="secret-hideout-dialog" title="Administration">
         <p>This is an area for magical unicorns and rainbows.</p>
       </div>
+    </div>
+    <!-- The debug log. Should not be displayed by default. Enable via the admin panel. -->
+    <div id="debug-section" style="display: none">
+      <textarea id="debug-log" rows="10" cols="80" spellcheck="false">
+      Please wait, loading debug console...
+      </textarea>
     </div>
     <!-- Do not place HTML markup below this line -->
   </body>
