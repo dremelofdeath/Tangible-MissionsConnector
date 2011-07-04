@@ -9,16 +9,6 @@ include_once 'common.php';
 
 header('Content-type: application/json');
 
-// create a results object
-class resultsObj{
-    var $name;
-    var $state;
-    var $city;
-	var $phone;
-	var $email;
-	var $religion;
-} 
-
 $con = arena_connect();
 
 $saferequest = cmc_safe_request_strip();
@@ -69,8 +59,7 @@ if (array_key_exists('fbid', $saferequest)) {
   		$has_error = TRUE;
   		$err_msg = "Search type and/or search fields not defined for advanced search";
 	}
-}
-else {
+} else {
   // error case: all needed variables are not defined
   $has_error = TRUE;
   $err_msg = "Required parameters not defined.";
@@ -159,246 +148,239 @@ function getZipsWithin($zip, $miles, &$has_error, &$err_msg, $con) {
 
 function get_rest_of_string(&$sql3,&$sql1,&$sql2,$val,$searchkeys) {
 
-$skills = 0;
-$sql2 = '';
-$sql1 = ' ';
-$sql3='';
-$usersinc=0;
-$firstone = 0;
+  $skills = 0;
+  $sql2 = '';
+  $sql1 = ' ';
+  $sql3='';
+  $usersinc=0;
+  $firstone = 0;
 
-/*
-For name or general keyword, only the user names are searched with a "%like% statement in the mysql query.
-For other search items, exact criteria (for example religion id etc. are used)
-*/
+  /*
+  For name or general keyword, only the user names are searched with a "%like% statement in the mysql query.
+  For other search items, exact criteria (for example religion id etc. are used)
+   */
 
-if (isset($searchkeys->{'name'})) {
-  if ($val ==1) {
-        $usersinc = 1;
-  	$sql1 = ',users';
-  	$sql3 = $sql3.' and users.name like "%'.$searchkeys->{'name'}.'%"';
-  }
-  else {
-    $pieces = explode(" ", $searchkeys->{'name'});
-  	$sql3 = $sql3.' users.name like "%';
-    for ($i=0;$i<count($pieces);$i++) {
-      if ($i==(count($pieces)-1))
-        $sql3 = $sql3.$pieces[$i].'%"';
-      else
-        $sql3 = $sql3.$pieces[$i].'%';
-    }
-    $firstone = 1;
-  }
-}
-if (isset($searchkeys->{'relg'})) {
-  if (strcmp($searchkeys['relg'],"Any")) {
-  if ($val ==1) {
-        $usersinc = 1;
-  	$sql1 = ',users';
-  	$sql3 = $sql3.' and users.religion="'.$searchkeys->{'relg'}.'"';
-  }
-  else {
-    if ($firstone == 1)
-  	$sql3 = $sql3.' and users.religion="'.$searchkeys->{'relg'}.'"';
-    else {
-  	$sql3 = $sql3.' users.religion="'.$searchkeys->{'relg'}.'"';
-    $firstone = 1;
+  if (isset($searchkeys->{'name'})) {
+    if ($val ==1) {
+      $usersinc = 1;
+      $sql1 = ',users';
+      $sql3 = $sql3.' and users.name like "%'.$searchkeys->{'name'}.'%"';
+    } else {
+      $pieces = explode(" ", $searchkeys->{'name'});
+      $sql3 = $sql3.' users.name like "%';
+      for ($i=0;$i<count($pieces);$i++) {
+        if ($i==(count($pieces)-1)) {
+          $sql3 = $sql3.$pieces[$i].'%"';
+        } else {
+          $sql3 = $sql3.$pieces[$i].'%';
+        }
+      }
+      $firstone = 1;
     }
   }
+  if (isset($searchkeys->{'relg'})) {
+    if (strcmp($searchkeys['relg'],"Any")) {
+      if ($val ==1) {
+        $usersinc = 1;
+        $sql1 = ',users';
+        $sql3 = $sql3.' and users.religion="'.$searchkeys->{'relg'}.'"';
+      } else {
+        if ($firstone == 1) {
+          $sql3 = $sql3.' and users.religion="'.$searchkeys->{'relg'}.'"';
+        } else {
+          $sql3 = $sql3.' users.religion="'.$searchkeys->{'relg'}.'"';
+          $firstone = 1;
+        }
+      }
+    }
   }
-}
-if (isset($searchkeys->{'medskills'})) {
-  if ($searchkeys->{'medskills'} != 0) {
-  
-  if ($firstone==1)  
-  $sql3 = $sql3.' and skills.id="'.$searchkeys->{'medskills'}.'"';
-  else {
-  $sql3 = $sql3.' skills.id="'.$searchkeys->{'medskills'}.'"';
-  $firstone = 1;
-  }
+  if (isset($searchkeys->{'medskills'})) {
+    if ($searchkeys->{'medskills'} != 0) {
 
-  $sql2 = $sql2.' and skills.id=skillsselected.id and users.userid=skillsselected.userid';
-  	if ($val==1) {
-  if ($usersinc == 0) {
-  	$sql1 = $sql1.',users,skills,skillsselected';
-	$usersinc = 1;
-	}
-  }
-  else
-  	$sql1 = $sql1.',skills,skillsselected';
-  $skills = 1;
-  }
-}
-if (isset($searchkeys->{'otherskills'})) {
-  if ($searchkeys->{'otherskills'} != 0) {
+      if ($firstone==1) {
+        $sql3 = $sql3.' and skills.id="'.$searchkeys->{'medskills'}.'"';
+      } else {
+        $sql3 = $sql3.' skills.id="'.$searchkeys->{'medskills'}.'"';
+        $firstone = 1;
+      }
 
-  if ($firstone==1)
-  $sql3 = $sql3.' and skills.id="'.$searchkeys->{'otherskills'}.'"';
-  else {
-  $sql3 = $sql3.' skills.id="'.$searchkeys->{'otherskills'}.'"';
-  $firstone=1;
-  }
+      $sql2 = $sql2.' and skills.id=skillsselected.id and users.userid=skillsselected.userid';
 
-  if ($skills==0) {
-  	$sql2 = $sql2.' and skills.id=skillsselected.id and users.userid=skillsselected.userid';
-
-  	if ($val==1) {
-  if ($usersinc == 0) {
-  	$sql1 = $sql1.',users,skills,skillsselected';
-	$usersinc = 1;
-	}
-  }
-  else
+      if ($val==1) {
+        if ($usersinc == 0) {
+          $sql1 = $sql1.',users,skills,skillsselected';
+          $usersinc = 1;
+        }
+      } else {
         $sql1 = $sql1.',skills,skillsselected';
+      }
+      $skills = 1;
+    }
+  }
+  if (isset($searchkeys->{'otherskills'})) {
+    if ($searchkeys->{'otherskills'} != 0) {
 
-  	$skills = 1;
-  }
-  }
-}
-if (isset($searchkeys->{'spiritserv'})) {
-  if ($searchkeys->{'spiritserv'} != 0) {
+      if ($firstone==1) {
+        $sql3 = $sql3.' and skills.id="'.$searchkeys->{'otherskills'}.'"';
+      } else {
+        $sql3 = $sql3.' skills.id="'.$searchkeys->{'otherskills'}.'"';
+        $firstone=1;
+      }
 
-  if ($firstone==1)
-  $sql3 = $sql3.' and skills.id="'.$searchkeys->{'spiritserv'}.'"';
-  else {
-  $sql3 = $sql3.' skills.id="'.$searchkeys->{'spiritserv'}.'"';
-  $firstone = 1;
-  }
+      if ($skills==0) {
+        $sql2 = $sql2.' and skills.id=skillsselected.id and users.userid=skillsselected.userid';
 
-  if ($skills==0) {
-  	$sql2 = $sql2.' and skills.id=skillsselected.id and users.userid=skillsselected.userid';
-  	if ($val==1) {
-  if ($usersinc == 0) {
-  	$sql1 = $sql1.',users,skills,skillsselected';
-	$usersinc = 1;
-	}
-  }
-  else
-        $sql1 = $sql1.',skills,skillsselected';
+        if ($val==1) {
+          if ($usersinc == 0) {
+            $sql1 = $sql1.',users,skills,skillsselected';
+            $usersinc = 1;
+          }
+        } else {
+          $sql1 = $sql1.',skills,skillsselected';
+        }
 
-  	$skills = 1;
+        $skills = 1;
+      }
+    }
   }
-  }
-}
-if (isset($searchkeys->{'country'})) {
-  if ($searchkeys->{'country'} != 0) {
+  if (isset($searchkeys->{'spiritserv'})) {
+    if ($searchkeys->{'spiritserv'} != 0) {
 
-  if ($firstone==1)
-  $sql3 = $sql3.' and countries.id="'.$searchkeys->{'country'}.'"';
-  else {
-  $sql3 = $sql3.' countries.id="'.$searchkeys->{'country'}.'"';
-  $firstone=1;
-  }
+      if ($firstone==1)
+        $sql3 = $sql3.' and skills.id="'.$searchkeys->{'spiritserv'}.'"';
+      else {
+        $sql3 = $sql3.' skills.id="'.$searchkeys->{'spiritserv'}.'"';
+        $firstone = 1;
+      }
 
-  	if ($val==1) {
-  if ($usersinc == 0) {
-  	$sql1 = $sql1.',users,countries,countriesselected';
-	$usersinc = 1;
-	}
-  }
-  else
-  $sql1 = $sql1.',countries,countriesselected';
+      if ($skills==0) {
+        $sql2 = $sql2.' and skills.id=skillsselected.id and users.userid=skillsselected.userid';
+        if ($val==1) {
+          if ($usersinc == 0) {
+            $sql1 = $sql1.',users,skills,skillsselected';
+            $usersinc = 1;
+          }
+        }
+        else
+          $sql1 = $sql1.',skills,skillsselected';
 
-  $sql2 = $sql2.' and countries.id=countriesselected.id and users.userid=countriesselected.userid';
+        $skills = 1;
+      }
+    }
   }
-}
-if (isset($searchkeys->{'region'})) {
-  if ($searchkeys->{'region'} != 0) {
+  if (isset($searchkeys->{'country'})) {
+    if ($searchkeys->{'country'} != 0) {
 
-  if ($firstone==1)  
-  $sql3 = $sql3.' and regions.id="'.$searchkeys->{'region'}.'"';
-  else {
-  $sql3 = $sql3.' regions.id="'.$searchkeys->{'region'}.'"';
-  $firstone = 1;
-  }
+      if ($firstone==1) {
+        $sql3 = $sql3.' and countries.id="'.$searchkeys->{'country'}.'"';
+      } else {
+        $sql3 = $sql3.' countries.id="'.$searchkeys->{'country'}.'"';
+        $firstone=1;
+      }
 
-  if ($val==1) {
-  if ($usersinc == 0) {
-  	$sql1 = $sql1.',users,regions,regionsselected';
-	$usersinc = 1;
-  }
-  }
-  else
-  $sql1 = $sql1.',regions,regionsselected';
+      if ($val==1) {
+        if ($usersinc == 0) {
+          $sql1 = $sql1.',users,countries,countriesselected';
+          $usersinc = 1;
+        }
+      } else {
+        $sql1 = $sql1.',countries,countriesselected';
+      }
 
-  $sql2 = $sql2.' and regions.id=regionsselected.id and users.userid=regionsselected.userid';
+      $sql2 = $sql2.' and countries.id=countriesselected.id and users.userid=countriesselected.userid';
+    }
   }
-}
-if (isset($searchkeys->{'dur'})) {
-  if ($searchkeys->{'dur'} != 0) {
+  if (isset($searchkeys->{'region'})) {
+    if ($searchkeys->{'region'} != 0) {
 
-  if ($firstone==1)
-  $sql3 = $sql3.' and durations.id="'.$searchkeys->{'dur'}.'"';
-  else {
-  $sql3 = $sql3.' durations.id="'.$searchkeys->{'dur'}.'"';
-  $firstone = 1;
-  }
+      if ($firstone==1) {
+        $sql3 = $sql3.' and regions.id="'.$searchkeys->{'region'}.'"';
+      } else {
+        $sql3 = $sql3.' regions.id="'.$searchkeys->{'region'}.'"';
+        $firstone = 1;
+      }
 
-  	if ($val==1) {
-  if ($usersinc == 0) {
-  	$sql1 = $sql1.',users,durations,durationsselected';
-	$usersinc = 1;
-  }
-  }
-  else
-  $sql1 = $sql1.',durations,durationsselected';
+      if ($val==1) {
+        if ($usersinc == 0) {
+          $sql1 = $sql1.',users,regions,regionsselected';
+          $usersinc = 1;
+        }
+      } else {
+        $sql1 = $sql1.',regions,regionsselected';
+      }
 
-  $sql2 = $sql2.' and durations.id=durationsselected.id and users.userid=durationsselected.userid';
+      $sql2 = $sql2.' and regions.id=regionsselected.id and users.userid=regionsselected.userid';
+    }
   }
-}
+  if (isset($searchkeys->{'dur'})) {
+    if ($searchkeys->{'dur'} != 0) {
 
+      if ($firstone==1) {
+        $sql3 = $sql3.' and durations.id="'.$searchkeys->{'dur'}.'"';
+      } else {
+        $sql3 = $sql3.' durations.id="'.$searchkeys->{'dur'}.'"';
+        $firstone = 1;
+      }
+
+      if ($val==1) {
+        if ($usersinc == 0) {
+          $sql1 = $sql1.',users,durations,durationsselected';
+          $usersinc = 1;
+        }
+      } else {
+        $sql1 = $sql1.',durations,durationsselected';
+      }
+
+      $sql2 = $sql2.' and durations.id=durationsselected.id and users.userid=durationsselected.userid';
+    }
+  }
 }
 
 function getzipsearchstring($result,$con,&$has_error,&$err_msg,&$sqlstr,&$sqlstr2,$sql3) {
+  $j=0;
+  if (empty($sql3)) {
+    $sqlstr = ' users.zipcode in (';
+  } else {
+    $sqlstr = ' and users.zipcode in (';
+  }
 
-$j=0;
-if (empty($sql3))
-  $sqlstr = ' users.zipcode in (';
-else
-  $sqlstr = ' and users.zipcode in (';
+  $sqlstr2 = ' order by field(users.zipcode, ';
 
-$sqlstr2 = ' order by field(users.zipcode, ';
-
-for ($i=0;$i<count($result);$i++) {
-	if ($i==(count($result)-1)) {
-		$sqlstr = $sqlstr.$result[$i].')';
-		$sqlstr2 = $sqlstr2.$result[$i].')';
-	}
-	else {
-		$sqlstr = $sqlstr.$result[$i].', ';
-		$sqlstr2 = $sqlstr2.$result[$i].', ';
-	}
-}
-
+  for ($i=0;$i<count($result);$i++) {
+    if ($i==(count($result)-1)) {
+      $sqlstr = $sqlstr.$result[$i].')';
+      $sqlstr2 = $sqlstr2.$result[$i].')';
+    } else {
+      $sqlstr = $sqlstr.$result[$i].', ';
+      $sqlstr2 = $sqlstr2.$result[$i].', ';
+    }
+  }
 }
 
 function update_searchtables($fbid,$keywords,$con,&$has_error,&$err_msg) {
-	$sql = 'insert into searches (userid) VALUES ("'.$fbid.'")';
-	$result = mysql_query($sql,$con);
-	if (!$result) {
-		setjsonmysqlerror($has_error,$err_msg,$sql);
-	}
-	else {
-		$sql2 = 'select max(searchid) as searchid from searches where userid="'.$fbid.'"';
-		$result2 = mysql_query($sql2,$con);
-		if (!$result2) {
-			setjsonmysqlerror($has_error,$err_msg,$sql2);
-		}
-		else {
-		while ($row = mysql_fetch_array($result2, MYSQL_ASSOC)) {
-			$searchid = $row['searchid']+0;  
-			break;
-		}
+  $sql = 'insert into searches (userid) VALUES ("'.$fbid.'")';
+  $result = mysql_query($sql,$con);
+  if (!$result) {
+    setjsonmysqlerror($has_error,$err_msg,$sql);
+  } else {
+    $sql2 = 'select max(searchid) as searchid from searches where userid="'.$fbid.'"';
+    $result2 = mysql_query($sql2,$con);
+    if (!$result2) {
+      setjsonmysqlerror($has_error,$err_msg,$sql2);
+    } else {
+      while ($row = mysql_fetch_array($result2, MYSQL_ASSOC)) {
+        $searchid = $row['searchid']+0;  
+        break; // what the heck? --zack
+      }
 
-		// Now insert into searchterms table
-		$sql2 = "insert into searchterms (searchid,searchquery) VALUES ('".$searchid."','".$keywords."')";
-		$result2 = mysql_query($sql2,$con);
-		if (!$result2) {
-			setjsonmysqlerror($has_error,$err_msg,$sql2);
-		}
-		}
-		
-	}
-
+      // Now insert into searchterms table
+      $sql2 = "insert into searchterms (searchid,searchquery) VALUES ('".$searchid."','".$keywords."')";
+      $result2 = mysql_query($sql2,$con);
+      if (!$result2) {
+        setjsonmysqlerror($has_error,$err_msg,$sql2);
+      }
+    }
+  }
 }
 
 if (!$has_error) {
@@ -410,8 +392,7 @@ if (!$has_error) {
     if (count($zipdata)!=2) {
       $has_error = TRUE;
       $err_msg = "zipcode data should have zipcode and search-radius";
-    }
-    else {
+    } else {
       // Zip code entered by user
       $myzipcode = $zipdata[0];
       // search radius entered by user
@@ -422,15 +403,13 @@ if (!$has_error) {
       }
 
     }
-  }
-  else {
+  } else {
     // get the zipcode of the current user if zipcode and search radius are not included in the search string
     $sql = 'select zipcode from users where userid="'.$fbid.'"';
     $result = mysql_query($sql,$con);
     if (!$result) {
       setjsonmysqlerror($has_error,$err_msg,$sql);
-    }
-    else {
+    } else {
       $numrows = mysql_num_rows($result);
       if ($numrows != 0) {
         $row = mysql_fetch_array($result,MYSQL_ASSOC);
@@ -524,4 +503,3 @@ if ($has_error) {
 
 echo json_encode($json);
 
-?>
