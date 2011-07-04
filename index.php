@@ -89,12 +89,12 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
 <html>
   <head>
     <meta charset="utf-8">
-    <title><?php echo STR_APP_NAME; ?></title>
+    <title>Christian Missions Connector</title>
   </head>
   <body>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <!-- Include jQuery stuff and link stylesheet to the specified theme -->
-    <?php cmc_jquery_startup("1.5.1", "1.8.11", "custom-theme"); ?>
+    <?php cmc_jquery_startup("1.6.1", "1.8.11", "custom-theme"); ?>
     <link rel="stylesheet" href="fcbkcomplete-style.css" type="text/css"
           media="screen" charset="utf-8" />
     <link rel="stylesheet" href="tipTip.css" type="text/css" />
@@ -106,407 +106,10 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
     <script src="https://connect.facebook.net/en_US/all.js"></script>
     <script src="base64.js"></script>
     <script src="json2-min.js"></script>
-    <script type="text/javascript">
-      // JavaScript code goes here
-
-      // first things first, some browser compatibility hacks
-      // add Object.keys() support to browsers that do not have it
-      if(!Object.keys) Object.keys = function(o){
-        if (o !== Object(o))
-          throw new TypeError('Object.keys called on non-object');
-        var ret=[],p;
-        for(p in o) if(Object.prototype.hasOwnProperty.call(o,p)) ret.push(p);
-        return ret;
-      }
-      
-      // the main CMC object
-      var CMC = {
-        // variables
-        loggedInUser : false,
-        friends : false,
-        requestsOutstanding : 0,
-        dialogsOpen : 0,
-        version : "1.9.18",
-        SearchState : {},
-
-        // methods
-        page : function(from, to) {
-          $(from).hide("drop", {direction: 'left'}, 250, function() {
-            $(to).show("drop", {direction: 'right'}, 250, null);
-          });
-        },
-
-        closeAllDialogs : function(except) {
-          $(".ui-dialog:visible").each(function() {
-            $(this).children(".ui-dialog-content").each(function() {
-              if (this != except) {
-                $(this).dialog('close');
-              }
-            });
-          });
-        },
-
-        dialogOpen : function(dialog) {
-          CMC.dialogsOpen++;
-          CMC.closeAllDialogs(dialog);
-          if ($.support.opacity && CMC.dialogsOpen == 1) {
-            $("#tabs, #cmc-footer").fadeTo('fast', 0.5);
-          }
-        },
-
-        dialogClose : function(dialog) {
-          if ($.support.opacity && CMC.dialogsOpen == 1) {
-            $("#tabs, #cmc-footer").fadeTo('fast', 1.0);
-          }
-          CMC.dialogsOpen--;
-        },
-
-        showAjaxSpinner : function() {
-          $("#ajax-spinner").show();
-        },
-
-        hideAjaxSpinner : function() {
-          $("#ajax-spinner").hide();
-        },
-
-        ajaxNotifyStart : function() {
-          if (CMC.requestsOutstanding == 0) {
-            CMC.showAjaxSpinner();
-          }
-          CMC.requestsOutstanding++;
-        },
-
-        ajaxNotifyComplete : function() {
-          if (CMC.requestsOutstanding > 0) {
-            CMC.requestsOutstanding--;
-            if (CMC.requestsOutstanding == 0) {
-              CMC.hideAjaxSpinner();
-            }
-          } else {
-            // this is a bug, and needs to be logged. --zack
-          }
-        },
-
-        recalculateTextareaLimit : function(messageID, labelID, limit, customText) {
-          var len = $(messageID).val().length;
-          limit = limit || 300;
-          customText = customText || " characters left";
-          $(labelID).html((limit - len) + customText);
-        },
-
-        recalculateProblemMessageLimit : function(limit) {
-          CMC.recalculateTextareaLimit(
-            "#report-problem-message",
-            "#report-problem-characters-left",
-            limit
-          );
-          $("#report-problem-characters-left").fadeIn();
-        },
-
-        handleSearchSelect : function(item) {
-          var value = jQuery.parseJSON(item)._value;
-          if (value.substring(0,2) == "!!") {
-            // this is a special value, we handle these differently
-            if (value.substring(2,3) == "z") { // this detection could definitely be better
-              // it's a zipcode
-              if (CMC.SearchState.z == undefined) {
-                CMC.SearchState.z = [value.substring(4,9), value.substring(10, value.length)];
-              } else {
-                // we have a problem, you can't have more than one zipcode
-              }
-            }
-          } else {
-            // this is a text item
-          }
-          CMC.search();
-        },
-
-        handleSearchRemove : function(item) {
-          var value = jQuery.parseJSON(item)._value;
-          if (value.substring(0,2) == "!!") {
-            // this is a special value, we handle these differently
-            if (value.substring(2,3) == "z") {
-              // it's a zipcode. we don't care what it is, just nuke it
-              delete CMC.SearchState.z;
-            }
-          } else {
-            // this is a text item
-          }
-          CMC.search();
-        },
-
-        search : function () {
-          $(".cmc-search-result").each(function () { $(this).fadeOut('fast'); });
-          if (Object.keys(CMC.SearchState).length == 0) {
-            // search is now blank. hide the results panels
-            $("#cmc-search-results-title").fadeOut();
-            $("#cmc-search-results-noresultmsg").fadeOut();
-          } else {
-            // otherwise, we have a new search to perform
-            CMC.ajaxNotifyStart(); // one for good measure, we want the spinner for the whole search
-            $.ajax({
-              url: "api/searchresults.php",
-              data: {
-                fbid: "25826994",
-                searchkeys: encode64(JSON.stringify(CMC.SearchState))
-              },
-              dataType: "json",
-              success: function(data, textStatus, jqXHR) {
-                if(data.has_error !== undefined && data.has_error !== null) {
-                  if(data.has_error) {
-                    // we have a known error, handle it
-                  } else {
-                    if(data.searchids === undefined) {
-                      // hm, this is strange. probably means no results, but we 
-                      // might consider logging this in the future. --zack
-                      CMC.showSearchResults(null);
-                    } else if(data.searchids === null) {
-                      // this should DEFINITELY mean that we have no results
-                      CMC.showSearchResults(null);
-                    } else {
-                      CMC.getDataForEachFBID(data.searchids, function (results) {
-                        CMC.showSearchResults(results);
-                      });
-                    }
-                  }
-                } else {
-                  // an unknown error occurred? do something!
-                }
-              }
-            });
-
-            $("#cmc-search-results-title").fadeIn();
-          }
-        },
-
-        getDataForEachFBID : function (fbids, callback) {
-          var results = new Array(fbids.length), requestsCompleted = 0, idPosMap = {};
-          var __notifyComplete = function () {
-            requestsCompleted++;
-            if (requestsCompleted == fbids.length) {
-              callback(results);
-            }
-          };
-          for(var each in fbids) {
-            idPosMap[fbids[each]] = each;
-            CMC.ajaxNotifyStart();
-            FB.api('/' + fbids[each], function (response) {
-              CMC.ajaxNotifyComplete();
-              results[idPosMap[response.id]] = response;
-              __notifyComplete();
-            });
-          }
-        },
-
-        showSearchResults : function (results) {
-          if (results === undefined) {
-            // this is a bug! do NOT pass this function undefined! say null to 
-            // inform it that you have no results!
-          } else if (results == null) {
-            // no results
-            $("#cmc-search-results-noresultmsg").fadeIn();
-          } else {
-            var imageLoadsCompleted = 0, __notifyImageLoadCompleted = function() {
-              imageLoadsCompleted++;
-              if(imageLoadsCompleted == results.length) {
-                for(var each in results) {
-                  $("#cmc-search-result-" + each)
-                    .delay(25 * each)
-                    .show("drop", {direction: "right", distance: 50}, 250, null);
-                }
-                CMC.ajaxNotifyComplete(); // finish the one we started at the beginning of the search
-              } else if (imageLoadsCompleted >= results.length) {
-                // loading more images than we have results for? bug. log it.
-              }
-            };
-            for(var each in results) {
-              var id = "#cmc-search-result-" + each;
-              CMC.ajaxNotifyStart();
-              $(id).children(".result-name").html(results[each].name);
-              $(id).children("div.result-picture").children("img").remove();
-              $("<img />")
-                .attr("src", "http://graph.facebook.com/"+results[each].id+"/picture")
-                .attr("cmcid", id)
-                .addClass("srpic")
-                .one('load', function() {
-                  $($(this).attr("cmcid")).children("div.result-picture").append($(this));
-                  CMC.ajaxNotifyComplete();
-                  __notifyImageLoadCompleted();
-                });
-            } // end for
-          } // end else
-        }
-      };
-
-      FB.init({
-        appId  : '153051888089898',
-        status : true,
-        cookie : true,
-        fbml   : true
-      });
-
-      $(function() {
-        $("#make-profile, #make-volunteer, #make-organizer").hide();
-
-        $(".cmc-big-button").hover(
-          function() { $(this).addClass('ui-state-hover'); },
-          function() { $(this).removeClass('ui-state-hover'); }
-        );
-
-        $("#tabs").tabs({
-          fx: {
-            //height: 'toggle',
-            opacity: 'toggle',
-            duration: 'fast'
-          }
-        });
-        
-        $("#ajax-spinner")
-          .hide()
-          .ajaxStart(function() {
-            CMC.ajaxNotifyStart();
-          })
-          .ajaxStop(function() {
-            CMC.ajaxNotifyComplete();
-          });
-
-        $("#search-box-select").fcbkcomplete({
-          addontab : true,
-          cache : true,
-          complete_text : "Start typing...",
-          filter_hide : true,
-          filter_selected : true,
-          firstselected : true, // circumvent a selection bug
-          height : 6,
-          maxshownitems : 5,
-          newel : true,
-          onselect : function (item) { CMC.handleSearchSelect(item); },
-          onremove : function (item) { CMC.handleSearchRemove(item); },
-          // custom (i.e. undocumented) options here
-          //cmc_icon_class : "ui-icon ui-icon-search" // broken.
-          cmc_zipcode_detect : true,
-          zipcode_target : "api/zipcode.php"
-        });
-
-        $("#search-tipbar-left .tipbar-link").tipTip({
-          activation: 'focus',
-          keepAlive: true,
-          maxWidth: '230px',
-          forceWidth: true,
-          delay: 0,
-          defaultPosition: 'bottom',
-          forcePosition: true,
-          content: $("#search-tipbar-left .tipbar-content").html()
-        });
-
-        $("#search-tipbar-right .tipbar-link").tipTip({
-          activation: 'focus',
-          keepAlive: true,
-          maxWidth: '230px',
-          forceWidth: true,
-          delay: 0,
-          defaultPosition: 'bottom',
-          forcePosition: true,
-          content: $("#search-tipbar-right .tipbar-content").html()
-        });
-
-        if ($.browser.msie && parseInt($.browser.version, 10) <= 7) {
-          $("#tiptip_content").css("background-color", "black");
-        }
-
-        $("#cmc-search-icon").click(function() {
-          $("#cmc-search-box").children("ul").children("li.bit-input").children(".maininput").focus();
-        });
-
-        $("#cmc-search-results-pagingctl-prev").button({ text: false, icons: { primary: "ui-icon-circle-triangle-w" }});
-        $("#cmc-search-results-pagingctl-next").button({ text: false, icons: { primary: "ui-icon-circle-triangle-e" }});
-
-        $("#cmc-search-results-title").hide();
-        $("#cmc-search-results-noresultmsg").hide();
-        $(".cmc-search-result").each(function () { $(this).hide(); });
-
-        CMC.ajaxNotifyStart();
-        FB.getLoginStatus(function(response) {
-          CMC.ajaxNotifyComplete();
-          if (response.session) {
-            CMC.loggedInUser = response.session.uid;
-            CMC.ajaxNotifyStart();
-            FB.api('/me/friends', function(friends) {
-              CMC.ajaxNotifyComplete();
-              CMC.friends = friends.data;
-            });
-          }
-        });
-
-        $("#copyrights-dialog").dialog({
-          autoOpen: false,
-          draggable: false,
-          position: [227, 50],
-          resizable: false,
-          title: "Christian Missions Connector v" + CMC.version,
-          open: function() {
-            CMC.dialogOpen(this);
-          },
-          close: function() {
-            CMC.dialogClose(this);
-          }
-        });
-
-        $("#copyrights").click(function() {
-          $("#copyrights-dialog").dialog('open');
-        });
-
-        $("#report-problem-dialog").dialog({
-          autoOpen: false,
-          draggable: false,
-          position: [177, 90],
-          resizable: false,
-          width: 400,
-          open: function() {
-            CMC.dialogOpen(this);
-          },
-          close: function() {
-            CMC.dialogClose(this);
-            if ($("#report-problem-message").val().length <= 0) {
-              $("#report-problem-characters-left").hide();
-            }
-          }
-        });
-
-        $("#report-problem").click(function() {
-          $("#report-problem-dialog").dialog('open');
-        });
-
-        $("#report-problem-submit")
-          .button()
-          .click(function() {
-            void false;
-          });
-
-        $("#report-problem-characters-left").hide();
-
-        $("#report-problem-message")
-          .click(function() {
-            CMC.recalculateProblemMessageLimit();
-          })
-          .keyup(function() {
-            CMC.recalculateProblemMessageLimit();
-          })
-          .keypress(function() {
-            CMC.recalculateProblemMessageLimit();
-          });
-
-        // this should be the last thing that happens
-        $("#loading").fadeOut(function() {
-          $("#tabs").hide().fadeIn(function() {
-            $("#cmc-footer").hide().delay(150).fadeIn();
-          });
-        });
-
-      });
-    </script>
+    <script type="text/javascript" src="cmc.js"></script>
     <script type="text/javascript">
       $(function() {
+        CMC.log("loading admin only code");
         $("#secret-hideout-dialog").dialog({
           autoOpen: false,
           draggable: false,
@@ -525,6 +128,8 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         $("#secret-hideout").click(function() {
           $("#secret-hideout-dialog").dialog('open');
         });
+
+        CMC.log("admin load complete");
       });
     </script>
     <!-- Custom CSS markup goes here -->
@@ -542,7 +147,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         border: 0px none;
       }
 
-      #tabs {
+      #tabs, #loading {
         height: 500px;
       }
 
@@ -553,6 +158,13 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         right: 2px;
         margin-top: 6px;
         margin-right: 5px;
+      }
+
+      #debug-section {
+        display: inline-block;
+        margin-left: 0px auto;
+        margin-top: 20px;
+        z-index: -1;
       }
 
       .cmc-infobar {
@@ -689,8 +301,8 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
       }
 
       img.srloading {
-        margin-left: 17px;
-        margin-top: 13px;
+        z-index: -1;
+        display: none;
       }
 
       #cmc-footer a {
@@ -978,6 +590,12 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
       <div id="secret-hideout-dialog" title="Administration">
         <p>This is an area for magical unicorns and rainbows.</p>
       </div>
+    </div>
+    <!-- The debug log. Should not be displayed by default. Enable via the admin panel. -->
+    <div id="debug-section" style="display: none">
+      <textarea id="debug-log" rows="10" cols="80" spellcheck="false">
+      Please wait, loading debug console...
+      </textarea>
     </div>
     <!-- Do not place HTML markup below this line -->
   </body>
