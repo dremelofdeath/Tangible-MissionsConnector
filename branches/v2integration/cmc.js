@@ -461,51 +461,36 @@ var CMC = {
       this.assert($(".result-picture img").length == 0,
                   "found " + $(".result-picture img").length + " junk pictures lying around");
       //@/END/DEBUGONLYSECTION
-      var __loadAllResultImages = $.proxy(function () {
-        for(var each in results) {
-          this.assert(results[each].id !== undefined, "id is missing from result at each=" + each);
-          var id = "#cmc-search-result-" + each;
-          this.ajaxNotifyStart();
-          this.assert(results[each].name !== undefined, "name is missing from result at each=" + each);
-          $(id).children(".result-name").html(results[each].name ? results[each].name : "");
-          $(id).children("div.result-picture").children("img").remove();
-          if (results[each].id) {
-            $("<img />")
-              .attr("src", "http://graph.facebook.com/"+results[each].id+"/picture")
-              .attr("cmcid", id) // this is the id from above! not results[each].id!
-              .addClass("srpic")
-              .one('load', $.proxy(function(event) {
-                // I never want to see more than one image here again. --zack
-                $($(event.target).attr("cmcid")).children("div.result-picture").children("img").remove();
-                $($(event.target).attr("cmcid")).children("div.result-picture").append($(event.target));
-                this.ajaxNotifyComplete();
-                __notifyImageLoadCompleted();
-              }, this));
-          } else {
-            // this thing is probably intentionally blank, so don't load anything
-            var i = 1;
-            for (i = 1; i <= 4; i++) { // set up four timeouts to clear the pictures after they load
-              this.searchPageImageClearJobQueue
-                .push(setTimeout("$('" + id + "').children('.result-picture').children('img').hide();", 100 * i));
-            }
-            this.ajaxNotifyComplete();
-            __notifyImageLoadCompleted();
+      for(var each in results) {
+        this.assert(results[each].id !== undefined, "id is missing from result at each=" + each);
+        var id = "#cmc-search-result-" + each;
+        this.ajaxNotifyStart();
+        this.assert(results[each].name !== undefined, "name is missing from result at each=" + each);
+        $(id).children(".result-name").html(results[each].name ? results[each].name : "");
+        $(id).children("div.result-picture").children("img").remove();
+        if (results[each].id) {
+          $("<img />")
+            .attr("src", "http://graph.facebook.com/"+results[each].id+"/picture")
+            .attr("cmcid", id) // this is the id from above! not results[each].id!
+            .addClass("srpic")
+            .one('load', $.proxy(function(event) {
+              // I never want to see more than one image here again. --zack
+              $($(event.target).attr("cmcid")).children("div.result-picture").children("img").remove();
+              $($(event.target).attr("cmcid")).children("div.result-picture").append($(event.target));
+              this.ajaxNotifyComplete();
+              __notifyImageLoadCompleted();
+            }, this));
+        } else {
+          // this thing is probably intentionally blank, so don't load anything
+          var i = 1;
+          for (i = 1; i <= 4; i++) { // set up four timeouts to clear the pictures after they load
+            this.searchPageImageClearJobQueue
+              .push(setTimeout("$('" + id + "').children('.result-picture').children('img').hide();", 100 * i));
           }
-        } // end for
-      }, this);
-      if ($("*").queue("custom-SearchResultsQueue") > 0) {
-        this.log("pending animation events, waiting until they finish");
-        var interval = 0;
-        var __timerCheckQueueEmptyForResults = $.proxy(function () {
-          if ($('*').queue('custom-SearchResultsQueue') <= 0) {
-            clearInterval(interval);
-            __loadAllResultImages();
-          }
-        }, this);
-        interval = setInterval(__timerCheckQueueEmptyForResults, 250);
-      } else {
-        __loadAllResultImages();
-      }
+          this.ajaxNotifyComplete();
+          __notifyImageLoadCompleted();
+        }
+      } // end for
     } // end else
     this.ajaxNotifyComplete(); // finish the one we started at the beginning of the search
     this.endFunction("showSearchResults");
@@ -528,10 +513,6 @@ var CMC = {
                   var tempId = "#cmc-search-result-" + (maxSearchResults - point);
                   $(tempId).delay(4 * (maxSearchResults - point)).fadeOut('fast'); // at least fade out
                 }
-              }
-              if (!$("#cmc-search-results").is(":visible")) {
-                this.log("this search has displayed, but is veiled; deleting pictures");
-                $("img.srpic").remove();
               }
             }
           }, this);
@@ -743,6 +724,28 @@ var CMC = {
       $("#cmc-search-results-pagingctl-next").button("disable");
     }
     this.endFunction("updateSearchPagingControls");
+  },
+
+  animateSearchResultSelected : function (whichResult) {
+    this.beginFunction("animateSearchResultSelected");
+    $(".cmc-search-result").not(whichResult).each(function () {
+      var _onHideComplete = function() {
+        setTimeout($.proxy(function () {
+          $(this).show().fadeTo(0, 1);
+        }, this), 300);
+      };
+      $(this)
+        .stop(true, true)
+        .show()
+        .delay(Math.floor(Math.random()*25))
+        .hide("drop", {direction: "right", distance: 115, easing: "easeOutQuart"}, 350, _onHideComplete)
+        .show(0)
+        .fadeTo(0, 0);
+    });
+    setTimeout(function () {
+      $("#tabs").tabs('select', 1);
+    }, 285);
+    this.endFunction("animateSearchResultSelected");
   }
 };
 
@@ -874,7 +877,9 @@ $(function() {
 
   $("#cmc-search-results-title").hide();
   $("#cmc-search-results-noresultmsg").hide();
-  $(".cmc-search-result").each(function () { $(this).hide(); });
+  $(".cmc-search-result")
+    .click(function () { CMC.animateSearchResultSelected(this); })
+    .each(function () { $(this).hide(); });
 
   // this should fix the junk picture assert on first search
   CMC.log("clearing the placeholder images");
