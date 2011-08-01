@@ -129,6 +129,8 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
           $("#secret-hideout-dialog").dialog('open');
         });
 
+        $("#debug-detach-handlers").button().click(function() { CMC.detachDebugHandlers(); });
+
         CMC.log("admin load complete");
       });
     </script>
@@ -596,7 +598,15 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
       <textarea id="debug-log" rows="10" cols="80" spellcheck="false">
       Please wait, loading debug console...
       </textarea>
+      <div id="requests-outstanding">
+        requests outstanding: <span id="requests-outstanding-value">0</span>
+      </div>
+      <div id="debug-controls">
+        <button id="debug-detach-handlers">detach debug handlers</button>
+      </div>
     </div>
     <!-- Do not place HTML markup below this line -->
   </body>
 </html>
+<!-- vim: ai:et:ts=2:sw=2
+-->

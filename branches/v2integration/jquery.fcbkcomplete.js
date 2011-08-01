@@ -348,7 +348,7 @@ jQuery(function($) {
 
                 input.keydown(function(event) {
                     //prevent to enter some bad chars when input is empty
-                    if (event.keyCode == 191) {
+                    if (event.keyCode == 191 || event.keyCode == 220) {
                         event.preventDefault();
                         return false;
                     }
@@ -612,7 +612,7 @@ jQuery(function($) {
 
                 maininput.unbind("keydown");
                 maininput.keydown(function(event) {
-                    if (event.keyCode == 191) {
+                    if (event.keyCode == 191 || event.keyCode == 220) {
                         event.preventDefault();
                         return false;
                     }

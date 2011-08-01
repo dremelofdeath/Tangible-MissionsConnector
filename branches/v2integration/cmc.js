@@ -20,19 +20,25 @@ var CMC = {
   version : "1.9.18",
   searchPageCache : [],
   currentDisplayedSearchPage : 0,
+  searchPageImageClearJobQueue : [],
   SearchState : {},
   // startup configuration settings
   StartupConfig : {
+    //@/BEGIN/DEBUGONLYSECTION
     attachDebugLogHandlersByDefault : true
+    //@/END/DEBUGONLYSECTION
   },
 
   // methods
   performStartupActions : function () {
+    //@/BEGIN/DEBUGONLYSECTION
     if (this.StartupConfig.attachDebugLogHandlersByDefault) {
       this.attachDebugHandlers(this.DebugMode);
     }
+    //@/END/DEBUGONLYSECTION
   },
 
+  //@/BEGIN/DEBUGONLYSECTION
   DebugMode : {
     log : function(output, whereTo) {
       var content = '(' + (new Date()).getTime() + ') ' + output;
@@ -49,16 +55,24 @@ var CMC = {
     },
 
     assert : function(condition, bugmsg) {
+      if (bugmsg === undefined && condition && typeof condition == "string" && condition != "") {
+        // in this case, we've only been passed one parameter, and it's a
+        // non-empty string. we will assume that the assert failed, and that the
+        // string is the assert failure message --zack
+        bugmsg = condition;
+        condition = false;
+      }
       if (!condition) {
-        var message = "ASSERT FAILED!\nIf you're reporting this, please use this message:\n" + bugmsg;
+        var message = "ASSERT FAILED!\nIf you're reporting this, please use this message:\n";
+        message += bugmsg;
         this.log(message);
       }
     },
 
     beginFunction : function(fnName) {
-      this.log("begin function: " + fnName);
       // check for scope corruption
       this.assert(this === CMC, "Scope corruption detected! this === CMC failed!");
+      this.log("begin function: " + fnName);
     },
 
     endFunction : function(fnName, fnReturnValue) {
@@ -67,7 +81,7 @@ var CMC = {
       } else {
         this.log("end function: " + fnName);
       }
-    }
+    },
   },
 
   log : $.noop,
@@ -96,6 +110,7 @@ var CMC = {
   },
 
   detachDebugHandlers : function() {
+    $("#debug-log").val("");
     this.log = $.noop;
     this.error = $.noop;
     this.assert = $.noop;
@@ -103,6 +118,7 @@ var CMC = {
     this.endFunction = $.noop;
     $("#debug-section").hide();
   },
+  //@/END/DEBUGONLYSECTION
 
   page : function(from, to) {
     $(from).hide("drop", {direction: 'left'}, 250, function() {
@@ -143,22 +159,35 @@ var CMC = {
     $("#ajax-spinner").hide();
   },
 
+  //@/BEGIN/DEBUGONLYSECTION
+  updateDebugAjaxRequestInformation : function() {
+    $("#requests-outstanding-value").html(""+this.requestsOutstanding);
+  },
+  //@/END/DEBUGONLYSECTION
+
   ajaxNotifyStart : function() {
     if (this.requestsOutstanding == 0) {
       this.showAjaxSpinner();
     }
     this.requestsOutstanding++;
+    //@/BEGIN/DEBUGONLYSECTION
+    this.updateDebugAjaxRequestInformation();
+    //@/END/DEBUGONLYSECTION
   },
 
   ajaxNotifyComplete : function() {
     if (this.requestsOutstanding > 0) {
       this.requestsOutstanding--;
-      if (this.requestsOutstanding == 0) {
+      if (this.requestsOutstanding == 0) { // not a bug if we just decremented ;)
         this.hideAjaxSpinner();
       }
-    } else {
+    } else if (this.requestsOutstanding == 0) {
       // this is a bug, and needs to be logged. --zack
+      this.assert("notified a completed request when none was made");
     }
+    //@/BEGIN/DEBUGONLYSECTION
+    this.updateDebugAjaxRequestInformation();
+    //@/END/DEBUGONLYSECTION
   },
 
   recalculateTextareaLimit : function(messageID, labelID, limit, customText) {
@@ -179,42 +208,60 @@ var CMC = {
 
   handleSearchSelect : function(item) {
     this.beginFunction("handleSearchSelect");
-    var value = jQuery.parseJSON(item)._value;
-    if (value.substring(0,2) == "!!") {
-      // this is a special value, we handle these differently
-      if (value.substring(2,3) == "z") { // this detection could definitely be better
-        // it's a zipcode
-        if (this.SearchState.z == undefined) {
-          this.SearchState.z = [value.substring(4,9), value.substring(10, value.length)];
-        } else {
-          // we have a problem, you can't have more than one zipcode
-        }
-      }
-    } else {
-      // this is a text item
-      // (note: we are going to handle text items as names for now)
-      this.SearchState.name = value;
+    var value = null, errorWhileParsing = false;
+    try {
+      value = jQuery.parseJSON(item)._value;
+    } catch(e) {
+      errorWhileParsing = true;
+      this.error("caught exception while parsing JSON:\n" + e);
     }
-    this.search();
+    if (!errorWhileParsing) {
+      this.assert(typeof value == "string", "type of value was not a string, actual type = " + typeof value);
+      if (value.substring(0,2) == "!!") {
+        // this is a special value, we handle these differently
+        if (value.substring(2,3) == "z") { // this detection could definitely be better
+          // it's a zipcode
+          if (this.SearchState.z == undefined) {
+            this.SearchState.z = [value.substring(4,9), value.substring(10, value.length)];
+          } else {
+            // we have a problem, you can't have more than one zipcode
+          }
+        }
+      } else {
+        // this is a text item
+        // (note: we are going to handle text items as names for now)
+        this.SearchState.name = value;
+      }
+      this.search();
+    }
     this.endFunction("handleSearchSelect");
   },
 
   handleSearchRemove : function(item) {
     this.beginFunction("handleSearchRemove");
-    var value = jQuery.parseJSON(item)._value;
-    if (value.substring(0,2) == "!!") {
-      // this is a special value, we handle these differently
-      if (value.substring(2,3) == "z") {
-        // it's a zipcode. we don't care what it is, just nuke it
-        delete this.SearchState.z;
-      }
-    } else {
-      // this is a text item
-      // note: since we are treating text items as names, we should just 
-      // delete the name. This will need to be fixed in the future.
-      delete this.SearchState.name;
+    var value = null, errorWhileParsing = false;
+    try {
+      value = jQuery.parseJSON(item)._value;
+    } catch(e) {
+      errorWhileParsing = true;
+      this.error("caught exception while parsing JSON:\n" + e);
     }
-    this.search();
+    if (!errorWhileParsing) {
+      this.assert(typeof value == "string", "type of value was not a string, actual type = " + typeof value);
+      if (value.substring(0,2) == "!!") {
+        // this is a special value, we handle these differently
+        if (value.substring(2,3) == "z") {
+          // it's a zipcode. we don't care what it is, just nuke it
+          delete this.SearchState.z;
+        }
+      } else {
+        // this is a text item
+        // note: since we are treating text items as names, we should just 
+        // delete the name. This will need to be fixed in the future.
+        delete this.SearchState.name;
+      }
+      this.search();
+    }
     this.endFunction("handleSearchRemove");
   },
 
@@ -227,11 +274,13 @@ var CMC = {
     $(".cmc-search-result").each(function () { $(this).fadeOut('fast'); });
     if (Object.keys(this.SearchState).length == 0) {
       this.log("search is now blank; hide the results panels");
-      var _fadeoutsCompleted = 0, _onSearchFadeoutComplete = function () {
-        if (++_fadeoutsCompleted == 2) {
+      var _fadeoutsCompleted = 0, _onSearchFadeoutComplete = $.proxy(function () {
+        _fadeoutsCompleted++;
+        this.log("_onSearchFadeoutComplete triggered, _fadeoutsCompleted="+_fadeoutsCompleted);
+        if (_fadeoutsCompleted == 2) {
           $("#cmc-search-results").hide();
         }
-      };
+      }, this);
       $("#cmc-search-results-title").fadeOut(400, _onSearchFadeoutComplete);
       $("#cmc-search-results-noresultmsg").fadeOut(400, _onSearchFadeoutComplete);
     } else {
@@ -329,22 +378,58 @@ var CMC = {
     this.error("an unknown error occurred while trying to process a search success callback.\ndata = " + data);
   },
 
-  getDataForEachFBID : function (fbids, callback) {
+  getDataForEachFBID : function (fbids, callback, isRetryCall) {
     this.beginFunction("getDataForEachFBID");
-    var results = new Array(fbids.length), requestsCompleted = 0, idPosMap = {};
+    if (isRetryCall === null || isRetryCall === undefined) isRetryCall = false;
+    var results = new Array(fbids.length), requestsCompleted = 0, idPosMap = {}, hasRetryPosted = false;
+    this.log("starting timer __timerNotificationTimeout");
+    var __timerNotificationTimeout = setTimeout($.proxy(function () {
+      this.log("__timerNotificationTimeout is checking getDataForEachFBID");
+      if (requestsCompleted != fbids.length) {
+        this.log("only " + requestsCompleted + " of " + fbids.length + " FBID requests completed in time (2s)");
+        this.log("dumping results variable:");
+        for (var each in results) {
+          var eachstr = "";
+          for (var e in results[each]) {
+            eachstr += (e + ": " + results[each][e] + "; ");
+          }
+          this.log("results["+each+"] = " + eachstr);
+        }
+        if(!isRetryCall) {
+          this.log("first getDataForEachFBID attempt failed. retrying...");
+          if(!hasRetryPosted) {
+            this.getDataForEachFBID(fbids, callback, true);
+          } else {
+            this.assert("something just went horribly wrong.\nhasRetryPosted = true, while isRetryCall = false");
+          }
+          hasRetryPosted = true;
+        } else {
+          this.error("couldn't complete getDataForEachFBID on retry, bailing");
+        }
+      } else {
+        this.log("__timerNotificationTimeout believes getDataForEachFBID completed");
+      }
+    }, this), 2000);
     var __notifyComplete = function () {
       requestsCompleted++;
-      if (requestsCompleted == fbids.length) {
+      if (requestsCompleted == fbids.length && !hasRetryPosted) {
+        clearTimeout(__timerNotificationTimeout); // cancel the timer, be nice and clean up
         callback(results);
       }
     };
     for(var each in fbids) {
       idPosMap[fbids[each]] = each;
-      this.ajaxNotifyStart();
+      //this.ajaxNotifyStart();
       FB.api('/' + fbids[each], $.proxy(function (response) {
-        this.ajaxNotifyComplete();
-        results[idPosMap[response.id]] = response;
-        __notifyComplete();
+        if (!response) {
+          this.error("response value was null in Facebook API call");
+        } else if (response.error) {
+          this.error("caught error from Facebook API call: " + response.error);
+        } else {
+          results[idPosMap[response.id]] = response;
+          __notifyComplete();
+        }
+        //this.ajaxNotifyComplete();
       }, this));
     }
     this.endFunction("getDataForEachFBID");
@@ -357,47 +442,81 @@ var CMC = {
       this.assert(results === undefined, "undefined passed as results for showSearchResults");
     } else if (results == null || results.length == 0) {
       // no results
-      this.ajaxNotifyComplete(); // finish the one we started at the beginning of the search
       $("#cmc-search-results-noresultmsg").fadeIn();
     } else {
       var imageLoadsCompleted = 0, __notifyImageLoadCompleted = $.proxy(function() {
         imageLoadsCompleted++;
+        //@/BEGIN/DEBUGONLYSECTION
+        this.assert(imageLoadsCompleted <= results.length ?1:
+          "loading more images than we have results for (" + imageLoadsCompleted + ")");
+        //@/END/DEBUGONLYSECTION
         if(imageLoadsCompleted == results.length) {
           this.animateShowSearchResults(results);
-          this.ajaxNotifyComplete(); // finish the one we started at the beginning of the search
-        } else if (imageLoadsCompleted >= results.length) {
-          this.assert(false, "loading more images than we have results for");
         }
       }, this);
       this.assert(results.length <= 10, "more than 10 results passed to showSearchResults");
+      //@/BEGIN/DEBUGONLYSECTION
+      // Since this is a multiline assert, we need to put it within a debug-only
+      // section to keep it from breaking ship code --zack
       this.assert($(".result-picture img").length == 0,
                   "found " + $(".result-picture img").length + " junk pictures lying around");
-      for(var each in results) {
-        var id = "#cmc-search-result-" + each;
-        this.ajaxNotifyStart();
-        $(id).children(".result-name").html(results[each].name);
-        $(id).children("div.result-picture").children("img").remove();
-        $("<img />")
-          .attr("src", "http://graph.facebook.com/"+results[each].id+"/picture")
-          .attr("cmcid", id)
-          .addClass("srpic")
-          .one('load', $.proxy(function(event) {
-            $($(event.target).attr("cmcid")).children("div.result-picture").append($(event.target));
+      //@/END/DEBUGONLYSECTION
+      var __loadAllResultImages = $.proxy(function () {
+        for(var each in results) {
+          this.assert(results[each].id !== undefined, "id is missing from result at each=" + each);
+          var id = "#cmc-search-result-" + each;
+          this.ajaxNotifyStart();
+          this.assert(results[each].name !== undefined, "name is missing from result at each=" + each);
+          $(id).children(".result-name").html(results[each].name ? results[each].name : "");
+          $(id).children("div.result-picture").children("img").remove();
+          if (results[each].id) {
+            $("<img />")
+              .attr("src", "http://graph.facebook.com/"+results[each].id+"/picture")
+              .attr("cmcid", id) // this is the id from above! not results[each].id!
+              .addClass("srpic")
+              .one('load', $.proxy(function(event) {
+                // I never want to see more than one image here again. --zack
+                $($(event.target).attr("cmcid")).children("div.result-picture").children("img").remove();
+                $($(event.target).attr("cmcid")).children("div.result-picture").append($(event.target));
+                this.ajaxNotifyComplete();
+                __notifyImageLoadCompleted();
+              }, this));
+          } else {
+            // this thing is probably intentionally blank, so don't load anything
+            var i = 1;
+            for (i = 1; i <= 4; i++) { // set up four timeouts to clear the pictures after they load
+              this.searchPageImageClearJobQueue
+                .push(setTimeout("$('" + id + "').children('.result-picture').children('img').hide();", 100 * i));
+            }
             this.ajaxNotifyComplete();
             __notifyImageLoadCompleted();
-          }, this));
-      } // end for
+          }
+        } // end for
+      }, this);
+      if ($("*").queue("custom-SearchResultsQueue") > 0) {
+        this.log("pending animation events, waiting until they finish");
+        var interval = 0;
+        var __timerCheckQueueEmptyForResults = $.proxy(function () {
+          if ($('*').queue('custom-SearchResultsQueue') <= 0) {
+            clearInterval(interval);
+            __loadAllResultImages();
+          }
+        }, this);
+        interval = setInterval(__timerCheckQueueEmptyForResults, 250);
+      } else {
+        __loadAllResultImages();
+      }
     } // end else
+    this.ajaxNotifyComplete(); // finish the one we started at the beginning of the search
     this.endFunction("showSearchResults");
   },
 
   animateShowSearchResults : function (results) {
     this.beginFunction("animateShowSearchResults");
+    var maxSearchResults = $(".cmc-search-result").length, i = 0;
     this.log("animating resultset starting with " + results[0].name);
-    $(".cmc-search-result").queue("custom-SearchResultsQueue", []);
     for(var each in results) {
-      var id = "#cmc-search-result-" + each, maxSearchResults = $(".cmc-search-result").length,
-          showsCompleted = 0, _onShowComplete = $.proxy(function () {
+      var id = "#cmc-search-result-" + each, showsCompleted = 0, _onShowComplete = $.proxy(function () {
             // this sure ain't the prettiest way to fix the incomplete
             // page quick click render bug, but it works --zack
             ++showsCompleted;
@@ -416,9 +535,6 @@ var CMC = {
               }
             }
           }, this);
-      $(id).queue("custom-SearchResultsQueue", function () {
-        $(this).stop(true, true);
-      }).dequeue("custom-SearchResultsQueue");
       $("*").clearQueue("custom-SearchResultsQueue");
       if ($(id + " .result-picture img").length > 1) {
         // cleanup the junk pictures, the user is clicking too quickly
@@ -432,6 +548,7 @@ var CMC = {
       $(id).queue("custom-SearchResultsQueue", function () {
         var each = $(this).attr("id").split("-")[3];
         $(this)
+          .stop(true, true)
           .delay(25 * each)
           .show("drop", {direction: "right", distance: 50}, 250, _onShowComplete);
       }).dequeue("custom-SearchResultsQueue");
@@ -457,7 +574,6 @@ var CMC = {
         }, this));
       }
     }, this);
-    $(".cmc-search-result").queue("custom-SearchResultsQueue", []);
     $(".cmc-search-result").queue("custom-SearchResultsQueue", function () {
       $(this).stop(true, true).fadeOut('fast', function () {
         _processFadeComplete();
@@ -466,20 +582,34 @@ var CMC = {
     this.endFunction("animateHideSearchResults");
   },
 
+  padSearchResults : function (results) {
+    this.beginFunction("padSearchResults");
+    // might we think about making this a constant or something?
+    var maxSearchResults = $(".cmc-search-result").length, i = 0, ret = results.slice(0);
+    if (results.length < maxSearchResults) {
+      for (i = results.length; i < maxSearchResults; i++) {
+        ret.push({id: false, name: false});
+      }
+    }
+    this.endFunction("padSearchResults");
+    return ret;
+  },
+
   navigateToNextSearchPage : function () {
     this.beginFunction("navigateToNextSearchPage");
     var searchIndex = ++this.currentDisplayedSearchPage - 1, interval;
     this.updateSearchPagingControls();
+    this.ajaxNotifyStart(); // we do this because showSearchResults expects its caller to post a notification like search()
     this.animateHideSearchResults($.proxy(function () {
       if (this.searchPageCache[searchIndex] !== undefined) {
-        this.showSearchResults(this.searchPageCache[searchIndex]);
+        this.showSearchResults(this.padSearchResults(this.searchPageCache[searchIndex]));
       } else {
         this.log("next search page not ready yet, set an interval to check on it");
         interval = setInterval($.proxy(function () {
           this.log("listening for the next search page to cache...");
           if (this.searchPageCache[searchIndex] !== undefined) {
             this.log("got it! caching the search page and clearing the interval");
-            this.showSearchResults(this.searchPageCache[searchIndex]);
+            this.showSearchResults(this.padSearchResults(this.searchPageCache[searchIndex]));
             clearInterval(interval);
           }
         }, this), 250);
@@ -519,11 +649,14 @@ var CMC = {
 
   onCacheSearchPageSuccess : function(data, textStatus, jqXHR) {
     this.cmc.beginFunction("onCacheSearchPageSuccess");
+    //@/BEGIN/DEBUGONLYSECTION
     if (!("cmc" in this)) {
       if (CMC) {
+        // definitely don't want this line floating around in production code --zack
         CMC.assert(false, '"cmc" not in this context for onCacheSearchPageSuccess');
       } // if this is unavailable, god help us all
     }
+    //@/END/DEBUGONLYSECTION
     this.cmc.assert(data != undefined, "data is undefined in onCacheSearchPageSuccess");
     if("has_error" in data && data["has_error"] !== undefined && data.has_error !== null) {
       if(data.has_error) {
@@ -576,6 +709,13 @@ var CMC = {
     var fadesCompleted = 0, imagesDeleted = 0;
     this.currentDisplayedSearchPage--;
     this.updateSearchPagingControls();
+    this.ajaxNotifyStart(); // we do this because showSearchResults expects its caller to post a notification like search()
+    if (this.searchPageImageClearJobQueue.length > 0) {
+      this.log("found " + this.searchPageImageClearJobQueue.length + " leftover image clearing jobs, stopping them");
+      while (this.searchPageImageClearJobQueue.length > 0) {
+        clearTimeout(this.searchPageImageClearJobQueue.pop());
+      }
+    }
     if (this.searchPageCache[this.currentDisplayedSearchPage - 1] !== undefined) {
       this.animateHideSearchResults($.proxy(function () {
         this.showSearchResults(this.searchPageCache[this.currentDisplayedSearchPage - 1]);
@@ -614,12 +754,15 @@ FB.init({
 });
 
 $(function() {
+  //@/BEGIN/DEBUGONLYSECTION
   $("#debug-log").val("=== BEGIN DEBUG OUTPUT ===\n");
+  //@/END/DEBUGONLYSECTION
 
   CMC.log("begin load callback");
 
   CMC.performStartupActions();
 
+  //@/BEGIN/DEBUGONLYSECTION
   CMC.log("attaching global click event handler");
   $('*').live('click', function(event) {
     event.preventDefault();
@@ -633,6 +776,7 @@ $(function() {
                : $(this).attr('id');
     CMC.log("click event: " + $(this).get(0).tagName.toLowerCase() + "#" + id);
   });
+  //@/END/DEBUGONLYSECTION
 
   $("#make-profile, #make-volunteer, #make-organizer").hide();
 
@@ -818,3 +962,4 @@ $(function() {
   });
 
 });
+// vim: ai:et:ts=2:sw=2
