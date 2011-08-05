@@ -543,6 +543,9 @@ var CMC = {
       fadesCompleted++;
       if (fadesCompleted == $(".cmc-search-result").length) {
         this.log("now killing pictures in _processFadeComplete");
+        $(".result-name").each(function () {
+          $(this).html("");
+        });
         $(".result-picture").each($.proxy(function (index, element) {
           imagesDeleted++;
           $(element).children("img").remove();
@@ -714,14 +717,14 @@ var CMC = {
     this.assert(this.currentDisplayedSearchPage >= 1, "displaying search page that is negative or zero");
     $("#cmc-search-results-pagingctl-text").children(".ui-button-text").html("page " + this.currentDisplayedSearchPage);
     if (this.currentDisplayedSearchPage <= 1) {
-      $("#cmc-search-results-pagingctl-prev").button("disable");
+      $("#cmc-search-results-pagingctl-prev").removeClass("ui-state-hover").button("disable");
     } else {
       $("#cmc-search-results-pagingctl-prev").button("enable");
     }
     if (this.searchPageCache[this.currentDisplayedSearchPage] != null) {
       $("#cmc-search-results-pagingctl-next").button("enable");
     } else {
-      $("#cmc-search-results-pagingctl-next").button("disable");
+      $("#cmc-search-results-pagingctl-next").removeClass("ui-state-hover").button("disable");
     }
     this.endFunction("updateSearchPagingControls");
   },
@@ -737,15 +740,24 @@ var CMC = {
       $(this)
         .stop(true, true)
         .show()
-        .delay(Math.floor(Math.random()*25))
         .hide("drop", {direction: "right", distance: 115, easing: "easeOutQuart"}, 350, _onHideComplete)
-        .show(0)
+        .show(0) // the 0 forces the show to be an animation event, and therefore happen after the hide() above
         .fadeTo(0, 0);
     });
     setTimeout(function () {
       $("#tabs").tabs('select', 1);
     }, 285);
     this.endFunction("animateSearchResultSelected");
+  },
+
+  handleSearchResultSelected : function (whichResult) {
+    this.beginFunction("handleSearchResultSelected");
+    if($(whichResult).children(".result-name").html() != "") {
+      this.animateSearchResultSelected(whichResult);
+    } else {
+      this.log("search result clicked, but name is empty; ignoring");
+    }
+    this.endFunction("handleSearchResultSelected");
   }
 };
 
@@ -878,7 +890,7 @@ $(function() {
   $("#cmc-search-results-title").hide();
   $("#cmc-search-results-noresultmsg").hide();
   $(".cmc-search-result")
-    .click(function () { CMC.animateSearchResultSelected(this); })
+    .click(function () { CMC.handleSearchResultSelected(this); })
     .each(function () { $(this).hide(); });
 
   // this should fix the junk picture assert on first search
