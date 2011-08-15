@@ -762,7 +762,7 @@ var CMC = {
 };
 
 FB.init({
-  appId  : '153051888089898',
+  appId  : '207688579246956',
   status : true,
   cookie : true,
   fbml   : true
