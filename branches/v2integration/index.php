@@ -1,6 +1,262 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <?php
 
+include_once 'api/common.php';
+$con = arena_connect();
+
+	$aCountries = array(
+		"Afghanistan",
+		"Albania",
+		"Algeria",
+		"Andorra",
+		"Angola",
+		"Antigua and Barbuda",
+		"Argentina",
+		"Armenia",
+		"Australia",
+		"Austria",
+		"Azerbaijan",
+		"Bahamas",
+		"Bahrain",
+		"Bangladesh",
+		"Barbados",
+		"Belarus",
+		"Belgium",
+		"Belize",
+		"Benin",
+		"Bhutan",
+		"Bolivia",
+		"Bosnia and Herzegovina",
+		"Botswana",
+		"Brazil",
+		"Brunei",
+		"Bulgaria",
+		"Burkina Faso",
+		"Burundi",
+		"Cambodia",
+		"Cameroon",
+		"Canada",
+		"Cape Verde",
+		"Central African Republic",
+		"Chad",
+		"Chile",
+		"China",
+		"Colombia",
+		"Comoros",
+		"Congo (Brazzaville)",
+		"Congo, Democratic Republic of the",
+		"Costa Rica",
+		"Côte d'Ivoire",
+		"Croatia",
+		"Cuba",
+		"Cyprus",
+		"Czech Republic",
+		"Denmark",
+		"Djibouti",
+		"Dominica",
+		"Dominican Republic",
+		"East Timor",
+		"Ecuador",
+		"Egypt",
+		"El Salvador",
+		"Equatorial Guinea",
+		"Eritrea",
+		"Estonia",
+		"Ethiopia",
+		"Fiji",
+		"Finland",
+		"France",
+		"Gabon",
+		"Gambia, The",
+		"Georgia",
+		"Germany",
+		"Ghana",
+		"Greece",
+		"Grenada",
+		"Guatemala",
+		"Guinea",
+		"Guinea-Bissau",
+		"Guyana",
+		"Haiti",
+		"Honduras",
+		"Hungary",
+		"Iceland",
+		"India",
+		"Indonesia",
+		"Iran",
+		"Iraq",
+		"Ireland",
+		"Israel",
+		"Italy",
+		"Jamaica",
+		"Japan",
+		"Jordan",
+		"Kazakhstan",
+		"Kenya",
+		"Kiribati",
+		"Korea, North",
+		"Korea, South",
+		"Kuwait",
+		"Kyrgyzstan","Laos","Latvia",
+		"Lebanon",
+		"Lesotho",
+		"Liberia",
+		"Libya",
+		"Liechtenstein",
+		"Lithuania",
+		"Luxembourg",
+		"Macedonia",
+		"Madagascar",
+		"Malawi",
+		"Malaysia",
+		"Maldives",
+		"Mali",
+		"Malta",
+		"Marshall Islands",
+		"Mauritania",
+		"Mauritius",
+		"Mexico",
+		"Micronesia",
+		"Moldova",
+		"Monaco",
+		"Mongolia",
+		"Morocco",
+		"Mozambique",
+		"Myanmar",
+		"Namibia",
+		"Nauru",
+		"Nepal",
+		"Netherlands",
+		"New Zealand",
+		"Nicaragua",
+		"Niger",
+		"Nigeria",
+		"Norway",
+		"Oman",
+		"Pakistan",
+		"Palau",
+		"Panama",
+		"Papua New Guinea",
+		"Paraguay",
+		"Peru",
+		"Philippines",
+		"Poland",
+		"Portugal",
+		"Qatar",
+		"Romania",
+		"Russia",
+		"Rwanda",
+		"Saint Kitts and Nevis",
+		"Saint Lucia",
+		"Saint Vincent and The Grenadines",
+		"Samoa",
+		"San Marino",
+		"Sao Tome and Principe",
+		"Saudi Arabia",
+		"Senegal",
+		"Serbia and Montenegro",
+		"Seychelles",
+		"Sierra Leone",
+		"Singapore",
+		"Slovakia",
+		"Slovenia",
+		"Solomon Islands",
+		"Somalia",
+		"South Africa",
+		"Spain",
+		"Sri Lanka",
+		"Sudan",
+		"Suriname",
+		"Swaziland",
+		"Sweden",
+		"Switzerland",
+		"Syria",
+		"Taiwan",
+		"Tajikistan",
+		"Tanzania",
+		"Thailand",
+		"Togo",
+		"Tonga",
+		"Trinidad and Tobago",
+		"Tunisia",
+		"Turkey",
+		"Turkmenistan",
+		"Tuvalu",
+		"Uganda",
+		"Ukraine",
+		"United Arab Emirates",
+		"United Kingdom",
+		"United States",
+		"Uruguay",
+		"Uzbekistan",
+		"Vanuatu",
+		"Vatican City",
+		"Venezuela",
+		"Vietnam",
+		"Western Sahara",
+		"Yemen",
+		"Zambia",
+		"Zimbabwe"
+	);
+	
+	$usstates = array(
+	"Alabama",
+	"Alaska",
+	"American Samoa",
+	"Arizona",
+    "Arkansas",
+    "California",
+    "Colorado",
+    "Connecticut",
+    "Delaware",
+    "District of Columbia",
+    "Florida",
+    "Georgia",
+    "Guam",
+    "Hawaii",
+    "Idaho",
+    "Illinois",
+    "Indiana",
+    "Iowa",
+    "Kansas",
+    "Kentucky",
+    "Louisiana",
+    "Maine",
+    "Maryland",
+    "Massachusetts",
+    "Michigan",
+    "Minnesota",
+    "Mississippi",
+    "Missouri",
+    "Montana",
+    "Nebraska",
+    "Nevada",
+    "New Hampshire",
+    "New Jersey",
+    "New Mexico",
+    "New York",
+    "North Carolina",
+    "North Dakota",
+    "Northern Marianas Islands",
+    "Ohio",
+    "Oklahoma",
+    "Oregon",
+    "Pennsylvania",
+    "Puerto Rico",
+    "Rhode Island",
+    "South Carolina",
+    "South Dakota",
+    "Tennessee",
+    "Texas",
+    "Utah",
+    "Vermont",
+    "Virginia",
+    "Virgin Islands",
+    "Washington",
+    "West Virginia",
+    "Wisconsin",
+    "Wyoming"
+	);
 // put PHP code here
 
 function cmc_js_load($src) {
@@ -84,6 +340,23 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
   echo '</a>';
 }
 
+function cmc_check_profile_existence($fbid,&$profileexists,$con) {
+  
+	$sql = 'select * from users where userid="'.$fbid.'"';
+	$result = mysql_query($sql,$con);
+	if (!$result) {
+ 		setjsonmysqlerror($has_error,$err_msg,$sql2);
+   	}
+	else {
+    $num_userids = mysql_num_rows($result);
+    if ($num_userids == 0) {
+      $profileexists = 0;
+    }
+    else {
+      $profileexists = 1;
+    }
+  }
+}
 ?>
 
 <html>
@@ -107,6 +380,11 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
     <script src="base64.js"></script>
     <script src="json2-min.js"></script>
     <script type="text/javascript" src="cmc.js"></script>
+    <script src="jquery.validate.js" type="text/javascript"></script>
+    <script src="jquery.validation.functions.js" type="text/javascript"></script>	
+	  <link rel="stylesheet" type="text/css" href="jquery.validate.css" />
+	  <link href="profilevalidate.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="style.css" />
     <script type="text/javascript">
       $(function() {
         CMC.log("loading admin only code");
@@ -132,7 +410,183 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         $("#debug-detach-handlers").button().click(function() { CMC.detachDebugHandlers(); });
 
         CMC.log("admin load complete");
+				
+        $("#profile-submit").click(function() {
+				    var mtype = $("form").find('.profile-ddl-type-medical');
+					var nmtype = $("form").find('.profile-ddl-type-nonmedical');
+					var sptype = $("form").find('.profile-ddl-type-spiritual');
+					var reltype = $("form").find('.profile-ddl-type-religious');
+					var durtype = $("form").find('.profile-ddl-type-duration');
+					var state = $("form").find('.profile-ddl-type-state');
+				    var city = $("form").find('.profile-input-city');
+					var zipcode = $("form").find('.profile-input-zipcode');
+					
+				    var country = $("form").find('.profile-ddl-type-country');
+					var region = $("form").find('.profile-ddl-type-region');
+				    var countriesserved = $("form").find('.profile-ddl-type-countriesserved');
+					var phone = $("form").find('.profile-input-phone');
+				    var email = $("form").find('.profile-input-email');
+					var misexp = $("form").find('.profile-input-experience');				    
+					
+					var zipisvalid = false;
+					var emailisvalid = false;
+					var reason="";
+					var errornum=1;
+					
+					if (zipcode.val() != "") {
+
+					zipisvalid = validateZipCode(zipcode.val());
+					if (!zipisvalid) {
+						reason += errornum+'. Incorrect Zipcode format entered\n';
+						errornum = errornum + 1;
+						isValid = false;
+					}
+					}
+
+					if (email.val() != "") {
+					emailisvalid = validateEmail(email.val());
+					if (!emailisvalid) {
+						reason += errornum + '. Incorrect Email format entered\n';
+						errornum = errornum + 1;
+						isValid = false;
+					}
+					}
+					
+					if (phone.val() != "") {
+					var phoneerror = validatePhone(phone.val(),country.val());
+					if (phoneerror != "") {
+						reason += errornum + ' ' + phoneerror + '\n';
+						errornum = errornum + 1;
+						isValid = false;
+					}
+					}
+					
+					if (reason != "") {
+						alert('Some input fields need correction:\n'+ reason);
+						return false;
+					}
+					else {
+
+					var profileformdata = {};
+					profileformdata.profiletype=1;
+					if (mtype.val() != 0)
+						profileformdata.medskills= mtype.val();
+					if (nmtype.val() != 0)
+						profileformdata.otherskills=nmtype.val();					
+					if (sptype.val() != 0)
+						profileformdata.spiritserv=sptype.val();				
+					if (region.val() != 0)
+						profileformdata.region=region.val();	
+					if (country.val() != "")
+						profileformdata.country=country.val();	
+					if (state.val() != "Select your State")
+						profileformdata.state=state.val();	
+					if (durtype.val() != 0)
+						profileformdata.dur=durtype.val();
+					if (reltype.val() != 0)
+						profileformdata.relg=reltype.val();						
+					if (zipcode.val() != "")
+						profileformdata.zip=zipcode.val();
+					if (email.val() != "")
+						profileformdata.email=email.val();
+					if (city.val() != "")
+						profileformdata.city=city.val();
+					if (phone.val() != "")
+						profileformdata.phone=phone.val();
+					if (misexp.val() != "")
+						profileformdata.misexp=misexp.val();						
+						
+                  alert('AJAX form submission = ' + JSON.stringify(profileformdata));
+
+                  $.ajax({
+                    type: "POST",
+                    url: "api/profilein.php",
+                    data: {
+                        fbid: "25826994",
+                        profiledata: JSON.stringify(profileformdata)
+                    },
+                    dataType: "json",
+                    success: function() {
+                      alert('Success');
+                    },
+                    error: function() {
+                      alert('Failure');
+                    }
+                  });
+                  return true;
+				}
+					
+                function validateZipCode(elementValue){
+				  var zisValid = false;
+                  var zipCodePattern = /^\d{5}$|^\d{5}-\d{4}$/;
+                  zisValid = zipCodePattern.test(elementValue);
+				  return zisValid;
+                }
+				function validateEmail(email){
+					var eisValid =  false;
+					var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+[\.]{1}[a-zA-Z]{2,4}$/;  
+					eisValid = emailPattern.test(email);  
+					return eisValid;
+				}	
+				
+				function validatePhone(fld,country) {
+				var error = "";
+				var stripped = fld.replace(/[\(\)\.\-\ ]/g, ''); 
+				// for international numbers
+				var regex = /^\+(?:[0-9] ?){6,14}[0-9]$/;
+
+				if (isNaN(parseInt(stripped))) {
+					error = "The phone number contains illegal characters.\n";
+				}
+				else if (country != "United States") {
+					if (!regex.test(fld)) {
+						error = "The phone number is not a valid International Number.\n";
+					}
+				}
+				else if (!(stripped.length == 10)) {
+					error = "The phone number is the wrong length. Make sure you included an area code.\n";
+				}
+				
+				return error;
+				}
+			});
+				
+        // Handles the live form validation
+				$("#profile-medical").validate({
+                    expression: "if (VAL) return true; else return false;",
+                    message: "Please enter the Required field"
+                });
+				$("#profile-email").validate({
+                    expression: "if (VAL.match(/^[^\\W][a-zA-Z0-9\\_\\-\\.]+([a-zA-Z0-9\\_\\-\\.]+)*\\@[a-zA-Z0-9_]+(\\.[a-zA-Z0-9_]+)*\\.[a-zA-Z]{2,4}$/) && VAL) return true; else if (!VAL) return true; else return false;",
+                    message: "Please enter a valid Email ID"
+                });	
+				$("#profile-zipcode").validate({
+                    expression: "if (VAL.match(new RegExp(/(^[0-9]{5}$)|(^[0-9]{5}-[0-9]{4}$)/)) && VAL) return true; else if (!VAL) return true; else return false;",
+                    message: "Please enter a valid Zipcode"
+                });	
+				$("#profile-phone").validate({
+					expression: "if (VAL.match(new RegExp(/(^[0-9]{10}$)/)) && VAL) return true; else if (!VAL) return true; else return false;",
+                    message: "Please enter a valid Phone Number"
+                });	
+        
+            $('.profile-ddl-contents').css('display', 'none');
+            $('.profile-ddl-type-country').css('display', 'United States');
+            $('.profile-ddl-header').toggle(function() {
+                toggleContents($(this).parent().find('.profile-ddl-contents'));
+            }, function() { toggleContents($(this).parent().find('.profile-ddl-contents')); });
+
+            function toggleContents(el) {
+               $('.profile-ddl-contents').css('display', 'none');
+                if (el.css('display') == 'none') el.fadeIn("slow");
+                else el.fadeOut("slow");
+            }
+            $('.profile-ddl-contents a').click(function() {
+                $(this).parent().parent().find('.profile-ddl-o select').attr('selectedIndex', $('.profile-ddl-contents a').index(this));
+                $(this).parent().parent().find('.profile-ddl-title').html($(this).html());
+                $(this).parent().parent().find('.profile-ddl-contents').fadeOut("slow");
+            });
       });
+
     </script>
     <!-- Custom CSS markup goes here -->
     <style type="text/css">
@@ -328,6 +782,119 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         margin-right: 14px;
       }
       
+        #wrapper
+        {
+            width: 900px;
+            height: 700px;
+            margin: auto;
+            border: solid 1px black;
+            -moz-border-radius: 8px;
+            -webkit-border-radius: 8px;
+            border-radius: 8px;
+            -moz-border-radius: 8px;
+            -webkit-border-radius: 8px;
+            border-radius: 8px;
+        }
+        #wrapper #header
+        {
+            /*width: 99%;*/
+            height: 40px;
+            color: White;
+            font-size: 24px;
+            font-weight: bold;
+            padding-left: 20px;
+            padding-top: 20px;
+            -moz-border-radius-topleft: 8px;
+            -webkit-border-top-left-radius: 8px;
+            border-top-left-radius: 8px;
+            -moz-border-radius-topright: 8px;
+            -webkit-border-top-right-radius: 8px;
+            border-top-right-radius: 8px;
+            background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#747577), to(#363739));
+            background-image: -moz-linear-gradient(#747577, #363739);
+            background-image: -webkit-linear-gradient(#747577, #363739);
+            background-image: -o-linear-gradient(#747577, #363739);
+            filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#747577, endColorstr=#363739)";
+            -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#747577, endColorstr=#363739)";
+        }
+        #wrapper #menu-bar
+        {
+            width: 100%;
+            height: 29px;
+            padding-top: 4px;
+            background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#E5E5E5), to(#CFCFCF));
+            background-image: -moz-linear-gradient(#E5E5E5, #CFCFCF);
+            background-image: -webkit-linear-gradient(#E5E5E5, #CFCFCF);
+            background-image: -o-linear-gradient(#E5E5E5, #CFCFCF);
+            filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#E5E5E5, endColorstr=#CFCFCF)";
+            -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#E5E5E5, endColorstr=#CFCFCF)";
+            border-bottom: solid 1px #747577;
+        }
+        #wrapper #contents
+        {
+            width: 600px;
+            height: 940px;
+            padding-top: 10px;
+        }
+     
+        #wrapper #footer
+        {
+            width: 100%;
+            height: 30px;
+            background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#747577), to(#363739));
+            background-image: -moz-linear-gradient(#747577, #363739);
+            background-image: -webkit-linear-gradient(#747577, #363739);
+            background-image: -o-linear-gradient(#747577, #363739);
+            filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#747577, endColorstr=#363739)";
+            -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#747577, endColorstr=#363739)";
+            -moz-border-radius-bottomleft: 8px;
+            -webkit-border-bottom-left-radius: 8px;
+            border-bottom-left-radius: 8px;
+            -moz-border-radius-bottomright: 8px;
+            -webkit-border-bottom-right-radius: 8px;
+            border-bottom-right-radius: 8px;
+            border-top: solid 1px #747577;
+        }
+        #menu-bar ul
+        {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            margin-left: 4px;
+        }
+        #menu-bar ul li
+        {
+            float: left;
+            display: inline-block;
+            padding: 4px;
+        }
+        #menu-bar ul li a, #menu-bar ul li a:active, #menu-bar ul li a:visited
+        {
+            text-decoration: none;
+            color: #747577;
+        }
+        #menu-bar ul li a:hover
+        {
+            text-decoration: underline;
+            color: #747577;
+        }
+        #footer div
+        {
+            padding-top: 14px;
+            width: 180px;
+            margin: auto;
+            color: White;
+        }
+        #footer div a, #footer div a:active, #footer div a:visited
+        {
+            text-decoration: none;
+            color: white;
+        }
+        #footer div a:hover
+        {
+            text-decoration: underline;
+            color: white;
+        }	  
     </style>
     <!-- HTML markup goes here -->
     <div id="loading">
@@ -357,6 +924,22 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         <div id="make-volunteer">
           <h1>Cool! You're a volunteer.</h1>
           <p>We're excited you're here! Now we'd like to sync with your Facebook profile so we can connect you with mission trips all over the world. We'll also let you know if anyone invites you to join their trip!</p>
+          <h1>
+            <a href="#" onclick="CMC.page('#make-volunteer', '#make-volunteer-profile');">Make your Profile &gt;&gt;</a>
+          </h1>
+        </div>
+        <div id="edit-profile">
+          <h1>Please Update Your Profile</h1>
+          <?php
+            cmc_big_button(
+              "I'm a volunteer",
+              "I'm interested in supporting or going on mission trips",
+              "CMC.page('#edit-profile', '#make-volunteer');",
+              "icon-volunteer.png",
+              "padding-top: 5px;",
+              65, 65
+            );
+          ?>
         </div>
         <div id="make-organizer">
           <h1>Awesome! You're an organizer.</h1>
@@ -383,6 +966,21 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
           ?>
         </div>
         <div id="no-profile">
+           <?php 
+                $fbid = 25826994;
+                cmc_check_profile_existence($fbid,$profileexists,$con);
+                if ($profileexists == 1) {
+              ?>
+                  
+                  <h1>
+                  <a href="#" onclick="CMC.page('#no-profile', '#edit-profile');">Edit your Profile Now &gt;&gt;</a>
+                </h1>
+
+              <?php
+                }
+                else {
+  
+            ?>
           <div class="ui-state-highlight ui-corner-all ui-widget cmc-infobar">
             <p class="cmc-infobar-text">
               <span class="ui-icon ui-icon-info cmc-infobar-icon"></span>
@@ -393,6 +991,9 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
           <h1>
             <a href="#" onclick="CMC.page('#no-profile', '#make-profile');">Create a Profile Now &gt;&gt;</a>
           </h1>
+            <?php
+              }
+            ?>
         </div>
       </div>
       <div id="trips-tab">
@@ -579,6 +1180,240 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         <p>Contains content obtained from The Noun Project (<a href="http://www.thenounproject.com" target="_blank">www.thenounproject.com</a>). "Community" reproduced under the Creative Commons Attribution 3.0 Unported license. For licensing information, please visit <a href="http://creativecommons.org/licenses/by/3.0/" target="_blank">http://creativecommons.org/licenses/by/3.0/</a>.</p>
         <p>"Arriving Flights" by Roger Cook and Don Shanosky, 1974. Obtained from the public domain. </p>
       </div>
+      <div id="profile-volunteer-dialog" title="Please enter your profile information">
+        <form id="profile-volunteer-form">
+      <div id="wrapper">
+        <div id="header">
+            CMC Profile Submission
+        </div>
+        <div id="contents">
+            <div class="profile-container">
+                <div class="profile-header">
+                    Please enter your profile information</div>
+                <div class="profile-contents">
+                    <table cellpadding="4" cellspacing="0">
+                        <tr>
+                            <td style="width: 97px">
+                                <label>
+                                    Medical Skills</label>
+                            </td>
+                            <td style="width: 97px">
+                                        <select id="profile-medical" multiple="multiple" class="profile-ddl-type-medical">
+											<option value="0" selected="selected">Select Medical Skills</option>
+                                            <option value="1">Advanced Practice Nursing</option>
+                                            <option value="2">Dental Professional</option>
+                                            <option value="3">Medical Educator</option>
+                                            <option value="4">Mental Health Professional</option>
+                                            <option value="5">Nurse</option>
+                                            <option value="6">Optometrist or Opthalmologist</option>
+                                            <option value="7">Pharmacist</option>
+                                            <option value="8">Physician</option>
+                                            <option value="9">Physician Assistant</option>
+                                            <option value="10">Physical or Occupational Therapist</option>
+                                            <option value="11">Public Health/Community Development Worker</option>
+                                            <option value="12">Speech Therapist</option>
+                                            <option value="13">Other</option>
+                                        </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 97px">
+                                <label>
+                                    Non-Medical Skills</label>
+                            </td>
+                            <td style="width: 197px">
+                                        <select id="profile-nonmedical" multiple="multiple" class="profile-ddl-type-nonmedical">
+											<option value="0" selected="selected">Select Non-Medical Skills</option>
+                                            <option value="1">General Help/Labor</option>
+                                            <option value="2">Team Leader/Primary Organizer</option>
+                                            <option value="3">Account and/or Business Management</option>
+                                            <option value="4">Skilled Construction and/or Maintenance</option>
+                                            <option value="5">Computer Science/Other Technical</option>
+                                            <option value="6">Agriculture and/or Animal Husbandry</option>
+                                            <option value="7">Mechanic</option>
+                                            <option value="8">Office/Secretarial</option>
+                                            <option value="9">Teaching</option>
+                                            <option value="10">Veterinary</option>
+                                            <option value="11">Water Supply Improvement</option>
+                                            <option value="12">Writing and/or Translating</option>
+                                            <option value="13">Engineering</option>
+                                        </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 97px">
+                                <label>
+                                    Spiritual Service</label>
+                            </td>
+                            <td style="width: 197px">
+                                        <select id="profile-spiritual" class="profile-ddl-type-spiritual">
+											<option value="0" selected="selected">Select Spiritual Service</option>
+                                            <option value="1">Team Spiritual Leader</option>
+                                            <option value="2">Individual Outreach (Prayer and Counseling)</option>
+                                            <option value="3">Evangelism</option>
+                                            <option value="4">Worship Team</option>
+                                            <option value="5">Public Speaking</option>
+                                        </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 97px">
+                                <label>
+                                    Religious Affiliation</label>
+                            </td>
+                            <td style="width: 197px">
+                                        <select id="profile-religion" class="profile-ddl-type-religious">
+											<option value="0", selected="selected">Select Religious Affiliation</option>
+                                            <option value="1">Secular</option>
+                                            <option value="2">Christian: Protestant</option>
+                                            <option value="3">Christian: Catholic</option>
+                                            <option value="4">Nondenominational</option>
+                                        </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 97px">
+                                <label>
+                                    Duration of Missions</label>
+                            </td>
+                            <td style="width: 197px">
+                                        <select id="profile-duration" class="profile-ddl-type-duration">
+											<option value="0" selected="selected">Select Duration of Missions</option>
+                                            <option value="1">Short Term: 1-2 weeks</option>
+                                            <option value="2">Medium Term: 1 Month-2 Years</option>
+                                            <option value="3">Long Term: 2+ Years</option>
+                                        </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 197px">
+                                <label>
+                                    State</label>
+                            </td>
+                            <td style="width: 197px">
+                                        <select id="profile-state" class="profile-ddl-type-state">
+                                        <?php
+											echo '<option value="Select your State" selected="selected">Select your State</option>';
+											foreach($usstates as $key => $state) {
+                                              echo '<option value="'.$state.'">'.$state.'</option>';
+											}
+                                        ?>
+                                        </select>
+                            </td>
+                        </tr>						
+                        <tr>
+                            <td>
+                                <label>
+                                    City</label>
+                            </td>
+                            <td>
+                                <input type="text" id="profile-city" class="profile-input-city"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>
+                                    Zipcode</label>
+                            </td>
+                            <td>
+                                <input type="text" id="profile-zipcode" class="profile-input-zipcode"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 197px">
+                                <label>
+                                    Country</label>
+                            </td>
+                            <td style="width: 197px">
+                                        <select id="profile-country" class="profile-ddl-type-country">
+                                        <?php
+											foreach($aCountries as $key => $country) {
+                                              if ($country == "United States")
+												    echo '<option selected="selected" value="'.$country.'">'.$country.'</option>';
+                                              else
+												    echo '<option value="'.$country.'">'.$country.'</option>';
+
+											}
+                                        ?>
+                                        </select>
+                            </td>
+                        </tr>							
+                        <tr>
+                            <td style="width: 197px">
+                                <label>
+                                    Regions of Interest</label>
+                            </td>
+                            <td style="width: 197px">
+                                        <select id="profile-region" class="profile-ddl-type-region">
+											<option value="0" selected="selected">Select Regions of Interest</option>
+                                            <option value="1">Africa</option>
+                                            <option value="2">Asia and Oceana</option>
+                                            <option value="3">Europe and Russia</option>
+                                            <option value="4">Latin America</option>
+                                            <option value="5">Middle East</option>
+                                            <option value="6">North America</option>
+                                            <option value="7">Caribbean</option>
+                                        </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 197px">
+                                <label>
+                                    Countries Served</label>
+                            </td>
+                            <td style="width: 197px">
+                                        <select id="profile-country-served" class="profile-ddl-type-countriesserved">
+                                        <?php
+											echo '<option selected="selected" value="Select Countries Served">Select Countries Served</option>';
+											foreach($aCountries as $key => $country) {											
+												echo '<option value="'.$country.'">'.$country.'</option>';
+											}
+                                        ?>
+                                        </select>
+                            </td>
+                        </tr>						
+                        <tr>
+                            <td>
+                                <label>
+                                    Phone</label>
+                            </td>
+                            <td>
+                                <input type="text" id="profile-phone" class="profile-input-phone" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>
+                                    Email Id</label>
+                            </td>
+                            <td>
+                                <input type="text" id="profile-email" class="profile-input-email" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>
+                                    My Missions Experience</label>
+                            </td>
+                            <td>
+                                <input type="text" id="profile-experience" class="profile-input-experience" />
+                            </td>
+                        </tr>							
+                        <tr>
+                            <td>&nbsp;
+                                
+                            </td>
+                            <td>
+                                <input type="submit" value="Submit" class="profile-submit" id="profile-submit" />
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    </form>		
+      </div>	  
       <div id="report-problem-dialog" title="What seems to be the matter?">
         <p>Tell us what's wrong, and we'll look into it right away.</p>
         <form id="report-problem-form">
