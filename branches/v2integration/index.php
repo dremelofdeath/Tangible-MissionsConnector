@@ -259,6 +259,23 @@ $con = arena_connect();
 	);
 // put PHP code here
 
+/**
+*  Given a file, i.e. /css/base.css, replaces it with a string containing the
+*  file's mtime, i.e. /css/base.1221534296.css.
+*  
+*  @param $file  The file to be loaded.  Must be an absolute path (i.e.
+*                starting with slash).
+*/
+function auto_version($file)
+{
+    if(strpos($file, '/') !== 0 || !file_exists($_SERVER['DOCUMENT_ROOT'] . $file))
+          return $file;
+
+      $mtime = filemtime($_SERVER['DOCUMENT_ROOT'] . $file);
+        return preg_replace('{\\.([^./]+)$}', ".$mtime.\$1", $file);
+}
+
+
 function cmc_js_load($src) {
   echo '<script type="text/javascript" src="'.$src.'"></script>';
 }
@@ -383,8 +400,9 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
     <script src="jquery.validate.js" type="text/javascript"></script>
     <script src="jquery.validation.functions.js" type="text/javascript"></script>	
 	  <link rel="stylesheet" type="text/css" href="jquery.validate.css" />
-	  <link href="profilevalidate.css" rel="stylesheet" type="text/css" />
+	  <link href="<?=auto_version('profilevalidate.css')?>" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" type="text/css" href="style.css" />
+	<link href="profiledisplay.css" rel="stylesheet" type="text/css" />
     <script type="text/javascript">
       $(function() {
         CMC.log("loading admin only code");
@@ -585,6 +603,42 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                 $(this).parent().parent().find('.profile-ddl-title').html($(this).html());
                 $(this).parent().parent().find('.profile-ddl-contents').fadeOut("slow");
             });
+			
+			
+      var profileshow = "hide";
+			$("#EditProfile").click(function() {
+				alert("Edit Profile clicked");
+			});
+			
+			$("#CreateTrip").click(function() {
+				alert("Create Trip Clicked");
+			});		
+			
+			var tripjoinbtns = new Array();
+			for (var i=0;i<4;i++) {
+				tripjoinbtns[i] = "join-trip-submit-"+i;
+			}
+			
+            $.each(tripjoinbtns, function() {
+                    $("#" +this).click(function() {
+						var tripparts = this.id.split('-');
+						var index = parseInt(tripparts[tripparts.length-1]);;
+                        alert("Trip Index = " + index);
+                    });
+            });
+			
+			var tripdescbtns = new Array();
+			for (var i=0;i<4;i++) {
+				tripdescbtns[i] = "trip-desc-submit-"+i;
+			}
+			
+            $.each(tripdescbtns, function() {
+                    $("#" +this).click(function() {
+						var descparts = this.id.split('-');
+						var index = parseInt(descparts[descparts.length-1]);;
+                        alert("Desc Trip Index = " + index);
+                    });
+            });			
       });
 
     </script>
@@ -896,6 +950,52 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
             color: white;
         }	  
     </style>
+	
+	<script type="text/JavaScript">
+	
+	var currentOptions = new Array(6);
+	for (i=0; i <6; i++) {
+		currentOptions[i]=new Array()		
+	}
+	var current = new Array(6);
+	var prelength = new Array(6);
+	var postlen = new Array(6);
+
+	for (i=0;i<6;i++) {
+		prelength[i] = 0;
+		postlen[i] = 0;
+	}
+	
+	function selectMultiple(s,k)
+	{
+	current[k] = s.selectedIndex;
+	
+	for (var i=0; i<currentOptions[k].length; i++)
+	{
+		if (current[k] == currentOptions[k][i])
+		{
+			prelength[k] = currentOptions[k].length;
+			currentOptions[k].splice(i, 1);
+			postlen[k] = currentOptions[k].length;
+			break;
+		}
+	}
+	
+	if ((prelength[k]==0) || (prelength[k]!=postlen[k]+1)) {
+		if (i >= currentOptions[k].length) currentOptions[k].push(current[k]);
+	}
+
+	// reinitialize the lengths
+	if (currentOptions[k].length == 0) {
+		prelength[k] = 0;
+		prelength[k] = 0;
+	}
+			
+	for (var i=0; i<s.options.length; i++) s.options[i].selected = false;
+	for (var i=0; i<currentOptions[k].length; i++) s.options[currentOptions[k][i]].selected = true;
+	}
+		
+	</script>	
     <!-- HTML markup goes here -->
     <div id="loading">
       <div style="vertical-align: middle; text-align: center; display: block">
@@ -928,19 +1028,6 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
             <a href="#" onclick="CMC.page('#make-volunteer', '#make-volunteer-profile');">Make your Profile &gt;&gt;</a>
           </h1>
         </div>
-        <div id="edit-profile">
-          <h1>Please Update Your Profile</h1>
-          <?php
-            cmc_big_button(
-              "I'm a volunteer",
-              "I'm interested in supporting or going on mission trips",
-              "CMC.page('#edit-profile', '#make-volunteer');",
-              "icon-volunteer.png",
-              "padding-top: 5px;",
-              65, 65
-            );
-          ?>
-        </div>
         <div id="make-organizer">
           <h1>Awesome! You're an organizer.</h1>
           <p>It's great to have you onboard! We'd like to take a chance to sync with your Facebook profile so we can connect you to volunteers all over the world. If you have a Facebook page, you can link that too. We'll be sure to let you know when people join your trips!</p>
@@ -965,22 +1052,255 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
             );
           ?>
         </div>
+		    <div id="show-profile">
+				<script type="text/javascript">
+				// First get the profile information using a AJAX request
+                  var ProfileObj = new Object;
+
+                  $.ajax({
+                    type: "POST",
+                    url: "api/profile.php",
+                    data: {
+                        fbid: "1439952404"
+                    },
+                    dataType: "json",
+                    async: false,
+                    success: function(data) {
+                      ProfileObj.name = data.name;
+                      if (typeof data.about != "undefined") {
+                      ProfileObj.about = data.about;
+                      }
+                      if (typeof data.zip != "undefined") {
+                      ProfileObj.zip = data.zip;
+                      }
+                      if (typeof data.misexp != "undefined") {
+                      ProfileObj.misexp = data.misexp;
+                      }
+                      if (typeof data.phone != "undefined") {
+                        ProfileObj.phone = data.phone;
+                      }
+                      if (typeof data.relg != "undefined") {
+                      ProfileObj.relg = data.relg;
+                      }
+                      if (typeof data.email != "undefined") {
+                      ProfileObj.email = data.email;
+                      }
+                      if (typeof data.MedicalSkills != "undefined") {
+                      ProfileObj.MedicalSkills = data.MedicalSkills;
+                      }
+                      if (typeof data.Non_MedicalSkills != "undefined") {
+                      ProfileObj.Non_MedicalSkills = data.Non_MedicalSkills;
+                      }
+                      if (typeof data.SpiritualSkills != "undefined") {
+                      ProfileObj.SpiritualSkills = data.SpiritualSkills;
+                      }
+                      if (typeof data.city != "undefined") {
+                      ProfileObj.city = data.city;
+                      }
+                      if (typeof data.GeographicAreasofInterest != "undefined") {
+                        if (typeof data.GeographicAreasofInterest.Regions != "undefined") {
+                          ProfileObj.Regions = data.GeographicAreasofInterest.Regions;
+                        }
+                        if (typeof data.GeographicAreasofInterest.Countries != "undefined") {
+                          ProfileObj.Countries = data.GeographicAreasofInterest.Countries;
+                        }
+                      }
+                      if (typeof data.Durations.PreferredDurationofMissionTrips != "undefined") {
+                      ProfileObj.PreferredDurationofMissionTrips = data.Durations.PreferredDurationofMissionTrips;
+                      }
+                      if (typeof data.States.State != "undefined") {
+                      ProfileObj.State = data.States.State;
+                      }
+                      if (typeof data.AgencyName != "undefined") {
+                      ProfileObj.AgencyName = data.AgencyName;
+                      }
+                      if (typeof data.AgencyWebsite != "undefined") {
+                      ProfileObj.AgencyWebsite = data.AgencyWebsite;
+                      }
+                      if (typeof data.AboutAgency != "undefined") {
+                      ProfileObj.AboutAgency = data.AboutAgency;
+                      }
+                      if (typeof data.trips != "undefined") {
+                      ProfileObj.trips = data.trips;
+                      }
+
+                      alert('Success' + ProfileObj.name + ' ' + data.email + ' ' + data.trips.length);
+                    },
+                    error: function(data) {
+                      alert('Failed to get profile data' + data.err_msg);
+                    }
+                  });
+
+				var about = "This is what I can say about me. I can keep on writing and this will add to the number of lines without any problem during formatting";
+				var medskills=new Array(); // regular array (add an optional integer
+		medskills[0]="Dental Professional";
+		medskills[1]="Pharmacist";
+		var nonmedskills=new Array(); // regular array (add an optional integer
+		nonmedskills[0]="General Help/Labor";
+		nonmedskills[1]="Computer Science/Other Technical";
+		var personal = new Array();
+		personal[0] = "junk@email.com";
+		personal[1] = "4042933965";
+		personal[2] = "USA";
+		personal[3] = "23693";
+		personal[4] = "1-2 Weeks, 2 Weeks-1 Month";
+		personal[5] = "Secular";
+		personal[6] = "India, China, Australia";
+		var name = "Poornima Bhamidipati";
+		var TripName = "Richmond Trip longer name";
+		var numtrips = 4;
+        //alert('NAME = ' + ProfileObj.name);
+
+				  </script>
+				  
+		<style type="text/css">
+		#table_wrapper{background:#000080;border:0px solid #A9A9A9;float:center;}
+		#tbody{height:100px;overflow-y:auto;width:410px;background:#000080;}
+		table{border-collapse:collapse; width:100%;}
+		td{padding:0px 0px; /* pixels */
+		border-right:0px solid #A9A9A9; /* to avoid the hacks for the padding */
+		border-bottom:0px solid #A9A9A9;} 
+		.td1{width:75px;}
+		.td2{width:100px;}
+		.td3{border-right-width:0;}
+		</style>			
+
+		<script type="text/javascript">
+
+    function displayprofile() {
+    document.write('<h1> Profile Page </h1>');
+		document.write('<div id="profilecontent">');
+		document.write('<div id="colOne">');
+		document.write('<p><img src="img6.jpg" alt="" width="230" height="170" /></p>');
+		document.write('<div class="box2">');
+    document.write('<h3>' + ProfileObj.name + '</h3>');
+		document.write('</div>');
+		document.write('<input type="submit" value="Edit Profile" id="EditProfile" class="button" />');
+		document.write('<input type="submit" value="Create Trip" id="CreateTrip" class="button" />');
+		document.write('<p>&nbsp;</p>');
+		document.write('<div class="box2">');
+		document.write('<h3>');
+		document.write('About Me: <br />');
+		document.write('</h3>');
+    document.write('<h4>' + about + '</h4>');
+		document.write('</div>');
+		document.write('</div>');
+		document.write('<div id="colTwo">');
+		document.write('<div class="box1">');
+		document.write('<h2>Medical Skills:</h2>');
+    if (typeof ProfileObj.MedicalSkills != "undefined") {
+		document.write('<ul>');
+		for (var i=0;i<ProfileObj.MedicalSkills.length;i++) {
+			document.write('<li>' + ProfileObj.MedicalSkills[i] + '</li>');
+		}
+		document.write('</ul>');
+    }
+		document.write('</div>');
+		document.write('<p>&nbsp;</p>');
+		document.write('<div class="box1">');
+		document.write('<h2>Non-Medical Skills:</h2>');
+    if (typeof ProfileObj.Non_MedicalSkills != "undefined") {
+		document.write('<ul>');
+		for (var i=0;i<ProfileObj_Non_MedicalSkills.length;i++) {
+			document.write('<li>' + ProfileObj.Non_MedicalSkills[i] + '</li>');
+		}
+		document.write('</ul>');
+    }
+		document.write('</div>');
+		document.write('<p>&nbsp;</p>');
+		document.write('<div class="box1">');
+		document.write('<h2>Personal Information:</h2>');
+		for (var i=0;i<personal.length;i++) {
+			//if (typeof ProfileObj.email != "undefined") {
+      if (i==0) {
+				//document.write('<h5>Email: </h5><h6>' + ProfileObj.email + '</h6>\t');
+				document.write('<h5>Email: </h5><h6>' + personal[i] + '</h6>\t');
+			}
+			//if (typeof ProfileObj.phone != "undefined") {
+      else if (i==1) {
+				//document.write('\t<h5>Phone: ' + ProfileObj.phone + '</h5><br/>');
+				document.write('\t<h5>Phone: ' + personal[i] + '</h5><br/>');
+			}
+			//if (typeof ProfileObj.country != "undefined") {
+      else if (i==2) {
+				//document.write('<h5>Country: ' + ProfileObj.country + '</h5>	');
+				document.write('<h5>Country: ' + personal[i] + '</h5>	');
+			}
+			//if (typeof ProfileObj.zip != "undefined") {
+      else if (i==3) {
+				//document.write('<h5>Zip: ' + ProfileObj.zip + '</h5><br/>');
+				document.write('<h5>Zip: ' + personal[i] + '</h5><br/>');
+			}
+			//if (typeof ProfileObj.PreferredDurationofMissionTrips!= "undefined") {
+      else if (i==4) {
+				//document.write('<h5>Preferred Duration of Mission Trips: ' + ProfileObj.PreferredDurationofMissionTrips + '</h5><br/>');
+				document.write('<h5>Preferred Duration of Mission Trips: ' + personal[i] + '</h5><br/>');
+			}
+			//if (typeof ProfileObj.relg != "undefined") {
+      else if (i==5) {
+				//document.write('<h5>Religious Affiliation: ' + ProfileObj.relg + '</h5><br/>');
+				document.write('<h5>Religious Affiliation: ' + personal[i] + '</h5><br/>');
+			}
+			//if (typeof ProfileObj.Countries != "undefined") {
+      else if (i==6) {
+				//document.write('<h5>Countries of Interest: ' + ProfileObj.Countries + '</h5><br/>');
+				document.write('<h5>Countries of Interest: ' + personal[i] + '</h5><br/>');
+			}						
+		}
+		document.write('</div>');
+
+		document.write('<p>&nbsp;</p>');
+		document.write('<h2>Trips Information:</h2>');
+		document.write('<div id="table_wrapper">');
+		document.write('<div id="tbody">');
+		document.write('<table>');
+		for (var i=0;i<numtrips;i++) {
+		document.write('<tr>');	
+		document.write('<td class="td1"><img src="img6.jpg" alt="" width="75" height="55" /></td>');
+		//document.write('<td><div class="box3"><h4>' + ProfileObj.trips[i] + '</h4></div></td>');
+		document.write('<td><div class="box3"><h4>' + TripName + '</h4></div></td>');
+		document.write('<td class="td2"><input type="submit" value="Trip Description" class="button" id="trip-desc-submit-'+i+'" /></td>');
+		document.write('<td class="td2"><input type="submit" value="Join This Trip" class="button" id="join-trip-submit-'+i+'" /></td>');
+		document.write('</tr>');		
+		}
+		document.write('</table>');
+		document.write('</div>');
+		document.write('</div>');
+		document.write('</div>');
+		document.write('</div>');
+    }
+		</script>
+		
+		    </div>
+
         <div id="no-profile">
+            
            <?php 
                 $fbid = 25826994;
                 cmc_check_profile_existence($fbid,$profileexists,$con);
                 if ($profileexists == 1) {
               ?>
-                  
-                  <h1>
-                  <a href="#" onclick="CMC.page('#no-profile', '#edit-profile');">Edit your Profile Now &gt;&gt;</a>
-                </h1>
+              
+                <script type="text/javascript">
+                /*                 
+                $.get("api/profile.php",{fbid: "25826994"},
+                  function(data){
+                  alert("Success " + data.name + " " + data.city);
+                                     }, "json");
+               */
+                  profileshow = "display";
+                  displayprofile();
 
+                </script>
               <?php
                 }
+
                 else {
   
             ?>
+                <script type="text/javascript">
+                  profileshow = "hide"
+                </script>
           <div class="ui-state-highlight ui-corner-all ui-widget cmc-infobar">
             <p class="cmc-infobar-text">
               <span class="ui-icon ui-icon-info cmc-infobar-icon"></span>
@@ -1198,8 +1518,8 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                                     Medical Skills</label>
                             </td>
                             <td style="width: 97px">
-                                        <select id="profile-medical" multiple="multiple" class="profile-ddl-type-medical">
-											<option value="0" selected="selected">Select Medical Skills</option>
+                                        <select id="profile-medical" multiple="multiple" class="profile-ddl-type-medical" onclick="selectMultiple(this,0);">
+											                      <!--<option value="0" selected="selected">Select Medical Skills</option>-->
                                             <option value="1">Advanced Practice Nursing</option>
                                             <option value="2">Dental Professional</option>
                                             <option value="3">Medical Educator</option>
@@ -1222,8 +1542,8 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                                     Non-Medical Skills</label>
                             </td>
                             <td style="width: 197px">
-                                        <select id="profile-nonmedical" multiple="multiple" class="profile-ddl-type-nonmedical">
-											<option value="0" selected="selected">Select Non-Medical Skills</option>
+                                        <select id="profile-nonmedical" multiple="multiple" class="profile-ddl-type-nonmedical" onclick="selectMultiple(this,1);">
+                      											<!--<option value="0" selected="selected">Select Non-Medical Skills</option>-->
                                             <option value="1">General Help/Labor</option>
                                             <option value="2">Team Leader/Primary Organizer</option>
                                             <option value="3">Account and/or Business Management</option>
@@ -1246,8 +1566,8 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                                     Spiritual Service</label>
                             </td>
                             <td style="width: 197px">
-                                        <select id="profile-spiritual" class="profile-ddl-type-spiritual">
-											<option value="0" selected="selected">Select Spiritual Service</option>
+                                        <select id="profile-spiritual" multiple="multiple" class="profile-ddl-type-spiritual" onclick="selectMultiple(this,2);">
+											                      <!--<option value="0" selected="selected">Select Spiritual Service</option>-->
                                             <option value="1">Team Spiritual Leader</option>
                                             <option value="2">Individual Outreach (Prayer and Counseling)</option>
                                             <option value="3">Evangelism</option>
@@ -1263,7 +1583,7 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                             </td>
                             <td style="width: 197px">
                                         <select id="profile-religion" class="profile-ddl-type-religious">
-											<option value="0", selected="selected">Select Religious Affiliation</option>
+											                      <!--<option value="0", selected="selected">Select Religious Affiliation</option>-->
                                             <option value="1">Secular</option>
                                             <option value="2">Christian: Protestant</option>
                                             <option value="3">Christian: Catholic</option>
@@ -1278,7 +1598,7 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                             </td>
                             <td style="width: 197px">
                                         <select id="profile-duration" class="profile-ddl-type-duration">
-											<option value="0" selected="selected">Select Duration of Missions</option>
+											                      <!--<option value="0" selected="selected">Select Duration of Missions</option>-->
                                             <option value="1">Short Term: 1-2 weeks</option>
                                             <option value="2">Medium Term: 1 Month-2 Years</option>
                                             <option value="3">Long Term: 2+ Years</option>
@@ -1293,7 +1613,7 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                             <td style="width: 197px">
                                         <select id="profile-state" class="profile-ddl-type-state">
                                         <?php
-											echo '<option value="Select your State" selected="selected">Select your State</option>';
+											                  //echo '<option value="Select your State" selected="selected">Select your State</option>';
 											foreach($usstates as $key => $state) {
                                               echo '<option value="'.$state.'">'.$state.'</option>';
 											}
@@ -1344,8 +1664,8 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                                     Regions of Interest</label>
                             </td>
                             <td style="width: 197px">
-                                        <select id="profile-region" class="profile-ddl-type-region">
-											<option value="0" selected="selected">Select Regions of Interest</option>
+                                        <select id="profile-region" multiple="multiple" class="profile-ddl-type-region" onclick="selectMultiple(this,3);">
+											                      <!--<option value="0" selected="selected">Select Regions of Interest</option>-->
                                             <option value="1">Africa</option>
                                             <option value="2">Asia and Oceana</option>
                                             <option value="3">Europe and Russia</option>
@@ -1362,9 +1682,9 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                                     Countries Served</label>
                             </td>
                             <td style="width: 197px">
-                                        <select id="profile-country-served" class="profile-ddl-type-countriesserved">
+                                        <select id="profile-country-served" multiple="multiple" class="profile-ddl-type-countriesserved" onclick="selectMultiple(this,4);">
                                         <?php
-											echo '<option selected="selected" value="Select Countries Served">Select Countries Served</option>';
+											//echo '<option selected="selected" value="Select Countries Served">Select Countries Served</option>';
 											foreach($aCountries as $key => $country) {											
 												echo '<option value="'.$country.'">'.$country.'</option>';
 											}
