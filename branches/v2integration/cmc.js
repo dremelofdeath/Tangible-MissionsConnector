@@ -795,7 +795,7 @@ var CMC = {
     this.endFunction("checkFacebookLoginStatus");
   },
 
-  login : function () {
+  login : function (callback) {
     // this is a wrapper API to handle user clicks that require Facebook authorization
     this.beginFunction("login");
     CMC.ajaxNotifyStart();
@@ -806,6 +806,9 @@ var CMC = {
         CMC.cacheFacebookData();
       } else {
         CMC.log("authResponse is null; user cancelled login or did not authorize");
+      }
+      if (callback) {
+        callback(response);
       }
     });
     this.endFunction("login");
