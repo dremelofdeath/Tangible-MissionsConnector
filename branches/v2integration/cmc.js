@@ -14,6 +14,7 @@ if(!Object.keys) Object.keys = function(o){
 var CMC = {
   // variables
   loggedInUser : false,
+  me : false,
   friends : false,
   requestsOutstanding : 0,
   dialogsOpen : 0,
@@ -543,6 +544,9 @@ var CMC = {
       fadesCompleted++;
       if (fadesCompleted == $(".cmc-search-result").length) {
         this.log("now killing pictures in _processFadeComplete");
+        $(".result-name").each(function () {
+          $(this).html("");
+        });
         $(".result-picture").each($.proxy(function (index, element) {
           imagesDeleted++;
           $(element).children("img").remove();
@@ -714,14 +718,14 @@ var CMC = {
     this.assert(this.currentDisplayedSearchPage >= 1, "displaying search page that is negative or zero");
     $("#cmc-search-results-pagingctl-text").children(".ui-button-text").html("page " + this.currentDisplayedSearchPage);
     if (this.currentDisplayedSearchPage <= 1) {
-      $("#cmc-search-results-pagingctl-prev").button("disable");
+      $("#cmc-search-results-pagingctl-prev").removeClass("ui-state-hover").button("disable");
     } else {
       $("#cmc-search-results-pagingctl-prev").button("enable");
     }
     if (this.searchPageCache[this.currentDisplayedSearchPage] != null) {
       $("#cmc-search-results-pagingctl-next").button("enable");
     } else {
-      $("#cmc-search-results-pagingctl-next").button("disable");
+      $("#cmc-search-results-pagingctl-next").removeClass("ui-state-hover").button("disable");
     }
     this.endFunction("updateSearchPagingControls");
   },
@@ -737,23 +741,83 @@ var CMC = {
       $(this)
         .stop(true, true)
         .show()
-        .delay(Math.floor(Math.random()*25))
         .hide("drop", {direction: "right", distance: 115, easing: "easeOutQuart"}, 350, _onHideComplete)
-        .show(0)
+        .show(0) // the 0 forces the show to be an animation event, and therefore happen after the hide() above
         .fadeTo(0, 0);
     });
     setTimeout(function () {
       $("#tabs").tabs('select', 1);
     }, 285);
     this.endFunction("animateSearchResultSelected");
+  },
+  
+  handleSearchResultSelected : function (whichResult) {
+    this.beginFunction("handleSearchResultSelected");
+    if($(whichResult).children(".result-name").html() != "") {
+      this.animateSearchResultSelected(whichResult);
+    } else {
+      this.log("search result clicked, but name is empty; ignoring");
+    }
+    this.endFunction("handleSearchResultSelected");
+  },
+
+  cacheFacebookData : function () {
+    this.beginFunction("cacheFacebookData");
+    CMC.ajaxNotifyStart();
+    FB.api('/me', function (response) {
+      CMC.log("got user data from Facebook");
+      CMC.ajaxNotifyComplete();
+      CMC.me = response;
+      CMC.assert(loggedInUser, "Something went wrong, loggedInUser is false");
+    });
+    CMC.ajaxNotifyStart();
+    FB.api('/me/friends', function (friends) {
+      CMC.log("got friend data from Facebook");
+      CMC.ajaxNotifyComplete();
+      CMC.friends = friends.data;
+    });
+    this.endFunction("cacheFacebookData");
+  },
+
+  checkFacebookLoginStatus : function (callback) {
+    this.beginFunction("checkFacebookLoginStatus");
+    CMC.ajaxNotifyStart();
+    FB.getLoginStatus(function(response) {
+      CMC.ajaxNotifyComplete();
+      CMC.log("got the response for FB.getLoginStatus()");
+      if (response.authResponse) {
+        CMC.loggedInUser = response.authResponse.uid;
+      }
+      if (callback) {
+        callback(response);
+      }
+    });
+    this.endFunction("checkFacebookLoginStatus");
+  },
+
+  login : function () {
+    // this is a wrapper API to handle user clicks that require Facebook authorization
+    this.beginFunction("login");
+    CMC.ajaxNotifyStart();
+    FB.login(function (response) {
+      CMC.ajaxNotifyComplete();
+      if (response.authResponse) {
+        CMC.log("user has just logged in to the app");
+        CMC.cacheFacebookData();
+      } else {
+        CMC.log("authResponse is null; user cancelled login or did not authorize");
+      }
+    });
+    this.endFunction("login");
   }
 };
 
 FB.init({
-  appId  : '153051888089898',
+  appId  : '207688579246956',
   status : true,
   cookie : true,
-  fbml   : true
+  fbml   : true,
+  oauth  : true
 });
 
 $(function() {
@@ -896,7 +960,7 @@ $(function() {
   $("#cmc-search-results-title").hide();
   $("#cmc-search-results-noresultmsg").hide();
   $(".cmc-search-result")
-    .click(function () { CMC.animateSearchResultSelected(this); })
+    .click(function () { CMC.handleSearchResultSelected(this); })
     .each(function () { $(this).hide(); });
 
   // this should fix the junk picture assert on first search
@@ -904,21 +968,12 @@ $(function() {
   $(".result-picture img").remove();
 
   CMC.log("attempting to get facebook login status");
-  CMC.ajaxNotifyStart();
-  FB.getLoginStatus(function(response) {
-    //CMC.ajaxNotifyComplete();
-    CMC.log("Inside facebook login status");
-    if (response.session) {
-    CMC.log("Inside login status response");
-      CMC.loggedInUser = response.session.uid;
-      CMC.ajaxNotifyStart();
-      FB.api('/me/friends', function(friends) {
-        CMC.ajaxNotifyComplete();
-        CMC.friends = friends.data;
-      });
-    }
-    else {
-      CMC.log("session is null");
+  CMC.checkFacebookLoginStatus(function (response) {
+    if (response.authResponse) {
+      CMC.log("user is already logged in, cache their data");
+      CMC.cacheFacebookData();
+    } else {
+      CMC.log("authResponse is null; no user session, do not cache data yet");
     }
   });
 
@@ -980,6 +1035,214 @@ $(function() {
     .keypress(function() {
       CMC.recalculateProblemMessageLimit();
     });
+
+  $("#profile-submit").click(function() {
+    var mtype = $("form").find('.profile-ddl-type-medical');
+    var nmtype = $("form").find('.profile-ddl-type-nonmedical');
+    var sptype = $("form").find('.profile-ddl-type-spiritual');
+    var reltype = $("form").find('.profile-ddl-type-religious');
+    var durtype = $("form").find('.profile-ddl-type-duration');
+    var state = $("form").find('.profile-ddl-type-state');
+    var city = $("form").find('.profile-input-city');
+    var zipcode = $("form").find('.profile-input-zipcode');
+
+    var country = $("form").find('.profile-ddl-type-country');
+    var region = $("form").find('.profile-ddl-type-region');
+    var countriesserved = $("form").find('.profile-ddl-type-countriesserved');
+    var phone = $("form").find('.profile-input-phone');
+    var email = $("form").find('.profile-input-email');
+    var misexp = $("form").find('.profile-input-experience');           
+
+    var zipisvalid = false;
+    var emailisvalid = false;
+    var reason="";
+    var errornum=1;
+
+    if (zipcode.val() != "") {
+      zipisvalid = validateZipCode(zipcode.val());
+      if (!zipisvalid) {
+        reason += errornum+'. Incorrect Zipcode format entered\n';
+        errornum = errornum + 1;
+        isValid = false;
+      }
+    }
+
+    if (email.val() != "") {
+      emailisvalid = validateEmail(email.val());
+      if (!emailisvalid) {
+        reason += errornum + '. Incorrect Email format entered\n';
+        errornum = errornum + 1;
+        isValid = false;
+      }
+    }
+
+    if (phone.val() != "") {
+      var phoneerror = validatePhone(phone.val(),country.val());
+      if (phoneerror != "") {
+        reason += errornum + ' ' + phoneerror + '\n';
+        errornum = errornum + 1;
+        isValid = false;
+      }
+    }
+
+    if (reason != "") {
+      alert('Some input fields need correction:\n'+ reason);
+      return false;
+    } else {
+      var profileformdata = {};
+      profileformdata.profiletype=1;
+      if (mtype.val() != 0)
+        profileformdata.medskills= mtype.val();
+      if (nmtype.val() != 0)
+        profileformdata.otherskills=nmtype.val();         
+      if (sptype.val() != 0)
+        profileformdata.spiritserv=sptype.val();        
+      if (region.val() != 0)
+        profileformdata.region=region.val();  
+      if (country.val() != "")
+        profileformdata.country=country.val();  
+      if (state.val() != "Select your State")
+        profileformdata.state=state.val();  
+      if (durtype.val() != 0)
+        profileformdata.dur=durtype.val();
+      if (reltype.val() != 0)
+        profileformdata.relg=reltype.val();           
+      if (zipcode.val() != "")
+        profileformdata.zip=zipcode.val();
+      if (email.val() != "")
+        profileformdata.email=email.val();
+      if (city.val() != "")
+        profileformdata.city=city.val();
+      if (phone.val() != "")
+        profileformdata.phone=phone.val();
+      if (misexp.val() != "")
+        profileformdata.misexp=misexp.val();            
+
+      alert('AJAX form submission = ' + JSON.stringify(profileformdata));
+
+      $.ajax({
+        type: "POST",
+        url: "api/profilein.php",
+        data: {
+          fbid: "25826994",
+        profiledata: JSON.stringify(profileformdata)
+        },
+        dataType: "json",
+        success: function() {
+          alert('Success');
+        },
+        error: function() {
+                 alert('Failure');
+               }
+      });
+      return true;
+    }
+
+    function validateZipCode(elementValue){
+      var zisValid = false;
+      var zipCodePattern = /^\d{5}$|^\d{5}-\d{4}$/;
+      zisValid = zipCodePattern.test(elementValue);
+      return zisValid;
+    }
+    function validateEmail(email){
+      var eisValid =  false;
+      var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+[\.]{1}[a-zA-Z]{2,4}$/;  
+      eisValid = emailPattern.test(email);  
+      return eisValid;
+    } 
+
+    function validatePhone(fld,country) {
+      var error = "";
+      var stripped = fld.replace(/[\(\)\.\-\ ]/g, ''); 
+      // for international numbers
+      var regex = /^\+(?:[0-9] ?){6,14}[0-9]$/;
+
+      if (isNaN(parseInt(stripped))) {
+        error = "The phone number contains illegal characters.\n";
+      }
+      else if (country != "United States") {
+        if (!regex.test(fld)) {
+          error = "The phone number is not a valid International Number.\n";
+        }
+      }
+      else if (!(stripped.length == 10)) {
+        error = "The phone number is the wrong length. Make sure you included an area code.\n";
+      }
+
+      return error;
+    }
+  });
+
+  // Handles the live form validation
+  $("#profile-medical").validate({
+    expression: "if (VAL) return true; else return false;",
+    message: "Please enter the Required field"
+  });
+  $("#profile-email").validate({
+    expression: "if (VAL.match(/^[^\\W][a-zA-Z0-9\\_\\-\\.]+([a-zA-Z0-9\\_\\-\\.]+)*\\@[a-zA-Z0-9_]+(\\.[a-zA-Z0-9_]+)*\\.[a-zA-Z]{2,4}$/) && VAL) return true; else if (!VAL) return true; else return false;",
+    message: "Please enter a valid Email ID"
+  }); 
+  $("#profile-zipcode").validate({
+    expression: "if (VAL.match(new RegExp(/(^[0-9]{5}$)|(^[0-9]{5}-[0-9]{4}$)/)) && VAL) return true; else if (!VAL) return true; else return false;",
+    message: "Please enter a valid Zipcode"
+  }); 
+  $("#profile-phone").validate({
+    expression: "if (VAL.match(new RegExp(/(^[0-9]{10}$)/)) && VAL) return true; else if (!VAL) return true; else return false;",
+    message: "Please enter a valid Phone Number"
+  }); 
+
+  $('.profile-ddl-contents').css('display', 'none');
+  $('.profile-ddl-type-country').css('display', 'United States');
+  $('.profile-ddl-header').toggle(function() {
+    toggleContents($(this).parent().find('.profile-ddl-contents'));
+  }, function() { toggleContents($(this).parent().find('.profile-ddl-contents')); });
+
+  function toggleContents(el) {
+    $('.profile-ddl-contents').css('display', 'none');
+    if (el.css('display') == 'none') el.fadeIn("slow");
+    else el.fadeOut("slow");
+  }
+  $('.profile-ddl-contents a').click(function() {
+    $(this).parent().parent().find('.profile-ddl-o select').attr('selectedIndex', $('.profile-ddl-contents a').index(this));
+    $(this).parent().parent().find('.profile-ddl-title').html($(this).html());
+    $(this).parent().parent().find('.profile-ddl-contents').fadeOut("slow");
+  });
+
+
+  var profileshow = "hide";
+  $("#EditProfile").click(function() {
+    alert("Edit Profile clicked");
+  });
+
+  $("#CreateTrip").click(function() {
+    alert("Create Trip Clicked");
+  });   
+
+  var tripjoinbtns = new Array();
+  for (var i=0;i<4;i++) {
+    tripjoinbtns[i] = "join-trip-submit-"+i;
+  }
+
+  $.each(tripjoinbtns, function() {
+    $("#" +this).click(function() {
+      var tripparts = this.id.split('-');
+      var index = parseInt(tripparts[tripparts.length-1]);;
+      alert("Trip Index = " + index);
+    });
+  });
+
+  var tripdescbtns = new Array();
+  for (var i=0;i<4;i++) {
+    tripdescbtns[i] = "trip-desc-submit-"+i;
+  }
+
+  $.each(tripdescbtns, function() {
+    $("#" +this).click(function() {
+      var descparts = this.id.split('-');
+      var index = parseInt(descparts[descparts.length-1]);;
+      alert("Desc Trip Index = " + index);
+    });
+  });     
 
   // this should be the last thing that happens
   CMC.log("load callback complete, fading in canvas");

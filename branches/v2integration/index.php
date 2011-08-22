@@ -4,206 +4,206 @@
 include_once 'api/common.php';
 $con = arena_connect();
 
-	$aCountries = array(
-		"Afghanistan",
-		"Albania",
-		"Algeria",
-		"Andorra",
-		"Angola",
-		"Antigua and Barbuda",
-		"Argentina",
-		"Armenia",
-		"Australia",
-		"Austria",
-		"Azerbaijan",
-		"Bahamas",
-		"Bahrain",
-		"Bangladesh",
-		"Barbados",
-		"Belarus",
-		"Belgium",
-		"Belize",
-		"Benin",
-		"Bhutan",
-		"Bolivia",
-		"Bosnia and Herzegovina",
-		"Botswana",
-		"Brazil",
-		"Brunei",
-		"Bulgaria",
-		"Burkina Faso",
-		"Burundi",
-		"Cambodia",
-		"Cameroon",
-		"Canada",
-		"Cape Verde",
-		"Central African Republic",
-		"Chad",
-		"Chile",
-		"China",
-		"Colombia",
-		"Comoros",
-		"Congo (Brazzaville)",
-		"Congo, Democratic Republic of the",
-		"Costa Rica",
-		"Côte d'Ivoire",
-		"Croatia",
-		"Cuba",
-		"Cyprus",
-		"Czech Republic",
-		"Denmark",
-		"Djibouti",
-		"Dominica",
-		"Dominican Republic",
-		"East Timor",
-		"Ecuador",
-		"Egypt",
-		"El Salvador",
-		"Equatorial Guinea",
-		"Eritrea",
-		"Estonia",
-		"Ethiopia",
-		"Fiji",
-		"Finland",
-		"France",
-		"Gabon",
-		"Gambia, The",
-		"Georgia",
-		"Germany",
-		"Ghana",
-		"Greece",
-		"Grenada",
-		"Guatemala",
-		"Guinea",
-		"Guinea-Bissau",
-		"Guyana",
-		"Haiti",
-		"Honduras",
-		"Hungary",
-		"Iceland",
-		"India",
-		"Indonesia",
-		"Iran",
-		"Iraq",
-		"Ireland",
-		"Israel",
-		"Italy",
-		"Jamaica",
-		"Japan",
-		"Jordan",
-		"Kazakhstan",
-		"Kenya",
-		"Kiribati",
-		"Korea, North",
-		"Korea, South",
-		"Kuwait",
-		"Kyrgyzstan","Laos","Latvia",
-		"Lebanon",
-		"Lesotho",
-		"Liberia",
-		"Libya",
-		"Liechtenstein",
-		"Lithuania",
-		"Luxembourg",
-		"Macedonia",
-		"Madagascar",
-		"Malawi",
-		"Malaysia",
-		"Maldives",
-		"Mali",
-		"Malta",
-		"Marshall Islands",
-		"Mauritania",
-		"Mauritius",
-		"Mexico",
-		"Micronesia",
-		"Moldova",
-		"Monaco",
-		"Mongolia",
-		"Morocco",
-		"Mozambique",
-		"Myanmar",
-		"Namibia",
-		"Nauru",
-		"Nepal",
-		"Netherlands",
-		"New Zealand",
-		"Nicaragua",
-		"Niger",
-		"Nigeria",
-		"Norway",
-		"Oman",
-		"Pakistan",
-		"Palau",
-		"Panama",
-		"Papua New Guinea",
-		"Paraguay",
-		"Peru",
-		"Philippines",
-		"Poland",
-		"Portugal",
-		"Qatar",
-		"Romania",
-		"Russia",
-		"Rwanda",
-		"Saint Kitts and Nevis",
-		"Saint Lucia",
-		"Saint Vincent and The Grenadines",
-		"Samoa",
-		"San Marino",
-		"Sao Tome and Principe",
-		"Saudi Arabia",
-		"Senegal",
-		"Serbia and Montenegro",
-		"Seychelles",
-		"Sierra Leone",
-		"Singapore",
-		"Slovakia",
-		"Slovenia",
-		"Solomon Islands",
-		"Somalia",
-		"South Africa",
-		"Spain",
-		"Sri Lanka",
-		"Sudan",
-		"Suriname",
-		"Swaziland",
-		"Sweden",
-		"Switzerland",
-		"Syria",
-		"Taiwan",
-		"Tajikistan",
-		"Tanzania",
-		"Thailand",
-		"Togo",
-		"Tonga",
-		"Trinidad and Tobago",
-		"Tunisia",
-		"Turkey",
-		"Turkmenistan",
-		"Tuvalu",
-		"Uganda",
-		"Ukraine",
-		"United Arab Emirates",
-		"United Kingdom",
-		"United States",
-		"Uruguay",
-		"Uzbekistan",
-		"Vanuatu",
-		"Vatican City",
-		"Venezuela",
-		"Vietnam",
-		"Western Sahara",
-		"Yemen",
-		"Zambia",
-		"Zimbabwe"
-	);
-	
-	$usstates = array(
-	"Alabama",
-	"Alaska",
-	"American Samoa",
-	"Arizona",
+  $aCountries = array(
+    "Afghanistan",
+    "Albania",
+    "Algeria",
+    "Andorra",
+    "Angola",
+    "Antigua and Barbuda",
+    "Argentina",
+    "Armenia",
+    "Australia",
+    "Austria",
+    "Azerbaijan",
+    "Bahamas",
+    "Bahrain",
+    "Bangladesh",
+    "Barbados",
+    "Belarus",
+    "Belgium",
+    "Belize",
+    "Benin",
+    "Bhutan",
+    "Bolivia",
+    "Bosnia and Herzegovina",
+    "Botswana",
+    "Brazil",
+    "Brunei",
+    "Bulgaria",
+    "Burkina Faso",
+    "Burundi",
+    "Cambodia",
+    "Cameroon",
+    "Canada",
+    "Cape Verde",
+    "Central African Republic",
+    "Chad",
+    "Chile",
+    "China",
+    "Colombia",
+    "Comoros",
+    "Congo (Brazzaville)",
+    "Congo, Democratic Republic of the",
+    "Costa Rica",
+    "Côte d'Ivoire",
+    "Croatia",
+    "Cuba",
+    "Cyprus",
+    "Czech Republic",
+    "Denmark",
+    "Djibouti",
+    "Dominica",
+    "Dominican Republic",
+    "East Timor",
+    "Ecuador",
+    "Egypt",
+    "El Salvador",
+    "Equatorial Guinea",
+    "Eritrea",
+    "Estonia",
+    "Ethiopia",
+    "Fiji",
+    "Finland",
+    "France",
+    "Gabon",
+    "Gambia, The",
+    "Georgia",
+    "Germany",
+    "Ghana",
+    "Greece",
+    "Grenada",
+    "Guatemala",
+    "Guinea",
+    "Guinea-Bissau",
+    "Guyana",
+    "Haiti",
+    "Honduras",
+    "Hungary",
+    "Iceland",
+    "India",
+    "Indonesia",
+    "Iran",
+    "Iraq",
+    "Ireland",
+    "Israel",
+    "Italy",
+    "Jamaica",
+    "Japan",
+    "Jordan",
+    "Kazakhstan",
+    "Kenya",
+    "Kiribati",
+    "Korea, North",
+    "Korea, South",
+    "Kuwait",
+    "Kyrgyzstan","Laos","Latvia",
+    "Lebanon",
+    "Lesotho",
+    "Liberia",
+    "Libya",
+    "Liechtenstein",
+    "Lithuania",
+    "Luxembourg",
+    "Macedonia",
+    "Madagascar",
+    "Malawi",
+    "Malaysia",
+    "Maldives",
+    "Mali",
+    "Malta",
+    "Marshall Islands",
+    "Mauritania",
+    "Mauritius",
+    "Mexico",
+    "Micronesia",
+    "Moldova",
+    "Monaco",
+    "Mongolia",
+    "Morocco",
+    "Mozambique",
+    "Myanmar",
+    "Namibia",
+    "Nauru",
+    "Nepal",
+    "Netherlands",
+    "New Zealand",
+    "Nicaragua",
+    "Niger",
+    "Nigeria",
+    "Norway",
+    "Oman",
+    "Pakistan",
+    "Palau",
+    "Panama",
+    "Papua New Guinea",
+    "Paraguay",
+    "Peru",
+    "Philippines",
+    "Poland",
+    "Portugal",
+    "Qatar",
+    "Romania",
+    "Russia",
+    "Rwanda",
+    "Saint Kitts and Nevis",
+    "Saint Lucia",
+    "Saint Vincent and The Grenadines",
+    "Samoa",
+    "San Marino",
+    "Sao Tome and Principe",
+    "Saudi Arabia",
+    "Senegal",
+    "Serbia and Montenegro",
+    "Seychelles",
+    "Sierra Leone",
+    "Singapore",
+    "Slovakia",
+    "Slovenia",
+    "Solomon Islands",
+    "Somalia",
+    "South Africa",
+    "Spain",
+    "Sri Lanka",
+    "Sudan",
+    "Suriname",
+    "Swaziland",
+    "Sweden",
+    "Switzerland",
+    "Syria",
+    "Taiwan",
+    "Tajikistan",
+    "Tanzania",
+    "Thailand",
+    "Togo",
+    "Tonga",
+    "Trinidad and Tobago",
+    "Tunisia",
+    "Turkey",
+    "Turkmenistan",
+    "Tuvalu",
+    "Uganda",
+    "Ukraine",
+    "United Arab Emirates",
+    "United Kingdom",
+    "United States",
+    "Uruguay",
+    "Uzbekistan",
+    "Vanuatu",
+    "Vatican City",
+    "Venezuela",
+    "Vietnam",
+    "Western Sahara",
+    "Yemen",
+    "Zambia",
+    "Zimbabwe"
+  );
+  
+  $usstates = array(
+  "Alabama",
+  "Alaska",
+  "American Samoa",
+  "Arizona",
     "Arkansas",
     "California",
     "Colorado",
@@ -256,25 +256,8 @@ $con = arena_connect();
     "West Virginia",
     "Wisconsin",
     "Wyoming"
-	);
+  );
 // put PHP code here
-
-/**
-*  Given a file, i.e. /css/base.css, replaces it with a string containing the
-*  file's mtime, i.e. /css/base.1221534296.css.
-*  
-*  @param $file  The file to be loaded.  Must be an absolute path (i.e.
-*                starting with slash).
-*/
-function auto_version($file)
-{
-    if(strpos($file, '/') !== 0 || !file_exists($_SERVER['DOCUMENT_ROOT'] . $file))
-          return $file;
-
-      $mtime = filemtime($_SERVER['DOCUMENT_ROOT'] . $file);
-        return preg_replace('{\\.([^./]+)$}', ".$mtime.\$1", $file);
-}
-
 
 function cmc_js_load($src) {
   echo '<script type="text/javascript" src="'.$src.'"></script>';
@@ -359,12 +342,12 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
 
 function cmc_check_profile_existence($fbid,&$profileexists,$con) {
   
-	$sql = 'select * from users where userid="'.$fbid.'"';
-	$result = mysql_query($sql,$con);
-	if (!$result) {
- 		setjsonmysqlerror($has_error,$err_msg,$sql2);
-   	}
-	else {
+  $sql = 'select * from users where userid="'.$fbid.'"';
+  $result = mysql_query($sql,$con);
+  if (!$result) {
+    setjsonmysqlerror($has_error,$err_msg,$sql2);
+    }
+  else {
     $num_userids = mysql_num_rows($result);
     if ($num_userids == 0) {
       $profileexists = 0;
@@ -398,11 +381,12 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
     <script src="json2-min.js"></script>
     <script type="text/javascript" src="cmc.js"></script>
     <script src="jquery.validate.js" type="text/javascript"></script>
-    <script src="jquery.validation.functions.js" type="text/javascript"></script>	
-	  <link rel="stylesheet" type="text/css" href="jquery.validate.css" />
-	  <link href="<?=auto_version('profilevalidate.css')?>" rel="stylesheet" type="text/css" />
+    <script src="jquery.validation.functions.js" type="text/javascript"></script> 
+    <link rel="stylesheet" type="text/css" href="jquery.validate.css" />
+    <link href="profilevalidate.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" type="text/css" href="style.css" />
-	<link href="profiledisplay.css" rel="stylesheet" type="text/css" />
+    <link href="profiledisplay.css" rel="stylesheet" type="text/css" />
+    <!-- THIS IS THE ADMIN CODE BLOCK! Do NOT put code here for end users, they won't see it! -zack -->
     <script type="text/javascript">
       $(function() {
         CMC.log("loading admin only code");
@@ -426,221 +410,10 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
         });
 
         $("#debug-detach-handlers").button().click(function() { CMC.detachDebugHandlers(); });
+        $("#debug-force-login").button().click(function() { CMC.login(); });
 
         CMC.log("admin load complete");
-				
-        $("#profile-submit").click(function() {
-				    var mtype = $("form").find('.profile-ddl-type-medical');
-					var nmtype = $("form").find('.profile-ddl-type-nonmedical');
-					var sptype = $("form").find('.profile-ddl-type-spiritual');
-					var reltype = $("form").find('.profile-ddl-type-religious');
-					var durtype = $("form").find('.profile-ddl-type-duration');
-					var state = $("form").find('.profile-ddl-type-state');
-				    var city = $("form").find('.profile-input-city');
-					var zipcode = $("form").find('.profile-input-zipcode');
-					
-				    var country = $("form").find('.profile-ddl-type-country');
-					var region = $("form").find('.profile-ddl-type-region');
-				    var countriesserved = $("form").find('.profile-ddl-type-countriesserved');
-					var phone = $("form").find('.profile-input-phone');
-				    var email = $("form").find('.profile-input-email');
-					var misexp = $("form").find('.profile-input-experience');				    
-					
-					var zipisvalid = false;
-					var emailisvalid = false;
-					var reason="";
-					var errornum=1;
-					
-					if (zipcode.val() != "") {
-
-					zipisvalid = validateZipCode(zipcode.val());
-					if (!zipisvalid) {
-						reason += errornum+'. Incorrect Zipcode format entered\n';
-						errornum = errornum + 1;
-						isValid = false;
-					}
-					}
-
-					if (email.val() != "") {
-					emailisvalid = validateEmail(email.val());
-					if (!emailisvalid) {
-						reason += errornum + '. Incorrect Email format entered\n';
-						errornum = errornum + 1;
-						isValid = false;
-					}
-					}
-					
-					if (phone.val() != "") {
-					var phoneerror = validatePhone(phone.val(),country.val());
-					if (phoneerror != "") {
-						reason += errornum + ' ' + phoneerror + '\n';
-						errornum = errornum + 1;
-						isValid = false;
-					}
-					}
-					
-					if (reason != "") {
-						alert('Some input fields need correction:\n'+ reason);
-						return false;
-					}
-					else {
-
-					var profileformdata = {};
-					profileformdata.profiletype=1;
-					if (mtype.val() != 0)
-						profileformdata.medskills= mtype.val();
-					if (nmtype.val() != 0)
-						profileformdata.otherskills=nmtype.val();					
-					if (sptype.val() != 0)
-						profileformdata.spiritserv=sptype.val();				
-					if (region.val() != 0)
-						profileformdata.region=region.val();	
-					if (country.val() != "")
-						profileformdata.country=country.val();	
-					if (state.val() != "Select your State")
-						profileformdata.state=state.val();	
-					if (durtype.val() != 0)
-						profileformdata.dur=durtype.val();
-					if (reltype.val() != 0)
-						profileformdata.relg=reltype.val();						
-					if (zipcode.val() != "")
-						profileformdata.zip=zipcode.val();
-					if (email.val() != "")
-						profileformdata.email=email.val();
-					if (city.val() != "")
-						profileformdata.city=city.val();
-					if (phone.val() != "")
-						profileformdata.phone=phone.val();
-					if (misexp.val() != "")
-						profileformdata.misexp=misexp.val();						
-						
-                  alert('AJAX form submission = ' + JSON.stringify(profileformdata));
-
-                  $.ajax({
-                    type: "POST",
-                    url: "api/profilein.php",
-                    data: {
-                        fbid: "25826994",
-                        profiledata: JSON.stringify(profileformdata)
-                    },
-                    dataType: "json",
-                    success: function() {
-                      alert('Success');
-                    },
-                    error: function() {
-                      alert('Failure');
-                    }
-                  });
-                  return true;
-				}
-					
-                function validateZipCode(elementValue){
-				  var zisValid = false;
-                  var zipCodePattern = /^\d{5}$|^\d{5}-\d{4}$/;
-                  zisValid = zipCodePattern.test(elementValue);
-				  return zisValid;
-                }
-				function validateEmail(email){
-					var eisValid =  false;
-					var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+[\.]{1}[a-zA-Z]{2,4}$/;  
-					eisValid = emailPattern.test(email);  
-					return eisValid;
-				}	
-				
-				function validatePhone(fld,country) {
-				var error = "";
-				var stripped = fld.replace(/[\(\)\.\-\ ]/g, ''); 
-				// for international numbers
-				var regex = /^\+(?:[0-9] ?){6,14}[0-9]$/;
-
-				if (isNaN(parseInt(stripped))) {
-					error = "The phone number contains illegal characters.\n";
-				}
-				else if (country != "United States") {
-					if (!regex.test(fld)) {
-						error = "The phone number is not a valid International Number.\n";
-					}
-				}
-				else if (!(stripped.length == 10)) {
-					error = "The phone number is the wrong length. Make sure you included an area code.\n";
-				}
-				
-				return error;
-				}
-			});
-				
-        // Handles the live form validation
-				$("#profile-medical").validate({
-                    expression: "if (VAL) return true; else return false;",
-                    message: "Please enter the Required field"
-                });
-				$("#profile-email").validate({
-                    expression: "if (VAL.match(/^[^\\W][a-zA-Z0-9\\_\\-\\.]+([a-zA-Z0-9\\_\\-\\.]+)*\\@[a-zA-Z0-9_]+(\\.[a-zA-Z0-9_]+)*\\.[a-zA-Z]{2,4}$/) && VAL) return true; else if (!VAL) return true; else return false;",
-                    message: "Please enter a valid Email ID"
-                });	
-				$("#profile-zipcode").validate({
-                    expression: "if (VAL.match(new RegExp(/(^[0-9]{5}$)|(^[0-9]{5}-[0-9]{4}$)/)) && VAL) return true; else if (!VAL) return true; else return false;",
-                    message: "Please enter a valid Zipcode"
-                });	
-				$("#profile-phone").validate({
-					expression: "if (VAL.match(new RegExp(/(^[0-9]{10}$)/)) && VAL) return true; else if (!VAL) return true; else return false;",
-                    message: "Please enter a valid Phone Number"
-                });	
-        
-            $('.profile-ddl-contents').css('display', 'none');
-            $('.profile-ddl-type-country').css('display', 'United States');
-            $('.profile-ddl-header').toggle(function() {
-                toggleContents($(this).parent().find('.profile-ddl-contents'));
-            }, function() { toggleContents($(this).parent().find('.profile-ddl-contents')); });
-
-            function toggleContents(el) {
-               $('.profile-ddl-contents').css('display', 'none');
-                if (el.css('display') == 'none') el.fadeIn("slow");
-                else el.fadeOut("slow");
-            }
-            $('.profile-ddl-contents a').click(function() {
-                $(this).parent().parent().find('.profile-ddl-o select').attr('selectedIndex', $('.profile-ddl-contents a').index(this));
-                $(this).parent().parent().find('.profile-ddl-title').html($(this).html());
-                $(this).parent().parent().find('.profile-ddl-contents').fadeOut("slow");
-            });
-			
-			
-      var profileshow = "hide";
-			$("#EditProfile").click(function() {
-				alert("Edit Profile clicked");
-			});
-			
-			$("#CreateTrip").click(function() {
-				alert("Create Trip Clicked");
-			});		
-			
-			var tripjoinbtns = new Array();
-			for (var i=0;i<4;i++) {
-				tripjoinbtns[i] = "join-trip-submit-"+i;
-			}
-			
-            $.each(tripjoinbtns, function() {
-                    $("#" +this).click(function() {
-						var tripparts = this.id.split('-');
-						var index = parseInt(tripparts[tripparts.length-1]);;
-                        alert("Trip Index = " + index);
-                    });
-            });
-			
-			var tripdescbtns = new Array();
-			for (var i=0;i<4;i++) {
-				tripdescbtns[i] = "trip-desc-submit-"+i;
-			}
-			
-            $.each(tripdescbtns, function() {
-                    $("#" +this).click(function() {
-						var descparts = this.id.split('-');
-						var index = parseInt(descparts[descparts.length-1]);;
-                        alert("Desc Trip Index = " + index);
-                    });
-            });			
       });
-
     </script>
     <!-- Custom CSS markup goes here -->
     <style type="text/css">
@@ -948,54 +721,54 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
         {
             text-decoration: underline;
             color: white;
-        }	  
+        }   
     </style>
-	
-	<script type="text/JavaScript">
-	
-	var currentOptions = new Array(6);
-	for (i=0; i <6; i++) {
-		currentOptions[i]=new Array()		
-	}
-	var current = new Array(6);
-	var prelength = new Array(6);
-	var postlen = new Array(6);
+  
+  <script type="text/JavaScript">
+  
+  var currentOptions = new Array(6);
+  for (i=0; i <6; i++) {
+    currentOptions[i]=new Array()   
+  }
+  var current = new Array(6);
+  var prelength = new Array(6);
+  var postlen = new Array(6);
 
-	for (i=0;i<6;i++) {
-		prelength[i] = 0;
-		postlen[i] = 0;
-	}
-	
-	function selectMultiple(s,k)
-	{
-	current[k] = s.selectedIndex;
-	
-	for (var i=0; i<currentOptions[k].length; i++)
-	{
-		if (current[k] == currentOptions[k][i])
-		{
-			prelength[k] = currentOptions[k].length;
-			currentOptions[k].splice(i, 1);
-			postlen[k] = currentOptions[k].length;
-			break;
-		}
-	}
-	
-	if ((prelength[k]==0) || (prelength[k]!=postlen[k]+1)) {
-		if (i >= currentOptions[k].length) currentOptions[k].push(current[k]);
-	}
+  for (i=0;i<6;i++) {
+    prelength[i] = 0;
+    postlen[i] = 0;
+  }
+  
+  function selectMultiple(s,k)
+  {
+  current[k] = s.selectedIndex;
+  
+  for (var i=0; i<currentOptions[k].length; i++)
+  {
+    if (current[k] == currentOptions[k][i])
+    {
+      prelength[k] = currentOptions[k].length;
+      currentOptions[k].splice(i, 1);
+      postlen[k] = currentOptions[k].length;
+      break;
+    }
+  }
+  
+  if ((prelength[k]==0) || (prelength[k]!=postlen[k]+1)) {
+    if (i >= currentOptions[k].length) currentOptions[k].push(current[k]);
+  }
 
-	// reinitialize the lengths
-	if (currentOptions[k].length == 0) {
-		prelength[k] = 0;
-		prelength[k] = 0;
-	}
-			
-	for (var i=0; i<s.options.length; i++) s.options[i].selected = false;
-	for (var i=0; i<currentOptions[k].length; i++) s.options[currentOptions[k][i]].selected = true;
-	}
-		
-	</script>	
+  // reinitialize the lengths
+  if (currentOptions[k].length == 0) {
+    prelength[k] = 0;
+    prelength[k] = 0;
+  }
+      
+  for (var i=0; i<s.options.length; i++) s.options[i].selected = false;
+  for (var i=0; i<currentOptions[k].length; i++) s.options[currentOptions[k][i]].selected = true;
+  }
+    
+  </script> 
     <!-- HTML markup goes here -->
     <div id="loading">
       <div style="vertical-align: middle; text-align: center; display: block">
@@ -1052,9 +825,9 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
             );
           ?>
         </div>
-		    <div id="show-profile">
-				<script type="text/javascript">
-				// First get the profile information using a AJAX request
+        <div id="show-profile">
+        <script type="text/javascript">
+        // First get the profile information using a AJAX request
                   var ProfileObj = new Object;
 
                   $.ajax({
@@ -1131,147 +904,147 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                     }
                   });
 
-				var about = "This is what I can say about me. I can keep on writing and this will add to the number of lines without any problem during formatting";
-				var medskills=new Array(); // regular array (add an optional integer
-		medskills[0]="Dental Professional";
-		medskills[1]="Pharmacist";
-		var nonmedskills=new Array(); // regular array (add an optional integer
-		nonmedskills[0]="General Help/Labor";
-		nonmedskills[1]="Computer Science/Other Technical";
-		var personal = new Array();
-		personal[0] = "junk@email.com";
-		personal[1] = "4042933965";
-		personal[2] = "USA";
-		personal[3] = "23693";
-		personal[4] = "1-2 Weeks, 2 Weeks-1 Month";
-		personal[5] = "Secular";
-		personal[6] = "India, China, Australia";
-		var name = "Poornima Bhamidipati";
-		var TripName = "Richmond Trip longer name";
-		var numtrips = 4;
+        var about = "This is what I can say about me. I can keep on writing and this will add to the number of lines without any problem during formatting";
+        var medskills=new Array(); // regular array (add an optional integer
+    medskills[0]="Dental Professional";
+    medskills[1]="Pharmacist";
+    var nonmedskills=new Array(); // regular array (add an optional integer
+    nonmedskills[0]="General Help/Labor";
+    nonmedskills[1]="Computer Science/Other Technical";
+    var personal = new Array();
+    personal[0] = "junk@email.com";
+    personal[1] = "4042933965";
+    personal[2] = "USA";
+    personal[3] = "23693";
+    personal[4] = "1-2 Weeks, 2 Weeks-1 Month";
+    personal[5] = "Secular";
+    personal[6] = "India, China, Australia";
+    var name = "Poornima Bhamidipati";
+    var TripName = "Richmond Trip longer name";
+    var numtrips = 4;
         //alert('NAME = ' + ProfileObj.name);
 
-				  </script>
-				  
-		<style type="text/css">
-		#table_wrapper{background:#000080;border:0px solid #A9A9A9;float:center;}
-		#tbody{height:100px;overflow-y:auto;width:410px;background:#000080;}
-		table{border-collapse:collapse; width:100%;}
-		td{padding:0px 0px; /* pixels */
-		border-right:0px solid #A9A9A9; /* to avoid the hacks for the padding */
-		border-bottom:0px solid #A9A9A9;} 
-		.td1{width:75px;}
-		.td2{width:100px;}
-		.td3{border-right-width:0;}
-		</style>			
+          </script>
+          
+    <style type="text/css">
+    #table_wrapper{background:#000080;border:0px solid #A9A9A9;float:center;}
+    #tbody{height:100px;overflow-y:auto;width:410px;background:#000080;}
+    table{border-collapse:collapse; width:100%;}
+    td{padding:0px 0px; /* pixels */
+    border-right:0px solid #A9A9A9; /* to avoid the hacks for the padding */
+    border-bottom:0px solid #A9A9A9;} 
+    .td1{width:75px;}
+    .td2{width:100px;}
+    .td3{border-right-width:0;}
+    </style>      
 
-		<script type="text/javascript">
+    <script type="text/javascript">
 
     function displayprofile() {
     document.write('<h1> Profile Page </h1>');
-		document.write('<div id="profilecontent">');
-		document.write('<div id="colOne">');
-		document.write('<p><img src="img6.jpg" alt="" width="230" height="170" /></p>');
-		document.write('<div class="box2">');
+    document.write('<div id="profilecontent">');
+    document.write('<div id="colOne">');
+    document.write('<p><img src="img6.jpg" alt="" width="230" height="170" /></p>');
+    document.write('<div class="box2">');
     document.write('<h3>' + ProfileObj.name + '</h3>');
-		document.write('</div>');
-		document.write('<input type="submit" value="Edit Profile" id="EditProfile" class="button" />');
-		document.write('<input type="submit" value="Create Trip" id="CreateTrip" class="button" />');
-		document.write('<p>&nbsp;</p>');
-		document.write('<div class="box2">');
-		document.write('<h3>');
-		document.write('About Me: <br />');
-		document.write('</h3>');
+    document.write('</div>');
+    document.write('<input type="submit" value="Edit Profile" id="EditProfile" class="button" />');
+    document.write('<input type="submit" value="Create Trip" id="CreateTrip" class="button" />');
+    document.write('<p>&nbsp;</p>');
+    document.write('<div class="box2">');
+    document.write('<h3>');
+    document.write('About Me: <br />');
+    document.write('</h3>');
     document.write('<h4>' + about + '</h4>');
-		document.write('</div>');
-		document.write('</div>');
-		document.write('<div id="colTwo">');
-		document.write('<div class="box1">');
-		document.write('<h2>Medical Skills:</h2>');
+    document.write('</div>');
+    document.write('</div>');
+    document.write('<div id="colTwo">');
+    document.write('<div class="box1">');
+    document.write('<h2>Medical Skills:</h2>');
     if (typeof ProfileObj.MedicalSkills != "undefined") {
-		document.write('<ul>');
-		for (var i=0;i<ProfileObj.MedicalSkills.length;i++) {
-			document.write('<li>' + ProfileObj.MedicalSkills[i] + '</li>');
-		}
-		document.write('</ul>');
+    document.write('<ul>');
+    for (var i=0;i<ProfileObj.MedicalSkills.length;i++) {
+      document.write('<li>' + ProfileObj.MedicalSkills[i] + '</li>');
     }
-		document.write('</div>');
-		document.write('<p>&nbsp;</p>');
-		document.write('<div class="box1">');
-		document.write('<h2>Non-Medical Skills:</h2>');
+    document.write('</ul>');
+    }
+    document.write('</div>');
+    document.write('<p>&nbsp;</p>');
+    document.write('<div class="box1">');
+    document.write('<h2>Non-Medical Skills:</h2>');
     if (typeof ProfileObj.Non_MedicalSkills != "undefined") {
-		document.write('<ul>');
-		for (var i=0;i<ProfileObj_Non_MedicalSkills.length;i++) {
-			document.write('<li>' + ProfileObj.Non_MedicalSkills[i] + '</li>');
-		}
-		document.write('</ul>');
+    document.write('<ul>');
+    for (var i=0;i<ProfileObj_Non_MedicalSkills.length;i++) {
+      document.write('<li>' + ProfileObj.Non_MedicalSkills[i] + '</li>');
     }
-		document.write('</div>');
-		document.write('<p>&nbsp;</p>');
-		document.write('<div class="box1">');
-		document.write('<h2>Personal Information:</h2>');
-		for (var i=0;i<personal.length;i++) {
-			//if (typeof ProfileObj.email != "undefined") {
+    document.write('</ul>');
+    }
+    document.write('</div>');
+    document.write('<p>&nbsp;</p>');
+    document.write('<div class="box1">');
+    document.write('<h2>Personal Information:</h2>');
+    for (var i=0;i<personal.length;i++) {
+      //if (typeof ProfileObj.email != "undefined") {
       if (i==0) {
-				//document.write('<h5>Email: </h5><h6>' + ProfileObj.email + '</h6>\t');
-				document.write('<h5>Email: </h5><h6>' + personal[i] + '</h6>\t');
-			}
-			//if (typeof ProfileObj.phone != "undefined") {
+        //document.write('<h5>Email: </h5><h6>' + ProfileObj.email + '</h6>\t');
+        document.write('<h5>Email: </h5><h6>' + personal[i] + '</h6>\t');
+      }
+      //if (typeof ProfileObj.phone != "undefined") {
       else if (i==1) {
-				//document.write('\t<h5>Phone: ' + ProfileObj.phone + '</h5><br/>');
-				document.write('\t<h5>Phone: ' + personal[i] + '</h5><br/>');
-			}
-			//if (typeof ProfileObj.country != "undefined") {
+        //document.write('\t<h5>Phone: ' + ProfileObj.phone + '</h5><br/>');
+        document.write('\t<h5>Phone: ' + personal[i] + '</h5><br/>');
+      }
+      //if (typeof ProfileObj.country != "undefined") {
       else if (i==2) {
-				//document.write('<h5>Country: ' + ProfileObj.country + '</h5>	');
-				document.write('<h5>Country: ' + personal[i] + '</h5>	');
-			}
-			//if (typeof ProfileObj.zip != "undefined") {
+        //document.write('<h5>Country: ' + ProfileObj.country + '</h5>  ');
+        document.write('<h5>Country: ' + personal[i] + '</h5> ');
+      }
+      //if (typeof ProfileObj.zip != "undefined") {
       else if (i==3) {
-				//document.write('<h5>Zip: ' + ProfileObj.zip + '</h5><br/>');
-				document.write('<h5>Zip: ' + personal[i] + '</h5><br/>');
-			}
-			//if (typeof ProfileObj.PreferredDurationofMissionTrips!= "undefined") {
+        //document.write('<h5>Zip: ' + ProfileObj.zip + '</h5><br/>');
+        document.write('<h5>Zip: ' + personal[i] + '</h5><br/>');
+      }
+      //if (typeof ProfileObj.PreferredDurationofMissionTrips!= "undefined") {
       else if (i==4) {
-				//document.write('<h5>Preferred Duration of Mission Trips: ' + ProfileObj.PreferredDurationofMissionTrips + '</h5><br/>');
-				document.write('<h5>Preferred Duration of Mission Trips: ' + personal[i] + '</h5><br/>');
-			}
-			//if (typeof ProfileObj.relg != "undefined") {
+        //document.write('<h5>Preferred Duration of Mission Trips: ' + ProfileObj.PreferredDurationofMissionTrips + '</h5><br/>');
+        document.write('<h5>Preferred Duration of Mission Trips: ' + personal[i] + '</h5><br/>');
+      }
+      //if (typeof ProfileObj.relg != "undefined") {
       else if (i==5) {
-				//document.write('<h5>Religious Affiliation: ' + ProfileObj.relg + '</h5><br/>');
-				document.write('<h5>Religious Affiliation: ' + personal[i] + '</h5><br/>');
-			}
-			//if (typeof ProfileObj.Countries != "undefined") {
+        //document.write('<h5>Religious Affiliation: ' + ProfileObj.relg + '</h5><br/>');
+        document.write('<h5>Religious Affiliation: ' + personal[i] + '</h5><br/>');
+      }
+      //if (typeof ProfileObj.Countries != "undefined") {
       else if (i==6) {
-				//document.write('<h5>Countries of Interest: ' + ProfileObj.Countries + '</h5><br/>');
-				document.write('<h5>Countries of Interest: ' + personal[i] + '</h5><br/>');
-			}						
-		}
-		document.write('</div>');
-
-		document.write('<p>&nbsp;</p>');
-		document.write('<h2>Trips Information:</h2>');
-		document.write('<div id="table_wrapper">');
-		document.write('<div id="tbody">');
-		document.write('<table>');
-		for (var i=0;i<numtrips;i++) {
-		document.write('<tr>');	
-		document.write('<td class="td1"><img src="img6.jpg" alt="" width="75" height="55" /></td>');
-		//document.write('<td><div class="box3"><h4>' + ProfileObj.trips[i] + '</h4></div></td>');
-		document.write('<td><div class="box3"><h4>' + TripName + '</h4></div></td>');
-		document.write('<td class="td2"><input type="submit" value="Trip Description" class="button" id="trip-desc-submit-'+i+'" /></td>');
-		document.write('<td class="td2"><input type="submit" value="Join This Trip" class="button" id="join-trip-submit-'+i+'" /></td>');
-		document.write('</tr>');		
-		}
-		document.write('</table>');
-		document.write('</div>');
-		document.write('</div>');
-		document.write('</div>');
-		document.write('</div>');
+        //document.write('<h5>Countries of Interest: ' + ProfileObj.Countries + '</h5><br/>');
+        document.write('<h5>Countries of Interest: ' + personal[i] + '</h5><br/>');
+      }           
     }
-		</script>
-		
-		    </div>
+    document.write('</div>');
+
+    document.write('<p>&nbsp;</p>');
+    document.write('<h2>Trips Information:</h2>');
+    document.write('<div id="table_wrapper">');
+    document.write('<div id="tbody">');
+    document.write('<table>');
+    for (var i=0;i<numtrips;i++) {
+    document.write('<tr>'); 
+    document.write('<td class="td1"><img src="img6.jpg" alt="" width="75" height="55" /></td>');
+    //document.write('<td><div class="box3"><h4>' + ProfileObj.trips[i] + '</h4></div></td>');
+    document.write('<td><div class="box3"><h4>' + TripName + '</h4></div></td>');
+    document.write('<td class="td2"><input type="submit" value="Trip Description" class="button" id="trip-desc-submit-'+i+'" /></td>');
+    document.write('<td class="td2"><input type="submit" value="Join This Trip" class="button" id="join-trip-submit-'+i+'" /></td>');
+    document.write('</tr>');    
+    }
+    document.write('</table>');
+    document.write('</div>');
+    document.write('</div>');
+    document.write('</div>');
+    document.write('</div>');
+    }
+    </script>
+    
+        </div>
 
         <div id="no-profile">
             
@@ -1519,7 +1292,7 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                             </td>
                             <td style="width: 97px">
                                         <select id="profile-medical" multiple="multiple" class="profile-ddl-type-medical" onclick="selectMultiple(this,0);">
-											                      <!--<option value="0" selected="selected">Select Medical Skills</option>-->
+                                            <!--<option value="0" selected="selected">Select Medical Skills</option>-->
                                             <option value="1">Advanced Practice Nursing</option>
                                             <option value="2">Dental Professional</option>
                                             <option value="3">Medical Educator</option>
@@ -1543,7 +1316,7 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                             </td>
                             <td style="width: 197px">
                                         <select id="profile-nonmedical" multiple="multiple" class="profile-ddl-type-nonmedical" onclick="selectMultiple(this,1);">
-                      											<!--<option value="0" selected="selected">Select Non-Medical Skills</option>-->
+                                            <!--<option value="0" selected="selected">Select Non-Medical Skills</option>-->
                                             <option value="1">General Help/Labor</option>
                                             <option value="2">Team Leader/Primary Organizer</option>
                                             <option value="3">Account and/or Business Management</option>
@@ -1567,7 +1340,7 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                             </td>
                             <td style="width: 197px">
                                         <select id="profile-spiritual" multiple="multiple" class="profile-ddl-type-spiritual" onclick="selectMultiple(this,2);">
-											                      <!--<option value="0" selected="selected">Select Spiritual Service</option>-->
+                                            <!--<option value="0" selected="selected">Select Spiritual Service</option>-->
                                             <option value="1">Team Spiritual Leader</option>
                                             <option value="2">Individual Outreach (Prayer and Counseling)</option>
                                             <option value="3">Evangelism</option>
@@ -1583,7 +1356,7 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                             </td>
                             <td style="width: 197px">
                                         <select id="profile-religion" class="profile-ddl-type-religious">
-											                      <!--<option value="0", selected="selected">Select Religious Affiliation</option>-->
+                                            <!--<option value="0", selected="selected">Select Religious Affiliation</option>-->
                                             <option value="1">Secular</option>
                                             <option value="2">Christian: Protestant</option>
                                             <option value="3">Christian: Catholic</option>
@@ -1598,7 +1371,7 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                             </td>
                             <td style="width: 197px">
                                         <select id="profile-duration" class="profile-ddl-type-duration">
-											                      <!--<option value="0" selected="selected">Select Duration of Missions</option>-->
+                                            <!--<option value="0" selected="selected">Select Duration of Missions</option>-->
                                             <option value="1">Short Term: 1-2 weeks</option>
                                             <option value="2">Medium Term: 1 Month-2 Years</option>
                                             <option value="3">Long Term: 2+ Years</option>
@@ -1613,14 +1386,14 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                             <td style="width: 197px">
                                         <select id="profile-state" class="profile-ddl-type-state">
                                         <?php
-											                  //echo '<option value="Select your State" selected="selected">Select your State</option>';
-											foreach($usstates as $key => $state) {
+                                        //echo '<option value="Select your State" selected="selected">Select your State</option>';
+                      foreach($usstates as $key => $state) {
                                               echo '<option value="'.$state.'">'.$state.'</option>';
-											}
+                      }
                                         ?>
                                         </select>
                             </td>
-                        </tr>						
+                        </tr>           
                         <tr>
                             <td>
                                 <label>
@@ -1647,17 +1420,17 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                             <td style="width: 197px">
                                         <select id="profile-country" class="profile-ddl-type-country">
                                         <?php
-											foreach($aCountries as $key => $country) {
+                      foreach($aCountries as $key => $country) {
                                               if ($country == "United States")
-												    echo '<option selected="selected" value="'.$country.'">'.$country.'</option>';
+                            echo '<option selected="selected" value="'.$country.'">'.$country.'</option>';
                                               else
-												    echo '<option value="'.$country.'">'.$country.'</option>';
+                            echo '<option value="'.$country.'">'.$country.'</option>';
 
-											}
+                      }
                                         ?>
                                         </select>
                             </td>
-                        </tr>							
+                        </tr>             
                         <tr>
                             <td style="width: 197px">
                                 <label>
@@ -1665,7 +1438,7 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                             </td>
                             <td style="width: 197px">
                                         <select id="profile-region" multiple="multiple" class="profile-ddl-type-region" onclick="selectMultiple(this,3);">
-											                      <!--<option value="0" selected="selected">Select Regions of Interest</option>-->
+                                            <!--<option value="0" selected="selected">Select Regions of Interest</option>-->
                                             <option value="1">Africa</option>
                                             <option value="2">Asia and Oceana</option>
                                             <option value="3">Europe and Russia</option>
@@ -1684,14 +1457,14 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                             <td style="width: 197px">
                                         <select id="profile-country-served" multiple="multiple" class="profile-ddl-type-countriesserved" onclick="selectMultiple(this,4);">
                                         <?php
-											//echo '<option selected="selected" value="Select Countries Served">Select Countries Served</option>';
-											foreach($aCountries as $key => $country) {											
-												echo '<option value="'.$country.'">'.$country.'</option>';
-											}
+                      //echo '<option selected="selected" value="Select Countries Served">Select Countries Served</option>';
+                      foreach($aCountries as $key => $country) {                      
+                        echo '<option value="'.$country.'">'.$country.'</option>';
+                      }
                                         ?>
                                         </select>
                             </td>
-                        </tr>						
+                        </tr>           
                         <tr>
                             <td>
                                 <label>
@@ -1718,7 +1491,7 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                             <td>
                                 <input type="text" id="profile-experience" class="profile-input-experience" />
                             </td>
-                        </tr>							
+                        </tr>             
                         <tr>
                             <td>&nbsp;
                                 
@@ -1732,8 +1505,8 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
             </div>
         </div>
     </div>
-    </form>		
-      </div>	  
+    </form>   
+      </div>    
       <div id="report-problem-dialog" title="What seems to be the matter?">
         <p>Tell us what's wrong, and we'll look into it right away.</p>
         <form id="report-problem-form">
@@ -1758,6 +1531,7 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
       </div>
       <div id="debug-controls">
         <button id="debug-detach-handlers">detach debug handlers</button>
+        <button id="debug-force-login">force login</button>
       </div>
     </div>
     <!-- Do not place HTML markup below this line -->
