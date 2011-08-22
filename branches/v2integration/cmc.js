@@ -792,7 +792,7 @@ $(function() {
     draggable: true,
     position: [477, 190],
     resizable: true,
-    width: 900,
+    width: 700,
     open: function() {
       CMC.dialogOpen(this);
     },
@@ -906,8 +906,10 @@ $(function() {
   CMC.log("attempting to get facebook login status");
   CMC.ajaxNotifyStart();
   FB.getLoginStatus(function(response) {
-    CMC.ajaxNotifyComplete();
+    //CMC.ajaxNotifyComplete();
+    CMC.log("Inside facebook login status");
     if (response.session) {
+    CMC.log("Inside login status response");
       CMC.loggedInUser = response.session.uid;
       CMC.ajaxNotifyStart();
       FB.api('/me/friends', function(friends) {

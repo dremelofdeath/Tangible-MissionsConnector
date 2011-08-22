@@ -58,15 +58,15 @@ function cmc_profile_render_id_join($title2,$title,$desc, $descdb, $selecteddb, 
 
   if ($i==0) {
     if ($k==0) {
-	  $json[$title2] = array();
+	  $json[str_replace (" ", "", $title2)] = array();
       $k++;
     }
-	$json[$title2][$title] = array();
+	$json[str_replace (" ", "", $title2)][str_replace (" ", "", $title)] = array();
   }
   
   $i++;
 	  
-	  $json[$title2][$title][] = $row[$desc];
+	  $json[str_replace (" ", "", $title2)][str_replace (" ", "", $title)][] = $row[$desc];
     }
   }
 }
@@ -83,10 +83,10 @@ function cmc_profile_render_skills($title, $type, $fbid,&$has_error,&$err_msg,&$
     $i=0;
     while($row= mysql_fetch_array($result)){
       if ($i==0) {
-	  $json[$title] = array();
+	  $json[str_replace (" ", "", $title)] = array();
       }
       $i++;
-	  $json[$title][] = $row['skilldesc'];
+	  $json[str_replace (" ", "", $title)][] = $row['skilldesc'];
     }
   }
 }
@@ -158,15 +158,15 @@ if(mysql_num_rows($result) != 0) {
 
   if ($isleader == 1) {
   cmc_profile_render_skills("Facility Medical Offerings", '4', $showuserid,$has_error,$err_msg,$json,$con);
-  cmc_profile_render_skills("Facility Non-Medical Offerings", '5', $showuserid,$has_error,$err_msg,$json,$con);
+  cmc_profile_render_skills("Facility Non_Medical Offerings", '5', $showuserid,$has_error,$err_msg,$json,$con);
   }
   
   cmc_profile_render_skills("Medical Skills", '1', $showuserid,$has_error,$err_msg,$json,$con);
-  cmc_profile_render_skills("Non-Medical Skills", '2', $showuserid,$has_error,$err_msg,$json,$con);
+  cmc_profile_render_skills("Non_Medical Skills", '2', $showuserid,$has_error,$err_msg,$json,$con);
   cmc_profile_render_skills("Spiritual Skills", '3', $showuserid,$has_error,$err_msg,$json,$con);
   
   $pp=-1;
-  cmc_profile_render_id_join("","State",'longname', 'usstates', 'usstatesselected', $showuserid, $message, $pp,$has_error,$err_msg,$json,$con);
+  cmc_profile_render_id_join("States","State",'longname', 'usstates', 'usstatesselected', $showuserid, $message, $pp,$has_error,$err_msg,$json,$con);
 
   if (!empty($city)) {
 	$json['city'] = $city;
@@ -178,8 +178,9 @@ if(mysql_num_rows($result) != 0) {
   cmc_profile_render_id_join("Geographic Areas of Interest","Countries",'longname', 'countries', 'countriesselected', $showuserid, $message, $kk,$has_error,$err_msg,$json,$con);
 
   $pp=-1;
-  cmc_profile_render_id_join("","Preferred Duration of Mission Trips",'name', 'durations', 'durationsselected', $showuserid, $message, $pp,$has_error,$err_msg,$json,$con);
+  cmc_profile_render_id_join("Durations","Preferred Duration of Mission Trips",'name', 'durations', 'durationsselected', $showuserid, $message, $pp,$has_error,$err_msg,$json,$con);
 
+  $json['trips'] = array();
   $trips = array();
   $sql = "select tripid from tripmembers where userid='".$showuserid."'";
   $result = mysql_query($sql,$con);
@@ -196,9 +197,9 @@ if(mysql_num_rows($result) != 0) {
 		$row2 = mysql_fetch_array($result2);
 		$tname = $row2['tripname'];
 		$trips[$tid]=$tname;    
+	  $json['trips'][] = $trips[$tid];
 	  }
     }
-	$json['trips'] = $trips;
   } else {
   		setjsonmysqlerror($has_error,$err_msg,$sql);
   }

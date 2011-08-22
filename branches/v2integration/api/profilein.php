@@ -33,6 +33,7 @@ if (!$has_error) {
 
 if ($myobj["profiletype"]==1) {
  $isreceiver = 0;
+ $is_trip = 0;
 }
 else if ($myobj["profiletype"] == 2) {
  $is_trip = 1;
@@ -48,6 +49,7 @@ else if ($myobj["profiletype"] == 2) {
 
 }
 else {
+ $is_trip = 0;
  $isreceiver = 1;
 }
 
@@ -135,15 +137,15 @@ else {
 $num_userids = mysql_num_rows($result);
 
 if($num_userids > 0){
-  
-  $sql = 'UPDATE users SET name="'.$name.'"';
+
+  $sql = 'UPDATE users SET isreceiver="'.$isreceiver.'"';
   
   if (!empty($myobj['name']))
    $sql = $sql.', organization="'.$myobj['name'].'"';
  
-   $sql = $sql.', isreceiver="'.$isreceiver.'"';
+   //$sql = $sql.', isreceiver="'.$isreceiver.'"';
    
-   if ($update) {
+   if (isset($update)) {
    
    if (empty($myobj['zip']))
 	$sql = $sql.', zipcode=NULL';
