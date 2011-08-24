@@ -768,7 +768,6 @@ var CMC = {
       CMC.log("got user data from Facebook");
       CMC.ajaxNotifyComplete();
       CMC.me = response;
-      CMC.assert(loggedInUser, "Something went wrong, loggedInUser is false");
     });
     CMC.ajaxNotifyStart();
     FB.api('/me/friends', function (friends) {
@@ -781,12 +780,19 @@ var CMC = {
 
   checkFacebookLoginStatus : function (callback) {
     this.beginFunction("checkFacebookLoginStatus");
+    //@/BEGIN/DEBUGONLYSECTION
+    $("#logged-in-user-value").html("(synchronizing)");
+    //@/END/DEBUGONLYSECTION
     CMC.ajaxNotifyStart();
     FB.getLoginStatus(function(response) {
       CMC.ajaxNotifyComplete();
       CMC.log("got the response for FB.getLoginStatus()");
       if (response.authResponse) {
-        CMC.loggedInUser = response.authResponse.uid;
+        //@/BEGIN/DEBUGONLYSECTION
+        $("#logged-in-user-value").html(response.authResponse.userID);
+      } else { // please be careful, this else case gets deleted as part of the debug removal process
+        $("#logged-in-user-value").html("(not authorized)");
+        //@/END/DEBUGONLYSECTION
       }
       if (callback) {
         callback(response);
@@ -798,14 +804,23 @@ var CMC = {
   login : function (callback) {
     // this is a wrapper API to handle user clicks that require Facebook authorization
     this.beginFunction("login");
+    //@/BEGIN/DEBUGONLYSECTION
+    $("#logged-in-user-value").html("(synchronizing)");
+    //@/END/DEBUGONLYSECTION
     CMC.ajaxNotifyStart();
     FB.login(function (response) {
       CMC.ajaxNotifyComplete();
       if (response.authResponse) {
-        CMC.log("user has just logged in to the app");
+        CMC.log("user " + response.authResponse.userID + " has just logged in to the app");
         CMC.cacheFacebookData();
+        //@/BEGIN/DEBUGONLYSECTION
+        $("#logged-in-user-value").html(response.authResponse.userID);
+        //@/END/DEBUGONLYSECTION
       } else {
         CMC.log("authResponse is null; user cancelled login or did not authorize");
+        //@/BEGIN/DEBUGONLYSECTION
+        $("#logged-in-user-value").html("(not authorized)");
+        //@/END/DEBUGONLYSECTION
       }
       if (callback) {
         callback(response);
@@ -973,7 +988,7 @@ $(function() {
   CMC.log("attempting to get facebook login status");
   CMC.checkFacebookLoginStatus(function (response) {
     if (response.authResponse) {
-      CMC.log("user is already logged in, cache their data");
+      CMC.log("user " + response.authResponse.userID + " is already logged in, cache their data");
       CMC.cacheFacebookData();
     } else {
       CMC.log("authResponse is null; no user session, do not cache data yet");

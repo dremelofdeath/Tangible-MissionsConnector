@@ -1524,11 +1524,15 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
     <!-- The debug log. Should not be displayed by default. Enable via the admin panel. -->
     <div id="debug-section" style="display: none">
       <textarea id="debug-log" rows="10" cols="80" spellcheck="false">
-      Please wait, loading debug console...
+        Please wait, loading debug console...
       </textarea>
-      <div id="requests-outstanding">
-        requests outstanding: <span id="requests-outstanding-value">0</span>
-      </div>
+      <div id="debug-info-section">
+        <div id="requests-outstanding" style="display: inline; margin-right: 13px;">
+          requests outstanding: <span id="requests-outstanding-value">0</span>
+        </div>
+        <div id="logged-in-user" style="display: inline; margin-right: 13px;">
+          user: <span id="logged-in-user-value">(not in sync)</span>
+        </div>
       <div id="debug-controls">
         <button id="debug-detach-handlers">detach debug handlers</button>
         <button id="debug-force-login">force login</button>
