@@ -287,10 +287,13 @@ var CMC = {
     } else {
       this.log("we have a new search to perform");
       this.ajaxNotifyStart(); // one for good measure, we want the spinner for the whole search
+      if(!this.me.id) {
+        this.log("this.me.id isn't available; using blank fbid for search");
+      }
       $.ajax({
         url: "api/searchresults.php",
         data: {
-          fbid: "25826994",
+          fbid: this.me.id ? this.me.id : "",
           searchkeys: encode64(JSON.stringify(this.SearchState)),
           page: this.currentDisplayedSearchPage,
           perpage: 20
@@ -610,10 +613,13 @@ var CMC = {
       // this is a page that we haven't cached yet
       this.log("[cacheSearchPage] fetching search page " + (pageIndex + 1));
       this.ajaxNotifyStart();
+      if(!this.me.id) {
+        this.log("this.me.id isn't available; using blank fbid for cache search");
+      }
       $.ajax({
         url: "api/searchresults.php",
         data: {
-          fbid: "25826994",
+          fbid: this.me.id ? this.me.id : "",
           searchkeys: encode64(JSON.stringify(this.SearchState)),
           page: pageIndex + 1, // page on the server is off by one
           perpage: 10
@@ -1142,8 +1148,8 @@ $(function() {
         type: "POST",
         url: "api/profilein.php",
         data: {
-          fbid: "25826994",
-        profiledata: JSON.stringify(profileformdata)
+          fbid: CMC.me.id ? CMC.me.id : "",
+          profiledata: JSON.stringify(profileformdata)
         },
         dataType: "json",
         success: function() {
