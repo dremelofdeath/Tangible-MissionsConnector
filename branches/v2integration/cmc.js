@@ -16,12 +16,16 @@ var CMC = {
   loggedInUser : false,
   me : false,
   friends : false,
+  ProfileObj :  {},
+  isreceiver : false,
+  profileexists : false,
   requestsOutstanding : 0,
   dialogsOpen : 0,
   version : "1.9.18",
   searchPageCache : [],
   currentDisplayedSearchPage : 0,
   searchPageImageClearJobQueue : [],
+  profilePageImageClearJobQueue : [],
   SearchState : {},
   // startup configuration settings
   StartupConfig : {
@@ -207,6 +211,334 @@ var CMC = {
     $("#report-problem-characters-left").fadeIn();
   },
 
+  getProfileExistence : function () {
+    this.beginFunction("getProfileExistence");
+    $(".cmc-profile-result").each(function () { $(this).fadeOut('fast'); });
+    this.log("Checking existence of the profile");
+    this.ajaxNotifyStart(); // one for good measure, we want the spinner for the whole search
+	// check existence of the profile  
+	$.ajax({
+        type: "POST",
+        url: "api/profileexistence.php",
+        data: {
+             fbid: CMC.me.id
+        },
+        dataType: "json",
+		context: this,
+        async: false,
+		success: this.onProfileExistenceSuccess,
+		error: this.onProfileExistenceError
+    });
+    
+    this.endFunction("getProfileExistence");
+  },  
+  
+ onProfileExistenceSuccess : function(data, textStatus, jqXHR) {
+    this.beginFunction("onProfileExistenceSuccess");
+    this.assert(data != undefined, "data is undefined in onProfileExistenceSuccess");
+    if(data.has_error !== undefined && data.has_error !== null) {
+      if(data.has_error) {
+        // we have a known error, handle it
+        this.handleProfileExistenceSuccessHasError(data);
+      } else {
+        if(data.exists == 1) {
+		
+		this.log("Obtaining data from the profile");
+		this.ajaxNotifyStart(); // one for good measure, we want the spinner for the whole search
+		
+        $.ajax({
+			type: "POST",
+            url: "api/profile.php",
+            data: {
+                fbid: CMC.me.id
+            },
+            dataType: "json",
+			context: this,
+            async: false,
+			success: this.onGetProfileDataSuccess,
+			error: this.onGetProfileDataError
+		});
+		}
+		else 
+			this.showProfile(null);
+		}
+	} else {
+      // an unknown error occurred? do something!
+      this.handleProfileExistenceSuccessUnknownError(data, textStatus, jqXHR);
+    }
+	this.endFunction("onProfileExistenceSuccess");
+	},
+  
+  onGetProfileDataSuccess : function(data, textStatus, jqXHR) {
+    this.beginFunction("onGetProfileDataSuccess");
+    this.assert(data != undefined, "data is undefined in onGetProfileDataSuccess");
+    if(data.has_error !== undefined && data.has_error !== null) {
+      if(data.has_error) {
+        // we have a known error, handle it
+        this.handleGetProfileDataSuccessHasError(data);
+      } else {
+			// This is the case of a volunteer profile
+         if (data.isreceiver==0) {
+				    this.isreceiver = 0;
+			    }
+		  	  // profile is os a mission organizer
+			    else {
+				    this.isreceiver = 1;
+			    }
+			
+          CMC.log("Calling showProfile with profile data");
+			    this.showProfile(data);
+			
+	}
+	} else {
+      // an unknown error occurred? do something!
+      this.handleGetProfileDataSuccessUnknownError(data, textStatus, jqXHR);
+    }
+	this.endFunction("onGetProfileDataSuccess");
+	},
+  
+  showProfile : function (data) {
+    this.beginFunction("showProfile");
+    if (data === undefined) {
+      // this should be a bug! do NOT pass this function undefined! say null to inform it that you have no results!
+      this.assert(data === undefined, "undefined passed as results for showProfile");
+    } else if (data == null) {
+      // no profile exists - so display the new profile creation dialogs
+      $("#no-profile").fadeIn();
+    } else {
+      
+      $("#show-profile").fadeIn();
+
+      var imageLoadsCompleted = 0, __notifyprofileImageLoadCompleted = $.proxy(function() {
+        imageLoadsCompleted++;
+          this.animateShowProfile();
+      }, this);
+
+        var id = "#profilecontent";
+        this.ajaxNotifyStart();
+        this.assert(data.name !== undefined, "name is missing from result set");
+        $(id).children("#colOne").children(".box2").children(".profile-name").html(data.name ? data.name : "");
+        //$(id).children("#colOne").children("#profileimage").children(".profile-picture").children("img").remove();
+        //if (this.me.id) {
+        $(id).children("#colOne").children("#profileimage").children(".profile-picture").children("img").attr("src", "http://graph.facebook.com/"+this.me.id+"/picture");
+        /*
+        $(id).children("#colOne").children("#profileimage").children(".profile-picture").children("img")
+          //$("<img />")
+            .attr("src", "http://graph.facebook.com/"+this.me.id+"/picture")
+            .attr("cmcid", id) // this is the id from above! not results[each].id!
+            .addClass("prpic")
+            .one('load', $.proxy(function(event) {
+              // I never want to see more than one image here again. --zack
+              $($(event.target).attr("cmcid")).children("#colOne").children("#profileimage").children(".profile-picture").children("img").remove();
+              $($(event.target).attr("cmcid")).children("#colOne").children("#profileimage").children(".profile-picture").append($(event.target));
+              this.ajaxNotifyComplete();
+              __notifyprofileImageLoadCompleted();
+            }, this));
+      */
+			$(id).children("#colOne").children(".box2").children(".profile-about").html(data.about ? "<h4>" + data.about + "</h4>" : "");
+		
+      if (data.MedicalSkills == undefined) {
+			$(id).children("#colTwo").children(".box1").children(".profile-medskills").html("");
+      }
+      else {
+      //display medical skills information
+			if (data.MedicalSkills.length > 0) {
+			var eachstr = "<ul>";
+			for (var each in data.MedicalSkills) {
+					eachstr += "<li> " + data.MedicalSkills[each] + "</li>";
+			}
+			eachstr += "</ul>";
+		
+			$(id).children("#colTwo").children(".box1").children(".profile-medskills").html(data.MedicalSkills ? eachstr : "");
+			}
+      }
+			
+			//display non-medical skills information
+      if (data.Non_MedicalSkills == undefined) {
+			$(id).children("#colTwo").children(".box1").children(".profile-nonmedskills").html("");
+      }
+      else {
+			if (data.Non_MedicalSkills.length > 0) {
+			var eachstr = "<ul>";
+			for (var each in data.Non_MedicalSkills) {
+					eachstr += "<li> " + data.Non_MedicalSkills[each] + "</li>";
+			}
+			eachstr += "</ul>";
+		
+			$(id).children("#colTwo").children(".box1").children(".profile-nonmedskills").html(data.Non_MedicalSkills ? eachstr : "");
+			}
+      }
+			
+			//display profile information
+      if (data.email == undefined) {
+			$(id).children("#colTwo").children(".box1").children(".profile-email").html("<h6></h6>");
+      }
+      else {
+			$(id).children("#colTwo").children(".box1").children(".profile-email").html(data.email ? "<h6>" + data.email + "</h6>" : "");
+      }
+
+      if (data.phone == undefined) {
+			$(id).children("#colTwo").children(".box1").children(".profile-phone").html("<h6></h6>");
+      }
+      else {
+			$(id).children("#colTwo").children(".box1").children(".profile-phone").html(data.phone ? "<h6>" + data.phone + "</h6>" : "");
+      }
+
+      if (data.country == undefined) {
+			$(id).children("#colTwo").children(".box1").children(".profile-country").html("<h6></h6>");
+      }
+      else {
+      $(id).children("#colTwo").children(".box1").children(".profile-country").html(data.country ? "<h6>" + data.country + "</h6>" : "");
+      }
+			
+
+      if (data.zip == undefined) {
+			$(id).children("#colTwo").children(".box1").children(".profile-zip").html("<h6></h6>");
+      }
+      else {
+      $(id).children("#colTwo").children(".box1").children(".profile-zip").html(data.zip ? "<h6>" + data.zip + "</h6>" : "");
+      }
+
+			
+      if (data.Durations == undefined) {
+			$(id).children("#colTwo").children(".box1").children(".profile-dur").html("<h6></h6>");
+      }
+      else {
+      $(id).children("#colTwo").children(".box1").children(".profile-dur").html(data.Durations.PreferredDurationofMissionTrips ? "<h6>" + data.Durations.PreferredDurationofMissionTrips + "</h6>" : "");
+      }
+
+			
+      if (data.GeographicAreasofInterest == undefined) {
+			$(id).children("#colTwo").children(".box1").children(".profile-countries").html("<h6></h6>");
+      }
+      else {
+      $(id).children("#colTwo").children(".box1").children(".profile-countries").html(data.GeographicAreasofInterest.Countries ? "<h6>" + data.GeographicAreasofInterest.Countries + "</h6>" : "");
+      }
+		
+
+      if (data.trips === undefined) {
+			$(id).children("#colTwo").children(".table_wrapper").children(".tbody").html("<table></table>");
+      }
+      else {
+			//finally update the trips information
+			if (data.trips.length > 0) {
+			
+			for (var each in data.trips) {
+			
+		    $(id).children("#colTwo").children("#table_wrapper").children("#tbody").children(".profile-picture").children("img").remove();
+      
+      $(id).children("#colTwo").children("#table_wrapper").children("#tbody")..children(".profile-picture").children("img")
+			//$("<img />")
+            .attr("src", "http://graph.facebook.com/"+this.me.id+"/picture")
+            .attr("cmcid", id) // this is the id from above! not results[each].id!
+            .addClass("prpic")
+            .one('load', $.proxy(function(event) {
+              // I never want to see more than one image here again. --zack
+              $($(event.target).attr("cmcid")).children("#colTwo").children("#table_wrapper").children("#tbody").children(".profile-picture").children("img").remove();
+              $($(event.target).attr("cmcid")).children("#colTwo").children("#table_wrapper").children("#tbody").children(".profile-picture").append($(event.target));
+              this.ajaxNotifyComplete();
+              __notifyprofileImageLoadCompleted();
+            }, this));		
+			
+			$(id).children("#colTwo").children("#table_wrapper").children("#tbody").children(".box3").children(".profile-tripname").html(data.trips[each] ? "<h4>" + data.trips[each] + "</h4>" : "");
+
+			}			
+
+			}
+      }
+    } // end else
+    this.ajaxNotifyComplete(); // finish the one we started at the beginning of the search
+    this.endFunction("showProfile");
+  },	
+  
+  animateShowProfile : function () {
+    this.beginFunction("animateShowProfile");
+	  var id = "#profileimage";
+
+      $("*").clearQueue("custom-ProfileQueue");
+      if ($(id + " .profile-picture img").length > 1) {
+        // cleanup the junk pictures, the user is clicking too quickly
+        this.log("cleaning " + ($(id + " .result-picture img").length - 1) + " junk result(s) while showing " + id);
+        while ($(id + " .profile-picture img").length > 1) {
+          $(id + " .profile-picture img:first").remove();
+          $(id).hide(); // this will get shown again later
+        }
+      }
+      $(id).queue("custom-ProfileQueue", function () {
+        var each = $(this).attr("id").split("-")[3];
+        $(this)
+          .stop(true, true)
+          .delay(25 * each)
+          .show("drop", {direction: "right", distance: 50}, 250, _onShowComplete);
+      }).dequeue("custom-SearchResultsQueue");
+	  
+    this.endFunction("animateShowProfile");
+  },
+
+  onProfileExistenceError : function(jqXHR, textStatus, errorThrown) {
+    this.ajaxNotifyComplete();
+    // we might also want to log this or surface an error message or something
+    this.handleProfileExistenceServerError(jqXHR, textStatus, errorThrown);
+  },
+
+  handleProfileExistenceSuccessHasError : function(data) {
+    this.beginFunction("handleProfileExistenceSuccessHasError");
+    this.assert(data != undefined, "data is undefined in handleProfileExistenceSuccessHasError");
+    // we have a known error, handle it
+    if(data.err_msg !== undefined) {
+      if(data.err_msg != '') {
+        this.error("caught an error from the server while searching: \""+data.err_msg+"\"");
+      } else {
+        this.error("caught an error from the server while searching, but it was blank");
+      }
+    } else {
+      this.error("caught an error from the server while searching, but it did not return an error message");
+    }
+    this.endFunction("handleProfileExistenceSuccessHasError");
+  },
+
+  handleProfileExistenceServerError : function(jqXHR, textStatus, errorThrown) {
+    this.beginFunction("handleProfileExistenceServerError");
+    this.error("error while communicating with server (status: \""+textStatus+"\", error: \""+errorThrown+"\")");
+    this.endFunction("handleProfileExistenceServerError");
+  },
+
+  handleProfileExistenceSuccessUnknownError : function(data, textStatus, jqXHR) {
+    this.error("an unknown error occurred while trying to process a search success callback.\ndata = " + data);
+  },
+	
+  onGetProfileDataError : function(jqXHR, textStatus, errorThrown) {
+    this.ajaxNotifyComplete();
+    // we might also want to log this or surface an error message or something
+    this.handleProfileDataServerError(jqXHR, textStatus, errorThrown);
+  },
+
+  handleGetProfileDataSuccessHasError : function(data) {
+    this.beginFunction("handleGetProfileDataSuccessHasError");
+    this.assert(data != undefined, "data is undefined in handleGetProfileDataSuccessHasError");
+    // we have a known error, handle it
+    if(data.err_msg !== undefined) {
+      if(data.err_msg != '') {
+        this.error("caught an error from the server while searching: \""+data.err_msg+"\"");
+      } else {
+        this.error("caught an error from the server while searching, but it was blank");
+      }
+    } else {
+      this.error("caught an error from the server while searching, but it did not return an error message");
+    }
+    this.endFunction("handleGetProfileDataSuccessHasError");
+  },
+
+  handleProfileDataServerError : function(jqXHR, textStatus, errorThrown) {
+    this.beginFunction("handleProfileDataServerError");
+    this.error("error while communicating with server (status: \""+textStatus+"\", error: \""+errorThrown+"\")");
+    this.endFunction("handleProfileDataServerError");
+  },
+
+  handleGetProfileDataSuccessUnknownError : function(data, textStatus, jqXHR) {
+    this.error("an unknown error occurred while trying to process a search success callback.\ndata = " + data);
+  },
+  
   handleSearchSelect : function(item) {
     this.beginFunction("handleSearchSelect");
     var value = null, errorWhileParsing = false;
@@ -287,9 +619,6 @@ var CMC = {
     } else {
       this.log("we have a new search to perform");
       this.ajaxNotifyStart(); // one for good measure, we want the spinner for the whole search
-      if(!this.me.id) {
-        this.log("this.me.id isn't available; using blank fbid for search");
-      }
       $.ajax({
         url: "api/searchresults.php",
         data: {
@@ -613,9 +942,6 @@ var CMC = {
       // this is a page that we haven't cached yet
       this.log("[cacheSearchPage] fetching search page " + (pageIndex + 1));
       this.ajaxNotifyStart();
-      if(!this.me.id) {
-        this.log("this.me.id isn't available; using blank fbid for cache search");
-      }
       $.ajax({
         url: "api/searchresults.php",
         data: {
@@ -774,6 +1100,11 @@ var CMC = {
       CMC.log("got user data from Facebook");
       CMC.ajaxNotifyComplete();
       CMC.me = response;
+    // now check whether profile is volunteer or mission organizer	  
+      //alert('<img src="http://graph.facebook.com/' + CMC.me.id + '/picture" />');
+      CMC.getProfileExistence();
+		  CMC.log("user: " + CMC.me.name + " has just logged in to the app");
+		  CMC.log("userid: " + CMC.me.id + " has just logged in to the app");
     });
     CMC.ajaxNotifyStart();
     FB.api('/me/friends', function (friends) {
@@ -834,6 +1165,8 @@ var CMC = {
     });
     this.endFunction("login");
   }
+
+                 
 };
 
 FB.init({
@@ -871,11 +1204,65 @@ $(function() {
 
   $("#make-profile, #make-volunteer, #make-organizer").hide();
 
+  $("#make-trip, #profile-trip-dialog").hide();
+
   $("#make-volunteer").click(function() {
 	$("#profile-volunteer-dialog").dialog('open');
   });
 
   $("#profile-volunteer-dialog").dialog({
+    autoOpen: false,
+    draggable: true,
+    position: [477, 190],
+    resizable: true,
+    width: 700,
+    open: function() {
+      CMC.dialogOpen(this);
+    },
+    close: function() {
+      CMC.dialogClose(this);
+    }
+  });
+  
+  $("#edit-volunteer-dialog").dialog({
+    autoOpen: false,
+    draggable: true,
+    position: [477, 190],
+    resizable: true,
+    width: 700,
+    open: function() {
+      CMC.dialogOpen(this);
+    },
+    close: function() {
+      CMC.dialogClose(this);
+    }
+  });  
+
+  CMC.log("2");
+  
+  $("#make-organizer").click(function() {
+	$("#profile-organizer-dialog").dialog('open');
+  });
+
+  $("#profile-organizer-dialog").dialog({
+    autoOpen: false,
+    draggable: true,
+    position: [477, 190],
+    resizable: true,
+    width: 700,
+    open: function() {
+      CMC.dialogOpen(this);
+    },
+    close: function() {
+      CMC.dialogClose(this);
+    }
+  });  
+  
+  $("#make-trip").click(function() {
+	$("#profile-trip-dialog").dialog('open');
+  });
+
+  $("#profile-trip-dialog").dialog({
     autoOpen: false,
     draggable: true,
     position: [477, 190],
@@ -994,12 +1381,56 @@ $(function() {
   CMC.log("attempting to get facebook login status");
   CMC.checkFacebookLoginStatus(function (response) {
     if (response.authResponse) {
-      CMC.log("user " + response.authResponse.userID + " is already logged in, cache their data");
+	  CMC.loggedInUserID = response.authResponse.userID;
+      CMC.log("user " + CMC.loggedInUserID + " is already logged in, cache their data");
+      //CMC.log("user " + response.authResponse.userID + " is already logged in, cache their data");
       CMC.cacheFacebookData();
     } else {
       CMC.log("authResponse is null; no user session, do not cache data yet");
     }
   });
+
+/*
+CMC.checkFacebookLoginStatus(function (response) {
+if (response.authResponse) {
+//Get a list of all the albums
+FB.api('/me/albums', function (response) {
+for (album in response.data) {
+
+   // Find the Profile Picture album
+   if (response.data[album].name == "Profile Pictures") {
+    // Get a list of all photos in that album.
+      FB.api(response.data[album].id + "/photos", function(response) {
+      //The image link
+        CMC.pimage = response.data[0].images[0].source;
+      });
+   }
+}
+});
+} else {
+
+    CMC.login(function (response) {
+      if (response.authResponse) {
+        FB.api('/me/albums', function (response) {
+        for (album in response.data) {
+
+          // Find the Profile Picture album
+          if (response.data[album].name == "Profile Pictures") {
+            // Get a list of all photos in that album.
+            FB.api(response.data[album].id + "/photos", function(response) {
+             //The image link
+              CMC.image = response.data[0].images[0].source;
+            });
+          }
+        }
+        });
+      } else {
+        // this means the user denied us, cancel action
+      }
+    });
+}
+});
+*/
 
   CMC.log("setting up dialog boxes");
   $("#copyrights-dialog").dialog({
@@ -1060,6 +1491,45 @@ $(function() {
       CMC.recalculateProblemMessageLimit();
     });
 
+    function validateZipCode(elementValue){
+      var zisValid = false;
+      var zipCodePattern = /^\d{5}$|^\d{5}-\d{4}$/;
+      zisValid = zipCodePattern.test(elementValue);
+      return zisValid;
+    }
+
+    function validateEmail(email){
+      var eisValid =  false;
+      var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+[\.]{1}[a-zA-Z]{2,4}$/;  
+      eisValid = emailPattern.test(email);  
+      return eisValid;
+    } 
+    function isUrl(s) {
+		var regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
+		return regexp.test(s);
+	  }
+
+     function validatePhone(fld,country) {
+      var error = "";
+      var stripped = fld.replace(/[\(\)\.\-\ ]/g, ''); 
+      // for international numbers
+      var regex = /^\+(?:[0-9] ?){6,14}[0-9]$/;
+
+      if (isNaN(parseInt(stripped))) {
+        error = "The phone number contains illegal characters.\n";
+      }
+      else if (country != "United States") {
+        if (!regex.test(fld)) {
+          error = "The phone number is not a valid International Number.\n";
+        }
+      }
+      else if (!(stripped.length == 10)) {
+        error = "The phone number is the wrong length. Make sure you included an area code.\n";
+      }
+
+      return error;
+    }
+
   $("#profile-submit").click(function() {
     var mtype = $("form").find('.profile-ddl-type-medical');
     var nmtype = $("form").find('.profile-ddl-type-nonmedical');
@@ -1083,7 +1553,7 @@ $(function() {
     var errornum=1;
 
     if (zipcode.val() != "") {
-      zipisvalid = validateZipCode(zipcode.val());
+      zipisvalid = CMC.validateZipCode(zipcode.val());
       if (!zipisvalid) {
         reason += errornum+'. Incorrect Zipcode format entered\n';
         errornum = errornum + 1;
@@ -1092,7 +1562,7 @@ $(function() {
     }
 
     if (email.val() != "") {
-      emailisvalid = validateEmail(email.val());
+      emailisvalid = CMC.validateEmail(email.val());
       if (!emailisvalid) {
         reason += errornum + '. Incorrect Email format entered\n';
         errornum = errornum + 1;
@@ -1101,7 +1571,7 @@ $(function() {
     }
 
     if (phone.val() != "") {
-      var phoneerror = validatePhone(phone.val(),country.val());
+      var phoneerror = CMC.validatePhone(phone.val(),country.val());
       if (phoneerror != "") {
         reason += errornum + ' ' + phoneerror + '\n';
         errornum = errornum + 1;
@@ -1148,8 +1618,8 @@ $(function() {
         type: "POST",
         url: "api/profilein.php",
         data: {
-          fbid: CMC.me.id ? CMC.me.id : "",
-          profiledata: JSON.stringify(profileformdata)
+          fbid: CMC.me.id,
+        profiledata: JSON.stringify(profileformdata)
         },
         dataType: "json",
         success: function() {
@@ -1162,55 +1632,321 @@ $(function() {
       return true;
     }
 
-    function validateZipCode(elementValue){
-      var zisValid = false;
-      var zipCodePattern = /^\d{5}$|^\d{5}-\d{4}$/;
-      zisValid = zipCodePattern.test(elementValue);
-      return zisValid;
-    }
-    function validateEmail(email){
-      var eisValid =  false;
-      var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+[\.]{1}[a-zA-Z]{2,4}$/;  
-      eisValid = emailPattern.test(email);  
-      return eisValid;
-    } 
-
-    function validatePhone(fld,country) {
-      var error = "";
-      var stripped = fld.replace(/[\(\)\.\-\ ]/g, ''); 
-      // for international numbers
-      var regex = /^\+(?:[0-9] ?){6,14}[0-9]$/;
-
-      if (isNaN(parseInt(stripped))) {
-        error = "The phone number contains illegal characters.\n";
-      }
-      else if (country != "United States") {
-        if (!regex.test(fld)) {
-          error = "The phone number is not a valid International Number.\n";
-        }
-      }
-      else if (!(stripped.length == 10)) {
-        error = "The phone number is the wrong length. Make sure you included an area code.\n";
-      }
-
-      return error;
-    }
+    
   });
+
+    $("#profile-org-submit").click(function() {
+	
+    var aname = $("form").find('.profile-org-name');
+    var aurl = $("form").find('.profile-org-website');
+    var aabout = $("form").find('.profile-org-about');
+    var medfacil = $("form").find('.profile-org-offer');
+    var nonmedfacil = $("form").find('.profile-org-offern');
+	
+    var mtype = $("form").find('.profile-org-medical');
+    var nmtype = $("form").find('.profile-org-nonmedical');
+    var sptype = $("form").find('.profile-org-spiritual');
+    var reltype = $("form").find('.profile-org-religion');
+    var durtype = $("form").find('.profile-org-duration');
+    var state = $("form").find('.profile-org-state');
+    var city = $("form").find('.profile-org-city');
+    var zipcode = $("form").find('.profile-org-zipcode');
+
+    var country = $("form").find('.profile-org-country');
+    var region = $("form").find('.profile-org-region');
+    var countriesserved = $("form").find('.profile-org-countryserved');
+    var phone = $("form").find('.profile-org-phone');
+    var email = $("form").find('.profile-org-email');
+    var misexp = $("form").find('.profile-org-experience');           
+
+    var zipisvalid = false;
+    var emailisvalid = false;
+    var reason="";
+    var errornum=1;
+
+	if (aurl.val() != "") {
+		if (!isUrl(aurl.val())) {
+			reason += errornum+'. Incorrect Website Entered\n';
+			errornum = errornum + 1;
+			isValid = false;		
+		}
+	}
+	
+    if (zipcode.val() != "") {
+      zipisvalid = CMC.validateZipCode(zipcode.val());
+      if (!zipisvalid) {
+        reason += errornum+'. Incorrect Zipcode format entered\n';
+        errornum = errornum + 1;
+        isValid = false;
+      }
+    }
+
+    if (email.val() != "") {
+      emailisvalid = CMC.validateEmail(email.val());
+      if (!emailisvalid) {
+        reason += errornum + '. Incorrect Email format entered\n';
+        errornum = errornum + 1;
+        isValid = false;
+      }
+    }
+
+    if (phone.val() != "") {
+      var phoneerror = CMC.validatePhone(phone.val(),country.val());
+      if (phoneerror != "") {
+        reason += errornum + ' ' + phoneerror + '\n';
+        errornum = errornum + 1;
+        isValid = false;
+      }
+    }
+
+    if (reason != "") {
+      alert('Some input fields need correction:\n'+ reason);
+      return false;
+    } else {
+      var profileformdata = {};
+      profileformdata.profiletype=3;
+      if (aname.val() != 0)
+        profileformdata.name= aname.val();	  
+      if (aabout.val() != 0)
+        profileformdata.about= aabout.val();
+      if (aurl.val() != 0)
+        profileformdata.url= aurl.val();
+      if (medfacil.val() != 0)
+        profileformdata.medfacil= medfacil.val();
+      if (nonmedfacil.val() != 0)
+        profileformdata.nonmedfacil= nonmedfacil.val();		
+      if (mtype.val() != 0)
+        profileformdata.medskills= mtype.val();
+      if (nmtype.val() != 0)
+        profileformdata.otherskills=nmtype.val();         
+      if (sptype.val() != 0)
+        profileformdata.spiritserv=sptype.val();        
+      if (region.val() != 0)
+        profileformdata.region=region.val();  
+      if (country.val() != "")
+        profileformdata.country=country.val();  
+      if (state.val() != "Select your State")
+        profileformdata.state=state.val();  
+      if (durtype.val() != 0)
+        profileformdata.dur=durtype.val();
+      if (reltype.val() != 0)
+        profileformdata.relg=reltype.val();           
+      if (zipcode.val() != "")
+        profileformdata.zip=zipcode.val();
+      if (email.val() != "")
+        profileformdata.email=email.val();
+      if (city.val() != "")
+        profileformdata.city=city.val();
+      if (phone.val() != "")
+        profileformdata.phone=phone.val();
+      if (misexp.val() != "")
+        profileformdata.misexp=misexp.val();            
+
+      alert('AJAX form submission = ' + JSON.stringify(profileformdata));
+
+      $.ajax({
+        type: "POST",
+        url: "api/profilein.php",
+        data: {
+          fbid: CMC.me.id,
+        profiledata: JSON.stringify(profileformdata)
+        },
+        dataType: "json",
+        success: function() {
+          alert('Success');
+        },
+        error: function() {
+                 alert('Failure');
+               }
+      });
+      return true;
+    }
+
+    
+  });
+  
+  $("#profile-trip-submit").click(function() {
+  
+    var aname = $("form").find('.profile-trip-name');
+	var aurl = $("form").find('.profile-trip-website');
+	var aabout = $("form").find('.profile-trip-about');
+	
+    var reltype = $("form").find('.profile-trip-religion');
+    var durtype = $("form").find('.profile-trip-duration');
+    var city = $("form").find('.profile-trip-city');
+    var zipcode = $("form").find('.profile-trip-zipcode');
+
+    var country = $("form").find('.profile-trip-country');
+    var phone = $("form").find('.profile-trip-phone');
+    var email = $("form").find('.profile-trip-email');
+    var stage = $("form").find('.profile-trip-stage');
+    var tripdepart = $("form").find('.profile-trip-depart');
+    var tripreturn = $("form").find('.profile-trip-return');
+    var numberofmembers = $("form").find('.profile-trip-number');
+
+    var zipisvalid = false;
+    var emailisvalid = false;
+
+    var reason="";
+    var errornum=1;
+
+	if (aurl.val() != "") {
+		if (!isUrl(aurl.val())) {
+			reason += errornum+'. Incorrect Website Entered\n';
+			errornum = errornum + 1;
+			isValid = false;		
+		}
+	}
+	
+    if (zipcode.val() != "") {
+      zipisvalid = validateZipCode(zipcode.val());
+      if (!zipisvalid) {
+        reason += errornum+'. Incorrect Zipcode format entered\n';
+        errornum = errornum + 1;
+        isValid = false;
+      }
+    }
+
+    if (email.val() != "") {
+      emailisvalid = validateEmail(email.val());
+      if (!emailisvalid) {
+        reason += errornum + '. Incorrect Email format entered\n';
+        errornum = errornum + 1;
+        isValid = false;
+      }
+    }
+
+    if (phone.val() != "") {
+      var phoneerror = validatePhone(phone.val(),country.val());
+      if (phoneerror != "") {
+        reason += errornum + ' ' + phoneerror + '\n';
+        errornum = errornum + 1;
+        isValid = false;
+      }
+    }
+
+    if (tripdepart.val() == "select") {
+      reason += errornum + ' ' + 'Trip should have a depart date' + '\n';
+      errornum = errornum + 1;
+      isValid = false;
+    }
+    if (tripreturn.val() == "select") {
+      reason += errornum + ' ' + 'Trip should have a return date' + '\n';
+      errornum = errornum + 1;
+      isValid = false;
+    }
+    
+    if (reason != "") {
+      alert('Some input fields need correction:\n'+ reason);
+      return false;
+    } else {
+      var profiletripformdata = {};
+      profiletripformdata.profiletype=2;
+      if (aname.val() != "")
+        profiletripformdata.name= aname.val();
+      if (aurl.val() != "")
+        profiletripformdata.url=aurl.val();
+      if (aabout.val() != "")
+        profiletripformdata.about= aabout.val();		
+      if (stage.val() != 0)
+        profiletripformdata.stage= stage.val();
+      if (tripdepart.val() != "") {
+          //alert("departdate1 = " + tripdepart.val());
+          var departdate = tripdepart.val().split(".");
+          //alert("departdate = " + departdate[0] + "  " + departdate[1] + " " + departdate[2]);
+          profiletripformdata.DepartMonth=parseInt(departdate[0]);	  
+          profiletripformdata.DepartDay=parseInt(departdate[1]);	  
+          profiletripformdata.DepartYear=parseInt(departdate[2]);	  
+      }
+      if (tripreturn.val() != "") {
+          var returndate = tripreturn.val().split(".");
+          profiletripformdata.ReturnMonth=parseInt(returndate[0]);	  
+          profiletripformdata.ReturnDay=parseInt(returndate[1]);	  
+          profiletripformdata.ReturnYear=parseInt(returndate[2]);	  
+      }
+      if (numberofmembers.val() != "")
+        profiletripformdata.numpeople=numberofmembers.val();         
+      if (country.val() != "")
+        profiletripformdata.country=country.val();  
+      if (durtype.val() != 0)
+        profiletripformdata.durationid=durtype.val();
+      if (reltype.val() != 0)
+        profiletripformdata.relg=reltype.val();           
+      if (zipcode.val() != "")
+        profiletripformdata.zip=zipcode.val();
+      if (email.val() != "")
+        profiletripformdata.email=email.val();
+      if (city.val() != "")
+        profiletripformdata.destination=city.val();
+      if (phone.val() != "")
+        profiletripformdata.phone=phone.val();
+
+      //alert('AJAX TRIP form submission = ' + JSON.stringify(profiletripformdata));
+      
+      
+      $.ajax({
+        type: "POST",
+        url: "api/profilein.php",
+        data: {
+          fbid: CMC.me.id,
+		      profiledata: JSON.stringify(profiletripformdata)
+        },
+        dataType: "json",
+        success: function() {
+          alert('Success');
+        },
+        error: function() {
+                 alert('Failure');
+               }
+      });
+      
+	    $("#profile-trip-dialog").dialog('close');
+      return true;
+    }
+    });
 
   // Handles the live form validation
   $("#profile-medical").validate({
     expression: "if (VAL) return true; else return false;",
     message: "Please enter the Required field"
   });
+  $("#profile-org-website").validate({
+		expression: "if (VAL.test(/(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/) && VAL) return true; else if (!VAL) return true; else return false;",
+		message: "Please enter a valid website"
+  });
   $("#profile-email").validate({
+    expression: "if (VAL.match(/^[^\\W][a-zA-Z0-9\\_\\-\\.]+([a-zA-Z0-9\\_\\-\\.]+)*\\@[a-zA-Z0-9_]+(\\.[a-zA-Z0-9_]+)*\\.[a-zA-Z]{2,4}$/) && VAL) return true; else if (!VAL) return true; else return false;",
+    message: "Please enter a valid Email ID"
+  }); 
+  $("#profile-org-email").validate({
+    expression: "if (VAL.match(/^[^\\W][a-zA-Z0-9\\_\\-\\.]+([a-zA-Z0-9\\_\\-\\.]+)*\\@[a-zA-Z0-9_]+(\\.[a-zA-Z0-9_]+)*\\.[a-zA-Z]{2,4}$/) && VAL) return true; else if (!VAL) return true; else return false;",
+    message: "Please enter a valid Email ID"
+  });   
+  $("#profile-trip-email").validate({
     expression: "if (VAL.match(/^[^\\W][a-zA-Z0-9\\_\\-\\.]+([a-zA-Z0-9\\_\\-\\.]+)*\\@[a-zA-Z0-9_]+(\\.[a-zA-Z0-9_]+)*\\.[a-zA-Z]{2,4}$/) && VAL) return true; else if (!VAL) return true; else return false;",
     message: "Please enter a valid Email ID"
   }); 
   $("#profile-zipcode").validate({
     expression: "if (VAL.match(new RegExp(/(^[0-9]{5}$)|(^[0-9]{5}-[0-9]{4}$)/)) && VAL) return true; else if (!VAL) return true; else return false;",
     message: "Please enter a valid Zipcode"
+  });
+  $("#profile-org-zipcode").validate({
+    expression: "if (VAL.match(new RegExp(/(^[0-9]{5}$)|(^[0-9]{5}-[0-9]{4}$)/)) && VAL) return true; else if (!VAL) return true; else return false;",
+    message: "Please enter a valid Zipcode"
+  });  
+  $("#profile-trip-zipcode").validate({
+    expression: "if (VAL.match(new RegExp(/(^[0-9]{5}$)|(^[0-9]{5}-[0-9]{4}$)/)) && VAL) return true; else if (!VAL) return true; else return false;",
+    message: "Please enter a valid Zipcode"
   }); 
   $("#profile-phone").validate({
+    expression: "if (VAL.match(new RegExp(/(^[0-9]{10}$)/)) && VAL) return true; else if (!VAL) return true; else return false;",
+    message: "Please enter a valid Phone Number"
+  }); 
+  $("#profile-org-phone").validate({
+    expression: "if (VAL.match(new RegExp(/(^[0-9]{10}$)/)) && VAL) return true; else if (!VAL) return true; else return false;",
+    message: "Please enter a valid Phone Number"
+  });   
+  $("#profile-trip-phone").validate({
     expression: "if (VAL.match(new RegExp(/(^[0-9]{10}$)/)) && VAL) return true; else if (!VAL) return true; else return false;",
     message: "Please enter a valid Phone Number"
   }); 
@@ -1234,12 +1970,12 @@ $(function() {
 
 
   var profileshow = "hide";
-  $("#EditProfile").click(function() {
+  $("#EditProfile").click(function() {  
     alert("Edit Profile clicked");
   });
 
   $("#CreateTrip").click(function() {
-    alert("Create Trip Clicked");
+    $("#profile-trip-dialog").dialog('open');
   });   
 
   var tripjoinbtns = new Array();
@@ -1268,6 +2004,7 @@ $(function() {
     });
   });     
 
+
   // this should be the last thing that happens
   CMC.log("load callback complete, fading in canvas");
   $("#loading").fadeOut(function() {
@@ -1278,3 +2015,4 @@ $(function() {
 
 });
 // vim: ai:et:ts=2:sw=2
+// graphicAreasofInterest.Countries

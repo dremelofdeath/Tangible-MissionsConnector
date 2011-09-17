@@ -386,6 +386,8 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
     <link href="profilevalidate.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" type="text/css" href="style.css" />
     <link href="profiledisplay.css" rel="stylesheet" type="text/css" />
+	  <script src="datepicker.js" type="text/javascript"></script>
+	  <link href="datepicker.css" rel="stylesheet" type="text/css" />
     <!-- THIS IS THE ADMIN CODE BLOCK! Do NOT put code here for end users, they won't see it! -zack -->
     <script type="text/javascript">
       $(function() {
@@ -804,6 +806,9 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
         <div id="make-organizer">
           <h1>Awesome! You're an organizer.</h1>
           <p>It's great to have you onboard! We'd like to take a chance to sync with your Facebook profile so we can connect you to volunteers all over the world. If you have a Facebook page, you can link that too. We'll be sure to let you know when people join your trips!</p>
+          <h1>
+            <a href="#" onclick="CMC.page('#make-organizer', '#make-org-profile');">Make your Profile &gt;&gt;</a>
+          </h1>		  
         </div>
         <div id="make-profile">
           <h1>Create a Profile: Who Are You?</h1>
@@ -825,106 +830,106 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
             );
           ?>
         </div>
-        <div id="show-profile">
-        <script type="text/javascript">
-        // First get the profile information using a AJAX request
-                  var ProfileObj = new Object;
+        <div id="show-profile" style="display: none">
+          <div id="cmc-profile-title">
+            <h1 id="cmc-profile-title-text">CMC Profile Page</h1>
+          </div>
+		  
+		<div id="profilecontent">
+			<div id="colOne">
+			<div id="profileimage">
+            <div class="profile-picture">
+				<img src="ajax-spinner.gif" class="prpic srloading" alt="" width="230" height="170"/>
+            </div>
+			</div>
+			<div class="box2">
+				<div class="profile-name">Search Name
+				</div>
+			</div>
+			<input type="submit" value="Edit Profile" id="EditProfile" class="button" />
+			<input type="submit" value="Create Trip" id="CreateTrip" class="button" />
+			<p>&nbsp;</p>
+			<div class="box2">
+				<h3>
+					About Me: <br />
+				</h3>
+				<div class="profile-about">
+					<h4> About </h4>
+				</div>
+			</div>
+			</div>
+			<div id="colTwo">
+				<div class="box1">
+					<h2>Medical Skills:</h2>
+					<ul>
+					<div class="profile-medskills">
+						Medskills
+					</div>
+					</ul>
+				</div>
+				<p>&nbsp;</p>
+				<div class="box1">
+					<h2>Non-Medical Skills:</h2>
+					<ul>
+					<div class="profile-nonmedskills">
+						Non-Medskills
+					</div>
+					</ul>
+				</div>
+				<p>&nbsp;</p>
+				<div class="box1">
+					<h2>Personal Information:</h2>
+					<h5> Email: </h5>
+					<div class="profile-email">
+						<h6> Email </h6>
+					</div>		
+					<h5> Phone: </h5>
+					<div class="profile-phone">
+						<h6> Phone </h6>
+					</div>	
+					<h5> Country: </h5>
+					<div class="profile-country">
+						<h6> Country </h6>
+					</div>	
+					<h5> Zip: </h5>
+					<div class="profile-zip">
+						<h6> Zip </h6>
+					</div>	
+					<h5> Preferred Duration of Mission Trips: </h5>
+					<div class="profile-dur">
+						<h6> Duration </h6>
+					</div>	
+					<h5> Countries of Interest: </h5>
+					<div class="profile-countries">
+						<h6> Countries </h6>
+					</div>	
+				</div>
 
-                  $.ajax({
-                    type: "POST",
-                    url: "api/profile.php",
-                    data: {
-                        fbid: "1439952404"
-                    },
-                    dataType: "json",
-                    async: false,
-                    success: function(data) {
-                      ProfileObj.name = data.name;
-                      if (typeof data.about != "undefined") {
-                      ProfileObj.about = data.about;
-                      }
-                      if (typeof data.zip != "undefined") {
-                      ProfileObj.zip = data.zip;
-                      }
-                      if (typeof data.misexp != "undefined") {
-                      ProfileObj.misexp = data.misexp;
-                      }
-                      if (typeof data.phone != "undefined") {
-                        ProfileObj.phone = data.phone;
-                      }
-                      if (typeof data.relg != "undefined") {
-                      ProfileObj.relg = data.relg;
-                      }
-                      if (typeof data.email != "undefined") {
-                      ProfileObj.email = data.email;
-                      }
-                      if (typeof data.MedicalSkills != "undefined") {
-                      ProfileObj.MedicalSkills = data.MedicalSkills;
-                      }
-                      if (typeof data.Non_MedicalSkills != "undefined") {
-                      ProfileObj.Non_MedicalSkills = data.Non_MedicalSkills;
-                      }
-                      if (typeof data.SpiritualSkills != "undefined") {
-                      ProfileObj.SpiritualSkills = data.SpiritualSkills;
-                      }
-                      if (typeof data.city != "undefined") {
-                      ProfileObj.city = data.city;
-                      }
-                      if (typeof data.GeographicAreasofInterest != "undefined") {
-                        if (typeof data.GeographicAreasofInterest.Regions != "undefined") {
-                          ProfileObj.Regions = data.GeographicAreasofInterest.Regions;
-                        }
-                        if (typeof data.GeographicAreasofInterest.Countries != "undefined") {
-                          ProfileObj.Countries = data.GeographicAreasofInterest.Countries;
-                        }
-                      }
-                      if (typeof data.Durations.PreferredDurationofMissionTrips != "undefined") {
-                      ProfileObj.PreferredDurationofMissionTrips = data.Durations.PreferredDurationofMissionTrips;
-                      }
-                      if (typeof data.States.State != "undefined") {
-                      ProfileObj.State = data.States.State;
-                      }
-                      if (typeof data.AgencyName != "undefined") {
-                      ProfileObj.AgencyName = data.AgencyName;
-                      }
-                      if (typeof data.AgencyWebsite != "undefined") {
-                      ProfileObj.AgencyWebsite = data.AgencyWebsite;
-                      }
-                      if (typeof data.AboutAgency != "undefined") {
-                      ProfileObj.AboutAgency = data.AboutAgency;
-                      }
-                      if (typeof data.trips != "undefined") {
-                      ProfileObj.trips = data.trips;
-                      }
-
-                      alert('Success' + ProfileObj.name + ' ' + data.email + ' ' + data.trips.length);
-                    },
-                    error: function(data) {
-                      alert('Failed to get profile data' + data.err_msg);
-                    }
-                  });
-
-        var about = "This is what I can say about me. I can keep on writing and this will add to the number of lines without any problem during formatting";
-        var medskills=new Array(); // regular array (add an optional integer
-    medskills[0]="Dental Professional";
-    medskills[1]="Pharmacist";
-    var nonmedskills=new Array(); // regular array (add an optional integer
-    nonmedskills[0]="General Help/Labor";
-    nonmedskills[1]="Computer Science/Other Technical";
-    var personal = new Array();
-    personal[0] = "junk@email.com";
-    personal[1] = "4042933965";
-    personal[2] = "USA";
-    personal[3] = "23693";
-    personal[4] = "1-2 Weeks, 2 Weeks-1 Month";
-    personal[5] = "Secular";
-    personal[6] = "India, China, Australia";
-    var name = "Poornima Bhamidipati";
-    var TripName = "Richmond Trip longer name";
-    var numtrips = 4;
-        //alert('NAME = ' + ProfileObj.name);
-
-          </script>
+				<p>&nbsp;</p>
+				<h2>Trips Information:</h2>
+				<div id="table_wrapper">
+					<div id="tbody">
+					<table>
+					
+					<tr>
+					<div class="profile-picture">
+						<img src="ajax-spinner.gif" class="prpic srloading" alt="" width="75" height="55"/>
+					</div>
+					<td><div class="box3">
+					<div class="profile-tripname">
+						<h4> TripName </h4>
+					</div>						
+					</td>
+					<td class="td2"><input type="submit" value="Trip Description" class="button" id="trip-desc-submit" /></td>
+					<td class="td2"><input type="submit" value="Join This Trip" class="button" id="join-trip-submit" /></td>
+					</tr>
+	
+					</div>
+					</table>
+					</div>
+				</div>
+			</div>
+		</div>
           
     <style type="text/css">
     #table_wrapper{background:#000080;border:0px solid #A9A9A9;float:center;}
@@ -937,160 +942,38 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
     .td2{width:100px;}
     .td3{border-right-width:0;}
     </style>      
-
-    <script type="text/javascript">
-
-    function displayprofile() {
-    document.write('<h1> Profile Page </h1>');
-    document.write('<div id="profilecontent">');
-    document.write('<div id="colOne">');
-    document.write('<p><img src="img6.jpg" alt="" width="230" height="170" /></p>');
-    document.write('<div class="box2">');
-    document.write('<h3>' + ProfileObj.name + '</h3>');
-    document.write('</div>');
-    document.write('<input type="submit" value="Edit Profile" id="EditProfile" class="button" />');
-    document.write('<input type="submit" value="Create Trip" id="CreateTrip" class="button" />');
-    document.write('<p>&nbsp;</p>');
-    document.write('<div class="box2">');
-    document.write('<h3>');
-    document.write('About Me: <br />');
-    document.write('</h3>');
-    document.write('<h4>' + about + '</h4>');
-    document.write('</div>');
-    document.write('</div>');
-    document.write('<div id="colTwo">');
-    document.write('<div class="box1">');
-    document.write('<h2>Medical Skills:</h2>');
-    if (typeof ProfileObj.MedicalSkills != "undefined") {
-    document.write('<ul>');
-    for (var i=0;i<ProfileObj.MedicalSkills.length;i++) {
-      document.write('<li>' + ProfileObj.MedicalSkills[i] + '</li>');
-    }
-    document.write('</ul>');
-    }
-    document.write('</div>');
-    document.write('<p>&nbsp;</p>');
-    document.write('<div class="box1">');
-    document.write('<h2>Non-Medical Skills:</h2>');
-    if (typeof ProfileObj.Non_MedicalSkills != "undefined") {
-    document.write('<ul>');
-    for (var i=0;i<ProfileObj_Non_MedicalSkills.length;i++) {
-      document.write('<li>' + ProfileObj.Non_MedicalSkills[i] + '</li>');
-    }
-    document.write('</ul>');
-    }
-    document.write('</div>');
-    document.write('<p>&nbsp;</p>');
-    document.write('<div class="box1">');
-    document.write('<h2>Personal Information:</h2>');
-    for (var i=0;i<personal.length;i++) {
-      //if (typeof ProfileObj.email != "undefined") {
-      if (i==0) {
-        //document.write('<h5>Email: </h5><h6>' + ProfileObj.email + '</h6>\t');
-        document.write('<h5>Email: </h5><h6>' + personal[i] + '</h6>\t');
-      }
-      //if (typeof ProfileObj.phone != "undefined") {
-      else if (i==1) {
-        //document.write('\t<h5>Phone: ' + ProfileObj.phone + '</h5><br/>');
-        document.write('\t<h5>Phone: ' + personal[i] + '</h5><br/>');
-      }
-      //if (typeof ProfileObj.country != "undefined") {
-      else if (i==2) {
-        //document.write('<h5>Country: ' + ProfileObj.country + '</h5>  ');
-        document.write('<h5>Country: ' + personal[i] + '</h5> ');
-      }
-      //if (typeof ProfileObj.zip != "undefined") {
-      else if (i==3) {
-        //document.write('<h5>Zip: ' + ProfileObj.zip + '</h5><br/>');
-        document.write('<h5>Zip: ' + personal[i] + '</h5><br/>');
-      }
-      //if (typeof ProfileObj.PreferredDurationofMissionTrips!= "undefined") {
-      else if (i==4) {
-        //document.write('<h5>Preferred Duration of Mission Trips: ' + ProfileObj.PreferredDurationofMissionTrips + '</h5><br/>');
-        document.write('<h5>Preferred Duration of Mission Trips: ' + personal[i] + '</h5><br/>');
-      }
-      //if (typeof ProfileObj.relg != "undefined") {
-      else if (i==5) {
-        //document.write('<h5>Religious Affiliation: ' + ProfileObj.relg + '</h5><br/>');
-        document.write('<h5>Religious Affiliation: ' + personal[i] + '</h5><br/>');
-      }
-      //if (typeof ProfileObj.Countries != "undefined") {
-      else if (i==6) {
-        //document.write('<h5>Countries of Interest: ' + ProfileObj.Countries + '</h5><br/>');
-        document.write('<h5>Countries of Interest: ' + personal[i] + '</h5><br/>');
-      }           
-    }
-    document.write('</div>');
-
-    document.write('<p>&nbsp;</p>');
-    document.write('<h2>Trips Information:</h2>');
-    document.write('<div id="table_wrapper">');
-    document.write('<div id="tbody">');
-    document.write('<table>');
-    for (var i=0;i<numtrips;i++) {
-    document.write('<tr>'); 
-    document.write('<td class="td1"><img src="img6.jpg" alt="" width="75" height="55" /></td>');
-    //document.write('<td><div class="box3"><h4>' + ProfileObj.trips[i] + '</h4></div></td>');
-    document.write('<td><div class="box3"><h4>' + TripName + '</h4></div></td>');
-    document.write('<td class="td2"><input type="submit" value="Trip Description" class="button" id="trip-desc-submit-'+i+'" /></td>');
-    document.write('<td class="td2"><input type="submit" value="Join This Trip" class="button" id="join-trip-submit-'+i+'" /></td>');
-    document.write('</tr>');    
-    }
-    document.write('</table>');
-    document.write('</div>');
-    document.write('</div>');
-    document.write('</div>');
-    document.write('</div>');
-    }
-    </script>
     
         </div>
-
-        <div id="no-profile">
-            
-           <?php 
-                $fbid = 25826994;
-                cmc_check_profile_existence($fbid,$profileexists,$con);
-                if ($profileexists == 1) {
-              ?>
-              
-                <script type="text/javascript">
-                /*                 
-                $.get("api/profile.php",{fbid: "25826994"},
-                  function(data){
-                  alert("Success " + data.name + " " + data.city);
-                                     }, "json");
-               */
-                  profileshow = "display";
-                  displayprofile();
-
-                </script>
-              <?php
-                }
-
-                else {
-  
-            ?>
-                <script type="text/javascript">
-                  profileshow = "hide"
-                </script>
+        <div id="no-profile" style="display: none">
           <div class="ui-state-highlight ui-corner-all ui-widget cmc-infobar">
             <p class="cmc-infobar-text">
-              <span class="ui-icon ui-icon-info cmc-infobar-icon"></span>
-              <strong>Oops!</strong>
-              You haven't created a profile yet! Create one now and get involved.
+             <span class="ui-icon ui-icon-info cmc-infobar-icon"></span>
+             <strong>Oops!</strong>
+             You haven't created a profile yet! Create one now and get involved.
             </p>
           </div>
           <h1>
             <a href="#" onclick="CMC.page('#no-profile', '#make-profile');">Create a Profile Now &gt;&gt;</a>
           </h1>
-            <?php
-              }
-            ?>
         </div>
       </div>
       <div id="trips-tab">
-        <p>Proin elit arcu, rutrum commodo, vehicula tempus, commodo a, risus. Curabitur nec arcu. Donec sollicitudin mi sit amet mauris. Nam elementum quam ullamcorper ante. Etiam aliquet massa et lorem. Mauris dapibus lacus auctor risus. Aenean tempor ullamcorper leo. Vivamus sed magna quis ligula eleifend adipiscing. Duis orci. Aliquam sodales tortor vitae ipsum. Aliquam nulla. Duis aliquam molestie erat. Ut et mauris vel pede varius sollicitudin. Sed ut dolor nec orci tincidunt interdum. Phasellus ipsum. Nunc tristique tempus lectus.</p>
+        <div id="make-trip">
+          <?php
+            cmc_big_button(
+              "I want to create a trip",
+              "for the purpose of conducting missions",
+              "CMC.page('#make-trip', '#make-trip-profile');",
+              "icon-organizer.png"
+            );
+          ?>
+         </div>
+         <div id="no-trip">
+          <h1>Yay! You can create a missions trip very quickly</h1>
+          <h1>
+            <a href="#" onclick="CMC.page('#no-trip', '#make-trip');">Create a Trip &gt;&gt;</a>
+          </h1>
+          </div>
       </div>
       <div id="search-tab">
         <div id="search-box">
@@ -1505,8 +1388,492 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
             </div>
         </div>
     </div>
-    </form>   
+    </form>      
       </div>    
+      <div id="profile-organizer-dialog" title="Please enter your profile information">
+        <form id="profile-organizer-form">
+      <div id="wrapper">
+        <div id="header">
+            CMC Profile Submission
+        </div>
+        <div id="contents">
+            <div class="profile-container">
+                <div class="profile-header">
+                    Please enter your profile information</div>
+                <div class="profile-contents">
+                    <table cellpadding="4" cellspacing="0">
+                        <tr>
+                            <td>
+                                <label>
+                                    Agency/Mission Name</label>
+                            </td>
+                            <td>
+                                <input type="text" id="profile-org-name" class="profile-org-name" />
+                            </td>
+                        </tr>  
+                        <tr>
+                            <td>
+                                <label>
+                                    Agency/Mission Website</label>
+                            </td>
+                            <td>
+                                <input type="text" id="profile-org-website" class="profile-org-website" />
+                            </td>
+                        </tr>  
+                        <tr>
+                            <td>
+                                <label>
+                                    About My Agency</label>
+                            </td>
+                            <td>
+                                <input type="text" id="profile-org-about" class="profile-org-about" />
+                            </td>
+                        </tr>  						
+                        <tr>
+                            <td style="width: 97px">
+                                <label>
+                                    Medical Facility Offerings</label>
+                            </td>
+                            <td style="width: 97px">
+                                        <select id="profile-org-offer" multiple="multiple" class="profile-org-offer" onclick="selectMultiple(this,0);">
+                                            <!--<option value="0" selected="selected">Select Medical Skills</option>-->
+                                            <option value="1">Missions Hospital without Surgical Facilities</option>
+                                            <option value="2">Missions Hospital with Surgical Facilities</option>
+                                            <option value="3">Missions Hospital with Dental Care Facilities</option>
+                                            <option value="4">Outpatient Medical/Dental/Eye Care Clinic</option>
+                                            <option value="5">Organizing/Sending Short Term Medical/Dental/Eye Care Missions Agency</option>
+                                            <option value="6">Supplying/Enhancing Short Term Medical/Dental/Eye Care Missions Agency</option>
+                                            <option value="7">Community Development Agency</option>
+                                            <option value="8">Emergency Medical Relief Agency</option>
+                                            <option value="9">Medical/Dental/Eye Care Equipment Supplier</option>
+                                            <option value="10">Water Purification/Drilling</option>
+                                            <option value="11">Medical/Dental/Eye Care Training/Education Agency</option>
+                                        </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 97px">
+                                <label>
+                                    Non-Medical Facility Offerings</label>
+                            </td>
+                            <td style="width: 97px">
+                                        <select id="profile-org-offern" multiple="multiple" class="profile-org-offern" onclick="selectMultiple(this,1);">
+                                            <!--<option value="0" selected="selected">Select Medical Skills</option>-->
+                                            <option value="1">Evangelism and Church Planning Ministry</option>
+                                            <option value="2">Food Access</option>
+                                            <option value="3">Transportation (In Country)</option>
+                                            <option value="4">Translators</option>
+                                            <option value="5">Trip Planning/Itinerary Building</option>
+                                            <option value="6">Crowd Control</option>
+                                            <option value="7">Press Relations</option>
+                                            <option value="8">Housing for the Missions Team</option>
+                                            <option value="9">Help getting through Customs</option>
+                                            <option value="10">Building Supplies (Construction)</option>
+                                        </select>
+                            </td>
+                        </tr>												
+                        <tr>
+                            <td style="width: 97px">
+                                <label>
+                                    Medical Skills</label>
+                            </td>
+                            <td style="width: 97px">
+                                        <select id="profile-org-medical" multiple="multiple" class="profile-org-medical" onclick="selectMultiple(this,2);">
+                                            <!--<option value="0" selected="selected">Select Medical Skills</option>-->
+                                            <option value="1">Advanced Practice Nursing</option>
+                                            <option value="2">Dental Professional</option>
+                                            <option value="3">Medical Educator</option>
+                                            <option value="4">Mental Health Professional</option>
+                                            <option value="5">Nurse</option>
+                                            <option value="6">Optometrist or Opthalmologist</option>
+                                            <option value="7">Pharmacist</option>
+                                            <option value="8">Physician</option>
+                                            <option value="9">Physician Assistant</option>
+                                            <option value="10">Physical or Occupational Therapist</option>
+                                            <option value="11">Public Health/Community Development Worker</option>
+                                            <option value="12">Speech Therapist</option>
+                                            <option value="13">Other</option>
+                                        </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 97px">
+                                <label>
+                                    Non-Medical Skills</label>
+                            </td>
+                            <td style="width: 197px">
+                                        <select id="profile-org-nonmedical" multiple="multiple" class="profile-org-nonmedical" onclick="selectMultiple(this,3);">
+                                            <!--<option value="0" selected="selected">Select Non-Medical Skills</option>-->
+                                            <option value="1">General Help/Labor</option>
+                                            <option value="2">Team Leader/Primary Organizer</option>
+                                            <option value="3">Account and/or Business Management</option>
+                                            <option value="4">Skilled Construction and/or Maintenance</option>
+                                            <option value="5">Computer Science/Other Technical</option>
+                                            <option value="6">Agriculture and/or Animal Husbandry</option>
+                                            <option value="7">Mechanic</option>
+                                            <option value="8">Office/Secretarial</option>
+                                            <option value="9">Teaching</option>
+                                            <option value="10">Veterinary</option>
+                                            <option value="11">Water Supply Improvement</option>
+                                            <option value="12">Writing and/or Translating</option>
+                                            <option value="13">Engineering</option>
+                                        </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 97px">
+                                <label>
+                                    Spiritual Service</label>
+                            </td>
+                            <td style="width: 197px">
+                                        <select id="profile-org-spiritual" multiple="multiple" class="profile-org-spiritual" onclick="selectMultiple(this,4);">
+                                            <!--<option value="0" selected="selected">Select Spiritual Service</option>-->
+                                            <option value="1">Team Spiritual Leader</option>
+                                            <option value="2">Individual Outreach (Prayer and Counseling)</option>
+                                            <option value="3">Evangelism</option>
+                                            <option value="4">Worship Team</option>
+                                            <option value="5">Public Speaking</option>
+                                        </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 97px">
+                                <label>
+                                    Religious Affiliation</label>
+                            </td>
+                            <td style="width: 197px">
+                                        <select id="profile-org-religion" class="profile-org-religion">
+                                            <!--<option value="0", selected="selected">Select Religious Affiliation</option>-->
+                                            <option value="1">Secular</option>
+                                            <option value="2">Christian: Protestant</option>
+                                            <option value="3">Christian: Catholic</option>
+                                            <option value="4">Nondenominational</option>
+                                        </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 97px">
+                                <label>
+                                    Duration of Missions</label>
+                            </td>
+                            <td style="width: 197px">
+                                        <select id="profile-org-duration" class="profile-org-duration">
+                                            <!--<option value="0" selected="selected">Select Duration of Missions</option>-->
+                                            <option value="1">Short Term: 1-2 weeks</option>
+                                            <option value="2">Medium Term: 1 Month-2 Years</option>
+                                            <option value="3">Long Term: 2+ Years</option>
+                                        </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 197px">
+                                <label>
+                                    State</label>
+                            </td>
+                            <td style="width: 197px">
+                                        <select id="profile-org-state" class="profile-org-state">
+                                        <?php
+                                        //echo '<option value="Select your State" selected="selected">Select your State</option>';
+                      foreach($usstates as $key => $state) {
+                                              echo '<option value="'.$state.'">'.$state.'</option>';
+                      }
+                                        ?>
+                                        </select>
+                            </td>
+                        </tr>           
+                        <tr>
+                            <td>
+                                <label>
+                                    City</label>
+                            </td>
+                            <td>
+                                <input type="text" id="profile-org-city" class="profile-org-city"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>
+                                    Zipcode</label>
+                            </td>
+                            <td>
+                                <input type="text" id="profile-org-zipcode" class="profile-org-zipcode"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 197px">
+                                <label>
+                                    Country</label>
+                            </td>
+                            <td style="width: 197px">
+                                        <select id="profile-org-country" class="profile-org-country">
+                                        <?php
+                      foreach($aCountries as $key => $country) {
+                                              if ($country == "United States")
+                            echo '<option selected="selected" value="'.$country.'">'.$country.'</option>';
+                                              else
+                            echo '<option value="'.$country.'">'.$country.'</option>';
+
+                      }
+                                        ?>
+                                        </select>
+                            </td>
+                        </tr>             
+                        <tr>
+                            <td style="width: 197px">
+                                <label>
+                                    Regions of Interest</label>
+                            </td>
+                            <td style="width: 197px">
+                                        <select id="profile-org-region" multiple="multiple" class="profile-org-region" onclick="selectMultiple(this,5);">
+                                            <!--<option value="0" selected="selected">Select Regions of Interest</option>-->
+                                            <option value="1">Africa</option>
+                                            <option value="2">Asia and Oceana</option>
+                                            <option value="3">Europe and Russia</option>
+                                            <option value="4">Latin America</option>
+                                            <option value="5">Middle East</option>
+                                            <option value="6">North America</option>
+                                            <option value="7">Caribbean</option>
+                                        </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 197px">
+                                <label>
+                                    Countries Served</label>
+                            </td>
+                            <td style="width: 197px">
+                                        <select id="profile-org-countryserved" multiple="multiple" class="profile-org-countryserved" onclick="selectMultiple(this,6);">
+                                        <?php
+                      //echo '<option selected="selected" value="Select Countries Served">Select Countries Served</option>';
+                      foreach($aCountries as $key => $country) {                      
+                        echo '<option value="'.$country.'">'.$country.'</option>';
+                      }
+                                        ?>
+                                        </select>
+                            </td>
+                        </tr>           
+                        <tr>
+                            <td>
+                                <label>
+                                    Phone</label>
+                            </td>
+                            <td>
+                                <input type="text" id="profile-org-phone" class="profile-org-phone" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>
+                                    Email Id</label>
+                            </td>
+                            <td>
+                                <input type="text" id="profile-org-email" class="profile-org-email" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>
+                                    My Missions Experience</label>
+                            </td>
+                            <td>
+                                <input type="text" id="profile-org-experience" class="profile-org-experience" />
+                            </td>
+                        </tr>             
+                        <tr>
+                            <td>&nbsp;
+                                
+                            </td>
+                            <td>
+                                <input type="submit" value="Submit" class="profile-org-submit" id="profile-org-submit" />
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    </form>   
+      </div>	  	  
+      <div id="profile-trip-dialog" title="Please enter your trip profile information">
+        <form id="profile-organizer-form">
+      <div id="wrapper">
+        <div id="header">
+            CMC Trip Profile Submission
+        </div>
+        <div id="contents">
+            <div class="profile-container">
+                <div class="profile-header">
+                    Please enter your profile information</div>
+                <div class="profile-contents">
+                    <table cellpadding="4" cellspacing="0">
+                        <tr>
+                            <td>
+                                <label>
+                                    Trip Name</label>
+                            </td>
+                            <td>
+                                <input type="text" id="profile-trip-name" class="profile-trip-name" />
+                            </td>
+                        </tr>  
+                        <tr>
+                            <td>
+                                <label>
+                                    Organization Website</label>
+                            </td>
+                            <td>
+                                <input type="text" id="profile-trip-website" class="profile-trip-website" />
+                            </td>
+                        </tr>  
+                        <tr>
+                            <td>
+                                <label>
+                                    Trip Description</label>
+                            </td>
+                            <td>
+                                <input type="text" id="profile-trip-about" class="profile-trip-about" />
+                            </td>
+                        </tr>  						
+                        <tr>
+                            <td style="width: 97px">
+                                <label>
+                                    Religious Affiliation</label>
+                            </td>
+                            <td style="width: 197px">
+                                        <select id="profile-trip-religion" class="profile-trip-religion">
+                                            <!--<option value="0", selected="selected">Select Religious Affiliation</option>-->
+                                            <option value="1">Secular</option>
+                                            <option value="2">Christian: Protestant</option>
+                                            <option value="3">Christian: Catholic</option>
+                                            <option value="4">Nondenominational</option>
+                                        </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>
+                                    Anticipated Number of Team Members</label>
+                            </td>
+                            <td>
+                                <input type="text" id="profile-trip-number" class="profile-trip-number" />
+                            </td>
+                        </tr>  	
+                        <tr>
+                            <td style="width: 97px">
+                                <label>
+                                    Approximate Departure Date</label>
+                            </td>
+                            <td style="width: 197px">
+							<input name="profile-trip-depart" id="profile-trip-depart" class="profile-trip-depart" type=button value="select" onclick="displayDatePicker('profile-trip-depart', false, 'mdy', '.');">
+
+                            </td>
+                        </tr>						
+                        <tr>
+                            <td style="width: 97px">
+                                <label>
+                                    Approximate Return Date</label>
+                            </td>
+                            <td style="width: 197px">
+							<input name="profile-trip-return" id="profile-trip-return" class="profile-trip-return" type=button value="select" onclick="displayDatePicker('profile-trip-return', false, 'mdy', '.');">
+                            </td>
+                        </tr>							
+                        <tr>
+                            <td style="width: 97px">
+                                <label>
+                                    Duration of Missions</label>
+                            </td>
+                            <td style="width: 197px">
+                                        <select id="profile-trip-duration" class="profile-trip-duration">
+                                            <!--<option value="0" selected="selected">Select Duration of Missions</option>-->
+                                            <option value="1">Short Term: 1-2 weeks</option>
+                                            <option value="2">Medium Term: 1 Month-2 Years</option>
+                                            <option value="3">Long Term: 2+ Years</option>
+                                        </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 97px">
+                                <label>
+                                    Mission Stage</label>
+                            </td>
+                            <td style="width: 197px">
+                                        <select id="profile-trip-stage" class="profile-trip-stage">
+                                            <!--<option value="0" selected="selected">Select Duration of Missions</option>-->
+                                            <option value="1">Planning</option>
+                                            <option value="2">Execution</option>
+                                        </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>
+                                    Destination Zipcode</label>
+                            </td>
+                            <td>
+                                <input type="text" id="profile-trip-zipcode" class="profile-trip-zipcode"/>
+                            </td>
+                        </tr>						
+                        <tr>
+                            <td>
+                                <label>
+                                    Destination City</label>
+                            </td>
+                            <td>
+                                <input type="text" id="profile-trip-city" class="profile-trip-city"/>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td style="width: 197px">
+                                <label>
+                                    Destination Country</label>
+                            </td>
+                            <td style="width: 197px">
+                                        <select id="profile-trip-country" class="profile-trip-country">
+                                        <?php
+                      foreach($aCountries as $key => $country) {
+                                              if ($country == "United States")
+                            echo '<option selected="selected" value="'.$country.'">'.$country.'</option>';
+                                              else
+                            echo '<option value="'.$country.'">'.$country.'</option>';
+
+                      }
+                                        ?>
+                                        </select>
+                            </td>
+                        </tr>                     
+                        <tr>
+                            <td>
+                                <label>
+                                    Phone</label>
+                            </td>
+                            <td>
+                                <input type="text" id="profile-trip-phone" class="profile-trip-phone" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>
+                                    Email Id</label>
+                            </td>
+                            <td>
+                                <input type="text" id="profile-trip-email" class="profile-trip-email" />
+                            </td>
+                        </tr>           
+                        <tr>
+                            <td>&nbsp;
+                                
+                            </td>
+                            <td>
+                                <input type="submit" value="Submit" class="profile-trip-submit" id="profile-trip-submit" />
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    </form>   
+      </div>	  
       <div id="report-problem-dialog" title="What seems to be the matter?">
         <p>Tell us what's wrong, and we'll look into it right away.</p>
         <form id="report-problem-form">
