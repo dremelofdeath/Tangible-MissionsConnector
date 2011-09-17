@@ -215,7 +215,7 @@ var CMC = {
     this.beginFunction("getProfileExistence");
     $(".cmc-profile-result").each(function () { $(this).fadeOut('fast'); });
     this.log("Checking existence of the profile");
-    this.ajaxNotifyStart(); // one for good measure, we want the spinner for the whole search
+    this.ajaxNotifyStart(); // one for good measure, we want the spinner for profile existence check
 	// check existence of the profile  
 	$.ajax({
         type: "POST",
@@ -230,6 +230,7 @@ var CMC = {
 		error: this.onProfileExistenceError
     });
     
+    this.ajaxNotifyComplete(); // finish the one we started at the beginning of profile existence checks
     this.endFunction("getProfileExistence");
   },  
   
@@ -307,7 +308,6 @@ var CMC = {
       $("#no-profile").fadeIn();
     } else {
       
-      $("#show-profile").fadeIn();
 
       var imageLoadsCompleted = 0, __notifyprofileImageLoadCompleted = $.proxy(function() {
         imageLoadsCompleted++;
@@ -318,27 +318,16 @@ var CMC = {
         this.ajaxNotifyStart();
         this.assert(data.name !== undefined, "name is missing from result set");
         $(id).children("#colOne").children(".box2").children(".profile-name").html(data.name ? data.name : "");
-        //$(id).children("#colOne").children("#profileimage").children(".profile-picture").children("img").remove();
-        //if (this.me.id) {
-        $(id).children("#colOne").children("#profileimage").children(".profile-picture").children("img").attr("src", "http://graph.facebook.com/"+this.me.id+"/picture");
-        /*
-        $(id).children("#colOne").children("#profileimage").children(".profile-picture").children("img")
-          //$("<img />")
-            .attr("src", "http://graph.facebook.com/"+this.me.id+"/picture")
-            .attr("cmcid", id) // this is the id from above! not results[each].id!
-            .addClass("prpic")
-            .one('load', $.proxy(function(event) {
-              // I never want to see more than one image here again. --zack
-              $($(event.target).attr("cmcid")).children("#colOne").children("#profileimage").children(".profile-picture").children("img").remove();
-              $($(event.target).attr("cmcid")).children("#colOne").children("#profileimage").children(".profile-picture").append($(event.target));
-              this.ajaxNotifyComplete();
-              __notifyprofileImageLoadCompleted();
-            }, this));
-      */
-			$(id).children("#colOne").children(".box2").children(".profile-about").html(data.about ? "<h4>" + data.about + "</h4>" : "");
-		
+        
+        $(id).children("#colOne").children("#profileimage").children(".profile-picture").children("img").attr("src", "http://graph.facebook.com/"+this.me.id+"/picture?type=large");
+        this.ajaxNotifyComplete();
+			
+        $(id).children("#colOne").children(".box2").children(".profile-about").html(data.about ? "<h4>" + data.about + "</h4>" : "");
+	
+
+
       if (data.MedicalSkills == undefined) {
-			$(id).children("#colTwo").children(".box1").children(".profile-medskills").html("");
+			  $(id).children("#colTwo").children(".box1").children(".profile-medskills").html(" ");
       }
       else {
       //display medical skills information
@@ -351,6 +340,9 @@ var CMC = {
 		
 			$(id).children("#colTwo").children(".box1").children(".profile-medskills").html(data.MedicalSkills ? eachstr : "");
 			}
+      else {
+			$(id).children("#colTwo").children(".box1").children(".profile-medskills").html(" ");
+      }
       }
 			
 			//display non-medical skills information
@@ -367,6 +359,9 @@ var CMC = {
 		
 			$(id).children("#colTwo").children(".box1").children(".profile-nonmedskills").html(data.Non_MedicalSkills ? eachstr : "");
 			}
+      else {
+			$(id).children("#colTwo").children(".box1").children(".profile-nonmedskills").html("");
+      }
       }
 			
 			//display profile information
@@ -398,7 +393,6 @@ var CMC = {
       else {
       $(id).children("#colTwo").children(".box1").children(".profile-zip").html(data.zip ? "<h6>" + data.zip + "</h6>" : "");
       }
-
 			
       if (data.Durations == undefined) {
 			$(id).children("#colTwo").children(".box1").children(".profile-dur").html("<h6></h6>");
@@ -416,38 +410,49 @@ var CMC = {
       }
 		
 
-      if (data.trips === undefined) {
-			$(id).children("#colTwo").children(".table_wrapper").children(".tbody").html("<table></table>");
+      if (data.trips == undefined) {
+			$(id).children("#colTwo").children("#table_wrapper").children("#tbody").html("<table></table>");
       }
       else {
 			//finally update the trips information
 			if (data.trips.length > 0) {
 			
+      var eachstr = "";
 			for (var each in data.trips) {
 			
-		    $(id).children("#colTwo").children("#table_wrapper").children("#tbody").children(".profile-picture").children("img").remove();
-      
-      $(id).children("#colTwo").children("#table_wrapper").children("#tbody")..children(".profile-picture").children("img")
-			//$("<img />")
-            .attr("src", "http://graph.facebook.com/"+this.me.id+"/picture")
-            .attr("cmcid", id) // this is the id from above! not results[each].id!
-            .addClass("prpic")
-            .one('load', $.proxy(function(event) {
-              // I never want to see more than one image here again. --zack
-              $($(event.target).attr("cmcid")).children("#colTwo").children("#table_wrapper").children("#tbody").children(".profile-picture").children("img").remove();
-              $($(event.target).attr("cmcid")).children("#colTwo").children("#table_wrapper").children("#tbody").children(".profile-picture").append($(event.target));
-              this.ajaxNotifyComplete();
-              __notifyprofileImageLoadCompleted();
-            }, this));		
+        eachstr += "<tr>";
+        eachstr += "<div class=\"profile-picture-\"" + each + ">";
+        eachstr += "<img src=\"ajax-spinner.gif\"/>";
+        eachstr += "</div>";
+        eachstr += "<td><div class=\"box3\">";
+        eachstr += "<div class=\"profile-tripname-\"" + each + ">";
+        eachstr += "<h4> TripName </h4>";
+        eachstr += "</div>";
+        eachstr += "</td>";
+        eachstr += "<td class=\"td2\"><input type=\"submit\" value=\"Trip Description\" class=\"button\" id=\"trip-desc-submit-\"" + each + "/></td>";
+        eachstr += "<td class=\"td2\"><input type=\"submit\" value=\"Join This Trip\" class=\"button\" id=\"join-trip-submit-\"" + each + "/></td>";
+        eachstr += "</tr>";
+        eachstr += "</div>";
+      }
+      // replace the existing template with the new template that is the length of the trips array
+			$(id).children("#colTwo").children("#table_wrapper").children("#tbody").html("<table>" + eachstr + "</table>");
 			
-			$(id).children("#colTwo").children("#table_wrapper").children("#tbody").children(".box3").children(".profile-tripname").html(data.trips[each] ? "<h4>" + data.trips[each] + "</h4>" : "");
+      //Now update the new template with the trips information
+      for (var each in data.trips) {      
+      $(id).children("#colTwo").children("#table_wrapper").children("#tbody").children(".profile-picture-"+each).children("img").attr("src", "http://graph.facebook.com/"+this.me.id+"/picture?type=small");
+			$(id).children("#colTwo").children("#table_wrapper").children("#tbody").children(".box3").children(".profile-tripname-"+each).html(data.trips[each] ? "<h4>" + data.trips[each] + "</h4>" : "");
 
 			}			
 
 			}
+      else {
+			$(id).children("#colTwo").children("#table_wrapper").children("#tbody").html("<table></table>");
       }
+
+      }
+      $("#show-profile").fadeIn();
     } // end else
-    this.ajaxNotifyComplete(); // finish the one we started at the beginning of the search
+    this.ajaxNotifyComplete(); // finish the one we started at the beginning of profile retrieval
     this.endFunction("showProfile");
   },	
   
@@ -458,19 +463,19 @@ var CMC = {
       $("*").clearQueue("custom-ProfileQueue");
       if ($(id + " .profile-picture img").length > 1) {
         // cleanup the junk pictures, the user is clicking too quickly
-        this.log("cleaning " + ($(id + " .result-picture img").length - 1) + " junk result(s) while showing " + id);
+        this.log("cleaning " + ($(id + " .profile-picture img").length - 1) + " junk result(s) while showing " + id);
         while ($(id + " .profile-picture img").length > 1) {
           $(id + " .profile-picture img:first").remove();
           $(id).hide(); // this will get shown again later
         }
       }
       $(id).queue("custom-ProfileQueue", function () {
-        var each = $(this).attr("id").split("-")[3];
+        //var each = $(this).attr("id")[1];
         $(this)
           .stop(true, true)
-          .delay(25 * each)
+          .delay(25)
           .show("drop", {direction: "right", distance: 50}, 250, _onShowComplete);
-      }).dequeue("custom-SearchResultsQueue");
+      }).dequeue("custom-ProfileQueue");
 	  
     this.endFunction("animateShowProfile");
   },
@@ -618,6 +623,9 @@ var CMC = {
       $("#cmc-search-results-noresultmsg").fadeOut(400, _onSearchFadeoutComplete);
     } else {
       this.log("we have a new search to perform");
+      if(!this.me.id) {
+       this.log("this.me.id isn't available; using blank fbid for search");
+      }
       this.ajaxNotifyStart(); // one for good measure, we want the spinner for the whole search
       $.ajax({
         url: "api/searchresults.php",
@@ -942,6 +950,9 @@ var CMC = {
       // this is a page that we haven't cached yet
       this.log("[cacheSearchPage] fetching search page " + (pageIndex + 1));
       this.ajaxNotifyStart();
+      if(!this.me.id) {
+       this.log("this.me.id isn't available; using blank fbid for search");
+      }
       $.ajax({
         url: "api/searchresults.php",
         data: {
@@ -1390,48 +1401,6 @@ $(function() {
     }
   });
 
-/*
-CMC.checkFacebookLoginStatus(function (response) {
-if (response.authResponse) {
-//Get a list of all the albums
-FB.api('/me/albums', function (response) {
-for (album in response.data) {
-
-   // Find the Profile Picture album
-   if (response.data[album].name == "Profile Pictures") {
-    // Get a list of all photos in that album.
-      FB.api(response.data[album].id + "/photos", function(response) {
-      //The image link
-        CMC.pimage = response.data[0].images[0].source;
-      });
-   }
-}
-});
-} else {
-
-    CMC.login(function (response) {
-      if (response.authResponse) {
-        FB.api('/me/albums', function (response) {
-        for (album in response.data) {
-
-          // Find the Profile Picture album
-          if (response.data[album].name == "Profile Pictures") {
-            // Get a list of all photos in that album.
-            FB.api(response.data[album].id + "/photos", function(response) {
-             //The image link
-              CMC.image = response.data[0].images[0].source;
-            });
-          }
-        }
-        });
-      } else {
-        // this means the user denied us, cancel action
-      }
-    });
-}
-});
-*/
-
   CMC.log("setting up dialog boxes");
   $("#copyrights-dialog").dialog({
     autoOpen: false,
@@ -1618,7 +1587,7 @@ for (album in response.data) {
         type: "POST",
         url: "api/profilein.php",
         data: {
-          fbid: CMC.me.id,
+          fbid: CMC.me.id ? CMC.me.id : "",
         profiledata: JSON.stringify(profileformdata)
         },
         dataType: "json",

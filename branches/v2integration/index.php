@@ -590,6 +590,11 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
         display: none;
       }
 
+      img.prloading {
+        z-index: -1;
+        display: none;
+      }
+
       #cmc-footer a {
         text-decoration: none;
         color: #102030;
@@ -839,7 +844,7 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
 			<div id="colOne">
 			<div id="profileimage">
             <div class="profile-picture">
-				<img src="ajax-spinner.gif" class="prpic srloading" alt="" width="230" height="170"/>
+				      <img src="ajax-spinner.gif" width="230" />
             </div>
 			</div>
 			<div class="box2">
@@ -861,20 +866,14 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
 			<div id="colTwo">
 				<div class="box1">
 					<h2>Medical Skills:</h2>
-					<ul>
-					<div class="profile-medskills">
-						Medskills
+					<div class="profile-medskills">Medskills
 					</div>
-					</ul>
 				</div>
 				<p>&nbsp;</p>
 				<div class="box1">
 					<h2>Non-Medical Skills:</h2>
-					<ul>
-					<div class="profile-nonmedskills">
-						Non-Medskills
+					<div class="profile-nonmedskills">Non-Medskills
 					</div>
-					</ul>
 				</div>
 				<p>&nbsp;</p>
 				<div class="box1">
@@ -913,7 +912,7 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
 					
 					<tr>
 					<div class="profile-picture">
-						<img src="ajax-spinner.gif" class="prpic srloading" alt="" width="75" height="55"/>
+						<img src="ajax-spinner.gif" alt="" width="75" height="55"/>
 					</div>
 					<td><div class="box3">
 					<div class="profile-tripname">
