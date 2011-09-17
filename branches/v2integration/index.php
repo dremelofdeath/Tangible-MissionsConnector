@@ -1400,7 +1400,7 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                 <div class="profile-header">
                     Please enter your profile information</div>
                 <div class="profile-contents">
-                    <table cellpadding="4" cellspacing="0">
+                    <table id="orgtable" cellpadding="4" cellspacing="0">
                         <tr>
                             <td>
                                 <label>

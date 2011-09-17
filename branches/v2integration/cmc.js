@@ -16,7 +16,7 @@ var CMC = {
   loggedInUser : false,
   me : false,
   friends : false,
-  ProfileObj :  {},
+  profiledata :  {},
   isreceiver : false,
   profileexists : false,
   requestsOutstanding : 0,
@@ -286,7 +286,7 @@ var CMC = {
 			    else {
 				    this.isreceiver = 1;
 			    }
-			
+			    this.profiledata = data;
           CMC.log("Calling showProfile with profile data");
 			    this.showProfile(data);
 			
@@ -1940,15 +1940,176 @@ $(function() {
 
   var profileshow = "hide";
   $("#EditProfile").click(function() {  
-    alert("Edit Profile clicked");
+
+    if (CMC.receiver ==0) {
+      alert("Volunteer profile" + CMC.profiledata);
+    }
+    else {
+      // First modify the profile organizer dialog form, then display for editing
+
+        var id = "#profile-organizer-dialog";
+        //CMC.log($('#profile-org-zipcode').html());
+
+        if (CMC.profiledata.zip != undefined) {
+          $("input#profile-org-zipcode").val(CMC.profiledata.zip);
+        }
+        if (CMC.profiledata.AgencyName != undefined) {
+          $("input#profile-org-name").val(CMC.profiledata.AgencyName);
+        }
+        if (CMC.profiledata.AgencyWebsite != undefined) {
+          $("input#profile-org-website").val(CMC.profiledata.AgencyWebsite);
+        }
+        if (CMC.profiledata.AboutAgency != undefined) {
+          $("input#profile-org-about").val(CMC.profiledata.AboutAgency);
+        }
+        if (CMC.profiledata.FacilityMedicalOfferings != undefined) {
+          if (CMC.profiledata.FacilityMedicalOfferings.length>0) {
+          var selstr = "[";
+          for (var each in CMC.profiledata.FacilityMedicalOfferings) {
+            if (each > 0) {
+              selstr += ", ";
+            }
+            selstr += CMC.profiledata.FacilityMedicalOfferings[each];
+          }
+          selstr += "]";
+
+          $("input#profile-org-offer").val(selstr);
+          }
+        }
+        if (CMC.profiledata.FacilityNon_MedicalOfferings != undefined) {
+          if (CMC.profiledata.FacilityNon_MedicalOfferings.length > 0) {
+          var selstr = "[";
+          for (var each in CMC.profiledata.FacilityNon_MedicalOfferings) {
+            if (each > 0) {
+              selstr += ", ";
+            }
+            selstr += CMC.profiledata.FacilityNon_MedicalOfferings[each];
+          }
+          selstr += "]";
+
+          $("input#profile-org-offern").val(selstr);
+          }
+        }
+        if (CMC.profiledata.MedicalSkills != undefined) {
+          if (CMC.profiledata.MedicalSkills.length > 0) {
+          var selstr = "[";
+          for (var each in CMC.profiledata.MedicalSkills) {
+            if (each > 0) {
+              selstr += ", ";
+            }
+            selstr += CMC.profiledata.MedicalSkills[each];
+          }
+          selstr += "]";
+
+          $("input#profile-org-medical").val(selstr);
+          }
+        }
+        if (CMC.profiledata.Non_MedicalSkills != undefined) {
+          if (CMC.profiledata.Non_MedicalSkills.length > 0) {
+          var selstr = "[";
+          for (var each in CMC.profiledata.Non_MedicalSkills) {
+            if (each > 0) {
+              selstr += ", ";
+            }
+            selstr += CMC.profiledata.Non_MedicalSkills[each];
+          }
+          selstr += "]";
+
+          $("input#profile-org-nonmedical").val(selstr);
+          }
+        }
+        if (CMC.profiledata.SpiritualSkills != undefined) {
+          if (CMC.profiledata.SpiritualSkills.length > 0) {
+          var selstr = "[";
+          for (var each in CMC.profiledata.SpiritualSkills) {
+            if (each > 0) {
+              selstr += ", ";
+            }
+            selstr += CMC.profiledata.SpiritualSkills[each];
+          }
+          selstr += "]";
+
+          $("input#profile-org-spiritual").val(selstr);
+          }
+        }
+        if (CMC.profiledata.relg != undefined) {
+          $("input#profile-org-religion").val(CMC.profiledata.relg);
+        }
+       
+        if (CMC.profiledata.Durations != undefined) {
+        if (CMC.profiledata.Durations.PreferredDurationofMissionTrips != undefined) {
+          $("input#profile-org-duration").val(CMC.profiledata.Durations.PreferredDurationofMissionTrips);
+        }
+        }
+        
+        if (CMC.profiledata.States != undefined) {
+        if (CMC.profiledata.States.state != undefined) {
+          $("input#profile-org-state").val(CMC.profiledata.States.state);
+        }
+        }
+        if (CMC.profiledata.city != undefined) {
+          $("input#profile-org-city").val(CMC.profiledata.city);
+        }
+        if (CMC.profiledata.country != undefined) {
+          $("input#profile-org-country").val(CMC.profiledata.country);
+        }
+        if (CMC.profiledata.GeographicAreasofInterest != undefined) {
+        if (CMC.profiledata.GeographicAreasofInterest.Regions != undefined) {
+          if (CMC.profiledata.GeographicAreasofInterest.Regions.length > 0) {
+          var selstr = "[";
+          for (var each in CMC.profiledata.GeographicAreasofInterest.Regions) {
+            if (each > 0) {
+              selstr += ", ";
+            }
+            selstr += CMC.profiledata.GeographicAreasofInterest.Regions[each];
+          }
+          selstr += "]";
+
+          $("input#profile-org-region").val(selstr);
+          }
+        }
+        }
+        if (CMC.profiledata.GeographicAreasofInterest != undefined) {
+        if (CMC.profiledata.GeographicAreasofInterest.Countries != undefined) {
+          if (CMC.profiledata.GeographicAreasofInterest.Countries.length > 0) {
+          var selstr = "[";
+          for (var each in CMC.profiledata.GeographicAreasofInterest.Countries) {
+            if (each > 0) {
+              selstr += ", ";
+            }
+            selstr += CMC.profiledata.GeographicAreasofInterest.Countries[each];
+          }
+          selstr += "]";
+
+          $("input#profile-org-countryserved").val(selstr);
+          }
+        }
+        }
+        if (CMC.profiledata.phone != undefined) {
+          $("input#profile-org-phone").val(CMC.profiledata.phone);
+        }
+        if (CMC.profiledata.email != undefined) {
+          $("input#profile-org-email").val(CMC.profiledata.email);
+        }
+        if (CMC.profiledata.misexp != undefined) {
+          $("input#profile-org-experience").val(CMC.profiledata.misexp);
+        }
+       
+        $(id).children("form").children("#wrapper").children("#contents").children(".profile-container").children(".profile-header").html("Please edit your profile information");   
+        $("#profile-organizer-dialog").dialog('open');
+      
+    }
+
   });
 
   $("#CreateTrip").click(function() {
     $("#profile-trip-dialog").dialog('open');
   });   
 
+  if (CMC.profiledata.trips != undefined) {
+
   var tripjoinbtns = new Array();
-  for (var i=0;i<4;i++) {
+  for (var i=0;i<CMC.profiledata.trips.length;i++) {
     tripjoinbtns[i] = "join-trip-submit-"+i;
   }
 
@@ -1961,7 +2122,7 @@ $(function() {
   });
 
   var tripdescbtns = new Array();
-  for (var i=0;i<4;i++) {
+  for (var i=0;i<CMC.profiledata.trips.length;i++) {
     tripdescbtns[i] = "trip-desc-submit-"+i;
   }
 
@@ -1971,7 +2132,9 @@ $(function() {
       var index = parseInt(descparts[descparts.length-1]);;
       alert("Desc Trip Index = " + index);
     });
-  });     
+  });
+
+  }
 
 
   // this should be the last thing that happens
