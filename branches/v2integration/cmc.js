@@ -211,30 +211,42 @@ var CMC = {
     $("#report-problem-characters-left").fadeIn();
   },
 
+  handleGenericUnexpectedCallbackError : function(data, textStatus, jqXHR, requestType) {
+    if (requestType == undefined) {
+      requestType = "";
+    } else if (requestType.length > 0 && requestType.charAt(0) != " ") {
+      requestType = " " + requestType;
+    }
+    this.error("unexpected error occurred while trying to process a" + requestType + " callback.\ndata = " + data);
+  },
+
+  handleGenericServerError : function(jqXHR, textStatus, errorThrown) {
+    this.error("can't contact server (" + textStatus + ") " + jqXHR.status + " " + errorThrown);
+  },
+
   getProfileExistence : function () {
     this.beginFunction("getProfileExistence");
     $(".cmc-profile-result").each(function () { $(this).fadeOut('fast'); });
     this.log("Checking existence of the profile");
     this.ajaxNotifyStart(); // one for good measure, we want the spinner for profile existence check
-	// check existence of the profile  
-	$.ajax({
-        type: "POST",
-        url: "api/profileexistence.php",
-        data: {
-             fbid: CMC.me.id
-        },
-        dataType: "json",
-		context: this,
-        async: false,
-		success: this.onProfileExistenceSuccess,
-		error: this.onProfileExistenceError
+    // check existence of the profile  
+    $.ajax({
+      type: "POST",
+      url: "api/profileexistence.php",
+      data: {
+        fbid: this.me.id ? this.me.id : ""
+      },
+      dataType: "json",
+      context: this,
+      async: false,
+      success: this.onProfileExistenceSuccess,
+      error: this.onProfileExistenceError
     });
-    
-    this.ajaxNotifyComplete(); // finish the one we started at the beginning of profile existence checks
+
     this.endFunction("getProfileExistence");
   },  
   
- onProfileExistenceSuccess : function(data, textStatus, jqXHR) {
+  onProfileExistenceSuccess : function(data, textStatus, jqXHR) {
     this.beginFunction("onProfileExistenceSuccess");
     this.assert(data != undefined, "data is undefined in onProfileExistenceSuccess");
     if(data.has_error !== undefined && data.has_error !== null) {
@@ -243,33 +255,31 @@ var CMC = {
         this.handleProfileExistenceSuccessHasError(data);
       } else {
         if(data.exists == 1) {
-		
-		this.log("Obtaining data from the profile");
-		this.ajaxNotifyStart(); // one for good measure, we want the spinner for the whole search
-		
-        $.ajax({
-			type: "POST",
+          this.log("Obtaining data from the profile");
+          this.ajaxNotifyStart(); // one for good measure, we want the spinner for the whole search
+          $.ajax({
+            type: "POST",
             url: "api/profile.php",
             data: {
-                fbid: CMC.me.id
+              fbid: this.me.id ? this.me.id : ""
             },
             dataType: "json",
-			context: this,
+            context: this,
             async: false,
-			success: this.onGetProfileDataSuccess,
-			error: this.onGetProfileDataError
-		});
-		}
-		else 
-			this.showProfile(null);
-		}
-	} else {
+            success: this.onGetProfileDataSuccess,
+            error: this.onGetProfileDataError
+          });
+        } else {
+          this.showProfile(null);
+        }
+      }
+    } else {
       // an unknown error occurred? do something!
-      this.handleProfileExistenceSuccessUnknownError(data, textStatus, jqXHR);
+      this.handleGenericUnexpectedCallbackError(data, textStatus, jqXHR, "profile");
     }
-	this.endFunction("onProfileExistenceSuccess");
-	},
-  
+    this.endFunction("onProfileExistenceSuccess");
+  },
+
   onGetProfileDataSuccess : function(data, textStatus, jqXHR) {
     this.beginFunction("onGetProfileDataSuccess");
     this.assert(data != undefined, "data is undefined in onGetProfileDataSuccess");
@@ -278,24 +288,22 @@ var CMC = {
         // we have a known error, handle it
         this.handleGetProfileDataSuccessHasError(data);
       } else {
-			// This is the case of a volunteer profile
-         if (data.isreceiver==0) {
-				    this.isreceiver = 0;
-			    }
-		  	  // profile is os a mission organizer
-			    else {
-				    this.isreceiver = 1;
-			    }
-			    this.profiledata = data;
-          CMC.log("Calling showProfile with profile data");
-			    this.showProfile(data);
-			
-	}
-	} else {
+        // This is the case of a volunteer profile
+        if (data.isreceiver==0) {
+          this.isreceiver = 0;
+        } else {
+          // profile is os a mission organizer
+          this.isreceiver = 1;
+        }
+        this.profiledata = data;
+        CMC.log("Calling showProfile with profile data");
+        this.showProfile(data);
+      }
+    } else {
       // an unknown error occurred? do something!
-      this.handleGetProfileDataSuccessUnknownError(data, textStatus, jqXHR);
+      this.handleGenericUnexpectedCallbackError(data, textStatus, jqXHR, "profile data");
     }
-	this.endFunction("onGetProfileDataSuccess");
+    this.endFunction("onGetProfileDataSuccess");
 	},
   
   showProfile : function (data) {
@@ -483,7 +491,7 @@ var CMC = {
   onProfileExistenceError : function(jqXHR, textStatus, errorThrown) {
     this.ajaxNotifyComplete();
     // we might also want to log this or surface an error message or something
-    this.handleProfileExistenceServerError(jqXHR, textStatus, errorThrown);
+    this.handleGenericServerError(jqXHR, textStatus, errorThrown);
   },
 
   handleProfileExistenceSuccessHasError : function(data) {
@@ -502,20 +510,10 @@ var CMC = {
     this.endFunction("handleProfileExistenceSuccessHasError");
   },
 
-  handleProfileExistenceServerError : function(jqXHR, textStatus, errorThrown) {
-    this.beginFunction("handleProfileExistenceServerError");
-    this.error("error while communicating with server (status: \""+textStatus+"\", error: \""+errorThrown+"\")");
-    this.endFunction("handleProfileExistenceServerError");
-  },
-
-  handleProfileExistenceSuccessUnknownError : function(data, textStatus, jqXHR) {
-    this.error("an unknown error occurred while trying to process a search success callback.\ndata = " + data);
-  },
-	
   onGetProfileDataError : function(jqXHR, textStatus, errorThrown) {
     this.ajaxNotifyComplete();
     // we might also want to log this or surface an error message or something
-    this.handleProfileDataServerError(jqXHR, textStatus, errorThrown);
+    this.handleGenericServerError(jqXHR, textStatus, errorThrown);
   },
 
   handleGetProfileDataSuccessHasError : function(data) {
@@ -534,16 +532,6 @@ var CMC = {
     this.endFunction("handleGetProfileDataSuccessHasError");
   },
 
-  handleProfileDataServerError : function(jqXHR, textStatus, errorThrown) {
-    this.beginFunction("handleProfileDataServerError");
-    this.error("error while communicating with server (status: \""+textStatus+"\", error: \""+errorThrown+"\")");
-    this.endFunction("handleProfileDataServerError");
-  },
-
-  handleGetProfileDataSuccessUnknownError : function(data, textStatus, jqXHR) {
-    this.error("an unknown error occurred while trying to process a search success callback.\ndata = " + data);
-  },
-  
   handleSearchSelect : function(item) {
     this.beginFunction("handleSearchSelect");
     var value = null, errorWhileParsing = false;
@@ -681,7 +669,7 @@ var CMC = {
       }
     } else {
       // an unknown error occurred? do something!
-      this.handleSearchSuccessUnknownError(data, textStatus, jqXHR);
+      this.handleGenericUnexpectedCallbackError(data, textStatus, jqXHR, "search success");
     }
     this.updateSearchPagingControls();
     this.endFunction("onSearchSuccess");
@@ -690,7 +678,7 @@ var CMC = {
   onSearchError : function(jqXHR, textStatus, errorThrown) {
     this.ajaxNotifyComplete();
     // we might also want to log this or surface an error message or something
-    this.handleSearchServerError(jqXHR, textStatus, errorThrown);
+    this.handleGenericServerError(jqXHR, textStatus, errorThrown);
   },
 
   handleSearchSuccessHasError : function(data) {
@@ -707,16 +695,6 @@ var CMC = {
       this.error("caught an error from the server while searching, but it did not return an error message");
     }
     this.endFunction("handleSearchSuccessHasError");
-  },
-
-  handleSearchServerError : function(jqXHR, textStatus, errorThrown) {
-    this.beginFunction("handleSearchServerError");
-    this.error("error while communicating with server (status: \""+textStatus+"\", error: \""+errorThrown+"\")");
-    this.endFunction("handleSearchServerError");
-  },
-
-  handleSearchSuccessUnknownError : function(data, textStatus, jqXHR) {
-    this.error("an unknown error occurred while trying to process a search success callback.\ndata = " + data);
   },
 
   getDataForEachFBID : function (fbids, callback, isRetryCall) {
@@ -1016,7 +994,7 @@ var CMC = {
       // a thought from zack. if this is set to null, we'll never be able 
       // to get this page again. just a thought, but this is a bad user 
       // experience
-      this.cmc.handleSearchSuccessUnknownError(data, textStatus, jqXHR);
+      this.cmc.handleGenericUnexpectedCallbackError(data, textStatus, jqXHR, "search success");
     }
     this.cmc.updateSearchPagingControls();
     this.cmc.ajaxNotifyComplete();
@@ -1028,7 +1006,7 @@ var CMC = {
     this.ajaxNotifyComplete();
     this.searchPageCache.push(null); // this should (hopefully) stop the interval check
     // we might also want to log this or surface an error message or something
-    this.handleSearchServerError(jqXHR, textStatus, errorThrown);
+    this.handleGenericServerError(jqXHR, textStatus, errorThrown);
     this.endFunction("onCacheSearchPageServerError");
   },
 
@@ -1270,7 +1248,7 @@ $(function() {
   });  
   
   $("#make-trip").click(function() {
-	$("#profile-trip-dialog").dialog('open');
+    $("#profile-trip-dialog").dialog('open');
   });
 
   $("#profile-trip-dialog").dialog({
