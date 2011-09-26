@@ -237,6 +237,7 @@ function cmc_safe_request_strip() {
 			$returnArrayMap[$key] = htmlspecialchars(strip_tags($value));
 		}
 	}
+  date_default_timezone_set('America/New_York');
 	return $returnArrayMap;
 }
 

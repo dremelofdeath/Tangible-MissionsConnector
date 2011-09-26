@@ -1454,7 +1454,21 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
             );
           ?>
          </div>
-         <div id="no-trip">
+		 <div id="show-trips" style="display: none">
+				<h2>Upcoming Trips:</h2>
+				<table>	
+				<tr>
+				<td>
+				<div class="trips-tripname">
+					TripName 
+				</div>						
+				</td>	
+				<td class="td2"><input type="submit" value="Trip Description" class="button" id="trips-desc-submit" /></td>
+				<td class="td2"><input type="submit" value="Join This Trip" class="button" id="join-trips-submit" /></td>
+				</tr>
+				</table>
+		 </div>		 
+         <div id="no-trip" style="display: none">
           <h1>Yay! You can create a missions trip very quickly</h1>
           <h1>
             <a href="#" onclick="CMC.page('#no-trip', '#make-trip');">Create a Trip &gt;&gt;</a>

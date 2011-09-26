@@ -29,8 +29,12 @@ var CMC = {
   searchPageImageClearJobQueue : [],
   profilePageImageClearJobQueue : [],
   SearchState : {},
-  prelength : new Array(7),
-  postlen : new Array(7),
+  prelength : [],
+  postlen : [],
+  tripsjoinbtns : [],
+  tripdescbtns : [],
+  tripinvitebtns : [],
+  tripsdescbtns : [],
 
   // startup configuration settings
   StartupConfig : {
@@ -416,10 +420,15 @@ var CMC = {
         eachstr += "</div>";
         eachstr += "</td>";
         eachstr += "<td class=\"td2\"><input type=\"submit\" value=\"Trip Description\" class=\"button\" id=\"trip-desc-submit-" + each + "\"/></td>";
-        eachstr += "<td class=\"td2\"><input type=\"submit\" value=\"Join This Trip\" class=\"button\" id=\"join-trip-submit-" + each + "\"/></td>";
+        eachstr += "<td class=\"td2\"><input type=\"submit\" value=\"Invite To Trip\" class=\"button\" id=\"invite-trip-submit-" + each + "\"/></td>";
         eachstr += "</tr>";
         eachstr += "</div>";
+		
+		  this.tripinvitebtns[each] = "invite-trip-submit-"+each;
+		  this.tripdescbtns[each] = "trip-desc-submit-"+each;
+		
       }
+  
       // replace the existing template with the new template that is the length of the trips array
 			$(id).children("#colTwo").children("#table_wrapper").children("#tbody").html("<table>" + eachstr + "</table>");
 			
@@ -484,6 +493,118 @@ var CMC = {
       this.error("caught an error from the server while searching, but it did not return an error message");
     }
     this.endFunction("handleGetProfileDataSuccessHasError");
+  },
+
+    getFutureTrips : function() {
+    this.beginFunction("getFutureTrips");
+    this.log("Obtaining future trip information from the database");
+    $.ajax({
+      type: "POST",
+      url: "api/searchtrips.php",
+      dataType: "json",
+      context: this,
+      success: this.onGetTripsDataSuccess,
+      error: this.onGetTripsDataError
+    });
+    this.endFunction("getFutureTrips");
+	},
+  
+  onGetTripsDataSuccess : function(data, textStatus, jqXHR) {
+    this.beginFunction("onGetTripsDataSuccess");
+    this.assert(data != undefined, "data is undefined in onGetTripsDataSuccess");
+    if(data.has_error !== undefined && data.has_error !== null) {
+      if(data.has_error) {
+          // we have a known error, handle it
+          this.handleGetTripsDataSuccessHasError(data);
+      } else {
+          this.UpdateFutureTrips(data);
+      }
+    } else {
+      // an unknown error occurred? do something!
+      this.handleGenericUnexpectedCallbackError(data, textStatus, jqXHR, "future trips data");
+    }
+    this.endFunction("onGetTripsDataSuccess");
+	},  
+
+  UpdateFutureTrips : function (data) {
+    this.beginFunction("UpdateFutureTrips");
+    if (data === undefined) {
+      // this should be a bug! do NOT pass this function undefined! say null to inform it that you have no results!
+      this.assert(data === undefined, "undefined passed as results for UpdateFutureTrips");
+    } else if (data == null) {
+      // no future trips exist - so display new trip creation dialog
+      $("#no-trip").fadeIn();
+    } else {
+
+        var id = "#show-trips";
+		
+        this.assert(data.tripnames !== undefined, "Trip names are missing from result set");
+		this.assert(data.tripids !== undefined, "Trip IDs are missing from result set");
+
+      if (data.tripnames === undefined) {
+			$("#no-trip").fadeIn();
+      }
+      else {
+			//finally update the upcoming trips information
+			if (data.tripnames.length > 0) {
+			
+			var eachstr = "<h2>Upcoming Trips:</h2>";
+			
+			eachstr += "<table>";	
+			for (var each in data.tripnames) {
+				eachstr += "<tr>";
+				//eachstr += "<td><div class=\"box3\">";
+				eachstr += "<td>";
+				eachstr += "<div class=\"trips-tripname-" + each + "\">";
+				eachstr += "<h4> TripName </h4>";
+				eachstr += "</div>";
+				eachstr += "</td>";
+				eachstr += "<td class=\"td2\"><input type=\"submit\" value=\"Trip Description\" class=\"button\" id=\"trips-desc-submit-" + each + "\"/></td>";
+				eachstr += "<td class=\"td2\"><input type=\"submit\" value=\"Join This Trip\" class=\"button\" id=\"join-trips-submit-" + each + "\"/></td>";
+				eachstr += "</tr>";
+				//eachstr += "</div>";
+				
+				this.tripsjoinbtns[each] = "join-trips-submit-"+each;
+				this.tripsdescbtns[each] = "trips-desc-submit-"+each;
+			}
+			eachstr += "</table>";
+	
+			// replace the existing template with the new template that is the length of the upcoming trips array
+			$(id).html(eachstr);
+		
+
+			//Now update the new template with the trips information
+			for (var each in data.tripnames) {      
+				$(id).find(".trips-tripname-"+each).html(data.tripnames[each] ? "<h4> "+data.tripnames[each] + "</h4>" : "");
+			}			
+			
+			$("#show-trips").fadeIn();
+
+			}
+			else {
+				// No upcoming trips, prompt user to create a trip instead
+				$("#no-trip").fadeIn();
+			}
+      }	
+      
+    } // end else
+    this.endFunction("UpdateFutureTrips");
+  },
+  
+  handleGetTripsDataSuccessHasError : function(data) {
+    this.beginFunction("handleGetTripsDataSuccessHasError");
+    this.assert(data != undefined, "data is undefined in handleGetTripsDataSuccessHasError");
+    // we have a known error, handle it
+    if(data.err_msg !== undefined) {
+      if(data.err_msg != '') {
+        this.error("caught an error from the server while searching: \""+data.err_msg+"\"");
+      } else {
+        this.error("caught an error from the server while searching, but it was blank");
+      }
+    } else {
+      this.error("caught an error from the server while searching, but it did not return an error message");
+    }
+    this.endFunction("handleGetTripsDataSuccessHasError");
   },
 
   handleSearchSelect : function(item) {
@@ -1047,8 +1168,10 @@ var CMC = {
       //alert('<img src="http://graph.facebook.com/' + CMC.me.id + '/picture" />');
       CMC.profileshowflag=1;
       CMC.getProfile();
-		  CMC.log("user: " + CMC.me.name + " has just logged in to the app");
-		  CMC.log("userid: " + CMC.me.id + " has just logged in to the app");
+	  CMC.log("user: " + CMC.me.name + " has just logged in to the app");
+	 //CMC.log("userid: " + CMC.me.id + " has just logged in to the app");
+	  // Get upcoming trips information
+	  CMC.getFutureTrips();
     });
     CMC.ajaxNotifyStart();
     FB.api('/me/friends', function (friends) {
@@ -1771,17 +1894,17 @@ $(function() {
     // Logic to determine that the trip begin date is before the trip end date
       if (tripdepart.val() != "") {
           var departdate = tripdepart.val().split(".");
-          var DepartMonth=parseInt(departdate[0]);	  
-          var DepartDay=parseInt(departdate[1]);	  
-          var DepartYear=parseInt(departdate[2]);
+          var DepartMonth=parseInt(departdate[0],10);	  
+          var DepartDay=parseInt(departdate[1],10);	  
+          var DepartYear=parseInt(departdate[2],10);
 		  var TDeparture = new Date();
 		  TDeparture.setFullYear(DepartYear,DepartMonth,DepartDay);
       }
       if (tripreturn.val() != "") {
           var returndate = tripreturn.val().split(".");
-          var ReturnMonth=parseInt(returndate[0]);	  
-          var ReturnDay=parseInt(returndate[1]);	  
-          var ReturnYear=parseInt(returndate[2]);	
+          var ReturnMonth=parseInt(returndate[0],10);	  
+          var ReturnDay=parseInt(returndate[1],10);	  
+          var ReturnYear=parseInt(returndate[2],10);	
 		  var TReturn = new Date();
 		  TReturn.setFullYear(ReturnYear,ReturnMonth,ReturnDay);		  
       }
@@ -1799,21 +1922,21 @@ $(function() {
       var profiletripformdata = {};
       profiletripformdata.profiletype=2;
 
-      if ((aname != undefined) && (aname.val() != null))
+      if ((aname !== undefined) && (aname.val() !== null))
         profiletripformdata.name= aname.val();	  
-      if ((aabout != undefined) && (aabout.val() != null))
+      if ((aabout !== undefined) && (aabout.val() !== null))
         profiletripformdata.about= aabout.val();
-      if ((aurl != undefined) && (aurl.val() != null))
-        profiletripformdata.url= aurl.val();
-      if ((stage != undefined) && (stage.val() != null))
+      if ((aurl !== undefined) && (aurl.val() !== null))
+        profiletripformdata.url = aurl.val();
+      if ((stage !== undefined) && (stage.val() !== null))
         profiletripformdata.stage= stage.val();
-      if ((tripdepart != undefined) && (tripdepart.val() !=  null)) {
+      if ((tripdepart !== undefined) && (tripdepart.val() !==  null)) {
           var departdate = tripdepart.val().split(".");
           profiletripformdata.DepartMonth=parseInt(departdate[0],10);	  
           profiletripformdata.DepartDay=parseInt(departdate[1],10);	  
           profiletripformdata.DepartYear=parseInt(departdate[2],10);	  
       }
-      if ((tripreturn != undefined) && (tripreturn.val() !=  null)) {
+      if ((tripreturn !== undefined) && (tripreturn.val() !==  null)) {
           var returndate = tripreturn.val().split(".");
           profiletripformdata.ReturnMonth=parseInt(returndate[0],10);	  
           profiletripformdata.ReturnDay=parseInt(returndate[1],10);	  
@@ -1850,7 +1973,6 @@ $(function() {
       //if ((phone != undefined) && (phone.val() != null))
       if (!phone)
         profiletripformdata.phone=phone.val();
-
      
       alert("ajax submit : " + JSON.stringify(profiletripformdata));
 
@@ -2334,8 +2456,8 @@ $(function() {
         type: "POST",
         url: "api/profileT.php",
         data: {
-		      tripid: CMC.profiledata.tripid[index],
-          fbid: CMC.me.id ? CMC.me.id : ""
+		    tripid: CMC.profiledata.tripid[index],
+            fbid: CMC.me.id ? CMC.me.id : ""
         },
         dataType: "json",
         success: function(data) {
@@ -2347,43 +2469,45 @@ $(function() {
       });
     }
 
-  //alert("CMC profile trips = " + CMC.profiledata.trips.length);
-  //if (CMC.profiledata.trips != undefined) {
-
-  var tripjoinbtns = new Array();
-  //for (var i=0;i<CMC.profiledata.trips.length;i++) {
-  for (var i=0;i<20;i++) {
-    tripjoinbtns[i] = "join-trip-submit-"+i;
-  }
-
-  $.each(tripjoinbtns, function() {
+  $.each(CMC.tripsjoinbtns, function() {
     $("#" +this).click(function() {
       alert("Came into join click");
       var tripparts = this.id.split('-');
-      var index = parseInt(tripparts[tripparts.length-1]);;
+      var index = parseInt(tripparts[tripparts.length-1],10);;
       alert("Trip Index = " + index + " " + CMC.profiledata.tripid[index]);
+	  jointrip(index);
+    });
+  });
+
+  $.each(CMC.tripsdescbtns, function() {
+    $("#" +this).click(function() {
+      alert("Came into Trips description click");
+      var tripparts = this.id.split('-');
+      var index = parseInt(tripparts[tripparts.length-1],10);;
+      alert("Trips Index = " + index + " " + CMC.profiledata.tripid[index]);
 	    jointrip(index);
     });
   });
 
-  var tripdescbtns = new Array();
-  //for (var i=0;i<CMC.profiledata.trips.length;i++) {
-  for (var i=0;i<20;i++) {
-    tripdescbtns[i] = "trip-desc-submit-"+i;
-  }
+  $.each(CMC.tripinvitebtns, function() {
+    $("#" +this).click(function() {
+      alert("Came into Trip Invite click");
+      var tripparts = this.id.split('-');
+      var index = parseInt(tripparts[tripparts.length-1],10);;
+      alert("Trip Index = " + index + " " + CMC.profiledata.tripid[index]);
+	    //jointrip(index);
+    });
+  });
 
-  $.each(tripdescbtns, function() {
+  $.each(CMC.tripdescbtns, function() {
     $("#" +this).click(function() {
       var descparts = this.id.split('-');
-      var index = parseInt(descparts[descparts.length-1]);
+      var index = parseInt(descparts[descparts.length-1],10);
       alert("TripDesc Index = " + index + " " + CMC.profiledata.tripid[index]);
       tripdesc(index);
     });
   });
-
- // }
-
-
+  
   // this should be the last thing that happens
   CMC.log("load callback complete, fading in canvas");
   $("#loading").fadeOut(function() {
