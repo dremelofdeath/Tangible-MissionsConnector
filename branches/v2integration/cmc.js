@@ -229,25 +229,22 @@ var CMC = {
     this.error("can't contact server (" + textStatus + ") " + jqXHR.status + " " + errorThrown);
   },
 
- getProfile : function() {
+  getProfile : function() {
     this.beginFunction("getProfile");
-	this.log("Obtaining data from the profile");
-	this.ajaxNotifyStart(); // one for good measure, we want the spinner for the whole search
-		
+    this.log("Obtaining data from the profile");
+    this.ajaxNotifyStart(); // one for good measure, we want the spinner for the whole search
     $.ajax({
-		type: "POST",
-		url: "api/profile.php",
-		data: {
-			fbid: CMC.me.id
-        },
-        dataType: "json",
-		context: this,
-		success: this.onGetProfileDataSuccess,
-		error: this.onGetProfileDataError
-	});
-
-   // this.ajaxNotifyComplete();
-	this.endFunction("getProfile");
+      type: "POST",
+      url: "api/profile.php",
+      data: {
+        fbid: CMC.me.id
+      },
+      dataType: "json",
+      context: this,
+      success: this.onGetProfileDataSuccess,
+      error: this.onGetProfileDataError
+    });
+    this.endFunction("getProfile");
 	},
   
   onGetProfileDataSuccess : function(data, textStatus, jqXHR) {
@@ -255,37 +252,34 @@ var CMC = {
     this.assert(data != undefined, "data is undefined in onGetProfileDataSuccess");
     if(data.has_error !== undefined && data.has_error !== null) {
       if(data.has_error) {
-		//first handle the no profile error - simply display a new profile creation form
-		if (data.exists == 0) {
-			this.showProfile(null);
-		}
-		else {
-			// we have a known error, handle it
-			this.handleGetProfileDataSuccessHasError(data);
-		}
+        // first handle the no profile error - simply display a new profile creation form
+        if (data.exists == 0) {
+          this.showProfile(null);
+        } else {
+          // we have a known error, handle it
+          this.handleGetProfileDataSuccessHasError(data);
+        }
       } else {
-			// This is the case of a volunteer profile
-			if (data.isreceiver==0) {
-				this.isreceiver = 0;
-			}
-		  	// profile is os a mission organizer
-			else {
-				this.isreceiver = 1;
-			}
-			this.profiledata = data;
-			CMC.log("Calling showProfile with profile data");
-      if (CMC.profileshowflag == 1) {
-			  this.showProfile(data);
+        if (data.isreceiver==0) {
+          // This is the case of a volunteer profile
+          this.isreceiver = 0;
+        } else {
+          // profile is os a mission organizer
+          this.isreceiver = 1;
+        }
+        this.profiledata = data;
+        CMC.log("Calling showProfile with profile data");
+        if (CMC.profileshowflag == 1) {
+          this.showProfile(data);
+        } else {
+          this.ajaxNotifyComplete();
+        }
       }
-      else {
-        this.ajaxNotifyComplete();
-      }
-	}
-	} else {
+    } else {
       // an unknown error occurred? do something!
-      this.handleGetProfileDataSuccessUnknownError(data, textStatus, jqXHR);
+      this.handleGenericUnexpectedCallbackError(data, textStatus, jqXHR, "profile data");
     }
-	this.endFunction("onGetProfileDataSuccess");
+    this.endFunction("onGetProfileDataSuccess");
 	},
   
   showProfile : function (data) {
@@ -473,7 +467,7 @@ var CMC = {
 
   onGetProfileDataError : function(jqXHR, textStatus, errorThrown) {
     // we might also want to log this or surface an error message or something
-    this.handleProfileDataServerError(jqXHR, textStatus, errorThrown);
+    this.handleGenericServerError(jqXHR, textStatus, errorThrown);
   },
 
   handleGetProfileDataSuccessHasError : function(data) {
@@ -492,16 +486,6 @@ var CMC = {
     this.endFunction("handleGetProfileDataSuccessHasError");
   },
 
-  handleProfileDataServerError : function(jqXHR, textStatus, errorThrown) {
-    this.beginFunction("handleProfileDataServerError");
-    this.error("error while communicating with server (status: \""+textStatus+"\", error: \""+errorThrown+"\")");
-    this.endFunction("handleProfileDataServerError");
-  },
-
-  handleGetProfileDataSuccessUnknownError : function(data, textStatus, jqXHR) {
-    this.error("an unknown error occurred while trying to process a search success callback.\ndata = " + data);
-  },
-  
   handleSearchSelect : function(item) {
     this.beginFunction("handleSearchSelect");
     var value = null, errorWhileParsing = false;
@@ -665,16 +649,6 @@ var CMC = {
       this.error("caught an error from the server while searching, but it did not return an error message");
     }
     this.endFunction("handleSearchSuccessHasError");
-  },
-
-  handleSearchServerError : function(jqXHR, textStatus, errorThrown) {
-    this.beginFunction("handleSearchServerError");
-    this.error("error while communicating with server (status: \""+textStatus+"\", error: \""+errorThrown+"\")");
-    this.endFunction("handleSearchServerError");
-  },
-
-  handleSearchSuccessUnknownError : function(data, textStatus, jqXHR) {
-    this.error("an unknown error occurred while trying to process a search success callback.\ndata = " + data);
   },
 
   getDataForEachFBID : function (fbids, callback, isRetryCall) {
@@ -934,7 +908,6 @@ var CMC = {
   },
 
   onCacheSearchPageSuccess : function(data, textStatus, jqXHR) {
-    this.cmc.beginFunction("onCacheSearchPageSuccess");
     //@/BEGIN/DEBUGONLYSECTION
     if (!("cmc" in this)) {
       if (CMC) {
@@ -943,6 +916,7 @@ var CMC = {
       } // if this is unavailable, god help us all
     }
     //@/END/DEBUGONLYSECTION
+    this.cmc.beginFunction("onCacheSearchPageSuccess"); // I know this isn't at the beginning --zack
     this.cmc.assert(data != undefined, "data is undefined in onCacheSearchPageSuccess");
     if("has_error" in data && data["has_error"] !== undefined && data.has_error !== null) {
       if(data.has_error) {
@@ -2420,4 +2394,3 @@ $(function() {
 
 });
 // vim: ai:et:ts=2:sw=2
-// graphicAreasofInterest.Countries

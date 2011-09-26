@@ -1333,10 +1333,6 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
     .td3{border-right-width:0;}
     </style>      
         <div id="show-profile" style="display: none">
-          <div id="cmc-profile-title">
-            <h1 id="cmc-profile-title-text">CMC Profile Page</h1>
-          </div>
-		  
 		<div id="profilecontent">
 			<div id="colOne">
 			<div id="profileimage">
