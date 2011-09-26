@@ -179,7 +179,7 @@ function get_rest_of_string(&$sql3,&$sql1,&$sql2,$val,$searchkeys) {
     }
   }
   if (isset($searchkeys->{'relg'})) {
-    if (strcmp($searchkeys['relg'],"Any")) {
+    if (strcmp($searchkeys->{'relg'},"Any")) {
       if ($val ==1) {
         $usersinc = 1;
         $sql1 = ',users';

@@ -202,7 +202,6 @@ $con = arena_connect();
   $usstates = array(
   "Alabama",
   "Alaska",
-  "American Samoa",
   "Arizona",
     "Arkansas",
     "California",
@@ -212,7 +211,6 @@ $con = arena_connect();
     "District of Columbia",
     "Florida",
     "Georgia",
-    "Guam",
     "Hawaii",
     "Idaho",
     "Illinois",
@@ -237,12 +235,10 @@ $con = arena_connect();
     "New York",
     "North Carolina",
     "North Dakota",
-    "Northern Marianas Islands",
     "Ohio",
     "Oklahoma",
     "Oregon",
     "Pennsylvania",
-    "Puerto Rico",
     "Rhode Island",
     "South Carolina",
     "South Dakota",
@@ -251,12 +247,500 @@ $con = arena_connect();
     "Utah",
     "Vermont",
     "Virginia",
-    "Virgin Islands",
     "Washington",
     "West Virginia",
     "Wisconsin",
     "Wyoming"
   );
+ 
+  $languages = array(
+"Afar",
+"Abkhazian",
+"Achinese",
+"Acoli",
+"Adangme",
+"Adyghe; Adygei",
+"Afro-Asiatic languages",
+"Afrihili",
+"Afrikaans",
+"Ainu",
+"Akan",
+"Akkadian",
+"Aleut",
+"Algonquian languages",
+"Southern Altai",
+"Amharic",
+"English, Old (ca.450-1100)",
+"Angika",
+"Apache languages",
+"Arabic",
+  "Official Aramaic (700-300 BCE); Imperial Aramaic (700-300 BCE)",
+  "Aragonese",
+  "Armenian",
+  "Mapudungun; Mapuche",
+  "Arapaho",
+  "Artificial languages",
+  "Arawak",
+  "Assamese",
+  "Asturian; Bable; Leonese; Asturleonese",
+  "Athapascan languages",
+  "Australian languages",
+  "Avaric",
+  "Avestan",
+  "Awadhi",
+  "Aymara",
+  "Azerbaijani",
+  "Banda languages",
+  "Bamileke languages",
+  "Bashkir",
+  "Baluchi",
+  "Bambara",
+  "Balinese",
+  "Basque",
+  "Basa",
+  "Baltic languages",
+  "Beja; Bedawiyet",
+  "Belarusian",
+  "Bemba",
+  "Bengali",
+  "Berber languages",
+  "Bhojpuri",
+  "Bihari",
+  "Bikol",
+  "Bini; Edo",
+  "Bislama",
+  "Siksika",
+  "Bantu languages",
+  "Tibetan",
+  "Bosnian",
+  "Braj",
+  "Breton",
+  "Batak languages",
+  "Buriat",
+  "Buginese",
+  "Bulgarian",
+  "Blin; Bilin",
+  "Caddo",
+  "Central American Indian languages",
+  "Galibi Carib",
+  "Catalan; Valencian",
+  "Caucasian languages",
+  "Cebuano",
+  "Celtic languages",
+  "Chamorro",
+  "Chibcha",
+  "Chechen",
+  "Chagatai",
+  "Chinese",
+  "Chuukese",
+  "Mari",
+  "Chinook jargon",
+  "Choctaw",
+  "Chipewyan; Dene Suline",
+  "Cherokee",
+  "Church Slavic; Old Slavonic; Church Slavonic; Old Bulgarian; Old Church Slavonic",
+  "Chuvash",
+  "Cheyenne",
+  "Chamic languages",
+  "Coptic",
+  "Cornish",
+  "Corsican",
+  "Creoles and pidgins, English based",
+  "Creoles and pidgins, French-based",
+  "Creoles and pidgins, Portuguese-based",
+  "Cree",
+  "Crimean Tatar; Crimean Turkish",
+  "Creoles and pidgins",
+  "Kashubian",
+  "Cushitic languages",
+  "Welsh",
+  "Czech",
+  "Dakota",
+  "Danish",
+  "Dargwa",
+  "Land Dayak languages",
+  "Delaware",
+  "Slave (Athapascan)",
+  "Dogrib",
+  "Dinka",
+  "Divehi; Dhivehi; Maldivian",
+  "Dogri",
+  "Dravidian languages",
+  "Lower Sorbian",
+  "Duala",
+  "Dutch, Middle (ca.1050-1350)",
+  "Dyula",
+  "Dzongkha",
+  "Efik",
+  "Egyptian (Ancient)",
+  "Ekajuk",
+  "Elamite",
+  "English",
+  "English, Middle (1100-1500)",
+  "Esperanto",
+  "Estonian",
+  "Ewe",
+  "Ewondo",
+  "Fang",
+  "Faroese",
+  "Fanti",
+  "Fijian",
+  "Filipino; Pilipino",
+  "Finnish",
+  "Finno-Ugrian languages",
+  "Fon",
+  "French",
+  "French, Middle (ca.1400-1600)",
+  "French, Old (842-ca.1400)",
+  "Northern Frisian",
+  "Eastern Frisian",
+  "Western Frisian",
+  "Fulah",
+  "Friulian",
+  "Ga",
+  "Gayo",
+  "Gbaya",
+  "Germanic languages",
+  "Georgian",
+  "German",
+  "Geez",
+  "Gilbertese",
+  "Gaelic; Scottish Gaelic",
+  "Irish",
+  "Galician",
+  "Manx",
+  "German, Middle High (ca.1050-1500)",
+  "German, Old High (ca.750-1050)",
+  "Gondi",
+  "Gorontalo",
+  "Gothic",
+  "Grebo",
+  "Greek, Ancient (to 1453)",
+  "Greek, Modern (1453-)",
+  "Guarani",
+  "Swiss German; Alemannic; Alsatian",
+  "Gujarati",
+  "Gwich'in",
+  "Haida",
+  "Haitian; Haitian Creole",
+  "Hausa",
+  "Hawaiian",
+  "Hebrew",
+  "Herero",
+  "Hiligaynon",
+  "Himachali",
+  "Hindi",
+  "Hittite",
+  "Hmong",
+  "Hiri Motu",
+  "Croatian",
+  "Upper Sorbian",
+  "Hungarian",
+  "Hupa",
+  "Iban",
+  "Igbo",
+  "Icelandic",
+  "Ido",
+  "Sichuan Yi; Nuosu",
+  "Ijo languages",
+  "Inuktitut",
+  "Interlingue; Occidental",
+  "Iloko",
+  "Interlingua (International Auxiliary Language Association)",
+  "Indic languages",
+  "Indonesian",
+  "Indo-European languages",
+  "Ingush",
+  "Inupiaq",
+  "Iranian languages",
+  "Iroquoian languages",
+  "Italian",
+  "Javanese",
+  "Lojban",
+  "Japanese",
+  "Judeo-Persian",
+  "Judeo-Arabic",
+  "Kara-Kalpak",
+  "Kabyle",
+  "Kachin; Jingpho",
+  "Kalaallisut; Greenlandic",
+  "Kamba",
+  "Kannada",
+  "Karen languages",
+  "Kashmiri",
+  "Kanuri",
+  "Kawi",
+  "Kazakh",
+  "Kabardian",
+  "Khasi",
+  "Khoisan languages",
+  "Central Khmer",
+  "Khotanese; Sakan",
+  "Kikuyu; Gikuyu",
+  "Kinyarwanda",
+  "Kirghiz; Kyrgyz",
+  "Kimbundu",
+  "Konkani",
+  "Komi",
+  "Kongo",
+  "Korean",
+  "Kosraean",
+  "Kpelle",
+  "Karachay-Balkar",
+  "Karelian",
+  "Kru languages",
+  "Kurukh",
+  "Kuanyama; Kwanyama",
+  "Kumyk",
+  "Kurdish",
+  "Kutenai",
+  "Ladino",
+  "Lahnda",
+  "Lamba",
+  "Lao",
+  "Latin",
+  "Latvian",
+  "Lezghian",
+  "Limburgan; Limburger; Limburgish",
+  "Lingala",
+  "Lithuanian",
+  "Mongo",
+  "Lozi",
+  "Luxembourgish; Letzeburgesch",
+  "Luba-Lulua",
+  "Luba-Katanga",
+  "Ganda",
+  "Luiseno",
+  "Lunda",
+  "Luo (Kenya and Tanzania)",
+  "Lushai",
+  "Macedonian",
+  "Madurese",
+  "Magahi",
+  "Marshallese",
+  "Maithili",
+  "Makasar",
+  "Malayalam",
+  "Mandingo",
+  "Maori",
+  "Austronesian languages",
+  "Marathi",
+  "Masai",
+  "Moksha",
+  "Mandar",
+  "Mende",
+  "Irish, Middle (900-1200)",
+  "Mi'kmaq; Micmac",
+  "Minangkabau",
+  "Uncoded languages",
+  "Mon-Khmer languages",
+  "Malagasy",
+  "Maltese",
+  "Manchu",
+  "Manipuri",
+  "Manobo languages",
+  "Mohawk",
+  "Mongolian",
+  "Mossi",
+  "Malay",
+  "Multiple languages",
+  "Munda languages",
+  "Creek",
+  "Mirandese",
+  "Marwari",
+  "Burmese",
+  "Mayan languages",
+  "Erzya",
+  "Nahuatl languages",
+  "North American Indian languages",
+  "Neapolitan",
+  "Nauru",
+  "Navajo; Navaho",
+  "Ndebele, South; South Ndebele",
+  "Ndebele, North; North Ndebele",
+  "Ndonga",
+  "Low German; Low Saxon; German, Low; Saxon, Low",
+  "Nepali",
+  "Nepal Bhasa; Newari",
+  "Nias",
+  "Niger-Kordofanian languages",
+  "Niuean",
+  "Dutch; Flemish",
+  "Norwegian Nynorsk; Nynorsk, Norwegian",
+  "Bokmål, Norwegian; Norwegian Bokmål",
+  "Nogai",
+  "Norse, Old",
+  "Norwegian",
+  "N'Ko",
+  "Pedi; Sepedi; Northern Sotho",
+  "Nubian languages",
+  "Classical Newari; Old Newari; Classical Nepal Bhasa",
+  "Chichewa; Chewa; Nyanja",
+  "Nyamwezi",
+  "Nyankole",
+  "Nyoro",
+  "Nzima",
+  "Occitan (post 1500)",
+  "Ojibwa",
+  "Oriya",
+  "Oromo",
+  "Osage",
+  "Ossetian; Ossetic",
+  "Turkish, Ottoman (1500-1928)",
+  "Otomian languages",
+  "Papuan languages",
+  "Pangasinan",
+  "Pahlavi",
+  "Pampanga; Kapampangan",
+  "Panjabi; Punjabi",
+  "Papiamento",
+  "Palauan",
+  "Persian, Old (ca.600-400 B.C.)",
+  "Persian",
+  "Philippine languages",
+  "Phoenician",
+  "Pali",
+  "Polish",
+  "Pohnpeian",
+  "Portuguese",
+  "Prakrit languages",
+  "Provençal, Old (to 1500);Occitan, Old (to 1500)",
+  "Pushto; Pashto",
+  "Reserved for local use",
+  "Quechua",
+  "Rajasthani",
+  "Rapanui",
+  "Rarotongan; Cook Islands Maori",
+  "Romance languages",
+  "Romansh",
+  "Romany",
+  "Romanian; Moldavian; Moldovan",
+  "Rundi",
+  "Aromanian; Arumanian; Macedo-Romanian",
+  "Russian",
+  "Sandawe",
+  "Sango",
+  "Yakut",
+  "South American Indian languages",
+  "Salishan languages",
+  "Samaritan Aramaic",
+  "Sanskrit",
+  "Sasak",
+  "Santali",
+  "Sicilian",
+  "Scots",
+  "Selkup",
+  "Semitic languages",
+  "Irish, Old (to 900)",
+  "Sign Languages",
+  "Shan",
+  "Sidamo",
+  "Sinhala; Sinhalese",
+  "Siouan languages",
+  "Sino-Tibetan languages",
+  "Slavic languages",
+  "Slovak",
+  "Slovenian",
+  "Southern Sami",
+  "Northern Sami",
+  "Sami languages",
+  "Lule Sami",
+  "Inari Sami",
+  "Samoan",
+  "Skolt Sami",
+  "Shona",
+  "Sindhi",
+  "Soninke",
+  "Sogdian",
+  "Somali",
+  "Songhai languages",
+  "Sotho, Southern",
+  "Spanish; Castilian",
+  "Albanian",
+  "Sardinian",
+  "Sranan Tongo",
+  "Serbian",
+  "Serer",
+  "Nilo-Saharan languages",
+  "Swati",
+  "Sukuma",
+  "Sundanese",
+  "Susu",
+  "Sumerian",
+  "Swahili",
+  "Swedish",
+  "Classical Syriac",
+  "Syriac",
+  "Tahitian",
+  "Tai languages",
+  "Tamil",
+  "Tatar",
+  "Telugu",
+  "Timne",
+  "Tereno",
+  "Tetum",
+  "Tajik",
+  "Tagalog",
+  "Thai",
+  "Tigre",
+  "Tigrinya",
+  "Tiv",
+  "Tokelau",
+  "Klingon; tlhIngan-Hol",
+  "Tlingit",
+  "Tamashek",
+  "Tonga (Nyasa)",
+  "Tonga (Tonga Islands)",
+  "Tok Pisin",
+  "Tsimshian",
+  "Tswana",
+  "Tsonga",
+  "Turkmen",
+  "Tumbuka",
+  "Tupi languages",
+  "Turkish",
+  "Altaic languages",
+  "Tuvalu",
+  "Twi",
+  "Tuvinian",
+  "Udmurt",
+  "Ugaritic",
+  "Uighur; Uyghur",
+  "Ukrainian",
+  "Umbundu",
+  "Undetermined",
+  "Urdu",
+  "Uzbek",
+  "Vai",
+  "Venda",
+  "Vietnamese",
+  "Volapük",
+  "Votic",
+  "Wakashan languages",
+  "Wolaitta; Wolaytta",
+  "Waray",
+  "Washo",
+  "Sorbian languages",
+  "Walloon",
+  "Wolof",
+  "Kalmyk; Oirat",
+  "Xhosa",
+  "Yao",
+  "Yapese",
+  "Yiddish",
+  "Yoruba",
+  "Yupik languages",
+  "Zapotec",
+  "Blissymbols; Blissymbolics; Bliss",
+  "Zenaga",
+  "Zhuang; Chuang",
+  "Zande languages",
+  "Zulu",
+  "Zuni",
+  "No linguistic content; Not applicable",
+  "Zaza; Dimili; Dimli; Kirdki; Kirmanjki; Zazaki"
+  );
+
 // put PHP code here
 
 function cmc_js_load($src) {
@@ -733,11 +1217,12 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
   
   <script type="text/JavaScript">
   
-  var currentOptions = new Array(6);
-  for (i=0; i <6; i++) {
+  var currentOptions = new Array(7);
+  for (i=0; i <7; i++) {
     currentOptions[i]=new Array()   
   }
-  var current = new Array(6);
+  var current = new Array(7);
+  /*
   var prelength = new Array(6);
   var postlen = new Array(6);
 
@@ -745,7 +1230,8 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
     prelength[i] = 0;
     postlen[i] = 0;
   }
-  
+  */
+
   function selectMultiple(s,k)
   {
   current[k] = s.selectedIndex;
@@ -754,21 +1240,21 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
   {
     if (current[k] == currentOptions[k][i])
     {
-      prelength[k] = currentOptions[k].length;
+      CMC.prelength[k] = currentOptions[k].length;
       currentOptions[k].splice(i, 1);
-      postlen[k] = currentOptions[k].length;
+      CMC.postlen[k] = currentOptions[k].length;
       break;
     }
   }
   
-  if ((prelength[k]==0) || (prelength[k]!=postlen[k]+1)) {
+  if ((CMC.prelength[k]==0) || (CMC.prelength[k]!=CMC.postlen[k]+1)) {
     if (i >= currentOptions[k].length) currentOptions[k].push(current[k]);
   }
 
   // reinitialize the lengths
   if (currentOptions[k].length == 0) {
-    prelength[k] = 0;
-    prelength[k] = 0;
+    CMC.prelength[k] = 0;
+    CMC.prelength[k] = 0;
   }
       
   for (var i=0; i<s.options.length; i++) s.options[i].selected = false;
@@ -835,6 +1321,17 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
             );
           ?>
         </div>
+    <style type="text/css">
+    #table_wrapper{background:#000080;border:0px solid #A9A9A9;float:center;}
+    #tbody{height:100px;overflow-y:auto;width:474px;background:#000080;}
+    table{border-collapse:collapse; width:100%;}
+    td{padding:0px 0px; /* pixels */
+    border-right:0px solid #A9A9A9; /* to avoid the hacks for the padding */
+    border-bottom:0px solid #A9A9A9;} 
+    .td1{width:55px;}
+    .td2{width:50px;}
+    .td3{border-right-width:0;}
+    </style>      
         <div id="show-profile" style="display: none">
           <div id="cmc-profile-title">
             <h1 id="cmc-profile-title-text">CMC Profile Page</h1>
@@ -844,7 +1341,7 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
 			<div id="colOne">
 			<div id="profileimage">
             <div class="profile-picture">
-				      <img src="ajax-spinner.gif" width="230" />
+				      <img src="ajax-spinner.gif" width="190" />
             </div>
 			</div>
 			<div class="box2">
@@ -911,12 +1408,14 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
 					<table>
 					
 					<tr>
+          <td>
 					<div class="profile-picture">
-						<img src="ajax-spinner.gif" alt="" width="75" height="55"/>
+						<img src="ajax-spinner.gif" alt="" height="35"/>
 					</div>
+          </td>
 					<td><div class="box3">
 					<div class="profile-tripname">
-						<h4> TripName </h4>
+						TripName 
 					</div>						
 					</td>
 					<td class="td2"><input type="submit" value="Trip Description" class="button" id="trip-desc-submit" /></td>
@@ -930,20 +1429,12 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
 			</div>
 		</div>
           
-    <style type="text/css">
-    #table_wrapper{background:#000080;border:0px solid #A9A9A9;float:center;}
-    #tbody{height:100px;overflow-y:auto;width:410px;background:#000080;}
-    table{border-collapse:collapse; width:100%;}
-    td{padding:0px 0px; /* pixels */
-    border-right:0px solid #A9A9A9; /* to avoid the hacks for the padding */
-    border-bottom:0px solid #A9A9A9;} 
-    .td1{width:75px;}
-    .td2{width:100px;}
-    .td3{border-right-width:0;}
-    </style>      
     
         </div>
         <div id="no-profile" style="display: none">
+          <script type="text/javascript">
+            CMC.profileedit = 0;
+          </script>
           <div class="ui-state-highlight ui-corner-all ui-widget cmc-infobar">
             <p class="cmc-infobar-text">
              <span class="ui-icon ui-icon-info cmc-infobar-icon"></span>
@@ -1199,19 +1690,19 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                             <td style="width: 197px">
                                         <select id="profile-nonmedical" multiple="multiple" class="profile-ddl-type-nonmedical" onclick="selectMultiple(this,1);">
                                             <!--<option value="0" selected="selected">Select Non-Medical Skills</option>-->
-                                            <option value="1">General Help/Labor</option>
-                                            <option value="2">Team Leader/Primary Organizer</option>
-                                            <option value="3">Account and/or Business Management</option>
-                                            <option value="4">Skilled Construction and/or Maintenance</option>
-                                            <option value="5">Computer Science/Other Technical</option>
-                                            <option value="6">Agriculture and/or Animal Husbandry</option>
-                                            <option value="7">Mechanic</option>
-                                            <option value="8">Office/Secretarial</option>
-                                            <option value="9">Teaching</option>
-                                            <option value="10">Veterinary</option>
-                                            <option value="11">Water Supply Improvement</option>
-                                            <option value="12">Writing and/or Translating</option>
-                                            <option value="13">Engineering</option>
+                                            <option value="14">General Help/Labor</option>
+                                            <option value="15">Team Leader/Primary Organizer</option>
+                                            <option value="16">Account and/or Business Management</option>
+                                            <option value="17">Skilled Construction and/or Maintenance</option>
+                                            <option value="18">Computer Science/Other Technical</option>
+                                            <option value="19">Agriculture and/or Animal Husbandry</option>
+                                            <option value="45">Mechanic</option>
+                                            <option value="46">Office/Secretarial</option>
+                                            <option value="47">Teaching</option>
+                                            <option value="48">Veterinary</option>
+                                            <option value="49">Water Supply Improvement</option>
+                                            <option value="50">Writing and/or Translating</option>
+                                            <option value="52">Engineering</option>
                                         </select>
                             </td>
                         </tr>
@@ -1223,11 +1714,11 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                             <td style="width: 197px">
                                         <select id="profile-spiritual" multiple="multiple" class="profile-ddl-type-spiritual" onclick="selectMultiple(this,2);">
                                             <!--<option value="0" selected="selected">Select Spiritual Service</option>-->
-                                            <option value="1">Team Spiritual Leader</option>
-                                            <option value="2">Individual Outreach (Prayer and Counseling)</option>
-                                            <option value="3">Evangelism</option>
-                                            <option value="4">Worship Team</option>
-                                            <option value="5">Public Speaking</option>
+                                            <option value="20">Team Spiritual Leader</option>
+                                            <option value="21">Individual Outreach (Prayer and Counseling)</option>
+                                            <option value="22">Evangelism</option>
+                                            <option value="44">Worship Team</option>
+                                            <option value="51">Public Speaking</option>
                                         </select>
                             </td>
                         </tr>
@@ -1268,9 +1759,11 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                             <td style="width: 197px">
                                         <select id="profile-state" class="profile-ddl-type-state">
                                         <?php
-                                        //echo '<option value="Select your State" selected="selected">Select your State</option>';
+                                        echo '<option value="Select your State" selected="selected">Select your State</option>';
+                                        $i=1;
                       foreach($usstates as $key => $state) {
-                                              echo '<option value="'.$state.'">'.$state.'</option>';
+                                              echo '<option value="'.$i.'">'.$state.'</option>';
+                                              $i++;
                       }
                                         ?>
                                         </select>
@@ -1302,12 +1795,14 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                             <td style="width: 197px">
                                         <select id="profile-country" class="profile-ddl-type-country">
                                         <?php
+                                        $i=2;
                       foreach($aCountries as $key => $country) {
                                               if ($country == "United States")
-                            echo '<option selected="selected" value="'.$country.'">'.$country.'</option>';
-                                              else
-                            echo '<option value="'.$country.'">'.$country.'</option>';
-
+                            echo '<option selected="selected" value="1">'.$country.'</option>';
+                                              else {
+                            echo '<option value="'.$i.'">'.$country.'</option>';
+                                              $i++;
+                                              }
                       }
                                         ?>
                                         </select>
@@ -1339,9 +1834,15 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                             <td style="width: 197px">
                                         <select id="profile-country-served" multiple="multiple" class="profile-ddl-type-countriesserved" onclick="selectMultiple(this,4);">
                                         <?php
+                                        $i=2;
                       //echo '<option selected="selected" value="Select Countries Served">Select Countries Served</option>';
                       foreach($aCountries as $key => $country) {                      
-                        echo '<option value="'.$country.'">'.$country.'</option>';
+                                              if ($country == "United States")
+                            echo '<option value="1">'.$country.'</option>';
+                                              else {
+                        echo '<option value="'.$i.'">'.$country.'</option>';
+                                              $i++;
+                                              }
                       }
                                         ?>
                                         </select>
@@ -1436,17 +1937,17 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                             <td style="width: 97px">
                                         <select id="profile-org-offer" multiple="multiple" class="profile-org-offer" onclick="selectMultiple(this,0);">
                                             <!--<option value="0" selected="selected">Select Medical Skills</option>-->
-                                            <option value="1">Missions Hospital without Surgical Facilities</option>
-                                            <option value="2">Missions Hospital with Surgical Facilities</option>
-                                            <option value="3">Missions Hospital with Dental Care Facilities</option>
-                                            <option value="4">Outpatient Medical/Dental/Eye Care Clinic</option>
-                                            <option value="5">Organizing/Sending Short Term Medical/Dental/Eye Care Missions Agency</option>
-                                            <option value="6">Supplying/Enhancing Short Term Medical/Dental/Eye Care Missions Agency</option>
-                                            <option value="7">Community Development Agency</option>
-                                            <option value="8">Emergency Medical Relief Agency</option>
-                                            <option value="9">Medical/Dental/Eye Care Equipment Supplier</option>
-                                            <option value="10">Water Purification/Drilling</option>
-                                            <option value="11">Medical/Dental/Eye Care Training/Education Agency</option>
+                                            <option value="23">Missions Hospital without Surgical Facilities</option>
+                                            <option value="24">Missions Hospital with Surgical Facilities</option>
+                                            <option value="25">Missions Hospital with Dental Care Facilities</option>
+                                            <option value="26">Outpatient Medical/Dental/Eye Care Clinic</option>
+                                            <option value="27">Organizing/Sending Short Term Medical/Dental/Eye Care Missions Agency</option>
+                                            <option value="28">Supplying/Enhancing Short Term Medical/Dental/Eye Care Missions Agency</option>
+                                            <option value="29">Community Development Agency</option>
+                                            <option value="30">Emergency Medical Relief Agency</option>
+                                            <option value="31">Medical/Dental/Eye Care Equipment Supplier</option>
+                                            <option value="32">Water Purification/Drilling</option>
+                                            <option value="33">Medical/Dental/Eye Care Training/Education Agency</option>
                                         </select>
                             </td>
                         </tr>
@@ -1458,16 +1959,16 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                             <td style="width: 97px">
                                         <select id="profile-org-offern" multiple="multiple" class="profile-org-offern" onclick="selectMultiple(this,1);">
                                             <!--<option value="0" selected="selected">Select Medical Skills</option>-->
-                                            <option value="1">Evangelism and Church Planning Ministry</option>
-                                            <option value="2">Food Access</option>
-                                            <option value="3">Transportation (In Country)</option>
-                                            <option value="4">Translators</option>
-                                            <option value="5">Trip Planning/Itinerary Building</option>
-                                            <option value="6">Crowd Control</option>
-                                            <option value="7">Press Relations</option>
-                                            <option value="8">Housing for the Missions Team</option>
-                                            <option value="9">Help getting through Customs</option>
-                                            <option value="10">Building Supplies (Construction)</option>
+                                            <option value="34">Evangelism and Church Planning Ministry</option>
+                                            <option value="35">Food Access</option>
+                                            <option value="36">Transportation (In Country)</option>
+                                            <option value="37">Translators</option>
+                                            <option value="38">Trip Planning/Itinerary Building</option>
+                                            <option value="39">Crowd Control</option>
+                                            <option value="40">Press Relations</option>
+                                            <option value="41">Housing for the Missions Team</option>
+                                            <option value="42">Help getting through Customs</option>
+                                            <option value="43">Building Supplies (Construction)</option>
                                         </select>
                             </td>
                         </tr>												
@@ -1503,19 +2004,19 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                             <td style="width: 197px">
                                         <select id="profile-org-nonmedical" multiple="multiple" class="profile-org-nonmedical" onclick="selectMultiple(this,3);">
                                             <!--<option value="0" selected="selected">Select Non-Medical Skills</option>-->
-                                            <option value="1">General Help/Labor</option>
-                                            <option value="2">Team Leader/Primary Organizer</option>
-                                            <option value="3">Account and/or Business Management</option>
-                                            <option value="4">Skilled Construction and/or Maintenance</option>
-                                            <option value="5">Computer Science/Other Technical</option>
-                                            <option value="6">Agriculture and/or Animal Husbandry</option>
-                                            <option value="7">Mechanic</option>
-                                            <option value="8">Office/Secretarial</option>
-                                            <option value="9">Teaching</option>
-                                            <option value="10">Veterinary</option>
-                                            <option value="11">Water Supply Improvement</option>
-                                            <option value="12">Writing and/or Translating</option>
-                                            <option value="13">Engineering</option>
+                                            <option value="14">General Help/Labor</option>
+                                            <option value="15">Team Leader/Primary Organizer</option>
+                                            <option value="16">Account and/or Business Management</option>
+                                            <option value="17">Skilled Construction and/or Maintenance</option>
+                                            <option value="18">Computer Science/Other Technical</option>
+                                            <option value="19">Agriculture and/or Animal Husbandry</option>
+                                            <option value="45">Mechanic</option>
+                                            <option value="46">Office/Secretarial</option>
+                                            <option value="47">Teaching</option>
+                                            <option value="48">Veterinary</option>
+                                            <option value="49">Water Supply Improvement</option>
+                                            <option value="50">Writing and/or Translating</option>
+                                            <option value="52">Engineering</option>
                                         </select>
                             </td>
                         </tr>
@@ -1527,11 +2028,11 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                             <td style="width: 197px">
                                         <select id="profile-org-spiritual" multiple="multiple" class="profile-org-spiritual" onclick="selectMultiple(this,4);">
                                             <!--<option value="0" selected="selected">Select Spiritual Service</option>-->
-                                            <option value="1">Team Spiritual Leader</option>
-                                            <option value="2">Individual Outreach (Prayer and Counseling)</option>
-                                            <option value="3">Evangelism</option>
-                                            <option value="4">Worship Team</option>
-                                            <option value="5">Public Speaking</option>
+                                            <option value="20">Team Spiritual Leader</option>
+                                            <option value="21">Individual Outreach (Prayer and Counseling)</option>
+                                            <option value="22">Evangelism</option>
+                                            <option value="44">Worship Team</option>
+                                            <option value="51">Public Speaking</option>
                                         </select>
                             </td>
                         </tr>
@@ -1572,9 +2073,11 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                             <td style="width: 197px">
                                         <select id="profile-org-state" class="profile-org-state">
                                         <?php
-                                        //echo '<option value="Select your State" selected="selected">Select your State</option>';
+                                        echo '<option value="Select your State" selected="selected">Select your State</option>';
+                                        $i=1;
                       foreach($usstates as $key => $state) {
-                                              echo '<option value="'.$state.'">'.$state.'</option>';
+                                              echo '<option value="'.$i.'">'.$state.'</option>';
+                                              $i++;
                       }
                                         ?>
                                         </select>
@@ -1606,11 +2109,14 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                             <td style="width: 197px">
                                         <select id="profile-org-country" class="profile-org-country">
                                         <?php
+                                        $i=2;
                       foreach($aCountries as $key => $country) {
                                               if ($country == "United States")
-                            echo '<option selected="selected" value="'.$country.'">'.$country.'</option>';
-                                              else
-                            echo '<option value="'.$country.'">'.$country.'</option>';
+                            echo '<option selected="selected" value="1">'.$country.'</option>';
+                                              else {
+                            echo '<option value="'.$i.'">'.$country.'</option>';
+                                              $i++;
+                                              }
 
                       }
                                         ?>
@@ -1643,9 +2149,15 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                             <td style="width: 197px">
                                         <select id="profile-org-countryserved" multiple="multiple" class="profile-org-countryserved" onclick="selectMultiple(this,6);">
                                         <?php
+                                        $i=2;
                       //echo '<option selected="selected" value="Select Countries Served">Select Countries Served</option>';
                       foreach($aCountries as $key => $country) {                      
-                        echo '<option value="'.$country.'">'.$country.'</option>';
+                                              if ($country == "United States")
+                            echo '<option value="1">'.$country.'</option>';
+                                              else {
+                        echo '<option value="'.$i.'">'.$country.'</option>';
+                                              $i++;
+                                              }
                       }
                                         ?>
                                         </select>
@@ -1694,7 +2206,7 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
     </form>   
       </div>	  	  
       <div id="profile-trip-dialog" title="Please enter your trip profile information">
-        <form id="profile-organizer-form">
+        <form id="profile-trip-form">
       <div id="wrapper">
         <div id="header">
             CMC Trip Profile Submission
@@ -1702,7 +2214,7 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
         <div id="contents">
             <div class="profile-container">
                 <div class="profile-header">
-                    Please enter your profile information</div>
+                    Please enter your trip information</div>
                 <div class="profile-contents">
                     <table cellpadding="4" cellspacing="0">
                         <tr>
@@ -1829,17 +2341,42 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                             <td style="width: 197px">
                                         <select id="profile-trip-country" class="profile-trip-country">
                                         <?php
+                                        $i=2;
                       foreach($aCountries as $key => $country) {
                                               if ($country == "United States")
-                            echo '<option selected="selected" value="'.$country.'">'.$country.'</option>';
-                                              else
-                            echo '<option value="'.$country.'">'.$country.'</option>';
+                            echo '<option selected="selected" value="1">'.$country.'</option>';
+                                              else {
+                            echo '<option value="'.$i.'">'.$country.'</option>';
+                                              $i++;
+                                              }
 
                       }
                                         ?>
                                         </select>
                             </td>
                         </tr>                     
+                        <tr>
+                            <td style="width: 197px">
+                                <label>
+                                    Languages</label>
+                            </td>
+                            <td style="width: 197px">
+                                        <select id="profile-trip-languages" multiple="multiple" class="profile-trip-languages" onclick="selectMultiple(this,0);">
+                                        <?php
+                                        $i=1;
+                      //echo '<option selected="selected" value="Select Countries Served">Select Countries Served</option>';
+                      foreach($languages as $key => $language) {                      
+                                              if ($language == "English")
+                            echo '<option selected="selected" value="'.$language.'">'.$language.'</option>';
+                                              else {
+                        echo '<option value="'.$language.'">'.$language.'</option>';
+                                              $i++;
+                                              }
+                      }
+                                        ?>
+                                        </select>
+                            </td>
+                        </tr>           
                         <tr>
                             <td>
                                 <label>

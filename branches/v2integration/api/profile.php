@@ -45,7 +45,7 @@ if(!$result) {
 else {
 
 function cmc_profile_render_id_join($title2,$title,$desc, $descdb, $selecteddb, $fbid, &$msg, &$k,&$has_error,&$err_msg,&$json,$con) {
-  $sql = "SELECT ".$desc." FROM ".$descdb.
+  $sql = "SELECT * FROM ".$descdb.
      " JOIN ".$selecteddb." ON ".$descdb.".id = ".$selecteddb.".id".
      " WHERE ".$selecteddb.".userid='".$fbid."'";
   $result = mysql_query($sql,$con);
@@ -62,17 +62,19 @@ function cmc_profile_render_id_join($title2,$title,$desc, $descdb, $selecteddb, 
       $k++;
     }
 	$json[str_replace (" ", "", $title2)][str_replace (" ", "", $title)] = array();
+	$json[str_replace (" ", "", $title2)][str_replace (" ", "", $title)."id"] = array();
   }
   
   $i++;
 	  
 	  $json[str_replace (" ", "", $title2)][str_replace (" ", "", $title)][] = $row[$desc];
+	  $json[str_replace (" ", "", $title2)][str_replace (" ", "", $title)."id"][] = $row["id"];
     }
   }
 }
 
 function cmc_profile_render_skills($title, $type, $fbid,&$has_error,&$err_msg,&$json,$con) {
-  $sql = "SELECT skilldesc FROM skills".
+  $sql = "SELECT * FROM skills".
        " JOIN skillsselected ON skills.id = skillsselected.id".
        " WHERE skills.type=".$type." AND skillsselected.userid='".$fbid."'";
   $result = mysql_query($sql,$con);
@@ -84,18 +86,23 @@ function cmc_profile_render_skills($title, $type, $fbid,&$has_error,&$err_msg,&$
     while($row= mysql_fetch_array($result)){
       if ($i==0) {
 	  $json[str_replace (" ", "", $title)] = array();
+	  $json[str_replace (" ", "", $title)."id"] = array();
       }
       $i++;
 	  $json[str_replace (" ", "", $title)][] = $row['skilldesc'];
+	  $json[str_replace (" ", "", $title)."id"][] = $row['id'];
     }
   }
 }
 
 if(mysql_num_rows($result) != 0) {
+
+  $json['exists'] = 1;
   while($row = mysql_fetch_array($result,MYSQL_ASSOC)) {
     $name = $row['name'];
     $organization = $row['organization'];
     $isleader = $row['isreceiver'];
+	$json['isreceiver'] = $row['isreceiver'];
     $zip = $row['zipcode'];
     $email = $row['email'];
     $misexp = $row['missionsexperience'];
@@ -139,10 +146,11 @@ if(mysql_num_rows($result) != 0) {
 	$json['AgencyName'] = $organization;
   if (!empty($website))
 	$json['AgencyWebsite'] = $website;
-  if (!empty($aboutme))
-	$json['AboutAgency'] = $aboutme;
   }
   
+  if (!empty($aboutme))
+	$json['about'] = $aboutme;
+
   if (!empty($zip))
 	$json['zip'] = $zip;
   if (!empty($email))
@@ -180,13 +188,16 @@ if(mysql_num_rows($result) != 0) {
   $pp=-1;
   cmc_profile_render_id_join("Durations","Preferred Duration of Mission Trips",'name', 'durations', 'durationsselected', $showuserid, $message, $pp,$has_error,$err_msg,$json,$con);
 
+  $json['tripid'] = array();
   $json['trips'] = array();
   $trips = array();
   $sql = "select tripid from tripmembers where userid='".$showuserid."'";
   $result = mysql_query($sql,$con);
   if($result) {
+    $ii=0;
     while($row= mysql_fetch_array($result)) {
       $tid=$row['tripid'];
+	  $json['tripid'][] = $tid;
       $sql2 = 'select tripname from trips where id="'.$tid.'"';
       $result2 = mysql_query($sql2,$con);
 	  if (!$result2) {
@@ -196,8 +207,9 @@ if(mysql_num_rows($result) != 0) {
 	  else {
 		$row2 = mysql_fetch_array($result2);
 		$tname = $row2['tripname'];
-		$trips[$tid]=$tname;    
-	  $json['trips'][] = $trips[$tid];
+		$trips[]=$tname;    
+		$json['trips'][] = $trips[$ii];
+		$ii++;
 	  }
     }
   } else {
@@ -205,6 +217,7 @@ if(mysql_num_rows($result) != 0) {
   }
   
 } else {
+		$json['exists'] = 0;		
   		$has_error = TRUE;
 		$err_msg = "User does not have a CMC profile";
 }

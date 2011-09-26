@@ -5,19 +5,52 @@
 // 
 
 include_once 'common.php';
+header('Content-type: application/json');
 $con = arena_connect();
 
 $saferequest = cmc_safe_request_strip();
 $has_error = FALSE;
 $err_msg = '';
 
+function stripslashes_deep($value)
+{
+    $value = is_array($value) ? array_map("stripslashes_deep", $value) : stripslashes($value);
+      return $value;
+}
+
+$json = array();
 
 // make sure all the required parameters are defined, else throw an error
 // profiletype, fbid
-if (array_key_exists('fbid', $saferequest) && array_key_exists('profiledata',$saferequest)) {
+if (array_key_exists('fbid', $saferequest) && array_key_exists('profileinfo',$saferequest)) {
 
   $fbid = $saferequest['fbid'];
-  $myobj = json_decode($saferequest['profiledata']);
+ 
+  if (get_magic_quotes_gpc())
+  {
+  $myobj = json_decode(htmlspecialchars_decode(array_map("stripslashes_deep",$saferequest['profileinfo'])));
+  }
+  else {
+  $myobj = json_decode(htmlspecialchars_decode($saferequest['profileinfo']));
+  }
+
+    switch(json_last_error())
+    {
+      case JSON_ERROR_DEPTH:
+         $has_error = TRUE;
+         $err_msg = "Maximum stack depth exceeded";
+         break;
+      case JSON_ERROR_CTRL_CHAR:
+         $has_error = TRUE;
+         $err_msg = "Unexpected control character found";
+          break;
+      case JSON_ERROR_SYNTAX:
+         $has_error = TRUE;
+         $err_msg = "Syntax error, malformed JSON";
+          break;
+      case JSON_ERROR_NONE:
+          break;
+      }
 
 }
 else {
@@ -26,19 +59,20 @@ else {
   $err_msg = "Required parameters not defined.";
 }
 
+
 if (!$has_error) {
 
 // If profiletype == 1, then it is a volunteer profile, if profiletype==2, then it is a trip profile
 // For all other profiletypes, it is a mission profile
 
-if ($myobj["profiletype"]==1) {
+if ($myobj->{'profiletype'}==1) {
  $isreceiver = 0;
  $is_trip = 0;
 }
-else if ($myobj["profiletype"] == 2) {
+else if ($myobj->{'profiletype'} == 2) {
  $is_trip = 1;
- if (isset($myobj['membertype'])) {
- 	$membertype = $myobj['membertype'];
+ if (isset($myobj->{'membertype'})) {
+ 	$membertype = $myobj->{'membertype'};
   if (($membertype < 1) || ($membertype > 3)) {
     $has_error = TRUE;
     $err_msg = "Member Type can be 1 or 2 or 3";
@@ -53,27 +87,33 @@ else {
  $isreceiver = 1;
 }
 
+if ($myobj->{'profiletype'} != 2) {
 // Zip code is a required field for volunteer or missions - return an error if the country is USA
 if (($isreceiver == 0) || ($isreceiver==1)) {
-	if (isset($myobj['country'])) {
-		if ((!isset($myobj['zip'])) && (!strcmp($myobj['country'],'United States'))) {
+	if (isset($myobj->{'country'})) {
+		if ((!isset($myobj->{'zip'})) && (!strcmp($myobj->{'country'},'United States'))) {
 			  $has_error = TRUE;
   			$err_msg = "If country is USA, zip code is a required field";
 		}
 	}
-
+}
 }
 
 if (!$has_error) {
 
-if (isset($myobj['update']))
-	$update = $myobj['update'];
+if (isset($myobj->{'update'})) {
+	$update = $myobj->{'update'};
+}
+else {
+  $update = 0;
+}
+
 
 if (!$is_trip) {
 
-if (!empty($myobj["toggle"])) {
+if (!empty($myobj->{'toggle'})) {
 
-if ($myobj["toggle"] == 1) {
+if ($myobj->{'toggle'} == 1) {
    $sql = 'select * from users where userid="'.$fbid.'"';
    $result = mysql_query($sql,$con);
    if (!$result) {
@@ -139,56 +179,56 @@ $num_userids = mysql_num_rows($result);
 if($num_userids > 0){
 
   $sql = 'UPDATE users SET isreceiver="'.$isreceiver.'"';
-  
-  if (!empty($myobj['name']))
-   $sql = $sql.', organization="'.$myobj['name'].'"';
+ 
+  if (!empty($myobj->{'name'}))
+   $sql = $sql.', organization="'.$myobj->{'name'}.'"';
  
    //$sql = $sql.', isreceiver="'.$isreceiver.'"';
    
-   if (isset($update)) {
+   if ($update) {
    
-   if (empty($myobj['zip']))
+   if (empty($myobj->{'zip'}))
 	$sql = $sql.', zipcode=NULL';
    else
-    $sql = $sql.', zipcode="'.$myobj["zip"].'"';
+    $sql = $sql.', zipcode="'.$myobj->{'zip'}.'"';
 	
-   if (empty($myobj['phone']))
+   if (empty($myobj->{'phone'}))
 	$sql = $sql.', phone=NULL';
    else
-    $sql = $sql.', phone="'.$myobj["phone"].'"';
+    $sql = $sql.', phone="'.$myobj->{'phone'}.'"';
 	
-   if (empty($myobj['email']))
+   if (empty($myobj->{'email'}))
 	$sql = $sql.', email=NULL';
    else
-    $sql = $sql.', email="'.$myobj["email"].'"';	
+    $sql = $sql.', email="'.$myobj->{'email'}.'"';	
 	
-   if (empty($myobj['misexp']))
+   if (empty($myobj->{'misexp'}))
 	$sql = $sql.', missionsexperience=NULL';
    else
-    $sql = $sql.', missionsexperience="'.$myobj["misexp"].'"';
+    $sql = $sql.', missionsexperience="'.$myobj->{'misexp'}.'"';
 	
-   if (empty($myobj['relg']))
+   if (empty($myobj->{'relg'}))
 	$sql = $sql.', religion=NULL';
    else
-    $sql = $sql.', religion="'.$myobj["relg"].'"';
+    $sql = $sql.', religion="'.$myobj->{'relg'}.'"';
 	
-   if (empty($myobj['about']))
+   if (empty($myobj->{'about'}))
 	$sql = $sql.', aboutme=NULL';
    else
-    $sql = $sql.', aboutme="'.$myobj["about"].'"';
+    $sql = $sql.', aboutme="'.$myobj->{'about'}.'"';
 	
-   if (empty($myobj['languages']))
+   if (empty($myobj->{'languages'}))
 	$sql = $sql.', Languages=NULL';
    else
-    $sql = $sql.', Languages="'.$myobj["languages"].'"';
+    $sql = $sql.', Languages="'.$myobj->{'languages'}.'"';
 
-   if (empty($myobj['state']))
+   if (empty($myobj->{'state'}))
 	$sql = $sql.', state=NULL';
    else
-    $sql = $sql.', state="'.$myobj["state"].'"';
+    $sql = $sql.', state="'.$myobj->{'state'}.'"';
 
 
-   $mycity = strip_tags($myobj['city']);
+   $mycity = $myobj->{'city'};
    if (empty($mycity))
 	$sql = $sql.', city=NULL';
    else {
@@ -197,34 +237,34 @@ if($num_userids > 0){
 	$err_msg = "You entered an invalid city string";
        }
        else {
-    		$sql = $sql.', city="'.$myobj["city"].'"';
+    		$sql = $sql.', city="'.$myobj->{'city'}.'"';
        }
    }
 
-   if (empty($myobj['url']))
+   if (empty($myobj->{'url'}))
 	$sql = $sql.', website=NULL';
    else
-    $sql = $sql.', website="'.$myobj["url"].'"';
+    $sql = $sql.', website="'.$myobj->{'url'}.'"';
 	
    }
    else {
-   if (!empty($myobj['zip']))
-   $sql = $sql.', zipcode="'.$myobj["zip"].'"';
-   if (!empty($myobj['phone']))
-   $sql = $sql.', phone = "'.$myobj["phone"].'"';
-   if (!empty($myobj['email']))
-   $sql = $sql.', email = "'.$myobj["email"].'"';
-   if (!empty($myobj['misexp']))
-   $sql = $sql.', missionsexperience = "'.$myobj["misexp"].'"';
-   if (!empty($myobj['relg']))
-    $sql = $sql.', religion = "'.$myobj["relg"].'"';
-    if (!empty($myobj['about']))
-    $sql = $sql.', aboutme = "'.$myobj["about"].'"';
-    if (!empty($myobj['languages']))
-    $sql = $sql.', Languages = "'.$myobj["languages"].'"';
-    if (!empty($myobj['state']))
-    $sql = $sql.',state ="'.$myobj['state'].'"';
-    $mycity = strip_tags($myobj['city']);
+   if (!empty($myobj->{'zip'}))
+   $sql = $sql.', zipcode="'.$myobj->{'zip'}.'"';
+   if (!empty($myobj->{'phone'}))
+   $sql = $sql.', phone = "'.$myobj->{'phone'}.'"';
+   if (!empty($myobj->{'email'}))
+   $sql = $sql.', email = "'.$myobj->{'email'}.'"';
+   if (!empty($myobj->{'misexp'}))
+   $sql = $sql.', missionsexperience = "'.$myobj->{'misexp'}.'"';
+   if (!empty($myobj->{'relg'}))
+    $sql = $sql.', religion = "'.$myobj->{'relg'}.'"';
+    if (!empty($myobj->{'about'}))
+    $sql = $sql.', aboutme = "'.$myobj->{'about'}.'"';
+    if (!empty($myobj->{'languages'}))
+    $sql = $sql.', Languages = "'.$myobj->{'languages'}.'"';
+    if (!empty($myobj->{'state'}))
+    $sql = $sql.',state ="'.$myobj->{'state'}.'"';
+    $mycity = $myobj->{'city'};
 
    if (!empty($mycity)) {
       if (validateString($mycity)==0) {
@@ -232,11 +272,11 @@ if($num_userids > 0){
 	$err_msg = "You entered an invalid city string";
        }
        else {
-    		$sql = $sql.', city ="'.$myobj['city'].'"';
+    		$sql = $sql.', city ="'.$myobj->{'city'}.'"';
        }
     }
-   if (!empty($myobj['url']))
-    $sql = $sql.', website = "'.$myobj['url'].'"';
+   if (!empty($myobj->{'url'}))
+    $sql = $sql.', website = "'.$myobj->{'url'}.'"';
 
 	}
 	
@@ -246,12 +286,13 @@ if($num_userids > 0){
   $sql = 'INSERT INTO users '.
     '(userid, name, organization, isreceiver, state, city, zipcode, phone, email, missionsexperience,'.
     ' religion, aboutme, Languages, website, partnersite) '.
-    'VALUES ("'.$fbid.'","'.$name.'","'.$myobj['name'].'","'.$isreceiver.'","'.$myobj['state'].'","'.strip_tags($myobj['city']).'","'.strip_tags($myobj["zip"]).'","'.
-    strip_tags($myobj["phone"]).'","'.strip_tags($myobj["email"]).'","'.strip_tags($myobj["misexp"]).'","'.
-    $myobj["relg"].'","'.$myobj['about'].'","'.$myobj['languages'].'","'.$myobj['url'].'","0")';
+    'VALUES ("'.$fbid.'","'.$name.'","'.$myobj->{'name'}.'","'.$isreceiver.'","'.$myobj->{'state'}.'","'.strip_tags($myobj->{'city'}).'","'.strip_tags($myobj->{'zip'}).'","'.
+    strip_tags($myobj->{'phone'}).'","'.strip_tags($myobj->{'email'}).'","'.strip_tags($myobj->{'misexp'}).'","'.
+    $myobj->{'relg'}.'","'.$myobj->{'about'}.'","'.$myobj->{'languages'}.'","'.$myobj->{'url'}.'","0")';
 }
 
 if (!$has_error) {
+  $json['sql'] = $sql;
 $result = mysql_query($sql,$con);
 if (!$result) {
 	setjsonmysqlerror($has_error,$err_msg,$sql);
@@ -267,11 +308,11 @@ if ($is_trip) {
 // check to see if any trip exists within the same creator, description or destination
 // if so, set to update
 
-if (empty($update)) {
+if ($update==0) {
 $changed=0;
 $sql = 'select * from trips where creatorid="'.$fbid.'"';
-if (!empty($myobj['name'])) {
-  $sql = $sql.' and tripname="'.$myobj['name'].'"';
+if (!empty($myobj->{'name'})) {
+  $sql = $sql.' and tripname="'.$myobj->{'name'}.'"';
 }
 
 $result = mysql_query($sql,$con);
@@ -303,7 +344,7 @@ $sql1 = '';
 
 $namemod = 0;
 
-$tripname = strip_tags($myobj['name']);
+$tripname = strip_tags($myobj->{'name'});
 if (!empty($tripname)){
 	if ($update) {
 	$namemod = 1;
@@ -319,7 +360,7 @@ else {
 	$err_msg = "Trip name is a required value";
 }
 
-$tripdesc = strip_tags($myobj['about']);
+$tripdesc = strip_tags($myobj->{'about'});
 if (!empty($tripdesc)) {
 	if ($update) {
 	if ($namemod)
@@ -353,7 +394,7 @@ else
 	return true;
 }
 
-$tripphone = strip_tags($myobj['phone']);
+$tripphone = strip_tags($myobj->{'phone'});
 if (!empty($tripphone)) {
 	if ($update) {
 	if ($namemod)
@@ -425,7 +466,7 @@ return true;
 }
 
 
-$tripemail = strip_tags($myobj['email']);
+$tripemail = strip_tags($myobj->{'email'});
 if (!empty($tripemail)) {
 	if (!check_email_address($tripemail)) {
 		$has_error = TRUE;
@@ -463,7 +504,7 @@ function isValidURL($url)
 return preg_match('|^http(s)?://[a-z0-9-]+(.[a-z0-9-]+)*(:[0-9]+)?(/.*)?$|i', $url);
 }
 
-$tripurl = strip_tags($myobj['url']);
+$tripurl = strip_tags($myobj->{'url'});
 //if (!empty($myobj['url'])) {
 if (!empty($tripurl)) {
 	//$tripurl = $myobj['url'];
@@ -497,8 +538,8 @@ else {
 	}	
 	}
 }
-if (!empty($myobj['dur'])) {
-	$tripdurid = $myobj['dur'];
+if (!empty($myobj->{'dur'})) {
+	$tripdurid = $myobj->{'dur'};
 	if ($update) {
 	if ($namemod)
 	$sql1 = $sql1.',durationid="'.$tripdurid[0].'"';
@@ -524,8 +565,8 @@ else {
 }
 
 
-if (isset($myobj['stage'])) {
-	$tripstage = $myobj['stage'];
+if (isset($myobj->{'stage'})) {
+	$tripstage = $myobj->{'stage'};
 	if ($update) {
 	if ($namemod)
 	$sql1 = $sql1.',isinexecutionstage="'.$tripstage.'"';
@@ -651,12 +692,12 @@ else if ($year2 == $year1) {
 
 }
 
-if ((!empty($myobj['DepartYear'])) && (!empty($myobj['DepartMonth'])) && (!empty($myobj['DepartDay']))) {
+if ((!empty($myobj->{'DepartYear'})) && (!empty($myobj->{'DepartMonth'})) && (!empty($myobj->{'DepartDay'}))) {
         //$thisyear = date("Y");
 
-	validate_date(1,$myobj['DepartYear'],$myobj['DepartMonth'],$myobj['DepartDay'],$update,$has_error,$err_msg);
+	validate_date(1,$myobj->{'DepartYear'},$myobj->{'DepartMonth'},$myobj->{'DepartDay'},$update,$has_error,$err_msg);
 
-	$tripdpt = getdatestring($myobj['DepartYear'],$myobj['DepartMonth'],$myobj['DepartDay']);
+	$tripdpt = getdatestring($myobj->{'DepartYear'},$myobj->{'DepartMonth'},$myobj->{'DepartDay'});
 
 	if ($update) {
 	if ($namemod)
@@ -672,12 +713,12 @@ if ((!empty($myobj['DepartYear'])) && (!empty($myobj['DepartMonth'])) && (!empty
 	$sql2 = $sql2.',"'.$tripdpt.'"';
 	}
 }
-if ((!empty($myobj['ReturnYear'])) && (!empty($myobj['ReturnMonth'])) && (!empty($myobj['ReturnDay']))) {
-	validate_date(2,$myobj['ReturnYear'],$myobj['ReturnMonth'],$myobj['ReturnDay'],$update,$has_error,$err_msg);
+if ((!empty($myobj->{'ReturnYear'})) && (!empty($myobj->{'ReturnMonth'})) && (!empty($myobj->{'ReturnDay'}))) {
+	validate_date(2,$myobj->{'ReturnYear'},$myobj->{'ReturnMonth'},$myobj->{'ReturnDay'},$update,$has_error,$err_msg);
 
-	validate_return($myobj['DepartYear'],$myobj['DepartMonth'],$myobj['DepartDay'],$myobj['ReturnYear'],$myobj['ReturnMonth'],$myobj['ReturnDay'],$update,$has_error,$err_msg);
+	validate_return($myobj->{'DepartYear'},$myobj->{'DepartMonth'},$myobj->{'DepartDay'},$myobj->{'ReturnYear'},$myobj->{'ReturnMonth'},$myobj->{'ReturnDay'},$update,$has_error,$err_msg);
 
-	$tripret = getdatestring($myobj['ReturnYear'],$myobj['ReturnMonth'],$myobj['ReturnDay']);
+	$tripret = getdatestring($myobj->{'ReturnYear'},$myobj->{'ReturnMonth'},$myobj->{'ReturnDay'});
 
 	if ($update) {
 	if ($namemod)
@@ -693,7 +734,7 @@ if ((!empty($myobj['ReturnYear'])) && (!empty($myobj['ReturnMonth'])) && (!empty
 	}
 }
 
-$tripdest = strip_tags($myobj['destination']);
+$tripdest = strip_tags($myobj->{'city'});
 if (!empty($tripdest)) {
 	if ($update) {
 	if ($namemod) 
@@ -719,9 +760,48 @@ else {
 	}
 }
 
-$languages = strip_tags($myobj['languages']);
+if (isset($myobj->{'languages'})) {
+$languages = $myobj->{'languages'};
 if (!empty($languages)) {
+$mystr = "";
+$ii=0;
+foreach($languages as $ms) {
+  $mystr = $mystr.$ms;
+  $ii++;
+  if ((count($languages)>1)&&($ii<count($languages))) {
+    $mystr = $mystr.",";
+  }
+}
+
 	if ($update) {
+	if ($namemod) 
+	$sql1 = $sql1.',Languages="'.$mystr.'"';
+	else {
+	$sql1 = $sql1.'Languages="'.$mystr.'"';
+	$namemod=1;
+	}
+	}
+	else {
+	$sql1 = $sql1.',Languages';
+	$sql2 = $sql2.',"'.$mystr.'"';
+	}
+}
+else {
+	if ($update) {
+	if ($namemod)
+	$sql1 = $sql1.',Languages=NULL';
+	else {
+	$sql1 = $sql1.'Languages=NULL';
+	$namemod=1;
+	}	
+	}
+}
+}
+
+/*
+$languages = strip_tags($myobj->{'languages'});
+if (!empty($languages)) {
+	if (isset($update)) {
 	if ($namemod) 
 	$sql1 = $sql1.',Languages="'.$languages.'"';
 	else {
@@ -735,7 +815,7 @@ if (!empty($languages)) {
 	}
 }
 else {
-	if ($update) {
+	if (isset($update)) {
 	if ($namemod)
 	$sql1 = $sql1.',Languages=NULL';
 	else {
@@ -744,8 +824,10 @@ else {
 	}	
 	}
 }
+*/
 
-$acco = strip_tags($myobj['acco']);
+if (isset($myobj->{'acco'})) {
+$acco = strip_tags($myobj->{'acco'});
 if (!empty($acco)) {
 	if ($update) {
 	if ($namemod) 
@@ -770,9 +852,20 @@ else {
 	}	
 	}
 }
+}
+else {
+	if ($update) {
+	if ($namemod)
+	$sql1 = $sql1.',accommodationlevel=NULL';
+	else {
+	$sql1 = $sql1.'accommodationlevel=NULL';
+	$namemod=1;
+	}	
+	}
+}
 
-if (!empty($myobj['country'])) {
-	$tripcountry = $myobj['country'];
+if (!empty($myobj->{'country'})) {
+	$tripcountry = $myobj->{'country'};
 	$sql5 = 'select * from countries where id="'.$tripcountry[0].'"';
 	$result5 = mysql_query($sql5);
 	$row5 = mysql_fetch_array($result5);
@@ -800,7 +893,7 @@ else {
 	}
 }
 
-$tripnump = strip_tags($myobj['numpeople']);
+$tripnump = strip_tags($myobj->{'numpeople'});
 if (!empty($tripnump)) {
 	if ($update) {
 	if ($namemod)
@@ -826,7 +919,7 @@ else {
 	}
 }
 
-$tripzip = strip_tags($myobj['zip']);
+$tripzip = strip_tags($myobj->{'zip'});
 if (!empty($tripzip)) {
 	if ($update) {
 	if ($namemod)
@@ -852,8 +945,8 @@ else {
 	}
 }
 
-if (!empty($myobj['relg'])) {
-	$triprelg = $myobj['relg'];
+if (!empty($myobj->{'relg'})) {
+	$triprelg = $myobj->{'relg'};
 	if ($update) {
 	if ($namemod)
 	$sql1 = $sql1.',religion="'.$triprelg.'"';
@@ -882,6 +975,7 @@ if ($update) {
 $sql = $sql.$sql1.$sql2;
 }
 else {
+date_default_timezone_set('America/New_York');
 $todayy = date("Y");
 $todaym = date("m");
 $todayd = date("d");
@@ -958,8 +1052,8 @@ if (!$result) {
 setjsonmysqlerror($has_error,$err_msg,$sql);
 }
 
-if (isset($myobj['medfacil'])) {
-$medfacil = $myobj['medfacil'];
+if (isset($myobj->{'medfacil'})) {
+$medfacil = $myobj->{'medfacil'};
 foreach($medfacil as $ms) {
   $sql = "INSERT INTO skillsselected VALUES ('".$fbid."','".$ms."')";
   $result = mysql_query($sql,$con);
@@ -969,8 +1063,8 @@ foreach($medfacil as $ms) {
 }
 }
 
-if (isset($myobj['nonmedfacil'])) {
-$nonmedfacil = $myobj['nonmedfacil'];
+if (isset($myobj->{'nonmedfacil'})) {
+$nonmedfacil = $myobj->{'nonmedfacil'};
 foreach($nonmedfacil as $ms) {
   $sql = "INSERT INTO skillsselected VALUES ('".$fbid."','".$ms."')";
   $result = mysql_query($sql,$con);
@@ -980,8 +1074,8 @@ foreach($nonmedfacil as $ms) {
 }
 }
 
-if (isset($myobj['medskills'])) {
-$medskills = $myobj['medskills'];
+if (isset($myobj->{'medskills'})) {
+$medskills = $myobj->{'medskills'};
 foreach($medskills as $ms) {
   $sql = "INSERT INTO skillsselected VALUES ('".$fbid."','".$ms."')";
   $result = mysql_query($sql,$con);
@@ -991,8 +1085,8 @@ foreach($medskills as $ms) {
 }
 }
 
-if (isset($myobj['otherskills'])) {
-$otherskills=$myobj['otherskills'];
+if (isset($myobj->{'otherskills'})) {
+$otherskills=$myobj->{'otherskills'};
 foreach($otherskills as $ms) {
   $sql = "INSERT INTO skillsselected VALUES ('".$fbid."','".$ms."')";
   $result = mysql_query($sql,$con);
@@ -1002,8 +1096,8 @@ foreach($otherskills as $ms) {
 }
 }
 
-if (isset($myobj['spiritserv'])) {
-$relgskills=$myobj['spiritserv'];
+if (isset($myobj->{'spiritserv'})) {
+$relgskills=$myobj->{'spiritserv'};
 foreach($relgskills as $ms) {
   $sql = "INSERT INTO skillsselected VALUES ('".$fbid."','".$ms."')";
   $result = mysql_query($sql,$con);
@@ -1013,8 +1107,8 @@ foreach($relgskills as $ms) {
 }
 }
 
-if (isset($myobj['region'])) {
-$region=$myobj['region'];
+if (isset($myobj->{'region'})) {
+$region=$myobj->{'region'};
 foreach($region as $ms) {
   $sql = "INSERT INTO regionsselected VALUES ('".$fbid."','".$ms."')";
   $result = mysql_query($sql,$con);
@@ -1024,8 +1118,8 @@ foreach($region as $ms) {
 }
 }
 
-if (isset($myobj['state'])) {
-$mystate = $myobj['state'];
+if (isset($myobj->{'state'})) {
+$mystate = $myobj->{'state'};
   $sql = "INSERT INTO usstatesselected VALUES ('".$fbid."','".$mystate."')";
   $result = mysql_query($sql,$con);
   if(!$result) {
@@ -1033,8 +1127,9 @@ $mystate = $myobj['state'];
   }
 }
 
-if (isset($myobj['country'])) {
-$country = $myobj['country'];
+if (isset($myobj->{'country'})) {
+$country = $myobj->{'country'};
+if (count($country)>1) {
 foreach($country as $ms) {
   $sql = "INSERT INTO countriesselected VALUES ('".$fbid."','".$ms."')";
   $result = mysql_query($sql,$con);
@@ -1043,11 +1138,28 @@ foreach($country as $ms) {
   }
 }
 }
+else {
+  $sql = "INSERT INTO countriesselected VALUES ('".$fbid."','".$country."')";
+  $result = mysql_query($sql,$con);
+  if(!$result) {
+    setjsonmysqlerror($has_error,$err_msg,$sql);
+  }
+}
+}
 
-if (isset($myobj['dur'])) {
-$dur = $myobj['dur'];
+if (isset($myobj->{'dur'})) {
+$dur = $myobj->{'dur'};
+if (count($dur) > 1) {
 foreach($dur as $ms) {
   $sql = "INSERT INTO durationsselected VALUES ('".$fbid."','".$ms."')";
+  $result = mysql_query($sql,$con);
+  if(!$result) {
+    setjsonmysqlerror($has_error,$err_msg,$sql);
+  }
+}
+}
+else {
+  $sql = "INSERT INTO durationsselected VALUES ('".$fbid."','".$dur."')";
   $result = mysql_query($sql,$con);
   if(!$result) {
     setjsonmysqlerror($has_error,$err_msg,$sql);

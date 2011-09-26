@@ -17,8 +17,10 @@ var CMC = {
   me : false,
   friends : false,
   profiledata :  {},
+  profileshowflag: 0,
   isreceiver : false,
   profileexists : false,
+  profileedit : false,
   requestsOutstanding : 0,
   dialogsOpen : 0,
   version : "1.9.18",
@@ -27,6 +29,9 @@ var CMC = {
   searchPageImageClearJobQueue : [],
   profilePageImageClearJobQueue : [],
   SearchState : {},
+  prelength : new Array(7),
+  postlen : new Array(7),
+
   // startup configuration settings
   StartupConfig : {
     //@/BEGIN/DEBUGONLYSECTION
@@ -224,86 +229,63 @@ var CMC = {
     this.error("can't contact server (" + textStatus + ") " + jqXHR.status + " " + errorThrown);
   },
 
-  getProfileExistence : function () {
-    this.beginFunction("getProfileExistence");
-    $(".cmc-profile-result").each(function () { $(this).fadeOut('fast'); });
-    this.log("Checking existence of the profile");
-    this.ajaxNotifyStart(); // one for good measure, we want the spinner for profile existence check
-    // check existence of the profile  
+ getProfile : function() {
+    this.beginFunction("getProfile");
+	this.log("Obtaining data from the profile");
+	this.ajaxNotifyStart(); // one for good measure, we want the spinner for the whole search
+		
     $.ajax({
-      type: "POST",
-      url: "api/profileexistence.php",
-      data: {
-        fbid: this.me.id ? this.me.id : ""
-      },
-      dataType: "json",
-      context: this,
-      async: false,
-      success: this.onProfileExistenceSuccess,
-      error: this.onProfileExistenceError
-    });
+		type: "POST",
+		url: "api/profile.php",
+		data: {
+			fbid: CMC.me.id
+        },
+        dataType: "json",
+		context: this,
+		success: this.onGetProfileDataSuccess,
+		error: this.onGetProfileDataError
+	});
 
-    this.endFunction("getProfileExistence");
-  },  
+   // this.ajaxNotifyComplete();
+	this.endFunction("getProfile");
+	},
   
-  onProfileExistenceSuccess : function(data, textStatus, jqXHR) {
-    this.beginFunction("onProfileExistenceSuccess");
-    this.assert(data != undefined, "data is undefined in onProfileExistenceSuccess");
-    if(data.has_error !== undefined && data.has_error !== null) {
-      if(data.has_error) {
-        // we have a known error, handle it
-        this.handleProfileExistenceSuccessHasError(data);
-      } else {
-        if(data.exists == 1) {
-          this.log("Obtaining data from the profile");
-          this.ajaxNotifyStart(); // one for good measure, we want the spinner for the whole search
-          $.ajax({
-            type: "POST",
-            url: "api/profile.php",
-            data: {
-              fbid: this.me.id ? this.me.id : ""
-            },
-            dataType: "json",
-            context: this,
-            async: false,
-            success: this.onGetProfileDataSuccess,
-            error: this.onGetProfileDataError
-          });
-        } else {
-          this.showProfile(null);
-        }
-      }
-    } else {
-      // an unknown error occurred? do something!
-      this.handleGenericUnexpectedCallbackError(data, textStatus, jqXHR, "profile");
-    }
-    this.endFunction("onProfileExistenceSuccess");
-  },
-
   onGetProfileDataSuccess : function(data, textStatus, jqXHR) {
     this.beginFunction("onGetProfileDataSuccess");
     this.assert(data != undefined, "data is undefined in onGetProfileDataSuccess");
     if(data.has_error !== undefined && data.has_error !== null) {
       if(data.has_error) {
-        // we have a known error, handle it
-        this.handleGetProfileDataSuccessHasError(data);
+		//first handle the no profile error - simply display a new profile creation form
+		if (data.exists == 0) {
+			this.showProfile(null);
+		}
+		else {
+			// we have a known error, handle it
+			this.handleGetProfileDataSuccessHasError(data);
+		}
       } else {
-        // This is the case of a volunteer profile
-        if (data.isreceiver==0) {
-          this.isreceiver = 0;
-        } else {
-          // profile is os a mission organizer
-          this.isreceiver = 1;
-        }
-        this.profiledata = data;
-        CMC.log("Calling showProfile with profile data");
-        this.showProfile(data);
+			// This is the case of a volunteer profile
+			if (data.isreceiver==0) {
+				this.isreceiver = 0;
+			}
+		  	// profile is os a mission organizer
+			else {
+				this.isreceiver = 1;
+			}
+			this.profiledata = data;
+			CMC.log("Calling showProfile with profile data");
+      if (CMC.profileshowflag == 1) {
+			  this.showProfile(data);
       }
-    } else {
+      else {
+        this.ajaxNotifyComplete();
+      }
+	}
+	} else {
       // an unknown error occurred? do something!
-      this.handleGenericUnexpectedCallbackError(data, textStatus, jqXHR, "profile data");
+      this.handleGetProfileDataSuccessUnknownError(data, textStatus, jqXHR);
     }
-    this.endFunction("onGetProfileDataSuccess");
+	this.endFunction("onGetProfileDataSuccess");
 	},
   
   showProfile : function (data) {
@@ -429,16 +411,18 @@ var CMC = {
 			for (var each in data.trips) {
 			
         eachstr += "<tr>";
-        eachstr += "<div class=\"profile-picture-\"" + each + ">";
+        eachstr += "<td>";
+        eachstr += "<div class=\"profile-picture-" + each + "\">";
         eachstr += "<img src=\"ajax-spinner.gif\"/>";
         eachstr += "</div>";
+        eachstr += "</td>";
         eachstr += "<td><div class=\"box3\">";
-        eachstr += "<div class=\"profile-tripname-\"" + each + ">";
+        eachstr += "<div class=\"profile-tripname-" + each + "\">";
         eachstr += "<h4> TripName </h4>";
         eachstr += "</div>";
         eachstr += "</td>";
-        eachstr += "<td class=\"td2\"><input type=\"submit\" value=\"Trip Description\" class=\"button\" id=\"trip-desc-submit-\"" + each + "/></td>";
-        eachstr += "<td class=\"td2\"><input type=\"submit\" value=\"Join This Trip\" class=\"button\" id=\"join-trip-submit-\"" + each + "/></td>";
+        eachstr += "<td class=\"td2\"><input type=\"submit\" value=\"Trip Description\" class=\"button\" id=\"trip-desc-submit-" + each + "\"/></td>";
+        eachstr += "<td class=\"td2\"><input type=\"submit\" value=\"Join This Trip\" class=\"button\" id=\"join-trip-submit-" + each + "\"/></td>";
         eachstr += "</tr>";
         eachstr += "</div>";
       }
@@ -447,9 +431,8 @@ var CMC = {
 			
       //Now update the new template with the trips information
       for (var each in data.trips) {      
-      $(id).children("#colTwo").children("#table_wrapper").children("#tbody").children(".profile-picture-"+each).children("img").attr("src", "http://graph.facebook.com/"+this.me.id+"/picture?type=small");
-			$(id).children("#colTwo").children("#table_wrapper").children("#tbody").children(".box3").children(".profile-tripname-"+each).html(data.trips[each] ? "<h4>" + data.trips[each] + "</h4>" : "");
-
+      $(id).children("#colTwo").children("#table_wrapper").children("#tbody").find(".profile-picture-"+each).children("img").attr("src", "http://graph.facebook.com/"+this.me.id+"/picture?type=small");
+			$(id).children("#colTwo").children("#table_wrapper").children("#tbody").find(".profile-tripname-"+each).html(data.trips[each] ? data.trips[each] : "");
 			}			
 
 			}
@@ -488,32 +471,9 @@ var CMC = {
     this.endFunction("animateShowProfile");
   },
 
-  onProfileExistenceError : function(jqXHR, textStatus, errorThrown) {
-    this.ajaxNotifyComplete();
-    // we might also want to log this or surface an error message or something
-    this.handleGenericServerError(jqXHR, textStatus, errorThrown);
-  },
-
-  handleProfileExistenceSuccessHasError : function(data) {
-    this.beginFunction("handleProfileExistenceSuccessHasError");
-    this.assert(data != undefined, "data is undefined in handleProfileExistenceSuccessHasError");
-    // we have a known error, handle it
-    if(data.err_msg !== undefined) {
-      if(data.err_msg != '') {
-        this.error("caught an error from the server while searching: \""+data.err_msg+"\"");
-      } else {
-        this.error("caught an error from the server while searching, but it was blank");
-      }
-    } else {
-      this.error("caught an error from the server while searching, but it did not return an error message");
-    }
-    this.endFunction("handleProfileExistenceSuccessHasError");
-  },
-
   onGetProfileDataError : function(jqXHR, textStatus, errorThrown) {
-    this.ajaxNotifyComplete();
     // we might also want to log this or surface an error message or something
-    this.handleGenericServerError(jqXHR, textStatus, errorThrown);
+    this.handleProfileDataServerError(jqXHR, textStatus, errorThrown);
   },
 
   handleGetProfileDataSuccessHasError : function(data) {
@@ -532,6 +492,16 @@ var CMC = {
     this.endFunction("handleGetProfileDataSuccessHasError");
   },
 
+  handleProfileDataServerError : function(jqXHR, textStatus, errorThrown) {
+    this.beginFunction("handleProfileDataServerError");
+    this.error("error while communicating with server (status: \""+textStatus+"\", error: \""+errorThrown+"\")");
+    this.endFunction("handleProfileDataServerError");
+  },
+
+  handleGetProfileDataSuccessUnknownError : function(data, textStatus, jqXHR) {
+    this.error("an unknown error occurred while trying to process a search success callback.\ndata = " + data);
+  },
+  
   handleSearchSelect : function(item) {
     this.beginFunction("handleSearchSelect");
     var value = null, errorWhileParsing = false;
@@ -695,6 +665,16 @@ var CMC = {
       this.error("caught an error from the server while searching, but it did not return an error message");
     }
     this.endFunction("handleSearchSuccessHasError");
+  },
+
+  handleSearchServerError : function(jqXHR, textStatus, errorThrown) {
+    this.beginFunction("handleSearchServerError");
+    this.error("error while communicating with server (status: \""+textStatus+"\", error: \""+errorThrown+"\")");
+    this.endFunction("handleSearchServerError");
+  },
+
+  handleSearchSuccessUnknownError : function(data, textStatus, jqXHR) {
+    this.error("an unknown error occurred while trying to process a search success callback.\ndata = " + data);
   },
 
   getDataForEachFBID : function (fbids, callback, isRetryCall) {
@@ -1091,7 +1071,8 @@ var CMC = {
       CMC.me = response;
     // now check whether profile is volunteer or mission organizer	  
       //alert('<img src="http://graph.facebook.com/' + CMC.me.id + '/picture" />');
-      CMC.getProfileExistence();
+      CMC.profileshowflag=1;
+      CMC.getProfile();
 		  CMC.log("user: " + CMC.me.name + " has just logged in to the app");
 		  CMC.log("userid: " + CMC.me.id + " has just logged in to the app");
     });
@@ -1248,7 +1229,7 @@ $(function() {
   });  
   
   $("#make-trip").click(function() {
-    $("#profile-trip-dialog").dialog('open');
+	$("#profile-trip-dialog").dialog('open');
   });
 
   $("#profile-trip-dialog").dialog({
@@ -1478,21 +1459,21 @@ $(function() {
     }
 
   $("#profile-submit").click(function() {
-    var mtype = $("form").find('.profile-ddl-type-medical');
-    var nmtype = $("form").find('.profile-ddl-type-nonmedical');
-    var sptype = $("form").find('.profile-ddl-type-spiritual');
-    var reltype = $("form").find('.profile-ddl-type-religious');
-    var durtype = $("form").find('.profile-ddl-type-duration');
-    var state = $("form").find('.profile-ddl-type-state');
-    var city = $("form").find('.profile-input-city');
-    var zipcode = $("form").find('.profile-input-zipcode');
+    var mtype = $("#profile-volunteer-form").find('.profile-ddl-type-medical');
+    var nmtype = $("#profile-volunteer-form").find('.profile-ddl-type-nonmedical');
+    var sptype = $("#profile-volunteer-form").find('.profile-ddl-type-spiritual');
+    var reltype = $("#profile-volunteer-form").find('.profile-ddl-type-religious');
+    var durtype = $("#profile-volunteer-form").find('.profile-ddl-type-duration');
+    var state = $("#profile-volunteer-form").find('.profile-ddl-type-state');
+    var city = $("#profile-volunteer-form").find('.profile-input-city');
+    var zipcode = $("#profile-volunteer-form").find('.profile-input-zipcode');
 
-    var country = $("form").find('.profile-ddl-type-country');
-    var region = $("form").find('.profile-ddl-type-region');
-    var countriesserved = $("form").find('.profile-ddl-type-countriesserved');
-    var phone = $("form").find('.profile-input-phone');
-    var email = $("form").find('.profile-input-email');
-    var misexp = $("form").find('.profile-input-experience');           
+    var country = $("#profile-volunteer-form").find('.profile-ddl-type-country');
+    var region = $("#profile-volunteer-form").find('.profile-ddl-type-region');
+    var countriesserved = $("#profile-volunteer-form").find('.profile-ddl-type-countriesserved');
+    var phone = $("#profile-volunteer-form").find('.profile-input-phone');
+    var email = $("#profile-volunteer-form").find('.profile-input-email');
+    var misexp = $("#profile-volunteer-form").find('.profile-input-experience');           
 
     var zipisvalid = false;
     var emailisvalid = false;
@@ -1500,7 +1481,7 @@ $(function() {
     var errornum=1;
 
     if (zipcode.val() != "") {
-      zipisvalid = CMC.validateZipCode(zipcode.val());
+      zipisvalid = validateZipCode(zipcode.val());
       if (!zipisvalid) {
         reason += errornum+'. Incorrect Zipcode format entered\n';
         errornum = errornum + 1;
@@ -1509,7 +1490,7 @@ $(function() {
     }
 
     if (email.val() != "") {
-      emailisvalid = CMC.validateEmail(email.val());
+      emailisvalid = validateEmail(email.val());
       if (!emailisvalid) {
         reason += errornum + '. Incorrect Email format entered\n';
         errornum = errornum + 1;
@@ -1518,7 +1499,7 @@ $(function() {
     }
 
     if (phone.val() != "") {
-      var phoneerror = CMC.validatePhone(phone.val(),country.val());
+      var phoneerror = validatePhone(phone.val(),country.val());
       if (phoneerror != "") {
         reason += errornum + ' ' + phoneerror + '\n';
         errornum = errornum + 1;
@@ -1531,51 +1512,60 @@ $(function() {
       return false;
     } else {
       var profileformdata = {};
+      
       profileformdata.profiletype=1;
-      if (mtype.val() != 0)
+      if (CMC.profileedit == 1)
+         profileformdata.update = 1;
+
+      if ((mtype != undefined) && (mtype.val() != null))
         profileformdata.medskills= mtype.val();
-      if (nmtype.val() != 0)
+      if ((nmtype != undefined) && (nmtype.val() != null))
         profileformdata.otherskills=nmtype.val();         
-      if (sptype.val() != 0)
+      if ((sptype != undefined) && (sptype.val() != null))
         profileformdata.spiritserv=sptype.val();        
-      if (region.val() != 0)
+      if ((region != undefined) && (region.val() != null))
         profileformdata.region=region.val();  
-      if (country.val() != "")
+      if ((country != undefined) && (country.val() != null))
         profileformdata.country=country.val();  
       if (state.val() != "Select your State")
         profileformdata.state=state.val();  
-      if (durtype.val() != 0)
+      if ((durtype != undefined) && (durtype.val() != null))
         profileformdata.dur=durtype.val();
-      if (reltype.val() != 0)
+      if ((reltype != undefined) && (reltype.val() != null))
         profileformdata.relg=reltype.val();           
-      if (zipcode.val() != "")
+      if ((zipcode != undefined) && (zipcode.val() != null))
         profileformdata.zip=zipcode.val();
-      if (email.val() != "")
+      if ((email != undefined) && (email.val() != null))
         profileformdata.email=email.val();
-      if (city.val() != "")
+      if ((city != undefined) && (city.val() != null))
         profileformdata.city=city.val();
-      if (phone.val() != "")
+      if ((phone != undefined) && (phone.val() != null))
         profileformdata.phone=phone.val();
-      if (misexp.val() != "")
+      if ((misexp != undefined) && (misexp.val() != null))
         profileformdata.misexp=misexp.val();            
-
-      alert('AJAX form submission = ' + JSON.stringify(profileformdata));
-
+      
       $.ajax({
         type: "POST",
         url: "api/profilein.php",
         data: {
           fbid: CMC.me.id ? CMC.me.id : "",
-        profiledata: JSON.stringify(profileformdata)
+        profileinfo: JSON.stringify(profileformdata)
         },
         dataType: "json",
-        success: function() {
-          alert('Success');
+        success: function(data) {
+          if (!data.has_error) {
+            alert('Thank you - your submission has been successfully entered into our database');
+          }
+          else {
+           alert('We are sorry - there was an error: ' + data.err_msg);
+          }
         },
-        error: function() {
-                 alert('Failure');
-               }
+        error: function(data) {
+           alert('We are sorry - there was an error: ' + data.err_msg);
+        }
       });
+      $("#profile-volunteer-dialog").dialog('close');
+     // $("#profile-volunteer-dialog").fadeOut('fast');
       return true;
     }
 
@@ -1583,33 +1573,34 @@ $(function() {
   });
 
     $("#profile-org-submit").click(function() {
-	
-    var aname = $("form").find('.profile-org-name');
-    var aurl = $("form").find('.profile-org-website');
-    var aabout = $("form").find('.profile-org-about');
-    var medfacil = $("form").find('.profile-org-offer');
-    var nonmedfacil = $("form").find('.profile-org-offern');
-	
-    var mtype = $("form").find('.profile-org-medical');
-    var nmtype = $("form").find('.profile-org-nonmedical');
-    var sptype = $("form").find('.profile-org-spiritual');
-    var reltype = $("form").find('.profile-org-religion');
-    var durtype = $("form").find('.profile-org-duration');
-    var state = $("form").find('.profile-org-state');
-    var city = $("form").find('.profile-org-city');
-    var zipcode = $("form").find('.profile-org-zipcode');
 
-    var country = $("form").find('.profile-org-country');
-    var region = $("form").find('.profile-org-region');
-    var countriesserved = $("form").find('.profile-org-countryserved');
-    var phone = $("form").find('.profile-org-phone');
-    var email = $("form").find('.profile-org-email');
-    var misexp = $("form").find('.profile-org-experience');           
+    var aname = $("#profile-organizer-form").find('.profile-org-name');
+    var aurl = $("#profile-organizer-form").find('.profile-org-website');
+    var aabout = $("#profile-organizer-form").find('.profile-org-about');
+    var medfacil = $("#profile-organizer-form").find('.profile-org-offer');
+    var nonmedfacil = $("#profile-organizer-form").find('.profile-org-offern');
+	
+    var mtype = $("#profile-organizer-form").find('.profile-org-medical');
+    var nmtype = $("#profile-organizer-form").find('.profile-org-nonmedical');
+    var sptype = $("#profile-organizer-form").find('.profile-org-spiritual');
+    var reltype = $("#profile-organizer-form").find('.profile-org-religion');
+    var durtype = $("#profile-organizer-form").find('.profile-org-duration');
+    var state = $("#profile-organizer-form").find('.profile-org-state');
+    var city = $("#profile-organizer-form").find('.profile-org-city');
+    var zipcode = $("#profile-organizer-form").find('.profile-org-zipcode');
+
+    var country = $("#profile-organizer-form").find('.profile-org-country');
+    var region = $("#profile-organizer-form").find('.profile-org-region');
+    var countriesserved = $("#profile-organizer-form").find('.profile-org-countryserved');
+    var phone = $("#profile-organizer-form").find('.profile-org-phone');
+    var email = $("#profile-organizer-form").find('.profile-org-email');
+    var misexp = $("#profile-organizer-form").find('.profile-org-experience');           
 
     var zipisvalid = false;
     var emailisvalid = false;
     var reason="";
     var errornum=1;
+    
 
 	if (aurl.val() != "") {
 		if (!isUrl(aurl.val())) {
@@ -1620,7 +1611,7 @@ $(function() {
 	}
 	
     if (zipcode.val() != "") {
-      zipisvalid = CMC.validateZipCode(zipcode.val());
+      zipisvalid = validateZipCode(zipcode.val());
       if (!zipisvalid) {
         reason += errornum+'. Incorrect Zipcode format entered\n';
         errornum = errornum + 1;
@@ -1629,7 +1620,7 @@ $(function() {
     }
 
     if (email.val() != "") {
-      emailisvalid = CMC.validateEmail(email.val());
+      emailisvalid = validateEmail(email.val());
       if (!emailisvalid) {
         reason += errornum + '. Incorrect Email format entered\n';
         errornum = errornum + 1;
@@ -1638,7 +1629,7 @@ $(function() {
     }
 
     if (phone.val() != "") {
-      var phoneerror = CMC.validatePhone(phone.val(),country.val());
+      var phoneerror = validatePhone(phone.val(),country.val());
       if (phoneerror != "") {
         reason += errornum + ' ' + phoneerror + '\n';
         errornum = errornum + 1;
@@ -1646,66 +1637,85 @@ $(function() {
       }
     }
 
+
     if (reason != "") {
       alert('Some input fields need correction:\n'+ reason);
       return false;
     } else {
       var profileformdata = {};
       profileformdata.profiletype=3;
-      if (aname.val() != 0)
+
+      if (CMC.profileedit == 1) {
+         profileformdata.update = 1;
+      }
+
+      
+      if ((aname != undefined) && (aname.val() != null))
         profileformdata.name= aname.val();	  
-      if (aabout.val() != 0)
+      if ((aabout != undefined) && (aabout.val() != null))
         profileformdata.about= aabout.val();
-      if (aurl.val() != 0)
+      if ((aurl != undefined) && (aurl.val() != null))
         profileformdata.url= aurl.val();
-      if (medfacil.val() != 0)
+      if ((medfacil != undefined) && (medfacil.val() != null))
         profileformdata.medfacil= medfacil.val();
-      if (nonmedfacil.val() != 0)
+      if ((nonmedfacil != undefined) && (nonmedfacil.val() !=  null))
         profileformdata.nonmedfacil= nonmedfacil.val();		
-      if (mtype.val() != 0)
+      if ((mtype != undefined) && (mtype.val() != null))
         profileformdata.medskills= mtype.val();
-      if (nmtype.val() != 0)
+      if ((nmtype != undefined) && (nmtype.val() != null))
         profileformdata.otherskills=nmtype.val();         
-      if (sptype.val() != 0)
+      if ((sptype != undefined) && (sptype.val() != null))
         profileformdata.spiritserv=sptype.val();        
-      if (region.val() != 0)
+      if ((region != undefined) && (region.val() != null))
         profileformdata.region=region.val();  
-      if (country.val() != "")
+      if ((country != undefined) && (country.val() != null))
         profileformdata.country=country.val();  
       if (state.val() != "Select your State")
         profileformdata.state=state.val();  
-      if (durtype.val() != 0)
+      if ((durtype != undefined) && (durtype.val() != null))
         profileformdata.dur=durtype.val();
-      if (reltype.val() != 0)
+      if ((reltype != undefined) && (reltype.val() != null))
         profileformdata.relg=reltype.val();           
-      if (zipcode.val() != "")
+      if ((zipcode != undefined) && (zipcode.val() != null))
         profileformdata.zip=zipcode.val();
-      if (email.val() != "")
+      if ((email != undefined) && (email.val() != null))
         profileformdata.email=email.val();
-      if (city.val() != "")
+      if ((city != undefined) && (city.val() != null))
         profileformdata.city=city.val();
-      if (phone.val() != "")
+      if ((phone != undefined) && (phone.val() != null))
         profileformdata.phone=phone.val();
-      if (misexp.val() != "")
+      if ((misexp != undefined) && (misexp.val() != null))
         profileformdata.misexp=misexp.val();            
-
-      alert('AJAX form submission = ' + JSON.stringify(profileformdata));
-
+     
+      //alert("AJAX Submit: " + JSON.stringify(profileformdata));
       $.ajax({
         type: "POST",
         url: "api/profilein.php",
         data: {
-          fbid: CMC.me.id,
-        profiledata: JSON.stringify(profileformdata)
+           fbid: CMC.me.id ? CMC.me.id : "",
+           profileinfo: JSON.stringify(profileformdata)
         },
         dataType: "json",
-        success: function() {
-          alert('Success');
+        success: function(data) {
+          if (!data.has_error) {
+          alert('Thank you - your submission has been successfully entered into our database ');
+          }
+          else {
+            alert("We are sorry, there was an error :  " + data.err_msg);
+          }
         },
-        error: function() {
-                 alert('Failure');
-               }
+        error: function(data, textStatus, errorThrown) {
+                alert("We are sorry, the profile was not submitted with the following error: " + data.err_msg);
+        }
       });
+   
+      // Now show the updated profile
+      CMC.profileshowflag=1;
+      CMC.getProfile();
+
+      // now close the profile submission window
+      $("#profile-organizer-dialog").dialog('close');
+     // $("#profile-organizer-dialog").fadeOut('fast');
       return true;
     }
 
@@ -1714,22 +1724,23 @@ $(function() {
   
   $("#profile-trip-submit").click(function() {
   
-    var aname = $("form").find('.profile-trip-name');
-	var aurl = $("form").find('.profile-trip-website');
-	var aabout = $("form").find('.profile-trip-about');
+    var aname = $("#profile-trip-form").find('.profile-trip-name');
+	var aurl = $("#profile-trip-form").find('.profile-trip-website');
+	var aabout = $("#profile-trip-form").find('.profile-trip-about');
 	
-    var reltype = $("form").find('.profile-trip-religion');
-    var durtype = $("form").find('.profile-trip-duration');
-    var city = $("form").find('.profile-trip-city');
-    var zipcode = $("form").find('.profile-trip-zipcode');
+    var reltype = $("#profile-trip-form").find('.profile-trip-religion');
+    var durtype = $("#profile-trip-form").find('.profile-trip-duration');
+    var city = $("#profile-trip-form").find('.profile-trip-city');
+    var zipcode = $("#profile-trip-form").find('.profile-trip-zipcode');
 
-    var country = $("form").find('.profile-trip-country');
-    var phone = $("form").find('.profile-trip-phone');
-    var email = $("form").find('.profile-trip-email');
-    var stage = $("form").find('.profile-trip-stage');
-    var tripdepart = $("form").find('.profile-trip-depart');
-    var tripreturn = $("form").find('.profile-trip-return');
-    var numberofmembers = $("form").find('.profile-trip-number');
+    var country = $("#profile-trip-form").find('.profile-trip-country');
+    var languages = $("#profile-trip-form").find('.profile-trip-languages');
+    var phone = $("#profile-trip-form").find('.profile-trip-phone');
+    var email = $("#profile-trip-form").find('.profile-trip-email');
+    var stage = $("#profile-trip-form").find('.profile-trip-stage');
+    var tripdepart = $("#profile-trip-form").find('.profile-trip-depart');
+    var tripreturn = $("#profile-trip-form").find('.profile-trip-return');
+    var numberofmembers = $("#profile-trip-form").find('.profile-trip-number');
 
     var zipisvalid = false;
     var emailisvalid = false;
@@ -1782,6 +1793,30 @@ $(function() {
       errornum = errornum + 1;
       isValid = false;
     }
+	
+    // Logic to determine that the trip begin date is before the trip end date
+      if (tripdepart.val() != "") {
+          var departdate = tripdepart.val().split(".");
+          var DepartMonth=parseInt(departdate[0]);	  
+          var DepartDay=parseInt(departdate[1]);	  
+          var DepartYear=parseInt(departdate[2]);
+		  var TDeparture = new Date();
+		  TDeparture.setFullYear(DepartYear,DepartMonth,DepartDay);
+      }
+      if (tripreturn.val() != "") {
+          var returndate = tripreturn.val().split(".");
+          var ReturnMonth=parseInt(returndate[0]);	  
+          var ReturnDay=parseInt(returndate[1]);	  
+          var ReturnYear=parseInt(returndate[2]);	
+		  var TReturn = new Date();
+		  TReturn.setFullYear(ReturnYear,ReturnMonth,ReturnDay);		  
+      }
+	  
+	  if (TDeparture > TReturn) {
+	        reason += errornum + ' ' + 'Trip departure date should be before the return date' + '\n';
+			errornum = errornum + 1;
+			isValid = false;
+	  }
     
     if (reason != "") {
       alert('Some input fields need correction:\n'+ reason);
@@ -1789,62 +1824,81 @@ $(function() {
     } else {
       var profiletripformdata = {};
       profiletripformdata.profiletype=2;
-      if (aname.val() != "")
-        profiletripformdata.name= aname.val();
-      if (aurl.val() != "")
-        profiletripformdata.url=aurl.val();
-      if (aabout.val() != "")
-        profiletripformdata.about= aabout.val();		
-      if (stage.val() != 0)
+
+      if ((aname != undefined) && (aname.val() != null))
+        profiletripformdata.name= aname.val();	  
+      if ((aabout != undefined) && (aabout.val() != null))
+        profiletripformdata.about= aabout.val();
+      if ((aurl != undefined) && (aurl.val() != null))
+        profiletripformdata.url= aurl.val();
+      if ((stage != undefined) && (stage.val() != null))
         profiletripformdata.stage= stage.val();
-      if (tripdepart.val() != "") {
-          //alert("departdate1 = " + tripdepart.val());
+      if ((tripdepart != undefined) && (tripdepart.val() !=  null)) {
           var departdate = tripdepart.val().split(".");
-          //alert("departdate = " + departdate[0] + "  " + departdate[1] + " " + departdate[2]);
-          profiletripformdata.DepartMonth=parseInt(departdate[0]);	  
-          profiletripformdata.DepartDay=parseInt(departdate[1]);	  
-          profiletripformdata.DepartYear=parseInt(departdate[2]);	  
+          profiletripformdata.DepartMonth=parseInt(departdate[0],10);	  
+          profiletripformdata.DepartDay=parseInt(departdate[1],10);	  
+          profiletripformdata.DepartYear=parseInt(departdate[2],10);	  
       }
-      if (tripreturn.val() != "") {
+      if ((tripreturn != undefined) && (tripreturn.val() !=  null)) {
           var returndate = tripreturn.val().split(".");
-          profiletripformdata.ReturnMonth=parseInt(returndate[0]);	  
-          profiletripformdata.ReturnDay=parseInt(returndate[1]);	  
-          profiletripformdata.ReturnYear=parseInt(returndate[2]);	  
+          profiletripformdata.ReturnMonth=parseInt(returndate[0],10);	  
+          profiletripformdata.ReturnDay=parseInt(returndate[1],10);	  
+          profiletripformdata.ReturnYear=parseInt(returndate[2],10);	  
       }
-      if (numberofmembers.val() != "")
-        profiletripformdata.numpeople=numberofmembers.val();         
-      if (country.val() != "")
+
+
+      if (!numberofmembers) {
+        profiletripformdata.numpeople= numberofmembers.val();
+      }
+      //if (numberofmembers.val() !== null)
+      //
+      //if ((country != undefined) && (country.val() != null))
+      if (!country)
         profiletripformdata.country=country.val();  
-      if (durtype.val() != 0)
-        profiletripformdata.durationid=durtype.val();
-      if (reltype.val() != 0)
+      //if ((languages != undefined) && (languages.val() != null))
+      if (!languages)
+        profiletripformdata.languages=languages.val(); 
+      //if ((durtype != undefined) && (durtype.val() != null))
+      if (!durtype)
+        profiletripformdata.dur=durtype.val();
+      //if ((reltype != undefined) && (reltype.val() != null))
+      if (!reltype)
         profiletripformdata.relg=reltype.val();           
-      if (zipcode.val() != "")
+      //if ((zipcode != undefined) && (zipcode.val() != null))
+      if (!zipcode)
         profiletripformdata.zip=zipcode.val();
-      if (email.val() != "")
+      //if ((email != undefined) && (email.val() != null))
+      if (!email)
         profiletripformdata.email=email.val();
-      if (city.val() != "")
-        profiletripformdata.destination=city.val();
-      if (phone.val() != "")
+      //if ((city != undefined) && (city.val() != null))
+      if (!city)
+        profiletripformdata.city=city.val();
+      //if ((phone != undefined) && (phone.val() != null))
+      if (!phone)
         profiletripformdata.phone=phone.val();
 
-      //alert('AJAX TRIP form submission = ' + JSON.stringify(profiletripformdata));
-      
-      
+     
+      alert("ajax submit : " + JSON.stringify(profiletripformdata));
+
       $.ajax({
         type: "POST",
         url: "api/profilein.php",
         data: {
-          fbid: CMC.me.id,
-		      profiledata: JSON.stringify(profiletripformdata)
+           fbid: this.me.id ? this.me.id : "",
+		      profileinfo: JSON.stringify(profiletripformdata)
         },
         dataType: "json",
-        success: function() {
-          alert('Success');
+        success: function(data) {
+          if (!data.has_error) {
+          alert('Thank you - your submission has been successfully entered into our database');
+          }
+          else {
+            alert("We are sorry, the trip was not created due to: " + data.err_msg);
+          }
         },
-        error: function() {
-                 alert('Failure');
-               }
+        error: function(data) {
+                 alert('We are sorry, the trip was not created due to: ' + data.err_msg);
+        }
       });
       
 	    $("#profile-trip-dialog").dialog('close');
@@ -1853,14 +1907,18 @@ $(function() {
     });
 
   // Handles the live form validation
-  $("#profile-medical").validate({
+  $("#profile-trip-name").validate({
     expression: "if (VAL) return true; else return false;",
-    message: "Please enter the Required field"
+    message: "Trip name is a required field"
   });
+  //$("#profile-org-website").validate[optional,custom[url]];
+  //$("#profile-trip-website").validate[optional,custom[url]];  
+  
   $("#profile-org-website").validate({
 		expression: "if (VAL.test(/(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/) && VAL) return true; else if (!VAL) return true; else return false;",
 		message: "Please enter a valid website"
   });
+  
   $("#profile-email").validate({
     expression: "if (VAL.match(/^[^\\W][a-zA-Z0-9\\_\\-\\.]+([a-zA-Z0-9\\_\\-\\.]+)*\\@[a-zA-Z0-9_]+(\\.[a-zA-Z0-9_]+)*\\.[a-zA-Z]{2,4}$/) && VAL) return true; else if (!VAL) return true; else return false;",
     message: "Please enter a valid Email ID"
@@ -1916,17 +1974,168 @@ $(function() {
   });
 
 
-  var profileshow = "hide";
   $("#EditProfile").click(function() {  
 
-    if (CMC.receiver ==0) {
-      alert("Volunteer profile" + CMC.profiledata);
+      CMC.profileedit = 1;
+
+    // Retrieve the profile data from the backend again to make sure it is the latest information, no need to show profile
+      CMC.profileshowflag=0;
+      CMC.getProfile();
+
+    if (CMC.isreceiver ==0) {
+		var id = "#profile-volunteer-dialog";
+
+        if (CMC.profiledata.zip != undefined) {
+          $("input#profile-zipcode").val(CMC.profiledata.zip);
+        }
+        if (CMC.profiledata.about != undefined) {
+          $("input#profile-about").val(CMC.profiledata.about);
+        }
+		
+        if (CMC.profiledata.MedicalSkills != undefined) {
+          if (CMC.profiledata.MedicalSkills.length > 0) {
+          var selstr = "[";
+          for (var each in CMC.profiledata.MedicalSkills) {
+            if (each > 0) {
+              selstr += ", ";
+            }
+            selstr += CMC.profiledata.MedicalSkillsid[each];
+          }
+          selstr += "]";
+
+          CMC.prelength[0] = CMC.profiledata.MedicalSkills.length-1;
+          CMC.postlen[0] = CMC.profiledata.MedicalSkills.length;
+          $("input#profile-medical").val(selstr);
+          }
+          else {
+            CMC.prelength[0] = 0;
+            CMC.postlen[0] = 0;
+          }
+        }
+        if (CMC.profiledata.Non_MedicalSkills != undefined) {
+          if (CMC.profiledata.Non_MedicalSkills.length > 0) {
+          var selstr = "[";
+          for (var each in CMC.profiledata.Non_MedicalSkills) {
+            if (each > 0) {
+              selstr += ", ";
+            }
+            selstr += CMC.profiledata.Non_MedicalSkillsid[each];
+          }
+          selstr += "]";
+          CMC.prelength[1] = CMC.profiledata.Non_MedicalSkills.length-1;
+          CMC.postlen[1] = CMC.profiledata.Non_MedicalSkills.length;
+
+          $("input#profile-nonmedical").val(selstr);
+          }
+          else {
+            CMC.prelength[1] = 0;
+            CMC.postlen[1] = 0;
+          }
+        }
+        if (CMC.profiledata.SpiritualSkills != undefined) {
+          if (CMC.profiledata.SpiritualSkills.length > 0) {
+          var selstr = "[";
+          for (var each in CMC.profiledata.SpiritualSkills) {
+            if (each > 0) {
+              selstr += ", ";
+            }
+            selstr += CMC.profiledata.SpiritualSkillsid[each];
+          }
+          selstr += "]";
+
+          CMC.prelength[2] = CMC.profiledata.SpiritualSkills.length-1;
+          CMC.postlen[2] = CMC.profiledata.SpiritualSkills.length;
+          $("input#profile-spiritual").val(selstr);
+          }
+          else {
+            CMC.prelength[2] = 0;
+            CMC.postlen[2] = 0;
+          }
+        }
+        if (CMC.profiledata.relg != undefined) {
+          $("input#profile-religion").val(CMC.profiledata.relg);
+        }
+       
+        if (CMC.profiledata.Durations != undefined) {
+        if (CMC.profiledata.Durations.PreferredDurationofMissionTrips != undefined) {
+          $("input#profile-duration").val(CMC.profiledata.Durations.PreferredDurationofMissionTrips);
+        }
+        }
+        
+        if (CMC.profiledata.States != undefined) {
+        if (CMC.profiledata.States.state != undefined) {
+          $("input#profile-state").val(CMC.profiledata.States.state);
+        }
+        }
+        if (CMC.profiledata.city != undefined) {
+          $("input#profile-city").val(CMC.profiledata.city);
+        }
+        if (CMC.profiledata.country != undefined) {
+          $("input#profile-country").val(CMC.profiledata.country);
+        }
+        if (CMC.profiledata.GeographicAreasofInterest != undefined) {
+        if (CMC.profiledata.GeographicAreasofInterest.Regions != undefined) {
+          if (CMC.profiledata.GeographicAreasofInterest.Regions.length > 0) {
+          var selstr = "[";
+          for (var each in CMC.profiledata.GeographicAreasofInterest.Regions) {
+            if (each > 0) {
+              selstr += ", ";
+            }
+            selstr += CMC.profiledata.GeographicAreasofInterest.Regionsid[each];
+          }
+          selstr += "]";
+          CMC.prelength[3] = CMC.profiledata.GeographicAreasofInterest.Regions.length-1;
+          CMC.postlen[3] = CMC.profiledata.GeographicAreasofInterest.Regions.length;
+
+          $("input#profile-region").val(selstr);
+          }
+          else {
+            CMC.prelength[3] = 0;
+            CMC.postlen[3] = 0;
+          }
+        }
+        }
+        if (CMC.profiledata.GeographicAreasofInterest != undefined) {
+        if (CMC.profiledata.GeographicAreasofInterest.Countries != undefined) {
+          if (CMC.profiledata.GeographicAreasofInterest.Countries.length > 0) {
+          var selstr = "[";
+          for (var each in CMC.profiledata.GeographicAreasofInterest.Countries) {
+            if (each > 0) {
+              selstr += ", ";
+            }
+            selstr += CMC.profiledata.GeographicAreasofInterest.Countriesid[each];
+          }
+          selstr += "]";
+          CMC.prelength[4] = CMC.profiledata.GeographicAreasofInterest.Countries.length-1;
+          CMC.postlen[4] = CMC.profiledata.GeographicAreasofInterest.Countries.length;
+
+          $("input#profile-region").val(selstr);
+
+          $("input#profile-country-served").val(selstr);
+          }
+          else {
+            CMC.prelength[4] = 0;
+            CMC.postlen[4] = 0;
+          }
+        }
+        }
+        if (CMC.profiledata.phone != undefined) {
+          $("input#profile-phone").val(CMC.profiledata.phone);
+        }
+        if (CMC.profiledata.email != undefined) {
+          $("input#profile-email").val(CMC.profiledata.email);
+        }
+        if (CMC.profiledata.misexp != undefined) {
+          $("input#profile-experience").val(CMC.profiledata.misexp);
+        }	 
+	 
+        $(id).children("form").children("#wrapper").children("#contents").children(".profile-container").children(".profile-header").html("Please edit your profile information");   
+        $("#profile-volunteer-dialog").dialog('open');
     }
     else {
       // First modify the profile organizer dialog form, then display for editing
 
         var id = "#profile-organizer-dialog";
-        //CMC.log($('#profile-org-zipcode').html());
 
         if (CMC.profiledata.zip != undefined) {
           $("input#profile-org-zipcode").val(CMC.profiledata.zip);
@@ -1937,8 +2146,8 @@ $(function() {
         if (CMC.profiledata.AgencyWebsite != undefined) {
           $("input#profile-org-website").val(CMC.profiledata.AgencyWebsite);
         }
-        if (CMC.profiledata.AboutAgency != undefined) {
-          $("input#profile-org-about").val(CMC.profiledata.AboutAgency);
+        if (CMC.profiledata.about != undefined) {
+          $("input#profile-org-about").val(CMC.profiledata.about);
         }
         if (CMC.profiledata.FacilityMedicalOfferings != undefined) {
           if (CMC.profiledata.FacilityMedicalOfferings.length>0) {
@@ -1947,11 +2156,17 @@ $(function() {
             if (each > 0) {
               selstr += ", ";
             }
-            selstr += CMC.profiledata.FacilityMedicalOfferings[each];
+            selstr += CMC.profiledata.FacilityMedicalOfferingsid[each];
           }
           selstr += "]";
+          CMC.prelength[0] = CMC.profiledata.FacilityMedicalOfferings.length-1;
+          CMC.postlen[0] = CMC.profiledata.FacilityMedicalOfferings.length;
 
           $("input#profile-org-offer").val(selstr);
+          }
+          else {
+            CMC.prelength[0] = 0;
+            CMC.postlen[0] = 0;
           }
         }
         if (CMC.profiledata.FacilityNon_MedicalOfferings != undefined) {
@@ -1961,11 +2176,17 @@ $(function() {
             if (each > 0) {
               selstr += ", ";
             }
-            selstr += CMC.profiledata.FacilityNon_MedicalOfferings[each];
+            selstr += CMC.profiledata.FacilityNon_MedicalOfferingsid[each];
           }
           selstr += "]";
+          CMC.prelength[1] = CMC.profiledata.FacilityNon_MedicalOfferings.length-1;
+          CMC.postlen[1] = CMC.profiledata.FacilityNon_MedicalOfferings.length;
 
           $("input#profile-org-offern").val(selstr);
+          }
+          else {
+            CMC.prelength[1] = 0;
+            CMC.postlen[1] = 0;
           }
         }
         if (CMC.profiledata.MedicalSkills != undefined) {
@@ -1975,11 +2196,17 @@ $(function() {
             if (each > 0) {
               selstr += ", ";
             }
-            selstr += CMC.profiledata.MedicalSkills[each];
+            selstr += CMC.profiledata.MedicalSkillsid[each];
           }
           selstr += "]";
 
+          CMC.prelength[2] = CMC.profiledata.MedicalSkills.length-1;
+          CMC.postlen[2] = CMC.profiledata.MedicalSkills.length;
           $("input#profile-org-medical").val(selstr);
+          }
+          else {
+            CMC.prelength[2] = 0;
+            CMC.postlen[2] = 0;
           }
         }
         if (CMC.profiledata.Non_MedicalSkills != undefined) {
@@ -1989,11 +2216,18 @@ $(function() {
             if (each > 0) {
               selstr += ", ";
             }
-            selstr += CMC.profiledata.Non_MedicalSkills[each];
+            selstr += CMC.profiledata.Non_MedicalSkillsid[each];
           }
           selstr += "]";
+          alert("selstr " + selstr);
 
+          CMC.prelength[3] = CMC.profiledata.Non_MedicalSkills.length-1;
+          CMC.postlen[3] = CMC.profiledata.Non_MedicalSkills.length;
           $("input#profile-org-nonmedical").val(selstr);
+          }
+          else {
+            CMC.prelength[3] = 0;
+            CMC.postlen[3] = 0;
           }
         }
         if (CMC.profiledata.SpiritualSkills != undefined) {
@@ -2003,11 +2237,17 @@ $(function() {
             if (each > 0) {
               selstr += ", ";
             }
-            selstr += CMC.profiledata.SpiritualSkills[each];
+            selstr += CMC.profiledata.SpiritualSkillsid[each];
           }
           selstr += "]";
+          CMC.prelength[4] = CMC.profiledata.SpiritualSkills.length-1;
+          CMC.postlen[4] = CMC.profiledata.SpiritualSkills.length;
 
           $("input#profile-org-spiritual").val(selstr);
+          }
+          else {
+            CMC.prelength[4] = 0;
+            CMC.postlen[4] = 0;
           }
         }
         if (CMC.profiledata.relg != undefined) {
@@ -2039,11 +2279,17 @@ $(function() {
             if (each > 0) {
               selstr += ", ";
             }
-            selstr += CMC.profiledata.GeographicAreasofInterest.Regions[each];
+            selstr += CMC.profiledata.GeographicAreasofInterest.Regionsid[each];
           }
           selstr += "]";
 
+          CMC.prelength[5] = CMC.profiledata.GeographicAreasofInterest.Regions.length-1;
+          CMC.postlen[5] = CMC.profiledata.GeographicAreasofInterest.Regions.length;
           $("input#profile-org-region").val(selstr);
+          }
+          else {
+            CMC.prelength[5] = 0;
+            CMC.postlen[5] = 0;
           }
         }
         }
@@ -2055,11 +2301,17 @@ $(function() {
             if (each > 0) {
               selstr += ", ";
             }
-            selstr += CMC.profiledata.GeographicAreasofInterest.Countries[each];
+            selstr += CMC.profiledata.GeographicAreasofInterest.Countriesid[each];
           }
           selstr += "]";
 
+          CMC.prelength[6] = CMC.profiledata.GeographicAreasofInterest.Countries.length-1;
+          CMC.postlen[6] = CMC.profiledata.GeographicAreasofInterest.Countries.length;
           $("input#profile-org-countryserved").val(selstr);
+          }
+          else {
+            CMC.prelength[6] = 0;
+            CMC.postlen[6] = 0;
           }
         }
         }
@@ -2084,35 +2336,78 @@ $(function() {
     $("#profile-trip-dialog").dialog('open');
   });   
 
-  if (CMC.profiledata.trips != undefined) {
+    function jointrip(index){
+      $.ajax({
+        type: "POST",
+        url: "api/addtripmember.php",
+        data: {
+		      tripid: CMC.profiledata.tripid[index],
+          fbid: CMC.me.id ? CMC.me.id : "",
+		      type: 2
+        },
+        dataType: "json",
+        success: function() {
+          alert('You have successfully joined this trip');
+        },
+        error: function() {
+            alert('Sorry, you could not be added to the trip due to some problem on our side - please try again later');
+        }
+      });
+    }   
+  
+    function tripdesc(index){
+      $.ajax({
+        type: "POST",
+        url: "api/profileT.php",
+        data: {
+		      tripid: CMC.profiledata.tripid[index],
+          fbid: CMC.me.id ? CMC.me.id : ""
+        },
+        dataType: "json",
+        success: function(data) {
+			
+		    },
+        error: function(data) {
+            alert('Sorry, the trip description could not be obtained due to: ' + data.err_msg);
+        }
+      });
+    }
+
+  //alert("CMC profile trips = " + CMC.profiledata.trips.length);
+  //if (CMC.profiledata.trips != undefined) {
 
   var tripjoinbtns = new Array();
-  for (var i=0;i<CMC.profiledata.trips.length;i++) {
+  //for (var i=0;i<CMC.profiledata.trips.length;i++) {
+  for (var i=0;i<20;i++) {
     tripjoinbtns[i] = "join-trip-submit-"+i;
   }
 
   $.each(tripjoinbtns, function() {
     $("#" +this).click(function() {
+      alert("Came into join click");
       var tripparts = this.id.split('-');
       var index = parseInt(tripparts[tripparts.length-1]);;
-      alert("Trip Index = " + index);
+      alert("Trip Index = " + index + " " + CMC.profiledata.tripid[index]);
+	    jointrip(index);
     });
   });
 
   var tripdescbtns = new Array();
-  for (var i=0;i<CMC.profiledata.trips.length;i++) {
+  //for (var i=0;i<CMC.profiledata.trips.length;i++) {
+  for (var i=0;i<20;i++) {
     tripdescbtns[i] = "trip-desc-submit-"+i;
   }
 
   $.each(tripdescbtns, function() {
     $("#" +this).click(function() {
       var descparts = this.id.split('-');
-      var index = parseInt(descparts[descparts.length-1]);;
-      alert("Desc Trip Index = " + index);
+      var index = parseInt(descparts[descparts.length-1]);
+      alert("TripDesc Index = " + index + " " + CMC.profiledata.tripid[index]);
+      tripdesc(index);
     });
   });
 
-  }
+ // }
 
 
   // this should be the last thing that happens
