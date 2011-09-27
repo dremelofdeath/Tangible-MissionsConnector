@@ -40,6 +40,7 @@ else {
 	if (!empty($name))
 		$json['tripname'] = $name;
     $creatorid = $row['creatorid'];
+	$json['creatorid'] = $creatorid;
     $sql2 = 'select * from users where userid="'.$creatorid.'"';
     $result2 = mysql_query($sql2,$con);
 	if (!$result2) {

@@ -1454,6 +1454,80 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
             );
           ?>
          </div>
+        <div id="show-trip-profile" style="display: none">
+		<div id="tripprofilecontent">
+			<div id="colOne">
+			<div id="tripprofileimage">
+            <div class="trip-owner-picture">
+				      <img src="ajax-spinner.gif" width="190" />
+            </div>
+			</div>
+			<div class="box2">
+				<div class="profile-trip-owner">Name
+				</div>
+			</div>
+			<p>&nbsp;</p>
+			<div class="box2">
+				<h3>
+					Trip Description: <br />
+				</h3>
+				<div class="trip-profile-about">
+					<h4> About </h4>
+				</div>
+			</div>
+			</div>
+			<div id="colTwo">
+				<p>&nbsp;</p>
+				<div class="box1">
+					<h2>Trip Information:</h2>
+					<h5> Trip Name: </h5>
+					<div class="profile-trip-name">
+						<h6> Trip Name </h6>
+					</div>	
+					<h5> Trip Website: </h5>
+					<div class="profile-trip-url">
+						<h6> Trip Website </h6>
+					</div>
+					<h5> Trip Destination: </h5>
+					<div class="profile-trip-dest">
+						<h6> Trip Destination </h6>
+					</div>					
+					<h5> Email: </h5>
+					<div class="profile-trip-email">
+						<h6> Email </h6>
+					</div>		
+					<h5> Phone: </h5>
+					<div class="profile-trip-phone">
+						<h6> Phone </h6>
+					</div>	
+					<h5> Execution Stage: </h5>
+					<div class="profile-trip-stage">
+						<h6> Trip Execution Stage </h6>
+					</div>	
+					<h5> Date of Departure: </h5>
+					<div class="profile-trip-depart">
+						<h6> Departure Date </h6>
+					</div>	
+					<h5> Date of Return </h5>
+					<div class="profile-trip-return">
+						<h6> Return </h6>
+					</div>	
+					<h5> Trip Religion: </h5>
+					<div class="profile-trip-religion">
+						<h6> Trip religion </h6>
+					</div>
+					<h5> Trip Accommodation Level: </h5>
+					<div class="profile-trip-acco">
+						<h6> Trip Accommodation Level </h6>
+					</div>	
+					<h5> Number of People involved in this Trip: </h5>
+					<div class="profile-trip-numpeople">
+						<h6> Number of people </h6>
+					</div>						
+				</div>
+			</div>
+		</div>
+        </div>		 
 		 <div id="show-trips" style="display: none">
 				<h2>Upcoming Trips:</h2>
 				<table>	

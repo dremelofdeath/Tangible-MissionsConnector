@@ -607,6 +607,162 @@ var CMC = {
     this.endFunction("handleGetTripsDataSuccessHasError");
   },
 
+  GetTripProfile : function(index) {
+	  this.beginFunction("GetTripProfile");
+      $.ajax({
+        type: "POST",
+        url: "api/profileT.php",
+        data: {
+		    tripid: CMC.profiledata.tripid[index],
+            fbid: CMC.me.id ? CMC.me.id : ""
+        },
+        dataType: "json",
+        success: this.onGetTripProfileDataSuccess,
+        error: this.onGetTripProfileDataError
+      });
+	  this.endFunction("GetTripProfile");
+    },  
+
+  onGetTripProfileDataSuccess : function(data, textStatus, jqXHR) {
+    this.beginFunction("onGetTripProfileDataSuccess");
+    this.assert(data != undefined, "data is undefined in onGetTripProfileDataSuccess");
+    if(data.has_error !== undefined && data.has_error !== null) {
+      if(data.has_error) {
+          // we have a known error, handle it
+          this.handleGetTripProfileDataSuccessHasError(data);
+      } else {
+          this.showTripProfile(data);
+      }
+    } else {
+      // an unknown error occurred? do something!
+      this.handleGenericUnexpectedCallbackError(data, textStatus, jqXHR, "trip profile data");
+    }
+    this.endFunction("onGetTripProfileDataSuccess");
+	},	
+	
+  handleGetTripProfileDataSuccessHasError : function(data) {
+    this.beginFunction("handleGetTripProfileDataSuccessHasError");
+    this.assert(data != undefined, "data is undefined in handleGetTripProfileDataSuccessHasError");
+    // we have a known error, handle it
+    if(data.err_msg !== undefined) {
+      if(data.err_msg != '') {
+        this.error("caught an error from the server while searching: \""+data.err_msg+"\"");
+      } else {
+        this.error("caught an error from the server while searching, but it was blank");
+      }
+    } else {
+      this.error("caught an error from the server while searching, but it did not return an error message");
+    }
+    this.endFunction("handleGetTripProfileDataSuccessHasError");
+  },	
+  
+  showTripProfile : function (data) {
+    this.beginFunction("showTripProfile");
+    if (data === undefined) {
+      // this should be a bug! do NOT pass this function undefined! say null to inform it that you have no results!
+      this.assert(data === undefined, "undefined passed as results for showTripProfile");
+    } else if (data == null) {
+      // no trip profile exists - // This condition should never be met
+      $("#no-trip").fadeIn();
+    } else {
+
+        var id = "#tripprofilecontent";
+        this.ajaxNotifyStart();
+        this.assert(data.tripname !== undefined, "Trip name is missing from result set");
+		
+    		alert(data.tripowner);
+		
+        $(id).children("#colOne").children(".box2").children(".profile-trip-owner").html(data.tripowner ? data.tripowner : "");
+        
+        $(id).children("#colOne").children("#tripprofileimage").children(".trip-owner-picture").children("img").attr("src", "http://graph.facebook.com/"+data.creatorid+"/picture?type=large");
+        this.ajaxNotifyComplete();
+			
+        $(id).children("#colOne").children(".box2").children(".trip-profile-about").html(data.tripdesc ? "<h4>" + data.tripdesc + "</h4>" : "");
+			
+	  //display Trip profile information
+      if (data.tripname === undefined) {
+			$(id).children("#colTwo").children(".box1").children(".profile-trip-name").html("<h6></h6>");
+      }
+      else {
+			$(id).children("#colTwo").children(".box1").children(".profile-trip-name").html(data.tripname ? "<h6>" + data.tripname + "</h6>" : "");
+      }
+	 
+      if (data.website === undefined) {
+			$(id).children("#colTwo").children(".box1").children(".profile-trip-url").html("<h6></h6>");
+      }
+      else {
+			$(id).children("#colTwo").children(".box1").children(".profile-trip-url").html(data.website ? "<h6>" + data.website + "</h6>" : "");
+      }	 
+	  
+      if ((data.destination === undefined) && (data.destinationcountry === undefined)) {
+			$(id).children("#colTwo").children(".box1").children(".profile-trip-dest").html("<h6></h6>");
+      }
+      else if (data.destination === undefined) {
+		$(id).children("#colTwo").children(".box1").children(".profile-trip-dest").html("<h6>"+data.destinationcountry+"</h6>");
+	  }
+	  else if (data.destinationcountry === undefined) {
+		$(id).children("#colTwo").children(".box1").children(".profile-trip-dest").html("<h6>"+data.destination+"</h6>");
+	  }
+	  else {
+			$(id).children("#colTwo").children(".box1").children(".profile-trip-dest").html("<h6>" + data.destination + "," +data.destinationcountry+"</h6>");
+      }		  
+	  
+      if (data.email == undefined) {
+			$(id).children("#colTwo").children(".box1").children(".profile-trip-email").html("<h6></h6>");
+      }
+      else {
+			$(id).children("#colTwo").children(".box1").children(".profile-trip-email").html(data.email ? "<h6>" + data.email + "</h6>" : "");
+      }
+
+      if (data.phone === undefined) {
+			$(id).children("#colTwo").children(".box1").children(".profile-trip-phone").html("<h6></h6>");
+      }
+      else {
+			$(id).children("#colTwo").children(".box1").children(".profile-trip-phone").html(data.phone ? "<h6>" + data.phone + "</h6>" : "");
+      }
+	  
+      if (data.tripstage === undefined) {
+			$(id).children("#colTwo").children(".box1").children(".profile-trip-stage").html("<h6></h6>");
+      }
+      else {
+			$(id).children("#colTwo").children(".box1").children(".profile-trip-stage").html(data.tripstage ? "<h6>" + data.tripstage + "</h6>" : "");
+      }	  
+
+	  if (data.departyear === undefined) {
+			$(id).children("#colTwo").children(".box1").children(".profile-trip-depart").html("<h6></h6>");
+      }
+      else {
+			$(id).children("#colTwo").children(".box1").children(".profile-trip-depart").html(data.departyear ? "<h6>" + data.departmonth +"/"+data.departday+"/"+data.departyear + "</h6>" : "");
+      }	
+	  
+	  if (data.returnyear === undefined) {
+			$(id).children("#colTwo").children(".box1").children(".profile-trip-return").html("<h6></h6>");
+      }
+      else {
+			$(id).children("#colTwo").children(".box1").children(".profile-trip-return").html(data.returnyear ? "<h6>" + data.returnmonth +"/"+data.returnday+"/"+data.returnyear + "</h6>" : "");
+      }	  
+
+      if (data.religion === undefined) {
+			$(id).children("#colTwo").children(".box1").children(".profile-trip-religion").html("<h6></h6>");
+      }
+      else {
+      $(id).children("#colTwo").children(".box1").children(".profile-trip-religion").html(data.religion ? "<h6>" + data.religion + "</h6>" : "");
+      }
+	  
+      if (data.numpeople === undefined) {
+			$(id).children("#colTwo").children(".box1").children(".profile-trip-numpeople").html("<h6></h6>");
+      }
+      else {
+      $(id).children("#colTwo").children(".box1").children(".profile-trip-numpeople").html(data.numpeople ? "<h6>" + data.numpeople + "</h6>" : "");
+      }
+
+      $("#trips-tab").fadeIn();
+      $("#show-trip-profile").fadeIn();
+    } // end else
+	
+    this.endFunction("showTripProfile");
+  },
+  
   handleSearchSelect : function(item) {
     this.beginFunction("handleSearchSelect");
     var value = null, errorWhileParsing = false;
@@ -1266,6 +1422,36 @@ $(function() {
                  : $(this).parent().attr('id'))
                : $(this).attr('id');
     CMC.log("click event: " + $(this).get(0).tagName.toLowerCase() + "#" + id);
+      
+      if (id.indexOf("trip-desc-submit") >=0) {
+        var descparts = id.split('-');
+        var index = parseInt(descparts[descparts.length-1],10);
+        //alert("TripDesc Index = " + index + " " + CMC.profiledata.tripid[index]);
+	      CMC.GetTripProfile(index);
+      }
+
+      if (id.indexOf("trips-desc-submit") >=0) {
+        var descparts = id.split('-');
+        var index = parseInt(descparts[descparts.length-1],10);
+        //alert("TripDesc Index = " + index + " " + CMC.profiledata.tripid[index]);
+	      CMC.GetTripProfile(index);
+      }
+
+      if (id.indexOf("join-trips-submit") >=0) {
+        var descparts = id.split('-');
+        var index = parseInt(descparts[descparts.length-1],10);
+        //alert("TripDesc Index = " + index + " " + CMC.profiledata.tripid[index]);
+	      //CMC.GetTripProfile(index);
+      }
+
+      if (id.indexOf("invite-trip-submit") >=0) {
+      alert("Came into Trip Invite click");
+      var tripparts = this.id.split('-');
+      var index = parseInt(tripparts[tripparts.length-1],10);;
+      alert("Trip Index = " + index + " " + CMC.profiledata.tripid[index]);
+	      //invitetotrip(index);
+      }
+
   });
   //@/END/DEBUGONLYSECTION
 
@@ -2437,41 +2623,23 @@ $(function() {
         type: "POST",
         url: "api/addtripmember.php",
         data: {
-		      tripid: CMC.profiledata.tripid[index],
-          fbid: CMC.me.id ? CMC.me.id : "",
-		      type: 2
-        },
-        dataType: "json",
-        success: function() {
-          alert('You have successfully joined this trip');
-        },
-        error: function() {
-            alert('Sorry, you could not be added to the trip due to some problem on our side - please try again later');
-        }
-      });
-    }   
-  
-    function tripdesc(index){
-      $.ajax({
-        type: "POST",
-        url: "api/profileT.php",
-        data: {
 		    tripid: CMC.profiledata.tripid[index],
-            fbid: CMC.me.id ? CMC.me.id : ""
+			fbid: CMC.me.id ? CMC.me.id : "",
+		    type: 2
         },
         dataType: "json",
         success: function(data) {
-			
-		    },
+          alert('You have successfully joined this trip');
+        },
         error: function(data) {
-            alert('Sorry, the trip description could not be obtained due to: ' + data.err_msg);
+            alert('Sorry, you could not be added to the trip due to: ' + data.err_msg);
         }
       });
-    }
+    }   
 
+    /*
   $.each(CMC.tripsjoinbtns, function() {
     $("#" +this).click(function() {
-      alert("Came into join click");
       var tripparts = this.id.split('-');
       var index = parseInt(tripparts[tripparts.length-1],10);;
       alert("Trip Index = " + index + " " + CMC.profiledata.tripid[index]);
@@ -2485,7 +2653,7 @@ $(function() {
       var tripparts = this.id.split('-');
       var index = parseInt(tripparts[tripparts.length-1],10);;
       alert("Trips Index = " + index + " " + CMC.profiledata.tripid[index]);
-	    jointrip(index);
+	  CMC.GetTripProfile(index);
     });
   });
 
@@ -2495,19 +2663,21 @@ $(function() {
       var tripparts = this.id.split('-');
       var index = parseInt(tripparts[tripparts.length-1],10);;
       alert("Trip Index = " + index + " " + CMC.profiledata.tripid[index]);
-	    //jointrip(index);
+	  //invitetotrip(index);
     });
   });
 
   $.each(CMC.tripdescbtns, function() {
     $("#" +this).click(function() {
+      alert("Came into trip desctiption");
       var descparts = this.id.split('-');
       var index = parseInt(descparts[descparts.length-1],10);
       alert("TripDesc Index = " + index + " " + CMC.profiledata.tripid[index]);
-      tripdesc(index);
+	  CMC.GetTripProfile(index);
     });
   });
-  
+  */
+
   // this should be the last thing that happens
   CMC.log("load callback complete, fading in canvas");
   $("#loading").fadeOut(function() {
