@@ -1463,6 +1463,7 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
             </div>
 			</div>
 			<div class="box2">
+        Trip Owner:
 				<div class="profile-trip-owner">Name
 				</div>
 			</div>
@@ -1482,8 +1483,8 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
 					<h2>Trip Information:</h2>
 					<h5> Trip Name: </h5>
 					<div class="profile-trip-name">
-						<h6> Trip Name </h6>
-					</div>	
+						<h6> Trip Name </h6> 
+					</div>
 					<h5> Trip Website: </h5>
 					<div class="profile-trip-url">
 						<h6> Trip Website </h6>
@@ -1529,6 +1530,7 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
 		</div>
         </div>		 
 		 <div id="show-trips" style="display: none">
+        <br /><br/>
 				<h2>Upcoming Trips:</h2>
 				<table>	
 				<tr>

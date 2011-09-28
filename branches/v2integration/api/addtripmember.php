@@ -64,10 +64,26 @@ if (!$has_error) {
     $err_msg = "Trip with the specified ID does not exist";
   }
   else {
+
+  //check that the user is not part of the trip already
+  $sql = 'select * from tripmembers where tripid="'.$tid.'" and userid="'.$fbid.'"';
+  $result = mysql_query($sql,$con);
+  if (!$result) {
+	    setjsonmysqlerror($has_error,$err_msg,$sql);
+  }
+  else {
+
+    $numbs = mysql_num_rows($result);
+    if ($numbs > 0) {
+      $has_error = TRUE;
+      $err_msg = "User is already part of this trip";
+    }
+    else {
+
 	$sql = 'INSERT INTO tripmembers (userid,tripid,isadmin,invited,accepted,type) VALUES ("'.$fbid.'","'.$tid.'","0","1","1","'.$membertype.'")';
 	$result = mysql_query($sql,$con);
 	
-	if(!result){	
+	if(!$result){	
 	    setjsonmysqlerror($has_error,$err_msg,$sql);
 	}
 	else {
@@ -88,6 +104,8 @@ if (!$has_error) {
 		}
 	}
 
+  }
+  }
   }
 	}
   }

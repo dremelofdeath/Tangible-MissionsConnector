@@ -613,10 +613,11 @@ var CMC = {
         type: "POST",
         url: "api/profileT.php",
         data: {
-		    tripid: CMC.profiledata.tripid[index],
+		    tripid: parseInt(CMC.profiledata.tripid[index],10),
             fbid: CMC.me.id ? CMC.me.id : ""
         },
         dataType: "json",
+        context: this,
         success: this.onGetTripProfileDataSuccess,
         error: this.onGetTripProfileDataError
       });
@@ -670,8 +671,6 @@ var CMC = {
         this.ajaxNotifyStart();
         this.assert(data.tripname !== undefined, "Trip name is missing from result set");
 		
-    		alert(data.tripowner);
-		
         $(id).children("#colOne").children(".box2").children(".profile-trip-owner").html(data.tripowner ? data.tripowner : "");
         
         $(id).children("#colOne").children("#tripprofileimage").children(".trip-owner-picture").children("img").attr("src", "http://graph.facebook.com/"+data.creatorid+"/picture?type=large");
@@ -684,62 +683,62 @@ var CMC = {
 			$(id).children("#colTwo").children(".box1").children(".profile-trip-name").html("<h6></h6>");
       }
       else {
-			$(id).children("#colTwo").children(".box1").children(".profile-trip-name").html(data.tripname ? "<h6>" + data.tripname + "</h6>" : "");
+			$(id).children("#colTwo").children(".box1").children(".profile-trip-name").html(data.tripname ? "<h6>" +data.tripname + "</h6>": "");
       }
 	 
       if (data.website === undefined) {
 			$(id).children("#colTwo").children(".box1").children(".profile-trip-url").html("<h6></h6>");
       }
       else {
-			$(id).children("#colTwo").children(".box1").children(".profile-trip-url").html(data.website ? "<h6>" + data.website + "</h6>" : "");
+			$(id).children("#colTwo").children(".box1").children(".profile-trip-url").html(data.website ? "<h6>" +data.website + "</h6>": "");
       }	 
 	  
       if ((data.destination === undefined) && (data.destinationcountry === undefined)) {
 			$(id).children("#colTwo").children(".box1").children(".profile-trip-dest").html("<h6></h6>");
       }
       else if (data.destination === undefined) {
-		$(id).children("#colTwo").children(".box1").children(".profile-trip-dest").html("<h6>"+data.destinationcountry+"</h6>");
+		$(id).children("#colTwo").children(".box1").children(".profile-trip-dest").html("<h6>" +data.destinationcountry+ "</h6>");
 	  }
 	  else if (data.destinationcountry === undefined) {
-		$(id).children("#colTwo").children(".box1").children(".profile-trip-dest").html("<h6>"+data.destination+"</h6>");
+		$(id).children("#colTwo").children(".box1").children(".profile-trip-dest").html("<h6>" +data.destination+ "</h6>");
 	  }
 	  else {
-			$(id).children("#colTwo").children(".box1").children(".profile-trip-dest").html("<h6>" + data.destination + "," +data.destinationcountry+"</h6>");
+			$(id).children("#colTwo").children(".box1").children(".profile-trip-dest").html("<h6>" +data.destination + "," +data.destinationcountry+ "</h6>");
       }		  
 	  
-      if (data.email == undefined) {
+      if (data.email === undefined) {
 			$(id).children("#colTwo").children(".box1").children(".profile-trip-email").html("<h6></h6>");
       }
       else {
-			$(id).children("#colTwo").children(".box1").children(".profile-trip-email").html(data.email ? "<h6>" + data.email + "</h6>" : "");
+			$(id).children("#colTwo").children(".box1").children(".profile-trip-email").html(data.email ? "<h6>" + data.email+ "</h6>" : "");
       }
 
       if (data.phone === undefined) {
 			$(id).children("#colTwo").children(".box1").children(".profile-trip-phone").html("<h6></h6>");
       }
       else {
-			$(id).children("#colTwo").children(".box1").children(".profile-trip-phone").html(data.phone ? "<h6>" + data.phone + "</h6>" : "");
+			$(id).children("#colTwo").children(".box1").children(".profile-trip-phone").html(data.phone ? "<h6>" + data.phone+ "</h6>" : "");
       }
 	  
       if (data.tripstage === undefined) {
 			$(id).children("#colTwo").children(".box1").children(".profile-trip-stage").html("<h6></h6>");
       }
       else {
-			$(id).children("#colTwo").children(".box1").children(".profile-trip-stage").html(data.tripstage ? "<h6>" + data.tripstage + "</h6>" : "");
+			$(id).children("#colTwo").children(".box1").children(".profile-trip-stage").html(data.tripstage ? "<h6>" + data.tripstage + "</h6>": "");
       }	  
 
 	  if (data.departyear === undefined) {
 			$(id).children("#colTwo").children(".box1").children(".profile-trip-depart").html("<h6></h6>");
       }
       else {
-			$(id).children("#colTwo").children(".box1").children(".profile-trip-depart").html(data.departyear ? "<h6>" + data.departmonth +"/"+data.departday+"/"+data.departyear + "</h6>" : "");
+			$(id).children("#colTwo").children(".box1").children(".profile-trip-depart").html("<h6>" +data.departyear ? data.departmonth +"/"+data.departday+"/"+data.departyear +"</h6>": "");
       }	
 	  
 	  if (data.returnyear === undefined) {
 			$(id).children("#colTwo").children(".box1").children(".profile-trip-return").html("<h6></h6>");
       }
       else {
-			$(id).children("#colTwo").children(".box1").children(".profile-trip-return").html(data.returnyear ? "<h6>" + data.returnmonth +"/"+data.returnday+"/"+data.returnyear + "</h6>" : "");
+			$(id).children("#colTwo").children(".box1").children(".profile-trip-return").html("<h6>" + data.returnyear ? data.returnmonth +"/"+data.returnday+"/"+data.returnyear + "</h6>": "");
       }	  
 
       if (data.religion === undefined) {
@@ -763,6 +762,29 @@ var CMC = {
     this.endFunction("showTripProfile");
   },
   
+     JoinTrip : function(index) {
+      $.ajax({
+        type: "POST",
+        url: "api/addtripmember.php",
+        data: {
+		    tripid: CMC.profiledata.tripid[index],
+			  fbid: CMC.me.id ? CMC.me.id : "",
+		    type: 2
+        },
+        dataType: "json",
+        context: this,
+        success: function(data) {
+          if (!data.has_error)
+            alert('You have successfully joined this trip');
+          else 
+            alert('Sorry, you could not be added to the trip due to: ' + data.err_msg);
+        },
+        error: function(data) {
+            alert('Sorry, you could not be added to the trip due to: ' + data.err_msg);
+        }
+      });
+    },
+
   handleSearchSelect : function(item) {
     this.beginFunction("handleSearchSelect");
     var value = null, errorWhileParsing = false;
@@ -1424,29 +1446,24 @@ $(function() {
       if (id.indexOf("trip-desc-submit") >=0) {
         var descparts = id.split('-');
         var index = parseInt(descparts[descparts.length-1],10);
-        //alert("TripDesc Index = " + index + " " + CMC.profiledata.tripid[index]);
 	      CMC.GetTripProfile(index);
       }
 
       if (id.indexOf("trips-desc-submit") >=0) {
         var descparts = id.split('-');
         var index = parseInt(descparts[descparts.length-1],10);
-        //alert("TripDesc Index = " + index + " " + CMC.profiledata.tripid[index]);
 	      CMC.GetTripProfile(index);
       }
 
       if (id.indexOf("join-trips-submit") >=0) {
         var descparts = id.split('-');
         var index = parseInt(descparts[descparts.length-1],10);
-        //alert("TripDesc Index = " + index + " " + CMC.profiledata.tripid[index]);
-	      //CMC.GetTripProfile(index);
+	      CMC.JoinTrip(index);
       }
 
       if (id.indexOf("invite-trip-submit") >=0) {
-      alert("Came into Trip Invite click");
       var tripparts = this.id.split('-');
       var index = parseInt(tripparts[tripparts.length-1],10);;
-      alert("Trip Index = " + index + " " + CMC.profiledata.tripid[index]);
 	      //invitetotrip(index);
       }
 
@@ -1833,6 +1850,7 @@ $(function() {
         profileinfo: JSON.stringify(profileformdata)
         },
         dataType: "json",
+        context: this,
         success: function(data) {
           if (!data.has_error) {
             alert('Thank you - your submission has been successfully entered into our database');
@@ -1977,6 +1995,7 @@ $(function() {
            profileinfo: JSON.stringify(profileformdata)
         },
         dataType: "json",
+        context: this,
         success: function(data) {
           if (!data.has_error) {
           alert('Thank you - your submission has been successfully entered into our database ');
@@ -2168,6 +2187,7 @@ $(function() {
 		      profileinfo: JSON.stringify(profiletripformdata)
         },
         dataType: "json",
+        context: this,
         success: function(data) {
           if (!data.has_error) {
           alert('Thank you - your submission has been successfully entered into our database');
@@ -2616,24 +2636,6 @@ $(function() {
     $("#profile-trip-dialog").dialog('open');
   });   
 
-    function jointrip(index){
-      $.ajax({
-        type: "POST",
-        url: "api/addtripmember.php",
-        data: {
-		    tripid: CMC.profiledata.tripid[index],
-			fbid: CMC.me.id ? CMC.me.id : "",
-		    type: 2
-        },
-        dataType: "json",
-        success: function(data) {
-          alert('You have successfully joined this trip');
-        },
-        error: function(data) {
-            alert('Sorry, you could not be added to the trip due to: ' + data.err_msg);
-        }
-      });
-    }   
 
     /*
   $.each(CMC.tripsjoinbtns, function() {
