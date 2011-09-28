@@ -2,17 +2,6 @@
  * @author GeekTantra
  * @date 24 September 2009
  */
-body {
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 14px;
-    padding: 20px;
-}
-
-h1 {
-    margin: 0px 0px 10px;
-    font-size: 22px;
-}
-
 .Tabs {
     margin-bottom: -1px;
     padding: 3px 10px 0px 10px;

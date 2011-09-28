@@ -1320,14 +1320,12 @@ var CMC = {
       CMC.log("got user data from Facebook");
       CMC.ajaxNotifyComplete();
       CMC.me = response;
-    // now check whether profile is volunteer or mission organizer	  
-      //alert('<img src="http://graph.facebook.com/' + CMC.me.id + '/picture" />');
+      // now check whether profile is volunteer or mission organizer	  
       CMC.profileshowflag=1;
       CMC.getProfile();
-	  CMC.log("user: " + CMC.me.name + " has just logged in to the app");
-	 //CMC.log("userid: " + CMC.me.id + " has just logged in to the app");
-	  // Get upcoming trips information
-	  CMC.getFutureTrips();
+      CMC.log(CMC.me.name + " (" + CMC.me.id + ") logged in to the app");
+      // Get upcoming trips information
+      CMC.getFutureTrips();
     });
     CMC.ajaxNotifyStart();
     FB.api('/me/friends', function (friends) {
@@ -1347,13 +1345,13 @@ var CMC = {
     FB.getLoginStatus(function(response) {
       CMC.ajaxNotifyComplete();
       CMC.log("got the response for FB.getLoginStatus()");
+      //@/BEGIN/DEBUGONLYSECTION
       if (response.authResponse) {
-        //@/BEGIN/DEBUGONLYSECTION
         $("#logged-in-user-value").html(response.authResponse.userID);
-      } else { // please be careful, this else case gets deleted as part of the debug removal process
+      } else {
         $("#logged-in-user-value").html("(not authorized)");
-        //@/END/DEBUGONLYSECTION
       }
+      //@/END/DEBUGONLYSECTION
       if (callback) {
         callback(response);
       }
