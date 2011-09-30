@@ -598,6 +598,7 @@ var CMC = {
 			}			
 			
 			$("#show-trip-profile").fadeOut();
+      $("#backtotrips").hide();
 			$("#show-trips").fadeIn();
 
 			}
@@ -775,8 +776,11 @@ var CMC = {
       $(id).children("#colTwo").children(".box1").children(".profile-trip-numpeople").html(data.numpeople ? "<h6>" + data.numpeople + "</h6>" : "");
       }
 
-      $("#trips-tab").fadeIn();
-	  $("#show-trips").fadeOut();
+      // change to the Trips Tab
+      $("#tabs").tabs('select', 2);
+
+	    $("#show-trips").hide();
+      $("#backtotrips").fadeIn();
       $("#show-trip-profile").fadeIn();
     } // end else
 	
