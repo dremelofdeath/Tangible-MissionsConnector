@@ -22,6 +22,7 @@ var CMC = {
   profileexists : false,
   profileedit : false,
   requestsOutstanding : 0,
+  showuserid : false,
   dialogsOpen : 0,
   version : "1.9.18",
   searchPageCache : [],
@@ -29,6 +30,7 @@ var CMC = {
   searchPageImageClearJobQueue : [],
   profilePageImageClearJobQueue : [],
   SearchState : {},
+  searchids : [],
   prelength : [],
   postlen : [],
   tripsjoinbtns : [],
@@ -233,15 +235,17 @@ var CMC = {
     this.error("can't contact server (" + textStatus + ") " + jqXHR.status + " " + errorThrown);
   },
 
-  getProfile : function() {
+  getProfile : function(userid) {
     this.beginFunction("getProfile");
     this.log("Obtaining data from the profile");
     this.ajaxNotifyStart(); // one for good measure, we want the spinner for the whole search
+	
+	  this.showuserid = userid;
     $.ajax({
       type: "POST",
       url: "api/profile.php",
       data: {
-        fbid: CMC.me.id
+        fbid: userid
       },
       dataType: "json",
       context: this,
@@ -305,14 +309,29 @@ var CMC = {
         var id = "#profilecontent";
         this.ajaxNotifyStart();
         this.assert(data.name !== undefined, "name is missing from result set");
+		
+		// Check whether the uses is viewing own profile or someone else's profile
+		// If viewing someone else's profile, provide a link to go back to own profile
+		if (CMC.showuserid != CMC.me.id) {
+			$(id).children("#topright").html('<a href="#" onclick="CMC.getProfile('+CMC.me.id+');">&lt;&lt; Go back to your own Profile </a>');
+			$("#topright").fadeIn();
+      $(id).children("#colOne").children("#poptions").html("");
+		}
+    else {
+			$("#topright").fadeOut();
+      
+      var peachstr = "";
+      peachstr += "<input type=\"submit\" value=\"Edit Profile\" class=\"button\" id=\"EditProfile\"/></td>";
+      peachstr += "<input type=\"submit\" value=\"Create Trip\" class=\"button\" id=\"CreateTrip\"/></td>";
+      $(id).children("#colOne").children("#poptions").html(peachstr);
+    }
+		
         $(id).children("#colOne").children(".box2").children(".profile-name").html(data.name ? data.name : "");
         
-        $(id).children("#colOne").children("#profileimage").children(".profile-picture").children("img").attr("src", "http://graph.facebook.com/"+this.me.id+"/picture?type=large");
+        $(id).children("#colOne").children("#profileimage").children(".profile-picture").children("img").attr("src", "http://graph.facebook.com/"+this.showuserid+"/picture?type=large");
         this.ajaxNotifyComplete();
 			
         $(id).children("#colOne").children(".box2").children(".profile-about").html(data.about ? "<h4>" + data.about + "</h4>" : "");
-	
-
 
       if (data.MedicalSkills == undefined) {
 			  $(id).children("#colTwo").children(".box1").children(".profile-medskills").html(" ");
@@ -531,7 +550,7 @@ var CMC = {
     if (data === undefined) {
       // this should be a bug! do NOT pass this function undefined! say null to inform it that you have no results!
       this.assert(data === undefined, "undefined passed as results for UpdateFutureTrips");
-    } else if (data == null) {
+    } else if (data === null) {
       // no future trips exist - so display new trip creation dialog
       $("#no-trip").fadeIn();
     } else {
@@ -578,6 +597,7 @@ var CMC = {
 				$(id).find(".trips-tripname-"+each).html(data.tripnames[each] ? "<h4> "+data.tripnames[each] + "</h4>" : "");
 			}			
 			
+			$("#show-trip-profile").fadeOut();
 			$("#show-trips").fadeIn();
 
 			}
@@ -756,6 +776,7 @@ var CMC = {
       }
 
       $("#trips-tab").fadeIn();
+	  $("#show-trips").fadeOut();
       $("#show-trip-profile").fadeIn();
     } // end else
 	
@@ -1039,6 +1060,9 @@ var CMC = {
         this.ajaxNotifyStart();
         this.assert(results[each].name !== undefined, "name is missing from result at each=" + each);
         $(id).children(".result-name").html(results[each].name ? results[each].name : "");
+	
+        this.searchids[each] = results[each].id;
+
         $(id).children("div.result-picture").children("img").remove();
         if (results[each].id) {
           $("<img />")
@@ -1328,6 +1352,10 @@ var CMC = {
   handleSearchResultSelected : function (whichResult) {
     this.beginFunction("handleSearchResultSelected");
     if($(whichResult).children(".result-name").html() != "") {
+      // Show the new profile
+      var sparts = $(whichResult).attr("id").split('-');
+      var sindex = parseInt(sparts[sparts.length-1],10);
+      this.getProfile(this.searchids[sindex]);      
       this.animateSearchResultSelected(whichResult);
     } else {
       this.log("search result clicked, but name is empty; ignoring");
@@ -1344,7 +1372,8 @@ var CMC = {
       CMC.me = response;
       // now check whether profile is volunteer or mission organizer	  
       CMC.profileshowflag=1;
-      CMC.getProfile();
+	  // This is the default profile display - showing the logged in user's profile
+      CMC.getProfile(CMC.me.id);
       CMC.log(CMC.me.name + " (" + CMC.me.id + ") logged in to the app");
       // Get upcoming trips information
       CMC.getFutureTrips();
@@ -1465,6 +1494,14 @@ $(function() {
       var tripparts = this.id.split('-');
       var index = parseInt(tripparts[tripparts.length-1],10);;
 	      //invitetotrip(index);
+      }
+
+      if (id.indexOf("EditProfile") >= 0) {
+        EditProfile();
+      }
+      
+      if (id.indexOf("CreateTrip") >= 0) {
+        CreateTrip();
       }
 
   });
@@ -1986,7 +2023,7 @@ $(function() {
       if ((misexp != undefined) && (misexp.val() != null))
         profileformdata.misexp=misexp.val();            
      
-      //alert("AJAX Submit: " + JSON.stringify(profileformdata));
+      alert("AJAX Submit: " + JSON.stringify(profileformdata));
       $.ajax({
         type: "POST",
         url: "api/profilein.php",
@@ -2011,7 +2048,7 @@ $(function() {
    
       // Now show the updated profile
       CMC.profileshowflag=1;
-      CMC.getProfile();
+      CMC.getProfile(CMC.me.id);
 
       // now close the profile submission window
       $("#profile-organizer-dialog").dialog('close');
@@ -2147,34 +2184,37 @@ $(function() {
       }
 
 
-      if (!numberofmembers) {
+      //if (!numberofmembers) {
+      /*
+      if (numberofmembers !== undefined) {
         profiletripformdata.numpeople= numberofmembers.val();
       }
+      */
       //if (numberofmembers.val() !== null)
       //
-      //if ((country != undefined) && (country.val() != null))
-      if (!country)
+      if ((country !== undefined) && (country.val() !== null))
+      //if (!country)
         profiletripformdata.country=country.val();  
-      //if ((languages != undefined) && (languages.val() != null))
-      if (!languages)
+      if ((languages !== undefined) && (languages.val() !== null))
+      //if (!languages)
         profiletripformdata.languages=languages.val(); 
-      //if ((durtype != undefined) && (durtype.val() != null))
-      if (!durtype)
+      if ((durtype !== undefined) && (durtype.val() !== null))
+      //if (!durtype)
         profiletripformdata.dur=durtype.val();
-      //if ((reltype != undefined) && (reltype.val() != null))
-      if (!reltype)
+      if ((reltype !== undefined) && (reltype.val() !== null))
+      //if (!reltype)
         profiletripformdata.relg=reltype.val();           
-      //if ((zipcode != undefined) && (zipcode.val() != null))
-      if (!zipcode)
+      if ((zipcode !== undefined) && (zipcode.val() !== null))
+      //if (!zipcode)
         profiletripformdata.zip=zipcode.val();
-      //if ((email != undefined) && (email.val() != null))
-      if (!email)
+      if ((email !== undefined) && (email.val() !== null))
+      //if (!email)
         profiletripformdata.email=email.val();
-      //if ((city != undefined) && (city.val() != null))
-      if (!city)
+      if ((city !== undefined) && (city.val() !== null))
+      //if (!city)
         profiletripformdata.city=city.val();
-      //if ((phone != undefined) && (phone.val() != null))
-      if (!phone)
+      if ((phone !== undefined) && (phone.val() !== null))
+      //if (!phone)
         profiletripformdata.phone=phone.val();
      
       alert("ajax submit : " + JSON.stringify(profiletripformdata));
@@ -2274,13 +2314,15 @@ $(function() {
   });
 
 
-  $("#EditProfile").click(function() {  
+//  $("#EditProfile").click(function() {  
+
+  function EditProfile() {
 
       CMC.profileedit = 1;
 
     // Retrieve the profile data from the backend again to make sure it is the latest information, no need to show profile
       CMC.profileshowflag=0;
-      CMC.getProfile();
+      CMC.getProfile(CMC.me.id);
 
     if (CMC.isreceiver ==0) {
 		var id = "#profile-volunteer-dialog";
@@ -2630,11 +2672,14 @@ $(function() {
       
     }
 
-  });
+  }
+  //});
 
-  $("#CreateTrip").click(function() {
+  //$("#CreateTrip").click(function() {
+  function CreateTrip() {
     $("#profile-trip-dialog").dialog('open');
-  });   
+  }
+  //});   
 
 
     /*

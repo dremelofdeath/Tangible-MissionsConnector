@@ -344,6 +344,7 @@ $sql1 = '';
 
 $namemod = 0;
 
+if (isset($myobj->{'name'})) {
 $tripname = strip_tags($myobj->{'name'});
 if (!empty($tripname)){
 	if ($update) {
@@ -359,7 +360,13 @@ else {
 	$has_error = TRUE;
 	$err_msg = "Trip name is a required value";
 }
+}
+else {
+	$has_error = TRUE;
+	$err_msg = "Trip name is a required value";
+}
 
+if (isset($myobj->{'about'})) {
 $tripdesc = strip_tags($myobj->{'about'});
 if (!empty($tripdesc)) {
 	if ($update) {
@@ -385,6 +392,17 @@ else {
 	}	
 	}
 }
+}
+else {
+	if ($update) {
+	if ($namemod)
+	$sql1 = $sql1.',tripdesc=NULL';
+	else {
+	$sql1 = $sql1.'tripdesc=NULL';
+	$namemod=1;
+	}	
+	}
+}
 
 function validatephone($phone) {
 if( !preg_match("/^([1]-)?[0-9]{3}-[0-9]{3}-[0-9]{4}$/i", $phone) ) {
@@ -394,6 +412,7 @@ else
 	return true;
 }
 
+if (isset($myobj->{'phone'})) {
 $tripphone = strip_tags($myobj->{'phone'});
 if (!empty($tripphone)) {
 	if ($update) {
@@ -419,7 +438,17 @@ else {
 	}	
 	}
 }
-
+}
+else {
+	if ($update) {
+	if ($namemod)
+	$sql1 = $sql1.',phone=NULL';
+	else {
+	$sql1 = $sql1.'phone=NULL';
+	$namemod=1;
+	}	
+	}
+}
 
 function validateemailid($email) {
 if (strlen($email)==0) {
@@ -466,6 +495,7 @@ return true;
 }
 
 
+if (isset($myobj->{'email'})) {
 $tripemail = strip_tags($myobj->{'email'});
 if (!empty($tripemail)) {
 	if (!check_email_address($tripemail)) {
@@ -497,6 +527,17 @@ else {
 	}	
 	}
 }
+}
+else {
+	if ($update) {
+	if ($namemod)
+	$sql1 = $sql1.',email=NULL';
+	else {
+	$sql1 = $sql1.'email=NULL';
+	$namemod=1;
+	}	
+	}
+}
 
 // function to validate a url
 function isValidURL($url)
@@ -504,6 +545,7 @@ function isValidURL($url)
 return preg_match('|^http(s)?://[a-z0-9-]+(.[a-z0-9-]+)*(:[0-9]+)?(/.*)?$|i', $url);
 }
 
+if (isset($myobj->{'url'})) {
 $tripurl = strip_tags($myobj->{'url'});
 //if (!empty($myobj['url'])) {
 if (!empty($tripurl)) {
@@ -538,6 +580,19 @@ else {
 	}	
 	}
 }
+}
+else {
+	if ($update) {
+	if ($namemod)
+	$sql1 = $sql1.',website=NULL';
+	else {
+	$sql1 = $sql1.'website=NULL';
+	$namemod=1;
+	}	
+	}
+}
+
+if (isset($myobj->{'dur'})) {
 if (!empty($myobj->{'dur'})) {
 	$tripdurid = $myobj->{'dur'};
 	if ($update) {
@@ -563,7 +618,17 @@ else {
 	}	
 	}
 }
-
+}
+else {
+	if ($update) {
+	if ($namemod)
+	$sql1 = $sql1.',durationid=NULL';
+	else {
+	$sql1 = $sql1.'durationid=NULL';
+	$namemod=1;
+	}	
+	}
+}
 
 if (isset($myobj->{'stage'})) {
 	$tripstage = $myobj->{'stage'};
@@ -692,6 +757,7 @@ else if ($year2 == $year1) {
 
 }
 
+if (isset($myobj->{'DepartYear'})) {
 if ((!empty($myobj->{'DepartYear'})) && (!empty($myobj->{'DepartMonth'})) && (!empty($myobj->{'DepartDay'}))) {
         //$thisyear = date("Y");
 
@@ -713,6 +779,9 @@ if ((!empty($myobj->{'DepartYear'})) && (!empty($myobj->{'DepartMonth'})) && (!e
 	$sql2 = $sql2.',"'.$tripdpt.'"';
 	}
 }
+}
+
+if (isset($myobj->{'ReturnYear'})) {
 if ((!empty($myobj->{'ReturnYear'})) && (!empty($myobj->{'ReturnMonth'})) && (!empty($myobj->{'ReturnDay'}))) {
 	validate_date(2,$myobj->{'ReturnYear'},$myobj->{'ReturnMonth'},$myobj->{'ReturnDay'},$update,$has_error,$err_msg);
 
@@ -733,7 +802,9 @@ if ((!empty($myobj->{'ReturnYear'})) && (!empty($myobj->{'ReturnMonth'})) && (!e
 	$sql2 = $sql2.',"'.$tripret.'"';
 	}
 }
+}
 
+if (isset($myobj->{'city'})) {
 $tripdest = strip_tags($myobj->{'city'});
 if (!empty($tripdest)) {
 	if ($update) {
@@ -748,6 +819,17 @@ if (!empty($tripdest)) {
 	$sql1 = $sql1.',destination';
 	$sql2 = $sql2.',"'.$tripdest.'"';
 	}
+}
+else {
+	if ($update) {
+	if ($namemod)
+	$sql1 = $sql1.',destination=NULL';
+	else {
+	$sql1 = $sql1.'destination=NULL';
+	$namemod=1;
+	}	
+	}
+}
 }
 else {
 	if ($update) {
@@ -796,6 +878,16 @@ else {
 	}	
 	}
 }
+}
+else {
+	if ($update) {
+	if ($namemod)
+	$sql1 = $sql1.',Languages=NULL';
+	else {
+	$sql1 = $sql1.'Languages=NULL';
+	$namemod=1;
+	}	
+	}
 }
 
 /*
@@ -864,6 +956,7 @@ else {
 	}
 }
 
+if (isset($myobj->{'country'})) {
 if (!empty($myobj->{'country'})) {
 	$tripcountry = $myobj->{'country'};
 	$sql5 = 'select * from countries where id="'.$tripcountry[0].'"';
@@ -892,7 +985,19 @@ else {
 	}	
 	}
 }
+}
+else {
+	if ($update) {
+	if ($namemod)
+	$sql1 = $sql1.',country=NULL';
+	else {
+	$sql1 = $sql1.'country=NULL';
+	$namemod=1;
+	}	
+	}
+}
 
+if (isset($myobj->{'numpeople'})) {
 $tripnump = strip_tags($myobj->{'numpeople'});
 if (!empty($tripnump)) {
 	if ($update) {
@@ -918,7 +1023,19 @@ else {
 	}	
 	}
 }
+}
+else {
+	if ($update) {
+	if ($namemod)
+	$sql1 = $sql1.',numpeople=NULL';
+	else {
+	$sql1 = $sql1.'numpeople=NULL';
+	$namemod=1;
+	}	
+	}
+}
 
+if (isset($myobj->{'zip'})) {
 $tripzip = strip_tags($myobj->{'zip'});
 if (!empty($tripzip)) {
 	if ($update) {
@@ -944,7 +1061,19 @@ else {
 	}	
 	}
 }
+}
+else {
+	if ($update) {
+	if ($namemod)
+	$sql1 = $sql1.',zipcode=NULL';
+	else {
+	$sql1 = $sql1.'zipcode=NULL';
+	$namemod=1;
+	}	
+	}
+}
 
+if (isset($myobj->{'relg'})) {
 if (!empty($myobj->{'relg'})) {
 	$triprelg = $myobj->{'relg'};
 	if ($update) {
@@ -959,6 +1088,17 @@ if (!empty($myobj->{'relg'})) {
 	$sql1 = $sql1.',religion';
 	$sql2 = $sql2.',"'.$triprelg.'"';
 	}
+}
+else {
+	if ($update) {
+	if ($namemod)
+	$sql1 = $sql1.',religion=NULL';
+	else {
+	$sql1 = $sql1.'religion=NULL';
+	$namemod=1;
+	}	
+	}
+}
 }
 else {
 	if ($update) {

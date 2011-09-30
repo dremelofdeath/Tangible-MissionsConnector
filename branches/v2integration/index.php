@@ -1328,12 +1328,25 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
     td{padding:0px 0px; /* pixels */
     border-right:0px solid #A9A9A9; /* to avoid the hacks for the padding */
     border-bottom:0px solid #A9A9A9;} 
+	#topright {
+	position:absolute;
+	top:0;
+	right:0;
+	}
+	#backtotrips {
+	position:absolute;
+	top:0;
+	right:0;
+	}
     .td1{width:55px;}
     .td2{width:50px;}
     .td3{border-right-width:0;}
     </style>      
         <div id="show-profile" style="display: none">
 		<div id="profilecontent">
+			<div id="topright" style="display: none">
+				<a href="#">&lt;&lt; Go back to your own Profile </a>
+			</div>			
 			<div id="colOne">
 			<div id="profileimage">
             <div class="profile-picture">
@@ -1344,8 +1357,10 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
 				<div class="profile-name">Search Name
 				</div>
 			</div>
+      <div id="poptions">
 			<input type="submit" value="Edit Profile" id="EditProfile" class="button" />
 			<input type="submit" value="Create Trip" id="CreateTrip" class="button" />
+      </div>
 			<p>&nbsp;</p>
 			<div class="box2">
 				<h3>
@@ -1456,6 +1471,9 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
          </div>
         <div id="show-trip-profile" style="display: none">
 		<div id="tripprofilecontent">
+			<div id="backtotrips" style="display: none">
+				<a href="#" onclick="CMC.getFutureTrips();">&lt;&lt; Go back to Upcoming Trips </a>
+			</div>			
 			<div id="colOne">
 			<div id="tripprofileimage">
             <div class="trip-owner-picture">
@@ -1545,7 +1563,7 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
 				</table>
 		 </div>		 
          <div id="no-trip" style="display: none">
-          <h1>Yay! You can create a missions trip very quickly</h1>
+          <h1>Currently there are no trips scheduled to begin in the future. But, you can create a missions trip very quickly</h1>
           <h1>
             <a href="#" onclick="CMC.page('#no-trip', '#make-trip');">Create a Trip &gt;&gt;</a>
           </h1>
@@ -1920,15 +1938,15 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                             <td style="width: 197px">
                                         <select id="profile-country-served" multiple="multiple" class="profile-ddl-type-countriesserved" onclick="selectMultiple(this,4);">
                                         <?php
-                                        $i=2;
+                                        $i=1;
                       //echo '<option selected="selected" value="Select Countries Served">Select Countries Served</option>';
                       foreach($aCountries as $key => $country) {                      
                                               if ($country == "United States")
-                            echo '<option value="1">'.$country.'</option>';
+                            echo '<option value="'.$i.'">'.$country.'</option>';
                                               else {
                         echo '<option value="'.$i.'">'.$country.'</option>';
-                                              $i++;
                                               }
+                                              $i++;
                       }
                                         ?>
                                         </select>
@@ -2195,14 +2213,14 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                             <td style="width: 197px">
                                         <select id="profile-org-country" class="profile-org-country">
                                         <?php
-                                        $i=2;
+                                        $i=1;
                       foreach($aCountries as $key => $country) {
                                               if ($country == "United States")
-                            echo '<option selected="selected" value="1">'.$country.'</option>';
+                            echo '<option selected="selected" value="'.$i.'">'.$country.'</option>';
                                               else {
                             echo '<option value="'.$i.'">'.$country.'</option>';
-                                              $i++;
                                               }
+                                              $i++;
 
                       }
                                         ?>
@@ -2427,14 +2445,14 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
                             <td style="width: 197px">
                                         <select id="profile-trip-country" class="profile-trip-country">
                                         <?php
-                                        $i=2;
+                                        $i=1;
                       foreach($aCountries as $key => $country) {
                                               if ($country == "United States")
-                            echo '<option selected="selected" value="1">'.$country.'</option>';
+                            echo '<option selected="selected" value="'.$i.'">'.$country.'</option>';
                                               else {
                             echo '<option value="'.$i.'">'.$country.'</option>';
-                                              $i++;
                                               }
+                                              $i++;
 
                       }
                                         ?>
