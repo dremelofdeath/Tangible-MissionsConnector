@@ -23,6 +23,7 @@ var CMC = {
   profileedit : false,
   requestsOutstanding : 0,
   showuserid : false,
+  tripuserid : false,
   dialogsOpen : 0,
   version : "1.9.18",
   searchPageCache : [],
@@ -693,7 +694,9 @@ var CMC = {
         this.assert(data.tripname !== undefined, "Trip name is missing from result set");
 		
         $(id).children("#colOne").children(".box2").children(".profile-trip-owner").html(data.tripowner ? data.tripowner : "");
-        
+       
+        this.tripuserid = data.creatorid;
+
         $(id).children("#colOne").children("#tripprofileimage").children(".trip-owner-picture").children("img").attr("src", "http://graph.facebook.com/"+data.creatorid+"/picture?type=large");
         this.ajaxNotifyComplete();
 			
@@ -1508,6 +1511,13 @@ $(function() {
         CreateTrip();
       }
 
+      if (id.indexOf("tripprofileimage") >= 0) {
+        // change to the Profile Tab
+        $("#tabs").tabs('select', 1);
+        // Show the Trip owner's profile
+        CMC.getProfile(CMC.tripuserid);
+      }
+
   });
   //@/END/DEBUGONLYSECTION
 
@@ -1547,8 +1557,6 @@ $(function() {
     }
   });  
 
-  CMC.log("2");
-  
   $("#make-organizer").click(function() {
 	$("#profile-organizer-dialog").dialog('open');
   });
@@ -1856,31 +1864,31 @@ $(function() {
       if (CMC.profileedit == 1)
          profileformdata.update = 1;
 
-      if ((mtype != undefined) && (mtype.val() != null))
+      if (mtype.val() != "")
         profileformdata.medskills= mtype.val();
-      if ((nmtype != undefined) && (nmtype.val() != null))
+      if (nmtype.val() != "")
         profileformdata.otherskills=nmtype.val();         
-      if ((sptype != undefined) && (sptype.val() != null))
+      if (sptype.val() != "")
         profileformdata.spiritserv=sptype.val();        
-      if ((region != undefined) && (region.val() != null))
+      if (region.val() != "")
         profileformdata.region=region.val();  
-      if ((country != undefined) && (country.val() != null))
+      if (country.val() != "")
         profileformdata.country=country.val();  
       if (state.val() != "Select your State")
         profileformdata.state=state.val();  
-      if ((durtype != undefined) && (durtype.val() != null))
+      if (durtype.val() != "")
         profileformdata.dur=durtype.val();
-      if ((reltype != undefined) && (reltype.val() != null))
+      if (reltype.val() != "")
         profileformdata.relg=reltype.val();           
-      if ((zipcode != undefined) && (zipcode.val() != null))
+      if (zipcode.val() != "")
         profileformdata.zip=zipcode.val();
-      if ((email != undefined) && (email.val() != null))
+      if (email.val() != "")
         profileformdata.email=email.val();
-      if ((city != undefined) && (city.val() != null))
+      if (city.val() != "")
         profileformdata.city=city.val();
-      if ((phone != undefined) && (phone.val() != null))
+      if (phone.val() != "")
         profileformdata.phone=phone.val();
-      if ((misexp != undefined) && (misexp.val() != null))
+      if (misexp.val() != "")
         profileformdata.misexp=misexp.val();            
       
       $.ajax({
@@ -1905,11 +1913,8 @@ $(function() {
         }
       });
       $("#profile-volunteer-dialog").dialog('close');
-     // $("#profile-volunteer-dialog").fadeOut('fast');
       return true;
     }
-
-    
   });
 
     $("#profile-org-submit").click(function() {
@@ -1989,45 +1994,44 @@ $(function() {
          profileformdata.update = 1;
       }
 
-      
-      if ((aname != undefined) && (aname.val() != null))
+      if (aname.val() != "")
         profileformdata.name= aname.val();	  
-      if ((aabout != undefined) && (aabout.val() != null))
+      if (aabout.val() != "")
         profileformdata.about= aabout.val();
-      if ((aurl != undefined) && (aurl.val() != null))
+      if (aurl.val() != "")
         profileformdata.url= aurl.val();
-      if ((medfacil != undefined) && (medfacil.val() != null))
+      if (medfacil.val() != "")
         profileformdata.medfacil= medfacil.val();
-      if ((nonmedfacil != undefined) && (nonmedfacil.val() !=  null))
+      if (nonmedfacil.val() != "")
         profileformdata.nonmedfacil= nonmedfacil.val();		
-      if ((mtype != undefined) && (mtype.val() != null))
+      if (mtype.val() != "")
         profileformdata.medskills= mtype.val();
-      if ((nmtype != undefined) && (nmtype.val() != null))
+      if (nmtype.val() != "")
         profileformdata.otherskills=nmtype.val();         
-      if ((sptype != undefined) && (sptype.val() != null))
+      if (sptype.val() != "")
         profileformdata.spiritserv=sptype.val();        
-      if ((region != undefined) && (region.val() != null))
+      if (region.val() != "")
         profileformdata.region=region.val();  
-      if ((country != undefined) && (country.val() != null))
+      if (country.val() != "")
         profileformdata.country=country.val();  
       if (state.val() != "Select your State")
         profileformdata.state=state.val();  
-      if ((durtype != undefined) && (durtype.val() != null))
+      if (durtype.val() != "")
         profileformdata.dur=durtype.val();
-      if ((reltype != undefined) && (reltype.val() != null))
+      if (reltype.val() != "")
         profileformdata.relg=reltype.val();           
-      if ((zipcode != undefined) && (zipcode.val() != null))
+      if (zipcode.val() != "")
         profileformdata.zip=zipcode.val();
-      if ((email != undefined) && (email.val() != null))
+      if (email.val() != "")
         profileformdata.email=email.val();
-      if ((city != undefined) && (city.val() != null))
+      if (city.val() != "")
         profileformdata.city=city.val();
-      if ((phone != undefined) && (phone.val() != null))
+      if (phone.val() != "")
         profileformdata.phone=phone.val();
-      if ((misexp != undefined) && (misexp.val() != null))
+      if (misexp.val() != "")
         profileformdata.misexp=misexp.val();            
      
-      alert("AJAX Submit: " + JSON.stringify(profileformdata));
+     // alert("AJAX Submit: " + JSON.stringify(profileformdata));
       $.ajax({
         type: "POST",
         url: "api/profilein.php",
@@ -2056,7 +2060,6 @@ $(function() {
 
       // now close the profile submission window
       $("#profile-organizer-dialog").dialog('close');
-     // $("#profile-organizer-dialog").fadeOut('fast');
       return true;
     }
 
@@ -2166,13 +2169,13 @@ $(function() {
       var profiletripformdata = {};
       profiletripformdata.profiletype=2;
 
-      if ((aname !== undefined) && (aname.val() !== null))
+	    if (aname.val() != "")
         profiletripformdata.name= aname.val();	  
-      if ((aabout !== undefined) && (aabout.val() !== null))
+	    if (aabout.val() != "")
         profiletripformdata.about= aabout.val();
-      if ((aurl !== undefined) && (aurl.val() !== null))
+	    if (aurl.val() != "")
         profiletripformdata.url = aurl.val();
-      if ((stage !== undefined) && (stage.val() !== null))
+	    if (stage.val() != "")
         profiletripformdata.stage= stage.val();
       if ((tripdepart !== undefined) && (tripdepart.val() !==  null)) {
           var departdate = tripdepart.val().split(".");
@@ -2187,47 +2190,33 @@ $(function() {
           profiletripformdata.ReturnYear=parseInt(returndate[2],10);	  
       }
 
-
-      //if (!numberofmembers) {
-      /*
-      if (numberofmembers !== undefined) {
+	    if (numberofmembers.val() != "")
         profiletripformdata.numpeople= numberofmembers.val();
-      }
-      */
-      //if (numberofmembers.val() !== null)
-      //
-      if ((country !== undefined) && (country.val() !== null))
-      //if (!country)
+      
+	    if (country.val() != "")
         profiletripformdata.country=country.val();  
-      if ((languages !== undefined) && (languages.val() !== null))
-      //if (!languages)
+	    if (languages.val() != "")
         profiletripformdata.languages=languages.val(); 
-      if ((durtype !== undefined) && (durtype.val() !== null))
-      //if (!durtype)
+	    if (durtype.val() != "")
         profiletripformdata.dur=durtype.val();
-      if ((reltype !== undefined) && (reltype.val() !== null))
-      //if (!reltype)
+	    if (reltype.val() != "")
         profiletripformdata.relg=reltype.val();           
-      if ((zipcode !== undefined) && (zipcode.val() !== null))
-      //if (!zipcode)
+	    if (zipcode.val() != "")
         profiletripformdata.zip=zipcode.val();
-      if ((email !== undefined) && (email.val() !== null))
-      //if (!email)
+	    if (email.val() != "")
         profiletripformdata.email=email.val();
-      if ((city !== undefined) && (city.val() !== null))
-      //if (!city)
+	    if (city.val() != "")
         profiletripformdata.city=city.val();
-      if ((phone !== undefined) && (phone.val() !== null))
-      //if (!phone)
+	    if (phone.val() != "")
         profiletripformdata.phone=phone.val();
      
-      alert("ajax submit : " + JSON.stringify(profiletripformdata));
+      //alert("ajax submit : " + JSON.stringify(profiletripformdata));
 
       $.ajax({
         type: "POST",
         url: "api/profilein.php",
         data: {
-           fbid: this.me.id ? this.me.id : "",
+           fbid: CMC.me.id ? CMC.me.id : "",
 		      profileinfo: JSON.stringify(profiletripformdata)
         },
         dataType: "json",
@@ -2331,14 +2320,14 @@ $(function() {
     if (CMC.isreceiver ==0) {
 		var id = "#profile-volunteer-dialog";
 
-        if (CMC.profiledata.zip != undefined) {
+        if (CMC.profiledata.zip !== undefined) {
           $("input#profile-zipcode").val(CMC.profiledata.zip);
         }
-        if (CMC.profiledata.about != undefined) {
+        if (CMC.profiledata.about !== undefined) {
           $("input#profile-about").val(CMC.profiledata.about);
         }
 		
-        if (CMC.profiledata.MedicalSkills != undefined) {
+        if (CMC.profiledata.MedicalSkills !== undefined) {
           if (CMC.profiledata.MedicalSkills.length > 0) {
           var selstr = "[";
           for (var each in CMC.profiledata.MedicalSkills) {
@@ -2358,7 +2347,7 @@ $(function() {
             CMC.postlen[0] = 0;
           }
         }
-        if (CMC.profiledata.Non_MedicalSkills != undefined) {
+        if (CMC.profiledata.Non_MedicalSkills !== undefined) {
           if (CMC.profiledata.Non_MedicalSkills.length > 0) {
           var selstr = "[";
           for (var each in CMC.profiledata.Non_MedicalSkills) {
@@ -2378,7 +2367,7 @@ $(function() {
             CMC.postlen[1] = 0;
           }
         }
-        if (CMC.profiledata.SpiritualSkills != undefined) {
+        if (CMC.profiledata.SpiritualSkills !== undefined) {
           if (CMC.profiledata.SpiritualSkills.length > 0) {
           var selstr = "[";
           for (var each in CMC.profiledata.SpiritualSkills) {
@@ -2398,29 +2387,29 @@ $(function() {
             CMC.postlen[2] = 0;
           }
         }
-        if (CMC.profiledata.relg != undefined) {
+        if (CMC.profiledata.relg !== undefined) {
           $("input#profile-religion").val(CMC.profiledata.relg);
         }
        
-        if (CMC.profiledata.Durations != undefined) {
-        if (CMC.profiledata.Durations.PreferredDurationofMissionTrips != undefined) {
+        if (CMC.profiledata.Durations !== undefined) {
+        if (CMC.profiledata.Durations.PreferredDurationofMissionTrips !== undefined) {
           $("input#profile-duration").val(CMC.profiledata.Durations.PreferredDurationofMissionTrips);
         }
         }
         
-        if (CMC.profiledata.States != undefined) {
-        if (CMC.profiledata.States.state != undefined) {
+        if (CMC.profiledata.States !== undefined) {
+        if (CMC.profiledata.States.state !== undefined) {
           $("input#profile-state").val(CMC.profiledata.States.state);
         }
         }
-        if (CMC.profiledata.city != undefined) {
+        if (CMC.profiledata.city !== undefined) {
           $("input#profile-city").val(CMC.profiledata.city);
         }
-        if (CMC.profiledata.country != undefined) {
+        if (CMC.profiledata.country !== undefined) {
           $("input#profile-country").val(CMC.profiledata.country);
         }
-        if (CMC.profiledata.GeographicAreasofInterest != undefined) {
-        if (CMC.profiledata.GeographicAreasofInterest.Regions != undefined) {
+        if (CMC.profiledata.GeographicAreasofInterest !== undefined) {
+        if (CMC.profiledata.GeographicAreasofInterest.Regions !== undefined) {
           if (CMC.profiledata.GeographicAreasofInterest.Regions.length > 0) {
           var selstr = "[";
           for (var each in CMC.profiledata.GeographicAreasofInterest.Regions) {
@@ -2441,8 +2430,8 @@ $(function() {
           }
         }
         }
-        if (CMC.profiledata.GeographicAreasofInterest != undefined) {
-        if (CMC.profiledata.GeographicAreasofInterest.Countries != undefined) {
+        if (CMC.profiledata.GeographicAreasofInterest !== undefined) {
+        if (CMC.profiledata.GeographicAreasofInterest.Countries !== undefined) {
           if (CMC.profiledata.GeographicAreasofInterest.Countries.length > 0) {
           var selstr = "[";
           for (var each in CMC.profiledata.GeographicAreasofInterest.Countries) {
@@ -2465,13 +2454,13 @@ $(function() {
           }
         }
         }
-        if (CMC.profiledata.phone != undefined) {
+        if (CMC.profiledata.phone !== undefined) {
           $("input#profile-phone").val(CMC.profiledata.phone);
         }
-        if (CMC.profiledata.email != undefined) {
+        if (CMC.profiledata.email !== undefined) {
           $("input#profile-email").val(CMC.profiledata.email);
         }
-        if (CMC.profiledata.misexp != undefined) {
+        if (CMC.profiledata.misexp !== undefined) {
           $("input#profile-experience").val(CMC.profiledata.misexp);
         }	 
 	 
@@ -2483,19 +2472,19 @@ $(function() {
 
         var id = "#profile-organizer-dialog";
 
-        if (CMC.profiledata.zip != undefined) {
+        if (CMC.profiledata.zip !== undefined) {
           $("input#profile-org-zipcode").val(CMC.profiledata.zip);
         }
-        if (CMC.profiledata.AgencyName != undefined) {
+        if (CMC.profiledata.AgencyName !== undefined) {
           $("input#profile-org-name").val(CMC.profiledata.AgencyName);
         }
-        if (CMC.profiledata.AgencyWebsite != undefined) {
+        if (CMC.profiledata.AgencyWebsite !== undefined) {
           $("input#profile-org-website").val(CMC.profiledata.AgencyWebsite);
         }
-        if (CMC.profiledata.about != undefined) {
+        if (CMC.profiledata.about !== undefined) {
           $("input#profile-org-about").val(CMC.profiledata.about);
         }
-        if (CMC.profiledata.FacilityMedicalOfferings != undefined) {
+        if (CMC.profiledata.FacilityMedicalOfferings !== undefined) {
           if (CMC.profiledata.FacilityMedicalOfferings.length>0) {
           var selstr = "[";
           for (var each in CMC.profiledata.FacilityMedicalOfferings) {
@@ -2515,7 +2504,7 @@ $(function() {
             CMC.postlen[0] = 0;
           }
         }
-        if (CMC.profiledata.FacilityNon_MedicalOfferings != undefined) {
+        if (CMC.profiledata.FacilityNon_MedicalOfferings !== undefined) {
           if (CMC.profiledata.FacilityNon_MedicalOfferings.length > 0) {
           var selstr = "[";
           for (var each in CMC.profiledata.FacilityNon_MedicalOfferings) {
@@ -2535,7 +2524,7 @@ $(function() {
             CMC.postlen[1] = 0;
           }
         }
-        if (CMC.profiledata.MedicalSkills != undefined) {
+        if (CMC.profiledata.MedicalSkills !== undefined) {
           if (CMC.profiledata.MedicalSkills.length > 0) {
           var selstr = "[";
           for (var each in CMC.profiledata.MedicalSkills) {
@@ -2555,7 +2544,7 @@ $(function() {
             CMC.postlen[2] = 0;
           }
         }
-        if (CMC.profiledata.Non_MedicalSkills != undefined) {
+        if (CMC.profiledata.Non_MedicalSkills !== undefined) {
           if (CMC.profiledata.Non_MedicalSkills.length > 0) {
           var selstr = "[";
           for (var each in CMC.profiledata.Non_MedicalSkills) {
@@ -2576,7 +2565,7 @@ $(function() {
             CMC.postlen[3] = 0;
           }
         }
-        if (CMC.profiledata.SpiritualSkills != undefined) {
+        if (CMC.profiledata.SpiritualSkills !== undefined) {
           if (CMC.profiledata.SpiritualSkills.length > 0) {
           var selstr = "[";
           for (var each in CMC.profiledata.SpiritualSkills) {
@@ -2596,29 +2585,29 @@ $(function() {
             CMC.postlen[4] = 0;
           }
         }
-        if (CMC.profiledata.relg != undefined) {
+        if (CMC.profiledata.relg !== undefined) {
           $("input#profile-org-religion").val(CMC.profiledata.relg);
         }
        
-        if (CMC.profiledata.Durations != undefined) {
-        if (CMC.profiledata.Durations.PreferredDurationofMissionTrips != undefined) {
+        if (CMC.profiledata.Durations !== undefined) {
+        if (CMC.profiledata.Durations.PreferredDurationofMissionTrips !== undefined) {
           $("input#profile-org-duration").val(CMC.profiledata.Durations.PreferredDurationofMissionTrips);
         }
         }
         
-        if (CMC.profiledata.States != undefined) {
-        if (CMC.profiledata.States.state != undefined) {
+        if (CMC.profiledata.States !== undefined) {
+        if (CMC.profiledata.States.state !== undefined) {
           $("input#profile-org-state").val(CMC.profiledata.States.state);
         }
         }
-        if (CMC.profiledata.city != undefined) {
+        if (CMC.profiledata.city !== undefined) {
           $("input#profile-org-city").val(CMC.profiledata.city);
         }
-        if (CMC.profiledata.country != undefined) {
+        if (CMC.profiledata.country !== undefined) {
           $("input#profile-org-country").val(CMC.profiledata.country);
         }
-        if (CMC.profiledata.GeographicAreasofInterest != undefined) {
-        if (CMC.profiledata.GeographicAreasofInterest.Regions != undefined) {
+        if (CMC.profiledata.GeographicAreasofInterest !== undefined) {
+        if (CMC.profiledata.GeographicAreasofInterest.Regions !== undefined) {
           if (CMC.profiledata.GeographicAreasofInterest.Regions.length > 0) {
           var selstr = "[";
           for (var each in CMC.profiledata.GeographicAreasofInterest.Regions) {
@@ -2639,8 +2628,8 @@ $(function() {
           }
         }
         }
-        if (CMC.profiledata.GeographicAreasofInterest != undefined) {
-        if (CMC.profiledata.GeographicAreasofInterest.Countries != undefined) {
+        if (CMC.profiledata.GeographicAreasofInterest !== undefined) {
+        if (CMC.profiledata.GeographicAreasofInterest.Countries !== undefined) {
           if (CMC.profiledata.GeographicAreasofInterest.Countries.length > 0) {
           var selstr = "[";
           for (var each in CMC.profiledata.GeographicAreasofInterest.Countries) {
@@ -2661,13 +2650,13 @@ $(function() {
           }
         }
         }
-        if (CMC.profiledata.phone != undefined) {
+        if (CMC.profiledata.phone !== undefined) {
           $("input#profile-org-phone").val(CMC.profiledata.phone);
         }
-        if (CMC.profiledata.email != undefined) {
+        if (CMC.profiledata.email !== undefined) {
           $("input#profile-org-email").val(CMC.profiledata.email);
         }
-        if (CMC.profiledata.misexp != undefined) {
+        if (CMC.profiledata.misexp !== undefined) {
           $("input#profile-org-experience").val(CMC.profiledata.misexp);
         }
        
