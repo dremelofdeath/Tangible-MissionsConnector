@@ -31,7 +31,6 @@ var CMC = {
   searchPageImageClearJobQueue : [],
   profilePageImageClearJobQueue : [],
   SearchState : {},
-  searchids : [],
   prelength : [],
   postlen : [],
   tripsjoinbtns : [],
@@ -86,24 +85,32 @@ var CMC = {
       }
     },
 
-    beginFunction : function(fnName) {
-      // check for scope corruption
-      this.assert(this === CMC, "Scope corruption detected! this === CMC failed!");
-      this.log("begin function: " + fnName);
+    findFunctionNameFor : function (obj) {
+      for(var each in CMC) {
+        try {
+          if (CMC[each] == obj) {
+            return each;
+          }
+        } catch(e) {}
+      }
+      return false;
     },
 
-    endFunction : function(fnName, fnReturnValue) {
-      if (fnReturnValue !== undefined) {
-        this.log("end function: " + fnName + ", returning " + fnReturnValue.toString());
-      } else {
-        this.log("end function: " + fnName);
-      }
+    beginFunction : function() {
+      // check for scope corruption
+      this.assert(this === CMC, "Scope corruption detected! this === CMC failed!");
+      this.log("begin function: " + this.findFunctionNameFor(this.beginFunction.caller));
+    },
+
+    endFunction : function() {
+      this.log("end function: " + this.findFunctionNameFor(this.endFunction.caller));
     },
   },
 
   log : $.noop,
   error : $.noop,
   assert : $.noop,
+  findFunctionNameFor : $.noop,
   beginFunction : $.noop,
   endFunction : $.noop,
 
@@ -116,6 +123,9 @@ var CMC = {
     }
     if ("assert" in handlerSet) {
       this.assert = handlerSet.assert;
+    }
+    if ("findFunctionNameFor" in handlerSet) {
+      this.findFunctionNameFor = handlerSet.findFunctionNameFor;
     }
     if ("beginFunction" in handlerSet) {
       this.beginFunction = handlerSet.beginFunction;
@@ -131,6 +141,7 @@ var CMC = {
     this.log = $.noop;
     this.error = $.noop;
     this.assert = $.noop;
+    this.findFunctionNameFor = $.noop;
     this.beginFunction = $.noop;
     this.endFunction = $.noop;
     $("#debug-section").hide();
@@ -237,7 +248,7 @@ var CMC = {
   },
 
   getProfile : function(userid) {
-    this.beginFunction("getProfile");
+    this.beginFunction();
     this.log("Obtaining data from the profile");
     this.ajaxNotifyStart(); // one for good measure, we want the spinner for the whole search
 	
@@ -253,11 +264,11 @@ var CMC = {
       success: this.onGetProfileDataSuccess,
       error: this.onGetProfileDataError
     });
-    this.endFunction("getProfile");
+    this.endFunction();
 	},
   
   onGetProfileDataSuccess : function(data, textStatus, jqXHR) {
-    this.beginFunction("onGetProfileDataSuccess");
+    this.beginFunction();
     this.assert(data != undefined, "data is undefined in onGetProfileDataSuccess");
     if(data.has_error !== undefined && data.has_error !== null) {
       if(data.has_error) {
@@ -288,11 +299,11 @@ var CMC = {
       // an unknown error occurred? do something!
       this.handleGenericUnexpectedCallbackError(data, textStatus, jqXHR, "profile data");
     }
-    this.endFunction("onGetProfileDataSuccess");
+    this.endFunction();
 	},
   
   showProfile : function (data) {
-    this.beginFunction("showProfile");
+    this.beginFunction();
     if (data === undefined) {
       // this should be a bug! do NOT pass this function undefined! say null to inform it that you have no results!
       this.assert(data === undefined, "undefined passed as results for showProfile");
@@ -467,11 +478,11 @@ var CMC = {
       $("#show-profile").fadeIn();
     } // end else
     this.ajaxNotifyComplete(); // finish the one we started at the beginning of profile retrieval
-    this.endFunction("showProfile");
+    this.endFunction();
   },	
   
   animateShowProfile : function () {
-    this.beginFunction("animateShowProfile");
+    this.beginFunction();
 	  var id = "#profileimage";
 
       $("*").clearQueue("custom-ProfileQueue");
@@ -491,7 +502,7 @@ var CMC = {
           .show("drop", {direction: "right", distance: 50}, 250, _onShowComplete);
       }).dequeue("custom-ProfileQueue");
 	  
-    this.endFunction("animateShowProfile");
+    this.endFunction();
   },
 
   onGetProfileDataError : function(jqXHR, textStatus, errorThrown) {
@@ -500,7 +511,7 @@ var CMC = {
   },
 
   handleGetProfileDataSuccessHasError : function(data) {
-    this.beginFunction("handleGetProfileDataSuccessHasError");
+    this.beginFunction();
     this.assert(data != undefined, "data is undefined in handleGetProfileDataSuccessHasError");
     // we have a known error, handle it
     if(data.err_msg !== undefined) {
@@ -512,11 +523,11 @@ var CMC = {
     } else {
       this.error("caught an error from the server while searching, but it did not return an error message");
     }
-    this.endFunction("handleGetProfileDataSuccessHasError");
+    this.endFunction();
   },
 
     getFutureTrips : function() {
-    this.beginFunction("getFutureTrips");
+    this.beginFunction();
     this.log("Obtaining future trip information from the database");
     $.ajax({
       type: "POST",
@@ -526,11 +537,11 @@ var CMC = {
       success: this.onGetTripsDataSuccess,
       error: this.onGetTripsDataError
     });
-    this.endFunction("getFutureTrips");
+    this.endFunction();
 	},
   
   onGetTripsDataSuccess : function(data, textStatus, jqXHR) {
-    this.beginFunction("onGetTripsDataSuccess");
+    this.beginFunction();
     this.assert(data != undefined, "data is undefined in onGetTripsDataSuccess");
     if(data.has_error !== undefined && data.has_error !== null) {
       if(data.has_error) {
@@ -543,11 +554,11 @@ var CMC = {
       // an unknown error occurred? do something!
       this.handleGenericUnexpectedCallbackError(data, textStatus, jqXHR, "future trips data");
     }
-    this.endFunction("onGetTripsDataSuccess");
+    this.endFunction();
 	},  
 
   UpdateFutureTrips : function (data) {
-    this.beginFunction("UpdateFutureTrips");
+    this.beginFunction();
     if (data === undefined) {
       // this should be a bug! do NOT pass this function undefined! say null to inform it that you have no results!
       this.assert(data === undefined, "undefined passed as results for UpdateFutureTrips");
@@ -610,11 +621,11 @@ var CMC = {
       }	
       
     } // end else
-    this.endFunction("UpdateFutureTrips");
+    this.endFunction();
   },
   
   handleGetTripsDataSuccessHasError : function(data) {
-    this.beginFunction("handleGetTripsDataSuccessHasError");
+    this.beginFunction();
     this.assert(data != undefined, "data is undefined in handleGetTripsDataSuccessHasError");
     // we have a known error, handle it
     if(data.err_msg !== undefined) {
@@ -626,11 +637,11 @@ var CMC = {
     } else {
       this.error("caught an error from the server while searching, but it did not return an error message");
     }
-    this.endFunction("handleGetTripsDataSuccessHasError");
+    this.endFunction();
   },
 
   GetTripProfile : function(index) {
-	  this.beginFunction("GetTripProfile");
+	  this.beginFunction();
       $.ajax({
         type: "POST",
         url: "api/profileT.php",
@@ -643,11 +654,11 @@ var CMC = {
         success: this.onGetTripProfileDataSuccess,
         error: this.onGetTripProfileDataError
       });
-	  this.endFunction("GetTripProfile");
+	  this.endFunction();
     },  
 
   onGetTripProfileDataSuccess : function(data, textStatus, jqXHR) {
-    this.beginFunction("onGetTripProfileDataSuccess");
+    this.beginFunction();
     this.assert(data != undefined, "data is undefined in onGetTripProfileDataSuccess");
     if(data.has_error !== undefined && data.has_error !== null) {
       if(data.has_error) {
@@ -660,11 +671,11 @@ var CMC = {
       // an unknown error occurred? do something!
       this.handleGenericUnexpectedCallbackError(data, textStatus, jqXHR, "trip profile data");
     }
-    this.endFunction("onGetTripProfileDataSuccess");
+    this.endFunction();
 	},	
 	
   handleGetTripProfileDataSuccessHasError : function(data) {
-    this.beginFunction("handleGetTripProfileDataSuccessHasError");
+    this.beginFunction();
     this.assert(data != undefined, "data is undefined in handleGetTripProfileDataSuccessHasError");
     // we have a known error, handle it
     if(data.err_msg !== undefined) {
@@ -676,11 +687,11 @@ var CMC = {
     } else {
       this.error("caught an error from the server while searching, but it did not return an error message");
     }
-    this.endFunction("handleGetTripProfileDataSuccessHasError");
+    this.endFunction();
   },	
   
   showTripProfile : function (data) {
-    this.beginFunction("showTripProfile");
+    this.beginFunction();
     if (data === undefined) {
       // this should be a bug! do NOT pass this function undefined! say null to inform it that you have no results!
       this.assert(data === undefined, "undefined passed as results for showTripProfile");
@@ -787,7 +798,7 @@ var CMC = {
       $("#show-trip-profile").fadeIn();
     } // end else
 	
-    this.endFunction("showTripProfile");
+    this.endFunction();
   },
   
      JoinTrip : function(index) {
@@ -814,7 +825,7 @@ var CMC = {
     },
 
   handleSearchSelect : function(item) {
-    this.beginFunction("handleSearchSelect");
+    this.beginFunction();
     var value = null, errorWhileParsing = false;
     try {
       value = jQuery.parseJSON(item)._value;
@@ -841,11 +852,11 @@ var CMC = {
       }
       this.search();
     }
-    this.endFunction("handleSearchSelect");
+    this.endFunction();
   },
 
   handleSearchRemove : function(item) {
-    this.beginFunction("handleSearchRemove");
+    this.beginFunction();
     var value = null, errorWhileParsing = false;
     try {
       value = jQuery.parseJSON(item)._value;
@@ -869,11 +880,11 @@ var CMC = {
       }
       this.search();
     }
-    this.endFunction("handleSearchRemove");
+    this.endFunction();
   },
 
   search : function () {
-    this.beginFunction("search");
+    this.beginFunction();
     this.searchPageCache = [];
     this.currentDisplayedSearchPage = 1;
     this.updateSearchPagingControls();
@@ -892,9 +903,11 @@ var CMC = {
       $("#cmc-search-results-noresultmsg").fadeOut(400, _onSearchFadeoutComplete);
     } else {
       this.log("we have a new search to perform");
+      //@/BEGIN/DEBUGONLYSECTION
       if(!this.me.id) {
        this.log("this.me.id isn't available; using blank fbid for search");
       }
+      //@/END/DEBUGONLYSECTION
       this.ajaxNotifyStart(); // one for good measure, we want the spinner for the whole search
       $.ajax({
         url: "api/searchresults.php",
@@ -912,11 +925,11 @@ var CMC = {
 
       $("#cmc-search-results-title").fadeIn();
     }
-    this.endFunction("search");
+    this.endFunction();
   },
 
   onSearchSuccess : function(data, textStatus, jqXHR) {
-    this.beginFunction("onSearchSuccess");
+    this.beginFunction();
     this.assert(data != undefined, "data is undefined in onSearchSuccess");
     $(".cmc-search-result").each(function () {
       $(this).hide();
@@ -953,7 +966,7 @@ var CMC = {
       this.handleGenericUnexpectedCallbackError(data, textStatus, jqXHR, "search success");
     }
     this.updateSearchPagingControls();
-    this.endFunction("onSearchSuccess");
+    this.endFunction();
   },
 
   onSearchError : function(jqXHR, textStatus, errorThrown) {
@@ -963,7 +976,7 @@ var CMC = {
   },
 
   handleSearchSuccessHasError : function(data) {
-    this.beginFunction("handleSearchSuccessHasError");
+    this.beginFunction();
     this.assert(data != undefined, "data is undefined in handleSearchSuccessHasError");
     // we have a known error, handle it
     if(data.err_msg !== undefined) {
@@ -975,11 +988,11 @@ var CMC = {
     } else {
       this.error("caught an error from the server while searching, but it did not return an error message");
     }
-    this.endFunction("handleSearchSuccessHasError");
+    this.endFunction();
   },
 
   getDataForEachFBID : function (fbids, callback, isRetryCall) {
-    this.beginFunction("getDataForEachFBID");
+    this.beginFunction();
     if (isRetryCall === null || isRetryCall === undefined) isRetryCall = false;
     var results = new Array(fbids.length), requestsCompleted = 0, idPosMap = {}, hasRetryPosted = false;
     this.log("starting timer __timerNotificationTimeout");
@@ -1032,11 +1045,11 @@ var CMC = {
         //this.ajaxNotifyComplete();
       }, this));
     }
-    this.endFunction("getDataForEachFBID");
+    this.endFunction();
   },
 
   showSearchResults : function (results) {
-    this.beginFunction("showSearchResults");
+    this.beginFunction();
     if (results === undefined) {
       // this is a bug! do NOT pass this function undefined! say null to inform it that you have no results!
       this.assert(results === undefined, "undefined passed as results for showSearchResults");
@@ -1046,30 +1059,20 @@ var CMC = {
     } else {
       var imageLoadsCompleted = 0, __notifyImageLoadCompleted = $.proxy(function() {
         imageLoadsCompleted++;
-        //@/BEGIN/DEBUGONLYSECTION
-        this.assert(imageLoadsCompleted <= results.length ?1:
-          "loading more images than we have results for (" + imageLoadsCompleted + ")");
-        //@/END/DEBUGONLYSECTION
+        this.assert(imageLoadsCompleted <= results.length, "loading more images than we have results for (" + imageLoadsCompleted + ")");
         if(imageLoadsCompleted == results.length) {
           this.animateShowSearchResults(results);
         }
       }, this);
       this.assert(results.length <= 10, "more than 10 results passed to showSearchResults");
-      //@/BEGIN/DEBUGONLYSECTION
-      // Since this is a multiline assert, we need to put it within a debug-only
-      // section to keep it from breaking ship code --zack
-      this.assert($(".result-picture img").length == 0,
-                  "found " + $(".result-picture img").length + " junk pictures lying around");
-      //@/END/DEBUGONLYSECTION
+      this.assert($(".result-picture img").length == 0, "found " + $(".result-picture img").length + " junk pictures lying around");
       for(var each in results) {
         this.assert(results[each].id !== undefined, "id is missing from result at each=" + each);
         var id = "#cmc-search-result-" + each;
         this.ajaxNotifyStart();
         this.assert(results[each].name !== undefined, "name is missing from result at each=" + each);
         $(id).children(".result-name").html(results[each].name ? results[each].name : "");
-	
-        this.searchids[each] = results[each].id;
-
+        $(id).attr("fbid", results[each].id);
         $(id).children("div.result-picture").children("img").remove();
         if (results[each].id) {
           $("<img />")
@@ -1096,11 +1099,11 @@ var CMC = {
       } // end for
     } // end else
     this.ajaxNotifyComplete(); // finish the one we started at the beginning of the search
-    this.endFunction("showSearchResults");
+    this.endFunction();
   },
 
   animateShowSearchResults : function (results) {
-    this.beginFunction("animateShowSearchResults");
+    this.beginFunction();
     var maxSearchResults = $(".cmc-search-result").length, i = 0;
     this.log("animating resultset starting with " + results[0].name);
     for(var each in results) {
@@ -1137,11 +1140,11 @@ var CMC = {
           .show("drop", {direction: "right", distance: 50}, 250, _onShowComplete);
       }).dequeue("custom-SearchResultsQueue");
     }
-    this.endFunction("animateShowSearchResults");
+    this.endFunction();
   },
 
   animateHideSearchResults : function(callback) {
-    this.beginFunction("animateHideSearchResults");
+    this.beginFunction();
     var fadesCompleted = 0, imagesDeleted = 0, _processFadeComplete = $.proxy(function () {
       fadesCompleted++;
       if (fadesCompleted == $(".cmc-search-result").length) {
@@ -1166,11 +1169,11 @@ var CMC = {
         _processFadeComplete();
       });
     }).dequeue("custom-SearchResultsQueue");
-    this.endFunction("animateHideSearchResults");
+    this.endFunction();
   },
 
   padSearchResults : function (results) {
-    this.beginFunction("padSearchResults");
+    this.beginFunction();
     // might we think about making this a constant or something?
     var maxSearchResults = $(".cmc-search-result").length, i = 0, ret = results.slice(0);
     if (results.length < maxSearchResults) {
@@ -1178,12 +1181,12 @@ var CMC = {
         ret.push({id: false, name: false});
       }
     }
-    this.endFunction("padSearchResults");
+    this.endFunction();
     return ret;
   },
 
   navigateToNextSearchPage : function () {
-    this.beginFunction("navigateToNextSearchPage");
+    this.beginFunction();
     var searchIndex = ++this.currentDisplayedSearchPage - 1, interval;
     this.updateSearchPagingControls();
     this.ajaxNotifyStart(); // we do this because showSearchResults expects its caller to post a notification like search()
@@ -1203,11 +1206,11 @@ var CMC = {
       }
     }, this));
     this.cacheSearchPage(searchIndex + 1);
-    this.endFunction("navigateToNextSearchPage");
+    this.endFunction();
   },
 
   cacheSearchPage : function(pageIndex) {
-    this.beginFunction("cacheSearchPage");
+    this.beginFunction();
     if (this.searchPageCache[pageIndex] === undefined) {
       // this is a page that we haven't cached yet
       this.log("[cacheSearchPage] fetching search page " + (pageIndex + 1));
@@ -1234,7 +1237,7 @@ var CMC = {
         error: this.onCacheSearchPageServerError
       });
     }
-    this.endFunction("cacheSearchPage");
+    this.endFunction();
   },
 
   onCacheSearchPageSuccess : function(data, textStatus, jqXHR) {
@@ -1246,7 +1249,7 @@ var CMC = {
       } // if this is unavailable, god help us all
     }
     //@/END/DEBUGONLYSECTION
-    this.cmc.beginFunction("onCacheSearchPageSuccess"); // I know this isn't at the beginning --zack
+    this.cmc.beginFunction(); // I know this isn't at the beginning --zack
     this.cmc.assert(data != undefined, "data is undefined in onCacheSearchPageSuccess");
     if("has_error" in data && data["has_error"] !== undefined && data.has_error !== null) {
       if(data.has_error) {
@@ -1282,20 +1285,20 @@ var CMC = {
     }
     this.cmc.updateSearchPagingControls();
     this.cmc.ajaxNotifyComplete();
-    this.cmc.endFunction("onCacheSearchPageSuccess");
+    this.cmc.endFunction();
   },
 
   onCacheSearchPageServerError : function(jqXHR, textStatus, errorThrown) {
-    this.beginFunction("onCacheSearchPageServerError");
+    this.beginFunction();
     this.ajaxNotifyComplete();
     this.searchPageCache.push(null); // this should (hopefully) stop the interval check
     // we might also want to log this or surface an error message or something
     this.handleGenericServerError(jqXHR, textStatus, errorThrown);
-    this.endFunction("onCacheSearchPageServerError");
+    this.endFunction();
   },
 
   navigateToPreviousSearchPage : function () {
-    this.beginFunction("navigateToPreviousSearchPage");
+    this.beginFunction();
     var fadesCompleted = 0, imagesDeleted = 0;
     this.currentDisplayedSearchPage--;
     this.updateSearchPagingControls();
@@ -1315,11 +1318,11 @@ var CMC = {
       this.assert(false, "stumbled on an undefined page while navigating to the previous page");
     }
     this.updateSearchPagingControls();
-    this.endFunction("navigateToPreviousSearchPage");
+    this.endFunction();
   },
 
   updateSearchPagingControls : function () {
-    this.beginFunction("updateSearchPagingControls");
+    this.beginFunction();
     this.assert(this.currentDisplayedSearchPage >= 1, "displaying search page that is negative or zero");
     $("#cmc-search-results-pagingctl-text").children(".ui-button-text").html("page " + this.currentDisplayedSearchPage);
     if (this.currentDisplayedSearchPage <= 1) {
@@ -1332,11 +1335,11 @@ var CMC = {
     } else {
       $("#cmc-search-results-pagingctl-next").removeClass("ui-state-hover").button("disable");
     }
-    this.endFunction("updateSearchPagingControls");
+    this.endFunction();
   },
 
   animateSearchResultSelected : function (whichResult) {
-    this.beginFunction("animateSearchResultSelected");
+    this.beginFunction();
     $(".cmc-search-result").not(whichResult).each(function () {
       var _onHideComplete = function() {
         setTimeout($.proxy(function () {
@@ -1353,25 +1356,24 @@ var CMC = {
     setTimeout(function () {
       $("#tabs").tabs('select', 1);
     }, 285);
-    this.endFunction("animateSearchResultSelected");
+    this.endFunction();
   },
   
   handleSearchResultSelected : function (whichResult) {
-    this.beginFunction("handleSearchResultSelected");
+    this.beginFunction();
     if($(whichResult).children(".result-name").html() != "") {
-      // Show the new profile
-      var sparts = $(whichResult).attr("id").split('-');
-      var sindex = parseInt(sparts[sparts.length-1],10);
-      this.getProfile(this.searchids[sindex]);      
+      var whichFBID = $(whichResult).attr("fbid");
+      this.assert(whichFBID != null && whichFBID != "", "fbid attr is null for clicked search result");
+      this.getProfile(whichFBID);      
       this.animateSearchResultSelected(whichResult);
     } else {
       this.log("search result clicked, but name is empty; ignoring");
     }
-    this.endFunction("handleSearchResultSelected");
+    this.endFunction();
   },
 
   cacheFacebookData : function () {
-    this.beginFunction("cacheFacebookData");
+    this.beginFunction();
     CMC.ajaxNotifyStart();
     FB.api('/me', function (response) {
       CMC.log("got user data from Facebook");
@@ -1391,11 +1393,11 @@ var CMC = {
       CMC.ajaxNotifyComplete();
       CMC.friends = friends.data;
     });
-    this.endFunction("cacheFacebookData");
+    this.endFunction();
   },
 
   checkFacebookLoginStatus : function (callback) {
-    this.beginFunction("checkFacebookLoginStatus");
+    this.beginFunction();
     //@/BEGIN/DEBUGONLYSECTION
     $("#logged-in-user-value").html("(synchronizing)");
     //@/END/DEBUGONLYSECTION
@@ -1414,12 +1416,12 @@ var CMC = {
         callback(response);
       }
     });
-    this.endFunction("checkFacebookLoginStatus");
+    this.endFunction();
   },
 
   login : function (callback) {
     // this is a wrapper API to handle user clicks that require Facebook authorization
-    this.beginFunction("login");
+    this.beginFunction();
     //@/BEGIN/DEBUGONLYSECTION
     $("#logged-in-user-value").html("(synchronizing)");
     //@/END/DEBUGONLYSECTION
@@ -1442,7 +1444,7 @@ var CMC = {
         callback(response);
       }
     });
-    this.endFunction("login");
+    this.endFunction();
   }
 
                  
