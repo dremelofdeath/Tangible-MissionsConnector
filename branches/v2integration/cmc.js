@@ -490,7 +490,7 @@ var CMC = {
         // cleanup the junk pictures, the user is clicking too quickly
         this.log("cleaning " + ($(id + " .profile-picture img").length - 1) + " junk result(s) while showing " + id);
         while ($(id + " .profile-picture img").length > 1) {
-          $(id + " .profile-picture img:first").remove();
+          $(id + " .profile-picture img").filter(":first").remove();
           $(id).hide(); // this will get shown again later
         }
       }
@@ -1106,40 +1106,44 @@ var CMC = {
     this.beginFunction();
     var maxSearchResults = $(".cmc-search-result").length, i = 0;
     this.log("animating resultset starting with " + results[0].name);
-    for(var each in results) {
-      var id = "#cmc-search-result-" + each, showsCompleted = 0, _onShowComplete = $.proxy(function () {
-            // this sure ain't the prettiest way to fix the incomplete
-            // page quick click render bug, but it works --zack
-            ++showsCompleted;
-            if (showsCompleted == results.length) {
-              if (results.length < maxSearchResults) {
-                this.log("incomplete page, hiding the the results that need cleanup");
-                for (var point = maxSearchResults - results.length; point > 0; point--) {
-                  // clean up the slots that weren't being shown
-                  var tempId = "#cmc-search-result-" + (maxSearchResults - point);
-                  $(tempId).delay(4 * (maxSearchResults - point)).fadeOut('fast'); // at least fade out
+    $("#cmc-search-results").clearQueue("custom-SearchResultsQueue");
+    var _doOneResultPageAnimation = function () {
+      CMC.assert(this.hasOwnProperty("results"), "search results not correctly assigned to animation delegate");
+      for(var each in this.results) {
+        var id = "#cmc-search-result-" + each, showsCompleted = 0, _onShowComplete = $.proxy(function () {
+              // this sure ain't the prettiest way to fix the incomplete
+              // page quick click render bug, but it works --zack
+              ++showsCompleted;
+              if (showsCompleted == this.results.length) {
+                if (this.results.length < maxSearchResults) {
+                  this.log("incomplete page, hiding the the results that need cleanup");
+                  for (var point = maxSearchResults - this.results.length; point > 0; point--) {
+                    // clean up the slots that weren't being shown
+                    var tempId = "#cmc-search-result-" + (maxSearchResults - point);
+                    $(tempId).delay(4 * (maxSearchResults - point)).fadeOut('fast'); // at least fade out
+                  }
                 }
               }
-            }
-          }, this);
-      $("*").clearQueue("custom-SearchResultsQueue");
-      if ($(id + " .result-picture img").length > 1) {
-        // cleanup the junk pictures, the user is clicking too quickly
-        this.log("cleaning " + ($(id + " .result-picture img").length - 1) + " junk result(s) while showing " + id);
-        while ($(id + " .result-picture img").length > 1) {
-          $(id + " .result-picture img:first").remove();
-          $(id + " .result-name div").html(""); // also kill the name
-          $(id).hide(); // this will get shown again later
+            }, this);
+        if ($(id + " .result-picture img").length > 1) {
+          // cleanup the junk pictures, the user is clicking too quickly
+          this.log("cleaning " + ($(id + " .result-picture img").length - 1) + " junk result(s) while showing " + id);
+          while ($(id + " .result-picture img").length > 1) {
+            $(id + " .result-picture img").filter(":first").remove();
+            $(id + " .result-name div").html(""); // also kill the name
+            $(id).hide(); // this will get shown again later
+          }
         }
-      }
-      $(id).queue("custom-SearchResultsQueue", function () {
-        var each = $(this).attr("id").split("-")[3];
-        $(this)
+        $(id)
           .stop(true, true)
           .delay(25 * each)
           .show("drop", {direction: "right", distance: 50}, 250, _onShowComplete);
-      }).dequeue("custom-SearchResultsQueue");
+      }
+      $("#cmc-search-results").dequeue("custom-SearchResultsQueue");
     }
+    _doOneResultPageAnimation.results = results;
+    _doOneResultPageAnimation = $.proxy(_doOneResultPageAnimation, _doOneResultPageAnimation); // I've seen worse hacks, I promise --zack
+    $("#cmc-search-results").filter(":first").queue("custom-SearchResultsQueue", _doOneResultPageAnimation).dequeue("custom-SearchResultsQueue");
     this.endFunction();
   },
 
