@@ -871,24 +871,6 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
 
   echo '</a>';
 }
-
-function cmc_check_profile_existence($fbid,&$profileexists,$con) {
-  
-  $sql = 'select * from users where userid="'.$fbid.'"';
-  $result = mysql_query($sql,$con);
-  if (!$result) {
-    setjsonmysqlerror($has_error,$err_msg,$sql2);
-    }
-  else {
-    $num_userids = mysql_num_rows($result);
-    if ($num_userids == 0) {
-      $profileexists = 0;
-    }
-    else {
-      $profileexists = 1;
-    }
-  }
-}
 ?>
 
 <html>
@@ -917,7 +899,6 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
     <link rel="stylesheet" type="text/css" href="jquery.validate.css" />
     <link href="profilevalidate.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" type="text/css" href="style.css" />
-    <link href="profiledisplay.css" rel="stylesheet" type="text/css" />
 	  <script src="datepicker.js" type="text/javascript"></script>
 	  <link href="datepicker.css" rel="stylesheet" type="text/css" />
     <!-- THIS IS THE ADMIN CODE BLOCK! Do NOT put code here for end users, they won't see it! -zack -->
@@ -1147,6 +1128,25 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
         margin-top: 7px;
         margin-right: 14px;
       }
+
+      #profile-left-column {
+        float: left;
+        margin-right: 9px;
+        height: 450px;
+        width: 180px;
+      }
+
+      #profile-name {
+        font-size: 2em;
+      }
+
+      .profile-picture {
+        width: 180px;
+      }
+
+      /* the stuff below here appears to be stylization for edit profile dialogs 
+       * --zack
+       */
       
         #wrapper
         {
@@ -1369,126 +1369,86 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
             );
           ?>
         </div>
-    <style type="text/css">
-    #table_wrapper{background:#000080;border:0px solid #A9A9A9;float:center;}
-    #tbody{height:100px;overflow-y:auto;width:474px;background:#000080;}
-    table{border-collapse:collapse; width:100%;}
-    td{padding:0px 0px; /* pixels */
-    border-right:0px solid #A9A9A9; /* to avoid the hacks for the padding */
-    border-bottom:0px solid #A9A9A9;} 
-	#topright {
-	position:absolute;
-	top:0;
-	right:0;
-	}
-	#backtotrips {
-	position:absolute;
-	top:0;
-	right:0;
-	}
-    .td1{width:55px;}
-    .td2{width:50px;}
-    .td3{border-right-width:0;}
-    </style>      
         <div id="show-profile" style="display: none">
-		<div id="profilecontent">
-			<div id="topright" style="display: none">
-				<a href="#">&lt;&lt; Go back to your own Profile </a>
-			</div>			
-			<div id="colOne">
-			<div id="profileimage">
-            <div class="profile-picture">
-				      <img src="ajax-spinner.gif" width="190" />
+          <div id="profilecontent">
+            <div id="profile-left-column">
+              <div id="profile-image">
+                <img class="profile-picture" src="ajax-spinner.gif" />
+              </div>
+              <div id="profile-controls">
+                <input type="submit" value="Edit Profile" id="profile-controls-edit" class="button" />
+                <input type="submit" value="Create Trip" id="profile-controls-create-trip" class="button" />
+                <a id="profile-control-back-to-my-profile" href="#">&lt;&lt;back to my profile</a>
+              </div>
+              <div id="profile-section-about-me">
+                <h3>About Me:</h3>
+                <div id="profile-section-about-me-content">
+                  Sample About Text
+                </div>
+              </div>
             </div>
-			</div>
-			<div class="box2">
-				<div class="profile-name">Search Name
-				</div>
-			</div>
-      <div id="poptions">
-			<input type="submit" value="Edit Profile" id="EditProfile" class="button" />
-			<input type="submit" value="Create Trip" id="CreateTrip" class="button" />
-      </div>
-			<p>&nbsp;</p>
-			<div class="box2">
-				<h3>
-					About Me: <br />
-				</h3>
-				<div class="profile-about">
-					<h4> About </h4>
-				</div>
-			</div>
-			</div>
-			<div id="colTwo">
-				<div class="box1">
-					<h2>Medical Skills:</h2>
-					<div class="profile-medskills">Medskills
-					</div>
-				</div>
-				<p>&nbsp;</p>
-				<div class="box1">
-					<h2>Non-Medical Skills:</h2>
-					<div class="profile-nonmedskills">Non-Medskills
-					</div>
-				</div>
-				<p>&nbsp;</p>
-				<div class="box1">
-					<h2>Personal Information:</h2>
-					<h5> Email: </h5>
-					<div class="profile-email">
-						<h6> Email </h6>
-					</div>		
-					<h5> Phone: </h5>
-					<div class="profile-phone">
-						<h6> Phone </h6>
-					</div>	
-					<h5> Country: </h5>
-					<div class="profile-country">
-						<h6> Country </h6>
-					</div>	
-					<h5> Zip: </h5>
-					<div class="profile-zip">
-						<h6> Zip </h6>
-					</div>	
-					<h5> Preferred Duration of Mission Trips: </h5>
-					<div class="profile-dur">
-						<h6> Duration </h6>
-					</div>	
-					<h5> Countries of Interest: </h5>
-					<div class="profile-countries">
-						<h6> Countries </h6>
-					</div>	
-				</div>
-
-				<p>&nbsp;</p>
-				<h2>Trips Information:</h2>
-				<div id="table_wrapper">
-					<div id="tbody">
-					<table>
-					
-					<tr>
-          <td>
-					<div class="profile-picture">
-						<img src="ajax-spinner.gif" alt="" height="35"/>
-					</div>
-          </td>
-					<td><div class="box3">
-					<div class="profile-tripname">
-						TripName 
-					</div>						
-					</td>
-					<td class="td2"><input type="submit" value="Trip Description" class="button" id="trip-desc-submit" /></td>
-					<td class="td2"><input type="submit" value="Join This Trip" class="button" id="join-trip-submit" /></td>
-					</tr>
-	
-					</div>
-					</table>
-					</div>
-				</div>
-			</div>
-		</div>
-          
-    
+            <div id="profile-right-column">
+              <div id="profile-name">
+                Sample Long Name
+              </div>
+              <div id="profile-section-skills">
+                <h3>Medical Skills:</h3>
+                <div id="profile-medskills">Medskills
+                </div>
+                <h3>Non-Medical Skills:</h3>
+                <div id="profile-nonmedskills">Non-Medskills
+                </div>
+              </div>
+              <div class="box1">
+                <h3>Personal Information:</h3>
+                <h5> Email: </h5>
+                <div id="profile-email">
+                  <h6> Email </h6>
+                </div>		
+                <h5> Phone: </h5>
+                <div id="profile-phone">
+                  <h6> Phone </h6>
+                </div>	
+                <h5> Country: </h5>
+                <div id="profile-country">
+                  <h6> Country </h6>
+                </div>	
+                <h5> Zip: </h5>
+                <div id="profile-zip">
+                  <h6> Zip </h6>
+                </div>	
+                <h5> Preferred Duration of Mission Trips: </h5>
+                <div id="profile-dur">
+                  <h6> Duration </h6>
+                </div>	
+                <h5> Countries of Interest: </h5>
+                <div id="profile-countries">
+                  <h6> Countries </h6>
+                </div>	
+              </div>
+              <h3>Trips Information:</h3>
+              <div id="table_wrapper">
+                <div id="tbody">
+                  <table>
+                    <tr>
+                      <td>
+                        <div class="profile-picture">
+                          <img src="ajax-spinner.gif" alt="" height="35"/>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="box3 profile-tripname">
+                          TripName 
+                        </div>						
+                      </td>
+                      <td class="td2"><input type="submit" value="Trip Description" class="button" id="trip-desc-submit" /></td>
+                      <td class="td2"><input type="submit" value="Join This Trip" class="button" id="join-trip-submit" /></td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <div id="no-profile" style="display: none">
           <script type="text/javascript">
@@ -1522,29 +1482,27 @@ function cmc_check_profile_existence($fbid,&$profileexists,$con) {
 			<div id="backtotrips" style="display: none">
 				<a href="#" onclick="CMC.getFutureTrips();">&lt;&lt; Go back to Upcoming Trips </a>
 			</div>			
-			<div id="colOne">
-			<div id="tripprofileimage">
-            <div class="trip-owner-picture">
-				      <img src="ajax-spinner.gif" width="190" />
-            </div>
+			<div id="trip-profile-left-column">
+        <div id="tripprofileimage">
+          <div class="trip-owner-picture">
+            <img src="ajax-spinner.gif" width="190" />
+          </div>
+        </div>
+        <div class="box2">
+          Trip Owner:
+          <div class="profile-trip-owner">Name
+          </div>
+        </div>
+        <div class="box2">
+          <h3>
+            Trip Description: <br />
+          </h3>
+          <div class="trip-profile-about">
+            <h4> About </h4>
+          </div>
+        </div>
 			</div>
-			<div class="box2">
-        Trip Owner:
-				<div class="profile-trip-owner">Name
-				</div>
-			</div>
-			<p>&nbsp;</p>
-			<div class="box2">
-				<h3>
-					Trip Description: <br />
-				</h3>
-				<div class="trip-profile-about">
-					<h4> About </h4>
-				</div>
-			</div>
-			</div>
-			<div id="colTwo">
-				<p>&nbsp;</p>
+			<div id="trip-profile-right-column">
 				<div class="box1">
 					<h2>Trip Information:</h2>
 					<h5> Trip Name: </h5>

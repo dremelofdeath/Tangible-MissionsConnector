@@ -57,10 +57,15 @@ var CMC = {
   //@/BEGIN/DEBUGONLYSECTION
   DebugMode : {
     log : function(output, whereTo) {
-      var content = '(' + (new Date()).getTime() + ') ' + output;
       if (whereTo === undefined) whereTo = "#debug-log";
+      var depth = "";
+      for (var i = 0; i < this.debugFunctionDepth; i++) {
+        depth += " ";
+      }
+      var content = $(whereTo).val() + depth + output;
+      content = content.slice(content.length - 5000); // only keep the most recent 5000 characters
       $(whereTo)
-        .val($(whereTo).val() + content + "\n")
+        .val(content + "\n")
         .scrollTop(99999)
         .scrollTop($(whereTo).scrollTop()*12);
     },
@@ -85,10 +90,11 @@ var CMC = {
       }
     },
 
-    findFunctionNameFor : function (obj) {
-      for(var each in CMC) {
+    findFunctionNameFor : function (obj, context) {
+      if (context === undefined) context = this; // context, such as CMC --zack
+      for (var each in context) {
         try {
-          if (CMC[each] == obj) {
+          if (context[each] == obj) {
             return each;
           }
         } catch(e) {}
@@ -100,9 +106,12 @@ var CMC = {
       // check for scope corruption
       this.assert(this === CMC, "Scope corruption detected! this === CMC failed!");
       this.log("begin function: " + this.findFunctionNameFor(this.beginFunction.caller));
+      this.debugFunctionDepth++;
     },
 
     endFunction : function() {
+      this.debugFunctionDepth--;
+      this.assert(this.debugFunctionDepth >= 0, "debugFunctionDepth went negative");
       this.log("end function: " + this.findFunctionNameFor(this.endFunction.caller));
     },
   },
@@ -113,6 +122,9 @@ var CMC = {
   findFunctionNameFor : $.noop,
   beginFunction : $.noop,
   endFunction : $.noop,
+
+  // debug state variables go here. please don't make a lot of these. --zack
+  debugFunctionDepth : 0,
 
   attachDebugHandlers : function(handlerSet) {
     if ("log" in handlerSet) {
@@ -133,6 +145,7 @@ var CMC = {
     if ("endFunction" in handlerSet) {
       this.endFunction = handlerSet.endFunction;
     }
+    this.assert(this.hasOwnProperty("debugFunctionDepth"), "debugFunctionDepth is missing! where could it be?");
     $("#debug-section").show();
   },
 
@@ -301,6 +314,22 @@ var CMC = {
     }
     this.endFunction();
 	},
+
+  updateProfileControls : function(userid) {
+    this.beginFunction();
+    // Check whether the user is viewing own profile or someone else's profile
+    // If viewing someone else's profile, provide a link to go back to own profile
+    if (userid != CMC.me.id) {
+      $("#profile-control-back-to-my-profile").fadeIn();
+      $("#profile-controls-edit").hide();
+      $("#profile-controls-create-trip").hide();
+    } else {
+      $("#profile-control-back-to-my-profile").fadeOut();
+      $("#profile-controls-edit").show();
+      $("#profile-controls-create-trip").show();
+    }
+    this.endFunction();
+  },
   
   showProfile : function (data) {
     this.beginFunction();
@@ -311,168 +340,130 @@ var CMC = {
       // no profile exists - so display the new profile creation dialogs
       $("#no-profile").fadeIn();
     } else {
-      
-
-      var imageLoadsCompleted = 0, __notifyprofileImageLoadCompleted = $.proxy(function() {
-        imageLoadsCompleted++;
-          this.animateShowProfile();
-      }, this);
-
-        var id = "#profilecontent";
-        this.ajaxNotifyStart();
-        this.assert(data.name !== undefined, "name is missing from result set");
-		
-		// Check whether the uses is viewing own profile or someone else's profile
-		// If viewing someone else's profile, provide a link to go back to own profile
-		if (CMC.showuserid != CMC.me.id) {
-			$(id).children("#topright").html('<a href="#" onclick="CMC.getProfile('+CMC.me.id+');">&lt;&lt; Go back to your own Profile </a>');
-			$("#topright").fadeIn();
-      $(id).children("#colOne").children("#poptions").html("");
-		}
-    else {
-			$("#topright").fadeOut();
-      
-      var peachstr = "";
-      peachstr += "<input type=\"submit\" value=\"Edit Profile\" class=\"button\" id=\"EditProfile\"/></td>";
-      peachstr += "<input type=\"submit\" value=\"Create Trip\" class=\"button\" id=\"CreateTrip\"/></td>";
-      $(id).children("#colOne").children("#poptions").html(peachstr);
-    }
-		
-        $(id).children("#colOne").children(".box2").children(".profile-name").html(data.name ? data.name : "");
-        
-        $(id).children("#colOne").children("#profileimage").children(".profile-picture").children("img").attr("src", "http://graph.facebook.com/"+this.showuserid+"/picture?type=large");
-        this.ajaxNotifyComplete();
-			
-        $(id).children("#colOne").children(".box2").children(".profile-about").html(data.about ? "<h4>" + data.about + "</h4>" : "");
-
+      var id = "#profilecontent";
+      this.ajaxNotifyStart();
+      this.assert(data.name !== undefined, "name is missing from result set");
+      this.updateProfileControls(CMC.showuserid);
+      $("#profile-name").html(data.name ? data.name : "");
+      $("img.profile-picture").attr("src", "http://graph.facebook.com/"+this.showuserid+"/picture?type=large");
+      this.ajaxNotifyComplete();
+      $("#profile-section-about-me-content").html(data.about ? data.about : "");
       if (data.MedicalSkills == undefined) {
-			  $(id).children("#colTwo").children(".box1").children(".profile-medskills").html(" ");
+        $("#profile-medskills").html("");
+      } else {
+        //display medical skills information
+        if (data.MedicalSkills.length > 0) {
+          var eachstr = "<ul>";
+          for (var each in data.MedicalSkills) {
+            eachstr += "<li> " + data.MedicalSkills[each] + "</li>";
+          }
+          eachstr += "</ul>";
+
+          $("#profile-medskills").html(data.MedicalSkills ? eachstr : "");
+        } else {
+          $("#profile-medskills").html("");
+        }
       }
-      else {
-      //display medical skills information
-			if (data.MedicalSkills.length > 0) {
-			var eachstr = "<ul>";
-			for (var each in data.MedicalSkills) {
-					eachstr += "<li> " + data.MedicalSkills[each] + "</li>";
-			}
-			eachstr += "</ul>";
-		
-			$(id).children("#colTwo").children(".box1").children(".profile-medskills").html(data.MedicalSkills ? eachstr : "");
-			}
-      else {
-			$(id).children("#colTwo").children(".box1").children(".profile-medskills").html(" ");
-      }
-      }
-			
-			//display non-medical skills information
+
+      //display non-medical skills information
       if (data.Non_MedicalSkills == undefined) {
-			$(id).children("#colTwo").children(".box1").children(".profile-nonmedskills").html("");
+        $("#profile-nonmedskills").html("");
+      } else {
+        if (data.Non_MedicalSkills.length > 0) {
+          var eachstr = "<ul>";
+          for (var each in data.Non_MedicalSkills) {
+            eachstr += "<li> " + data.Non_MedicalSkills[each] + "</li>";
+          }
+          eachstr += "</ul>";
+
+          $(id).children("#profile-right-column").children(".box1").children(".profile-nonmedskills").html(data.Non_MedicalSkills ? eachstr : "");
+        } else {
+          $(id).children("#profile-right-column").children(".box1").children(".profile-nonmedskills").html("");
+        }
       }
-      else {
-			if (data.Non_MedicalSkills.length > 0) {
-			var eachstr = "<ul>";
-			for (var each in data.Non_MedicalSkills) {
-					eachstr += "<li> " + data.Non_MedicalSkills[each] + "</li>";
-			}
-			eachstr += "</ul>";
-		
-			$(id).children("#colTwo").children(".box1").children(".profile-nonmedskills").html(data.Non_MedicalSkills ? eachstr : "");
-			}
-      else {
-			$(id).children("#colTwo").children(".box1").children(".profile-nonmedskills").html("");
-      }
-      }
-			
-			//display profile information
+
+      //display profile information
       if (data.email == undefined) {
-			$(id).children("#colTwo").children(".box1").children(".profile-email").html("<h6></h6>");
-      }
-      else {
-			$(id).children("#colTwo").children(".box1").children(".profile-email").html(data.email ? "<h6>" + data.email + "</h6>" : "");
+        $("#profile-email").html("<h6></h6>");
+      } else {
+        $("#profile-email").html(data.email ? "<h6>" + data.email + "</h6>" : "");
       }
 
       if (data.phone == undefined) {
-			$(id).children("#colTwo").children(".box1").children(".profile-phone").html("<h6></h6>");
-      }
-      else {
-			$(id).children("#colTwo").children(".box1").children(".profile-phone").html(data.phone ? "<h6>" + data.phone + "</h6>" : "");
+        $("#profile-phone").html("<h6></h6>");
+      } else {
+        $("#profile-phone").html(data.phone ? "<h6>" + data.phone + "</h6>" : "");
       }
 
       if (data.country == undefined) {
-			$(id).children("#colTwo").children(".box1").children(".profile-country").html("<h6></h6>");
+        $("#profile-country").html("<h6></h6>");
+      } else {
+        $("#profile-country").html(data.country ? "<h6>" + data.country + "</h6>" : "");
       }
-      else {
-      $(id).children("#colTwo").children(".box1").children(".profile-country").html(data.country ? "<h6>" + data.country + "</h6>" : "");
-      }
-			
+
 
       if (data.zip == undefined) {
-			$(id).children("#colTwo").children(".box1").children(".profile-zip").html("<h6></h6>");
-      }
-      else {
-      $(id).children("#colTwo").children(".box1").children(".profile-zip").html(data.zip ? "<h6>" + data.zip + "</h6>" : "");
-      }
-			
-      if (data.Durations == undefined) {
-			$(id).children("#colTwo").children(".box1").children(".profile-dur").html("<h6></h6>");
-      }
-      else {
-      $(id).children("#colTwo").children(".box1").children(".profile-dur").html(data.Durations.PreferredDurationofMissionTrips ? "<h6>" + data.Durations.PreferredDurationofMissionTrips + "</h6>" : "");
+        $("#profile-zip").html("<h6></h6>");
+      } else {
+        $("#profile-zip").html(data.zip ? "<h6>" + data.zip + "</h6>" : "");
       }
 
-			
+      if (data.Durations == undefined) {
+        $("#profile-dur").html("<h6></h6>");
+      } else {
+        $("#profile-dur").html(data.Durations.PreferredDurationofMissionTrips ? "<h6>" + data.Durations.PreferredDurationofMissionTrips + "</h6>" : "");
+      }
+
+
       if (data.GeographicAreasofInterest == undefined) {
-			$(id).children("#colTwo").children(".box1").children(".profile-countries").html("<h6></h6>");
+        $("#profile-countries").html("<h6></h6>");
+      } else {
+        $("#profile-countries").html(data.GeographicAreasofInterest.Countries ? "<h6>" + data.GeographicAreasofInterest.Countries + "</h6>" : "");
       }
-      else {
-      $(id).children("#colTwo").children(".box1").children(".profile-countries").html(data.GeographicAreasofInterest.Countries ? "<h6>" + data.GeographicAreasofInterest.Countries + "</h6>" : "");
-      }
-		
+
 
       if (data.trips == undefined) {
-			$(id).children("#colTwo").children("#table_wrapper").children("#tbody").html("<table></table>");
-      }
-      else {
-			//finally update the trips information
-			if (data.trips.length > 0) {
-			
-      var eachstr = "";
-			for (var each in data.trips) {
-			
-        eachstr += "<tr>";
-        eachstr += "<td>";
-        eachstr += "<div class=\"profile-picture-" + each + "\">";
-        eachstr += "<img src=\"ajax-spinner.gif\"/>";
-        eachstr += "</div>";
-        eachstr += "</td>";
-        eachstr += "<td><div class=\"box3\">";
-        eachstr += "<div class=\"profile-tripname-" + each + "\">";
-        eachstr += "<h4> TripName </h4>";
-        eachstr += "</div>";
-        eachstr += "</td>";
-        eachstr += "<td class=\"td2\"><input type=\"submit\" value=\"Trip Description\" class=\"button\" id=\"trip-desc-submit-" + each + "\"/></td>";
-        eachstr += "<td class=\"td2\"><input type=\"submit\" value=\"Invite To Trip\" class=\"button\" id=\"invite-trip-submit-" + each + "\"/></td>";
-        eachstr += "</tr>";
-        eachstr += "</div>";
-		
-		  this.tripinvitebtns[each] = "invite-trip-submit-"+each;
-		  this.tripdescbtns[each] = "trip-desc-submit-"+each;
-		
-      }
-  
-      // replace the existing template with the new template that is the length of the trips array
-			$(id).children("#colTwo").children("#table_wrapper").children("#tbody").html("<table>" + eachstr + "</table>");
-			
-      //Now update the new template with the trips information
-      for (var each in data.trips) {      
-      $(id).children("#colTwo").children("#table_wrapper").children("#tbody").find(".profile-picture-"+each).children("img").attr("src", "http://graph.facebook.com/"+this.me.id+"/picture?type=small");
-			$(id).children("#colTwo").children("#table_wrapper").children("#tbody").find(".profile-tripname-"+each).html(data.trips[each] ? data.trips[each] : "");
-			}			
+        $(id).children("#profile-right-column").children("#table_wrapper").children("#tbody").html("<table></table>");
+      } else {
+        //finally update the trips information
+        if (data.trips.length > 0) {
 
-			}
-      else {
-			$(id).children("#colTwo").children("#table_wrapper").children("#tbody").html("<table></table>");
-      }
+          var eachstr = "";
+          for (var each in data.trips) {
+
+            eachstr += "<tr>";
+            eachstr += "<td>";
+            eachstr += "<div class=\"profile-picture-" + each + "\">";
+            eachstr += "<img src=\"ajax-spinner.gif\"/>";
+            eachstr += "</div>";
+            eachstr += "</td>";
+            eachstr += "<td><div class=\"box3\">";
+            eachstr += "<div class=\"profile-tripname-" + each + "\">";
+            eachstr += "<h4> TripName </h4>";
+            eachstr += "</div>";
+            eachstr += "</td>";
+            eachstr += "<td class=\"td2\"><input type=\"submit\" value=\"Trip Description\" class=\"button\" id=\"trip-desc-submit-" + each + "\"/></td>";
+            eachstr += "<td class=\"td2\"><input type=\"submit\" value=\"Invite To Trip\" class=\"button\" id=\"invite-trip-submit-" + each + "\"/></td>";
+            eachstr += "</tr>";
+            eachstr += "</div>";
+
+            this.tripinvitebtns[each] = "invite-trip-submit-"+each;
+            this.tripdescbtns[each] = "trip-desc-submit-"+each;
+
+          }
+
+          // replace the existing template with the new template that is the length of the trips array
+          $(id).children("#profile-right-column").children("#table_wrapper").children("#tbody").html("<table>" + eachstr + "</table>");
+
+          //Now update the new template with the trips information
+          for (var each in data.trips) {      
+            $(id).children("#profile-right-column").children("#table_wrapper").children("#tbody").find(".profile-picture-"+each).children("img").attr("src", "http://graph.facebook.com/"+this.me.id+"/picture?type=small");
+            $(id).children("#profile-right-column").children("#table_wrapper").children("#tbody").find(".profile-tripname-"+each).html(data.trips[each] ? data.trips[each] : "");
+          }			
+
+        } else {
+          $(id).children("#profile-right-column").children("#table_wrapper").children("#tbody").html("<table></table>");
+        }
 
       }
       $("#show-profile").fadeIn();
@@ -481,30 +472,6 @@ var CMC = {
     this.endFunction();
   },	
   
-  animateShowProfile : function () {
-    this.beginFunction();
-	  var id = "#profileimage";
-
-      $("*").clearQueue("custom-ProfileQueue");
-      if ($(id + " .profile-picture img").length > 1) {
-        // cleanup the junk pictures, the user is clicking too quickly
-        this.log("cleaning " + ($(id + " .profile-picture img").length - 1) + " junk result(s) while showing " + id);
-        while ($(id + " .profile-picture img").length > 1) {
-          $(id + " .profile-picture img").filter(":first").remove();
-          $(id).hide(); // this will get shown again later
-        }
-      }
-      $(id).queue("custom-ProfileQueue", function () {
-        //var each = $(this).attr("id")[1];
-        $(this)
-          .stop(true, true)
-          .delay(25)
-          .show("drop", {direction: "right", distance: 50}, 250, _onShowComplete);
-      }).dequeue("custom-ProfileQueue");
-	  
-    this.endFunction();
-  },
-
   onGetProfileDataError : function(jqXHR, textStatus, errorThrown) {
     // we might also want to log this or surface an error message or something
     this.handleGenericServerError(jqXHR, textStatus, errorThrown);
@@ -526,7 +493,7 @@ var CMC = {
     this.endFunction();
   },
 
-    getFutureTrips : function() {
+  getFutureTrips : function() {
     this.beginFunction();
     this.log("Obtaining future trip information from the database");
     $.ajax({
@@ -704,90 +671,90 @@ var CMC = {
         this.ajaxNotifyStart();
         this.assert(data.tripname !== undefined, "Trip name is missing from result set");
 		
-        $(id).children("#colOne").children(".box2").children(".profile-trip-owner").html(data.tripowner ? data.tripowner : "");
+        $(id).children("#profile-left-column").children(".box2").children(".profile-trip-owner").html(data.tripowner ? data.tripowner : "");
        
         this.tripuserid = data.creatorid;
 
-        $(id).children("#colOne").children("#tripprofileimage").children(".trip-owner-picture").children("img").attr("src", "http://graph.facebook.com/"+data.creatorid+"/picture?type=large");
+        $(id).children("#profile-left-column").children("#tripprofileimage").children(".trip-owner-picture").children("img").attr("src", "http://graph.facebook.com/"+data.creatorid+"/picture?type=large");
         this.ajaxNotifyComplete();
 			
-        $(id).children("#colOne").children(".box2").children(".trip-profile-about").html(data.tripdesc ? "<h4>" + data.tripdesc + "</h4>" : "");
+        $(id).children("#profile-left-column").children(".box2").children(".trip-profile-about").html(data.tripdesc ? "<h4>" + data.tripdesc + "</h4>" : "");
 			
 	  //display Trip profile information
       if (data.tripname === undefined) {
-			$(id).children("#colTwo").children(".box1").children(".profile-trip-name").html("<h6></h6>");
+			$(id).children("#profile-right-column").children(".box1").children(".profile-trip-name").html("<h6></h6>");
       }
       else {
-			$(id).children("#colTwo").children(".box1").children(".profile-trip-name").html(data.tripname ? "<h6>" +data.tripname + "</h6>": "");
+			$(id).children("#profile-right-column").children(".box1").children(".profile-trip-name").html(data.tripname ? "<h6>" +data.tripname + "</h6>": "");
       }
 	 
       if (data.website === undefined) {
-			$(id).children("#colTwo").children(".box1").children(".profile-trip-url").html("<h6></h6>");
+			$(id).children("#profile-right-column").children(".box1").children(".profile-trip-url").html("<h6></h6>");
       }
       else {
-			$(id).children("#colTwo").children(".box1").children(".profile-trip-url").html(data.website ? "<h6>" +data.website + "</h6>": "");
+			$(id).children("#profile-right-column").children(".box1").children(".profile-trip-url").html(data.website ? "<h6>" +data.website + "</h6>": "");
       }	 
 	  
       if ((data.destination === undefined) && (data.destinationcountry === undefined)) {
-			$(id).children("#colTwo").children(".box1").children(".profile-trip-dest").html("<h6></h6>");
+			$(id).children("#profile-right-column").children(".box1").children(".profile-trip-dest").html("<h6></h6>");
       }
       else if (data.destination === undefined) {
-		$(id).children("#colTwo").children(".box1").children(".profile-trip-dest").html("<h6>" +data.destinationcountry+ "</h6>");
+		$(id).children("#profile-right-column").children(".box1").children(".profile-trip-dest").html("<h6>" +data.destinationcountry+ "</h6>");
 	  }
 	  else if (data.destinationcountry === undefined) {
-		$(id).children("#colTwo").children(".box1").children(".profile-trip-dest").html("<h6>" +data.destination+ "</h6>");
+		$(id).children("#profile-right-column").children(".box1").children(".profile-trip-dest").html("<h6>" +data.destination+ "</h6>");
 	  }
 	  else {
-			$(id).children("#colTwo").children(".box1").children(".profile-trip-dest").html("<h6>" +data.destination + "," +data.destinationcountry+ "</h6>");
+			$(id).children("#profile-right-column").children(".box1").children(".profile-trip-dest").html("<h6>" +data.destination + "," +data.destinationcountry+ "</h6>");
       }		  
 	  
       if (data.email === undefined) {
-			$(id).children("#colTwo").children(".box1").children(".profile-trip-email").html("<h6></h6>");
+			$(id).children("#profile-right-column").children(".box1").children(".profile-trip-email").html("<h6></h6>");
       }
       else {
-			$(id).children("#colTwo").children(".box1").children(".profile-trip-email").html(data.email ? "<h6>" + data.email+ "</h6>" : "");
+			$(id).children("#profile-right-column").children(".box1").children(".profile-trip-email").html(data.email ? "<h6>" + data.email+ "</h6>" : "");
       }
 
       if (data.phone === undefined) {
-			$(id).children("#colTwo").children(".box1").children(".profile-trip-phone").html("<h6></h6>");
+			$(id).children("#profile-right-column").children(".box1").children(".profile-trip-phone").html("<h6></h6>");
       }
       else {
-			$(id).children("#colTwo").children(".box1").children(".profile-trip-phone").html(data.phone ? "<h6>" + data.phone+ "</h6>" : "");
+			$(id).children("#profile-right-column").children(".box1").children(".profile-trip-phone").html(data.phone ? "<h6>" + data.phone+ "</h6>" : "");
       }
 	  
       if (data.tripstage === undefined) {
-			$(id).children("#colTwo").children(".box1").children(".profile-trip-stage").html("<h6></h6>");
+			$(id).children("#profile-right-column").children(".box1").children(".profile-trip-stage").html("<h6></h6>");
       }
       else {
-			$(id).children("#colTwo").children(".box1").children(".profile-trip-stage").html(data.tripstage ? "<h6>" + data.tripstage + "</h6>": "");
+			$(id).children("#profile-right-column").children(".box1").children(".profile-trip-stage").html(data.tripstage ? "<h6>" + data.tripstage + "</h6>": "");
       }	  
 
 	  if (data.departyear === undefined) {
-			$(id).children("#colTwo").children(".box1").children(".profile-trip-depart").html("<h6></h6>");
+			$(id).children("#profile-right-column").children(".box1").children(".profile-trip-depart").html("<h6></h6>");
       }
       else {
-			$(id).children("#colTwo").children(".box1").children(".profile-trip-depart").html("<h6>" +data.departyear ? data.departmonth +"/"+data.departday+"/"+data.departyear +"</h6>": "");
+			$(id).children("#profile-right-column").children(".box1").children(".profile-trip-depart").html("<h6>" +data.departyear ? data.departmonth +"/"+data.departday+"/"+data.departyear +"</h6>": "");
       }	
 	  
 	  if (data.returnyear === undefined) {
-			$(id).children("#colTwo").children(".box1").children(".profile-trip-return").html("<h6></h6>");
+			$(id).children("#profile-right-column").children(".box1").children(".profile-trip-return").html("<h6></h6>");
       }
       else {
-			$(id).children("#colTwo").children(".box1").children(".profile-trip-return").html("<h6>" + data.returnyear ? data.returnmonth +"/"+data.returnday+"/"+data.returnyear + "</h6>": "");
+			$(id).children("#profile-right-column").children(".box1").children(".profile-trip-return").html("<h6>" + data.returnyear ? data.returnmonth +"/"+data.returnday+"/"+data.returnyear + "</h6>": "");
       }	  
 
       if (data.religion === undefined) {
-			$(id).children("#colTwo").children(".box1").children(".profile-trip-religion").html("<h6></h6>");
+			$(id).children("#profile-right-column").children(".box1").children(".profile-trip-religion").html("<h6></h6>");
       }
       else {
-      $(id).children("#colTwo").children(".box1").children(".profile-trip-religion").html(data.religion ? "<h6>" + data.religion + "</h6>" : "");
+      $(id).children("#profile-right-column").children(".box1").children(".profile-trip-religion").html(data.religion ? "<h6>" + data.religion + "</h6>" : "");
       }
 	  
       if (data.numpeople === undefined) {
-			$(id).children("#colTwo").children(".box1").children(".profile-trip-numpeople").html("<h6></h6>");
+			$(id).children("#profile-right-column").children(".box1").children(".profile-trip-numpeople").html("<h6></h6>");
       }
       else {
-      $(id).children("#colTwo").children(".box1").children(".profile-trip-numpeople").html(data.numpeople ? "<h6>" + data.numpeople + "</h6>" : "");
+      $(id).children("#profile-right-column").children(".box1").children(".profile-trip-numpeople").html(data.numpeople ? "<h6>" + data.numpeople + "</h6>" : "");
       }
 
       // change to the Trips Tab
@@ -1532,7 +1499,7 @@ $(function() {
   $("#make-trip, #profile-trip-dialog").hide();
 
   $("#make-volunteer").click(function() {
-	$("#profile-volunteer-dialog").dialog('open');
+    $("#profile-volunteer-dialog").dialog('open');
   });
 
   $("#profile-volunteer-dialog").dialog({
@@ -1564,7 +1531,7 @@ $(function() {
   });  
 
   $("#make-organizer").click(function() {
-	$("#profile-organizer-dialog").dialog('open');
+    $("#profile-organizer-dialog").dialog('open');
   });
 
   $("#profile-organizer-dialog").dialog({
@@ -1582,7 +1549,7 @@ $(function() {
   });  
   
   $("#make-trip").click(function() {
-	$("#profile-trip-dialog").dialog('open');
+    $("#profile-trip-dialog").dialog('open');
   });
 
   $("#profile-trip-dialog").dialog({
@@ -1771,6 +1738,11 @@ $(function() {
     .keypress(function() {
       CMC.recalculateProblemMessageLimit();
     });
+
+  $("#profile-control-back-to-my-profile").hide();
+  $("#profile-control-back-to-my-profile").click(function () {
+    CMC.getProfile(CMC.me.id);
+  });
 
     function validateZipCode(elementValue){
       var zisValid = false;
