@@ -1061,7 +1061,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         width: 75px !important;
       }
 
-      .cmc-pagingctl-button {
+      .cmc-square-button {
         height: 20px;
         width: 20px !important;
       }
@@ -1103,11 +1103,6 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         display: none;
       }
 
-      img.prloading {
-        z-index: -1;
-        display: none;
-      }
-
       #cmc-footer a {
         text-decoration: none;
         color: #102030;
@@ -1136,8 +1131,20 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         width: 180px;
       }
 
-      #profile-name {
+      .entity-title {
         font-size: 2em;
+        float: left;
+      }
+
+      .entity-control {
+        display: inline-block;
+        margin: 2px 0;
+      }
+
+      .entity-control-spacer {
+        display: inline-block;
+        width: 3px;
+        height: 1px;
       }
 
       .profile-picture {
@@ -1375,11 +1382,6 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
               <div id="profile-image">
                 <img class="profile-picture" src="ajax-spinner.gif" />
               </div>
-              <div id="profile-controls">
-                <input type="submit" value="Edit Profile" id="profile-controls-edit" class="button" />
-                <input type="submit" value="Create Trip" id="profile-controls-create-trip" class="button" />
-                <a id="profile-control-back-to-my-profile" href="#">&lt;&lt;back to my profile</a>
-              </div>
               <div id="profile-section-about-me">
                 <h3>About Me:</h3>
                 <div id="profile-section-about-me-content">
@@ -1388,8 +1390,14 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
               </div>
             </div>
             <div id="profile-right-column">
-              <div id="profile-name">
-                Sample Long Name
+              <div id="profile-title-section">
+                <span id="profile-name" class="entity-title">Sample Long Name</span>
+                <div id="profile-controls" class="entity-controls">
+                  <div id="profile-controls-spacer" class="entity-control-spacer"></div>
+                  <div id="profile-controls-edit" class="entity-control cmc-square-button"></div>
+                  <div id="profile-controls-create-trip" class="entity-control cmc-square-button"></div>
+                  <div id="profile-controls-back-to-my-profile" class="entity-control cmc-square-button"></div>
+                </div>
               </div>
               <div id="profile-section-skills">
                 <h3>Medical Skills:</h3>
@@ -1649,12 +1657,12 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         <div id="cmc-search-results">
           <div id="cmc-search-results-title" style="display: none">
             <div id="cmc-search-results-pagingctl">
-              <div id="cmc-search-results-pagingctl-prev" class="cmc-pagingctl-button"></div>
+              <div id="cmc-search-results-pagingctl-prev" class="cmc-square-button"></div>
               <div id="cmc-search-results-pagingctl-text" class="ui-state-default ui-corner-all">
                 <!-- placeholder text, should be localized elsewhere -->
                 <span class="ui-button-text">page 0</span>
               </div>
-              <div id="cmc-search-results-pagingctl-next" class="cmc-pagingctl-button"></div>
+              <div id="cmc-search-results-pagingctl-next" class="cmc-square-button"></div>
             </div>
             <h1 id="cmc-search-results-title-text">Search Results:</h1>
           </div>
