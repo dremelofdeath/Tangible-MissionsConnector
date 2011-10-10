@@ -14,6 +14,7 @@ if(!Object.keys) Object.keys = function(o){
 var CMC = {
   // variables
   loggedInUser : false,
+  accessToken : false,
   me : false,
   friends : false,
   profiledata :  {},
@@ -29,7 +30,6 @@ var CMC = {
   searchPageCache : [],
   currentDisplayedSearchPage : 0,
   searchPageImageClearJobQueue : [],
-  profilePageImageClearJobQueue : [],
   SearchState : {},
   prelength : [],
   postlen : [],
@@ -239,12 +239,14 @@ var CMC = {
   },
 
   recalculateProblemMessageLimit : function(limit) {
+    this.beginFunction();
     this.recalculateTextareaLimit(
       "#report-problem-message",
       "#report-problem-characters-left",
       limit
     );
     $("#report-problem-characters-left").fadeIn();
+    this.endFunction();
   },
 
   handleGenericUnexpectedCallbackError : function(data, textStatus, jqXHR, requestType) {
@@ -1761,6 +1763,13 @@ var CMC = {
       CMC.ajaxNotifyComplete();
       if (response.authResponse) {
         CMC.log("user " + response.authResponse.userID + " has just logged in to the app");
+        if (response.authResponse.hasOwnProperty("accessToken")) {
+          CMC.assert("Facebook authResponse did not contain an access token");
+          CMC.accessToken = null;
+          // this is about the time that we should surface an error to the user, no? --zack
+        } else {
+          CMC.accessToken = response.authResponse.accessToken;
+        }
         CMC.cacheFacebookData();
         //@/BEGIN/DEBUGONLYSECTION
         $("#logged-in-user-value").html(response.authResponse.userID);
@@ -1777,8 +1786,6 @@ var CMC = {
     });
     this.endFunction();
   }
-
-                 
 };
 
 FB.init({
@@ -2095,7 +2102,7 @@ $(function() {
     },
     close: function() {
       CMC.dialogClose(this);
-      if ($("#report-problem-message").val().length <= 0) {
+      if ($("#report-problem-message").val().length <= 0 && !$.browser.webkit) {
         $("#report-problem-characters-left").hide();
       }
     }
@@ -2111,10 +2118,17 @@ $(function() {
       void false;
     });
 
-  $("#report-problem-characters-left").hide();
+  if (!$.browser.webkit) {
+    // it appears that webkit-based browsers like Safari and Chrome have
+    // problems with rendering this. not sure why, but fixing it anyway --zack
+    $("#report-problem-characters-left").hide();
+  }
 
   $("#report-problem-message")
     .click(function() {
+      CMC.recalculateProblemMessageLimit();
+    })
+    .focus(function() {
       CMC.recalculateProblemMessageLimit();
     })
     .keyup(function() {
@@ -2124,44 +2138,41 @@ $(function() {
       CMC.recalculateProblemMessageLimit();
     });
 
-    function validateZipCode(elementValue){
-      var zisValid = false;
-      var zipCodePattern = /^\d{5}$|^\d{5}-\d{4}$/;
-      zisValid = zipCodePattern.test(elementValue);
-      return zisValid;
+  function validateZipCode(elementValue){
+    var zisValid = false;
+    var zipCodePattern = /^\d{5}$|^\d{5}-\d{4}$/;
+    zisValid = zipCodePattern.test(elementValue);
+    return zisValid;
+  }
+
+  function validateEmail(email){
+    var eisValid =  false;
+    var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+[\.]{1}[a-zA-Z]{2,4}$/;  
+    eisValid = emailPattern.test(email);  
+    return eisValid;
+  } 
+
+  function isUrl(s) {
+    var regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
+      return regexp.test(s);
+  }
+
+  function validatePhone(fld,country) {
+    var error = "";
+    var stripped = fld.replace(/[\(\)\.\-\ ]/g, ''); 
+    // for international numbers
+    var regex = /^\+(?:[0-9] ?){6,14}[0-9]$/;
+    if (isNaN(parseInt(stripped))) {
+      error = "The phone number contains illegal characters.\n";
+    } else if (country != "United States") {
+      if (!regex.test(fld)) {
+        error = "The phone number is not a valid International Number.\n";
+      }
+    } else if (!(stripped.length == 10)) {
+      error = "The phone number is the wrong length. Make sure you included an area code.\n";
     }
-
-    function validateEmail(email){
-      var eisValid =  false;
-      var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+[\.]{1}[a-zA-Z]{2,4}$/;  
-      eisValid = emailPattern.test(email);  
-      return eisValid;
-    } 
-    function isUrl(s) {
-		var regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
-		return regexp.test(s);
-	  }
-
-     function validatePhone(fld,country) {
-      var error = "";
-      var stripped = fld.replace(/[\(\)\.\-\ ]/g, ''); 
-      // for international numbers
-      var regex = /^\+(?:[0-9] ?){6,14}[0-9]$/;
-
-      if (isNaN(parseInt(stripped))) {
-        error = "The phone number contains illegal characters.\n";
-      }
-      else if (country != "United States") {
-        if (!regex.test(fld)) {
-          error = "The phone number is not a valid International Number.\n";
-        }
-      }
-      else if (!(stripped.length == 10)) {
-        error = "The phone number is the wrong length. Make sure you included an area code.\n";
-      }
-
-      return error;
-    }
+    return error;
+  }
 
   $("#profile-submit").click(function() {
     var mtype = $("#profile-volunteer-form").find('.profile-ddl-type-medical');

@@ -897,7 +897,6 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
     <script src="jquery.validate.js" type="text/javascript"></script>
     <script src="jquery.validation.functions.js" type="text/javascript"></script> 
     <link rel="stylesheet" type="text/css" href="jquery.validate.css" />
-    <link href="profilevalidate.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" type="text/css" href="style.css" />
 	  <script src="datepicker.js" type="text/javascript"></script>
 	  <link href="datepicker.css" rel="stylesheet" type="text/css" />
@@ -2533,7 +2532,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         <form id="report-problem-form">
           <textarea id="report-problem-message" height="4" cols="55" style="width: 98%;"></textarea>
           <div style="float: right; margin-right: 1px;" id="report-problem-submit">Submit</div>
-          <div id="report-problem-characters-left" class="ui-state-disabled">
+          <div id="report-problem-characters-left">
             300 characters left<!-- just some placeholder text -->
           </div>
         </form>
