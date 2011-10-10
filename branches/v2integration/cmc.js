@@ -1705,6 +1705,24 @@ var CMC = {
     $("#profile-trip-dialog").dialog('open');
   },
 
+  cacheFacebookResponseProperties : function (response) {
+    this.beginFunction();
+    if (response.hasOwnProperty("authResponse")) {
+      if (!response.authResponse.hasOwnProperty("accessToken")) {
+        this.assert("Facebook authResponse did not contain an access token");
+        this.accessToken = null;
+        // this is about the time that we should surface an error to the user, no? --zack
+      } else {
+        this.accessToken = response.authResponse.accessToken;
+      }
+    } else {
+      this.assert("Facebook response didn't contain an authResponse to cache");
+      // this is also probably a nice time to surface an error, although this
+      // shouldn't happen ever --zack
+    }
+    this.endFunction();
+  },
+
   cacheFacebookData : function () {
     this.beginFunction();
     CMC.ajaxNotifyStart();
@@ -1714,7 +1732,7 @@ var CMC = {
       CMC.me = response;
       // now check whether profile is volunteer or mission organizer	  
       CMC.profileshowflag=1;
-	  // This is the default profile display - showing the logged in user's profile
+      // This is the default profile display - showing the logged in user's profile
       CMC.getProfile(CMC.me.id);
       CMC.log(CMC.me.name + " (" + CMC.me.id + ") logged in to the app");
       // Get upcoming trips information
@@ -1738,6 +1756,7 @@ var CMC = {
     FB.getLoginStatus(function(response) {
       CMC.ajaxNotifyComplete();
       CMC.log("got the response for FB.getLoginStatus()");
+      CMC.cacheFacebookResponseProperties(response);
       //@/BEGIN/DEBUGONLYSECTION
       if (response.authResponse) {
         $("#logged-in-user-value").html(response.authResponse.userID);
@@ -1763,13 +1782,7 @@ var CMC = {
       CMC.ajaxNotifyComplete();
       if (response.authResponse) {
         CMC.log("user " + response.authResponse.userID + " has just logged in to the app");
-        if (response.authResponse.hasOwnProperty("accessToken")) {
-          CMC.assert("Facebook authResponse did not contain an access token");
-          CMC.accessToken = null;
-          // this is about the time that we should surface an error to the user, no? --zack
-        } else {
-          CMC.accessToken = response.authResponse.accessToken;
-        }
+        CMC.cacheFacebookResponseProperties(response);
         CMC.cacheFacebookData();
         //@/BEGIN/DEBUGONLYSECTION
         $("#logged-in-user-value").html(response.authResponse.userID);
