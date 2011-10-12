@@ -761,7 +761,7 @@ if (isset($myobj->{'DepartYear'})) {
 if ((!empty($myobj->{'DepartYear'})) && (!empty($myobj->{'DepartMonth'})) && (!empty($myobj->{'DepartDay'}))) {
         //$thisyear = date("Y");
 
-	validate_date(1,$myobj->{'DepartYear'},$myobj->{'DepartMonth'},$myobj->{'DepartDay'},$update,$has_error,$err_msg);
+	//validate_date(1,$myobj->{'DepartYear'},$myobj->{'DepartMonth'},$myobj->{'DepartDay'},$update,$has_error,$err_msg);
 
 	$tripdpt = getdatestring($myobj->{'DepartYear'},$myobj->{'DepartMonth'},$myobj->{'DepartDay'});
 
@@ -783,7 +783,7 @@ if ((!empty($myobj->{'DepartYear'})) && (!empty($myobj->{'DepartMonth'})) && (!e
 
 if (isset($myobj->{'ReturnYear'})) {
 if ((!empty($myobj->{'ReturnYear'})) && (!empty($myobj->{'ReturnMonth'})) && (!empty($myobj->{'ReturnDay'}))) {
-	validate_date(2,$myobj->{'ReturnYear'},$myobj->{'ReturnMonth'},$myobj->{'ReturnDay'},$update,$has_error,$err_msg);
+	//validate_date(2,$myobj->{'ReturnYear'},$myobj->{'ReturnMonth'},$myobj->{'ReturnDay'},$update,$has_error,$err_msg);
 
 	validate_return($myobj->{'DepartYear'},$myobj->{'DepartMonth'},$myobj->{'DepartDay'},$myobj->{'ReturnYear'},$myobj->{'ReturnMonth'},$myobj->{'ReturnDay'},$update,$has_error,$err_msg);
 

@@ -1316,7 +1316,35 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
   for (var i=0; i<s.options.length; i++) s.options[i].selected = false;
   for (var i=0; i<CMC.currentOptions[k].length; i++) s.options[CMC.currentOptions[k][i]].selected = true;
   }
-    
+
+ function tripzipdisplay() {
+  if ($('select#profile-trip-country').val() == 1) {
+    $('#profile-trip-dialog').find('#tripzip').show();
+  }
+  else {
+    $('#profile-trip-dialog').find('#tripzip').hide();
+  }
+ }
+
+ function orgzipdisplay() {
+  if ($('select#profile-org-country').val() == 1) {
+    //$('#profile-organizer-dialog').find('#orgzip').attr("style","display:block;");
+    $('#profile-organizer-dialog').find('#orgzip').show();
+  }
+  else {
+    $('#profile-organizer-dialog').find('#orgzip').hide();
+  }
+ }
+
+ function volzipdisplay() {
+  if ($('select#profile-country').val() == 1) {
+    //$('#profile-volunteer-dialog').find('#volzip').attr("style","display:block;");
+    $('#profile-volunteer-dialog').find('#volzip').show();
+  }
+  else {
+    $('#profile-volunteer-dialog').find('#volzip').hide();
+  }
+ }
   </script> 
     <!-- HTML markup goes here -->
     <div id="loading">
@@ -1898,21 +1926,12 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                             </td>
                         </tr>
                         <tr>
-                            <td>
-                                <label>
-                                    Zipcode</label>
-                            </td>
-                            <td>
-                                <input type="text" id="profile-zipcode" class="profile-input-zipcode"/>
-                            </td>
-                        </tr>
-                        <tr>
                             <td style="width: 197px">
                                 <label>
                                     Country</label>
                             </td>
                             <td style="width: 197px">
-                                        <select id="profile-country" class="profile-ddl-type-country">
+                                        <select id="profile-country" class="profile-ddl-type-country" onchange="volzipdisplay();">
                                         <?php
                                         $i=1;
                       foreach($aCountries as $key => $country) {
@@ -1927,6 +1946,17 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                                         </select>
                             </td>
                         </tr>             
+                        <tbody id="volzip" style="display: none;">
+                        <tr>
+                            <td>
+                                <label>
+                                    Zipcode</label>
+                            </td>
+                            <td>
+                                <input type="text" id="profile-zipcode" class="profile-input-zipcode"/>
+                            </td>
+                        </tr>
+                        </tbody>
                         <tr>
                             <td style="width: 197px">
                                 <label>
@@ -2214,21 +2244,12 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                             </td>
                         </tr>
                         <tr>
-                            <td>
-                                <label>
-                                    Zipcode</label>
-                            </td>
-                            <td>
-                                <input type="text" id="profile-org-zipcode" class="profile-org-zipcode"/>
-                            </td>
-                        </tr>
-                        <tr>
                             <td style="width: 197px">
                                 <label>
                                     Country</label>
                             </td>
                             <td style="width: 197px">
-                                        <select id="profile-org-country" class="profile-org-country">
+                                        <select id="profile-org-country" class="profile-org-country" onchange="orgzipdisplay();">
                                         <?php
                                         $i=1;
                       foreach($aCountries as $key => $country) {
@@ -2244,6 +2265,17 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                                         </select>
                             </td>
                         </tr>             
+                        <tbody id="orgzip" style="display: none;">
+                        <tr>
+                            <td>
+                                <label>
+                                    Zipcode</label>
+                            </td>
+                            <td>
+                                <input type="text" id="profile-org-zipcode" class="profile-org-zipcode"/>
+                            </td>
+                        </tr>
+                        </tbody>
                         <tr>
                             <td style="width: 197px">
                                 <label>
@@ -2437,17 +2469,6 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                                         </select>
                             </td>
                         </tr>
-                        <div id="tripzip" class="tripzip" style="display: none">
-                        <tr>
-                            <td>
-                                <label>
-                                    Destination Zipcode</label>
-                            </td>
-                            <td>
-                                <input type="text" id="profile-trip-zipcode" class="profile-trip-zipcode"/>
-                            </td>
-                        </tr>						
-                        </div>
                         <tr>
                             <td>
                                 <label>
@@ -2464,7 +2485,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                                     Destination Country</label>
                             </td>
                             <td style="width: 197px">
-                                        <select id="profile-trip-country" class="profile-trip-country">
+                                        <select id="profile-trip-country" class="profile-trip-country" onchange="tripzipdisplay();">
                                         <?php
                                         echo '<option value="Select your Country" selected="selected">Select yourDestination Country</option>';
                                         $i=1;
@@ -2480,7 +2501,18 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                                         ?>
                                         </select>
                             </td>
-                        </tr>                     
+                        </tr>  
+                        <tbody id="tripzip" style="display: none;">
+                        <tr>
+                            <td>
+                                <label>
+                                    Destination Zipcode</label>
+                            </td>
+                            <td>
+                                <input type="text" id="profile-trip-zipcode" class="profile-trip-zipcode"/>
+                            </td>
+                        </tr>
+                        </tbody>
                         <tr>
                             <td style="width: 197px">
                                 <label>

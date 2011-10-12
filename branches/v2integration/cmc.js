@@ -2153,6 +2153,7 @@ $(function() {
     var reason="";
     var errornum=1;
 
+    if (zipcode !== undefined) {
     if (zipcode.val() != "") {
       zipisvalid = validateZipCode(zipcode.val());
       if (!zipisvalid) {
@@ -2160,6 +2161,7 @@ $(function() {
         errornum = errornum + 1;
         isValid = false;
       }
+    }
     }
 
     if (email.val() != "") {
@@ -2228,6 +2230,7 @@ $(function() {
         context: this,
         success: function(data) {
           if (!data.has_error) {
+            $("#profile-volunteer-dialog").dialog('close');
             alert('Thank you - your submission has been successfully entered into our database');
           }
           else {
@@ -2238,7 +2241,6 @@ $(function() {
            alert('We are sorry - there was an error: ' + data.err_msg);
         }
       });
-      $("#profile-volunteer-dialog").dialog('close');
       return true;
     }
   });
@@ -2281,6 +2283,7 @@ $(function() {
 		}
 	}
 	
+    if (zipcode !== undefined) {
     if (zipcode.val() != "") {
       zipisvalid = validateZipCode(zipcode.val());
       if (!zipisvalid) {
@@ -2288,6 +2291,7 @@ $(function() {
         errornum = errornum + 1;
         isValid = false;
       }
+    }
     }
 
     if (email.val() != "") {
@@ -2369,6 +2373,8 @@ $(function() {
         context: this,
         success: function(data) {
           if (!data.has_error) {
+          // now close the profile submission window
+          $("#profile-organizer-dialog").dialog('close');
           alert('Thank you - your submission has been successfully entered into our database ');
           }
           else {
@@ -2384,8 +2390,6 @@ $(function() {
       CMC.profileshowflag=1;
       CMC.getProfile(CMC.me.id);
 
-      // now close the profile submission window
-      $("#profile-organizer-dialog").dialog('close');
       return true;
     }
 
@@ -2426,6 +2430,7 @@ $(function() {
 		}
 	}
 	
+    if (zipcode !== undefined) {
     if (zipcode.val() != "") {
       zipisvalid = validateZipCode(zipcode.val());
       if (!zipisvalid) {
@@ -2433,6 +2438,7 @@ $(function() {
         errornum = errornum + 1;
         isValid = false;
       }
+    }
     }
 
     if (email.val() != "") {
@@ -2536,9 +2542,6 @@ $(function() {
 	    if (phone.val() != "")
         profiletripformdata.phone=phone.val();
      
-      //alert("ajax submit : " + JSON.stringify(profiletripformdata));
-
-      var tripsuccess=false;
       $.ajax({
         type: "POST",
         url: "api/profilein.php",
@@ -2550,8 +2553,8 @@ $(function() {
         context: this,
         success: function(data) {
           if (!data.has_error) {
+	        $("#profile-trip-dialog").dialog('close');
           alert('Thank you - your submission has been successfully entered into our database');
-          tripsuccess = true;
           }
           else {
             alert("We are sorry, the trip was not created due to: " + data.err_msg);
@@ -2562,9 +2565,6 @@ $(function() {
         }
       });
       
-      if (tripsuccess)
-	      $("#profile-trip-dialog").dialog('close');
-
       return true;
     }
     });
