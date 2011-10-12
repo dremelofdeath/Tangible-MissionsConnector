@@ -2554,6 +2554,8 @@ $(function() {
         success: function(data) {
           if (!data.has_error) {
 	        $("#profile-trip-dialog").dialog('close');
+          // refresh the profile page
+          $("#tabs").tabs('load', 1);
           alert('Thank you - your submission has been successfully entered into our database');
           }
           else {
