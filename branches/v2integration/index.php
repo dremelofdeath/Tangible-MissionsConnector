@@ -1271,10 +1271,12 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
   
   <script type="text/JavaScript">
   
+/*
   var currentOptions = new Array(7);
   for (i=0; i <7; i++) {
     currentOptions[i]=new Array()   
   }
+  */
   var current = new Array(7);
   /*
   var prelength = new Array(6);
@@ -1290,29 +1292,29 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
   {
   current[k] = s.selectedIndex;
   
-  for (var i=0; i<currentOptions[k].length; i++)
+  for (var i=0; i<CMC.currentOptions[k].length; i++)
   {
-    if (current[k] == currentOptions[k][i])
+    if (current[k] == CMC.currentOptions[k][i])
     {
-      CMC.prelength[k] = currentOptions[k].length;
-      currentOptions[k].splice(i, 1);
-      CMC.postlen[k] = currentOptions[k].length;
+      CMC.prelength[k] = CMC.currentOptions[k].length;
+      CMC.currentOptions[k].splice(i, 1);
+      CMC.postlen[k] = CMC.currentOptions[k].length;
       break;
     }
   }
   
   if ((CMC.prelength[k]==0) || (CMC.prelength[k]!=CMC.postlen[k]+1)) {
-    if (i >= currentOptions[k].length) currentOptions[k].push(current[k]);
+    if (i >= CMC.currentOptions[k].length) CMC.currentOptions[k].push(current[k]);
   }
 
   // reinitialize the lengths
-  if (currentOptions[k].length == 0) {
+  if (CMC.currentOptions[k].length == 0) {
     CMC.prelength[k] = 0;
     CMC.prelength[k] = 0;
   }
       
   for (var i=0; i<s.options.length; i++) s.options[i].selected = false;
-  for (var i=0; i<currentOptions[k].length; i++) s.options[currentOptions[k][i]].selected = true;
+  for (var i=0; i<CMC.currentOptions[k].length; i++) s.options[CMC.currentOptions[k][i]].selected = true;
   }
     
   </script> 
@@ -1783,19 +1785,19 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                             <td style="width: 97px">
                                         <select id="profile-medical" multiple="multiple" class="profile-ddl-type-medical" onclick="selectMultiple(this,0);">
                                             <!--<option value="0" selected="selected">Select Medical Skills</option>-->
-                                            <option value="1">Advanced Practice Nursing</option>
-                                            <option value="2">Dental Professional</option>
-                                            <option value="3">Medical Educator</option>
-                                            <option value="4">Mental Health Professional</option>
-                                            <option value="5">Nurse</option>
-                                            <option value="6">Optometrist or Opthalmologist</option>
-                                            <option value="7">Pharmacist</option>
-                                            <option value="8">Physician</option>
-                                            <option value="9">Physician Assistant</option>
-                                            <option value="10">Physical or Occupational Therapist</option>
-                                            <option value="11">Public Health/Community Development Worker</option>
-                                            <option value="12">Speech Therapist</option>
-                                            <option value="13">Other</option>
+                                            <option id="0" value="1">Advanced Practice Nursing</option>
+                                            <option id="1" value="2">Dental Professional</option>
+                                            <option id="2" value="3">Medical Educator</option>
+                                            <option id="3" value="4">Mental Health Professional</option>
+                                            <option id="4" value="5">Nurse</option>
+                                            <option id="5" value="6">Optometrist or Opthalmologist</option>
+                                            <option id="6" value="7">Pharmacist</option>
+                                            <option id="7" value="8">Physician</option>
+                                            <option id="8" value="9">Physician Assistant</option>
+                                            <option id="9" value="10">Physical or Occupational Therapist</option>
+                                            <option id="10" value="11">Public Health/Community Development Worker</option>
+                                            <option id="11" value="12">Speech Therapist</option>
+                                            <option id="12" value="13">Other</option>
                                         </select>
                             </td>
                         </tr>
@@ -1807,19 +1809,19 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                             <td style="width: 197px">
                                         <select id="profile-nonmedical" multiple="multiple" class="profile-ddl-type-nonmedical" onclick="selectMultiple(this,1);">
                                             <!--<option value="0" selected="selected">Select Non-Medical Skills</option>-->
-                                            <option value="14">General Help/Labor</option>
-                                            <option value="15">Team Leader/Primary Organizer</option>
-                                            <option value="16">Account and/or Business Management</option>
-                                            <option value="17">Skilled Construction and/or Maintenance</option>
-                                            <option value="18">Computer Science/Other Technical</option>
-                                            <option value="19">Agriculture and/or Animal Husbandry</option>
-                                            <option value="45">Mechanic</option>
-                                            <option value="46">Office/Secretarial</option>
-                                            <option value="47">Teaching</option>
-                                            <option value="48">Veterinary</option>
-                                            <option value="49">Water Supply Improvement</option>
-                                            <option value="50">Writing and/or Translating</option>
-                                            <option value="52">Engineering</option>
+                                            <option id="0" value="14">General Help/Labor</option>
+                                            <option id="1" value="15">Team Leader/Primary Organizer</option>
+                                            <option id="2" value="16">Account and/or Business Management</option>
+                                            <option id="3" value="17">Skilled Construction and/or Maintenance</option>
+                                            <option id="4" value="18">Computer Science/Other Technical</option>
+                                            <option id="5" value="19">Agriculture and/or Animal Husbandry</option>
+                                            <option id="6" value="45">Mechanic</option>
+                                            <option id="7" value="46">Office/Secretarial</option>
+                                            <option id="8" value="47">Teaching</option>
+                                            <option id="9" value="48">Veterinary</option>
+                                            <option id="10" value="49">Water Supply Improvement</option>
+                                            <option id="11" value="50">Writing and/or Translating</option>
+                                            <option id="12" value="52">Engineering</option>
                                         </select>
                             </td>
                         </tr>
@@ -1831,11 +1833,11 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                             <td style="width: 197px">
                                         <select id="profile-spiritual" multiple="multiple" class="profile-ddl-type-spiritual" onclick="selectMultiple(this,2);">
                                             <!--<option value="0" selected="selected">Select Spiritual Service</option>-->
-                                            <option value="20">Team Spiritual Leader</option>
-                                            <option value="21">Individual Outreach (Prayer and Counseling)</option>
-                                            <option value="22">Evangelism</option>
-                                            <option value="44">Worship Team</option>
-                                            <option value="51">Public Speaking</option>
+                                            <option id="0" value="20">Team Spiritual Leader</option>
+                                            <option id="1" value="21">Individual Outreach (Prayer and Counseling)</option>
+                                            <option id="2" value="22">Evangelism</option>
+                                            <option id="3" value="44">Worship Team</option>
+                                            <option id="4" value="51">Public Speaking</option>
                                         </select>
                             </td>
                         </tr>
@@ -1847,10 +1849,10 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                             <td style="width: 197px">
                                         <select id="profile-religion" class="profile-ddl-type-religious">
                                             <!--<option value="0", selected="selected">Select Religious Affiliation</option>-->
-                                            <option value="1">Secular</option>
-                                            <option value="2">Christian: Protestant</option>
-                                            <option value="3">Christian: Catholic</option>
-                                            <option value="4">Nondenominational</option>
+                                            <option value="Secular">Secular</option>
+                                            <option value="Christian: Protestant">Christian: Protestant</option>
+                                            <option value="Christian: Catholic">Christian: Catholic</option>
+                                            <option value="Nondenominational">Nondenominational</option>
                                         </select>
                             </td>
                         </tr>
@@ -1933,13 +1935,13 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                             <td style="width: 197px">
                                         <select id="profile-region" multiple="multiple" class="profile-ddl-type-region" onclick="selectMultiple(this,3);">
                                             <!--<option value="0" selected="selected">Select Regions of Interest</option>-->
-                                            <option value="1">Africa</option>
-                                            <option value="2">Asia and Oceana</option>
-                                            <option value="3">Europe and Russia</option>
-                                            <option value="4">Latin America</option>
-                                            <option value="5">Middle East</option>
-                                            <option value="6">North America</option>
-                                            <option value="7">Caribbean</option>
+                                            <option id="0" value="1">Africa</option>
+                                            <option id="1" value="2">Asia and Oceana</option>
+                                            <option id="2" value="3">Europe and Russia</option>
+                                            <option id="3" value="4">Latin America</option>
+                                            <option id="4" value="5">Middle East</option>
+                                            <option id="5" value="6">North America</option>
+                                            <option id="6" value="7">Caribbean</option>
                                         </select>
                             </td>
                         </tr>
@@ -1952,14 +1954,16 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                                         <select id="profile-country-served" multiple="multiple" class="profile-ddl-type-countriesserved" onclick="selectMultiple(this,4);">
                                         <?php
                                         $i=1;
+                                        $jj=0;
                       //echo '<option selected="selected" value="Select Countries Served">Select Countries Served</option>';
                       foreach($aCountries as $key => $country) {                      
                                               if ($country == "United States")
-                            echo '<option value="'.$i.'">'.$country.'</option>';
+                            echo '<option id="'.$jj.'" value="'.$i.'">'.$country.'</option>';
                                               else {
-                        echo '<option value="'.$i.'">'.$country.'</option>';
+                        echo '<option id="'.$jj.'" value="'.$i.'">'.$country.'</option>';
                                               }
                                               $i++;
+                                              $jj++;
                       }
                                         ?>
                                         </select>
@@ -2054,17 +2058,17 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                             <td style="width: 97px">
                                         <select id="profile-org-offer" multiple="multiple" class="profile-org-offer" onclick="selectMultiple(this,0);">
                                             <!--<option value="0" selected="selected">Select Medical Skills</option>-->
-                                            <option value="23">Missions Hospital without Surgical Facilities</option>
-                                            <option value="24">Missions Hospital with Surgical Facilities</option>
-                                            <option value="25">Missions Hospital with Dental Care Facilities</option>
-                                            <option value="26">Outpatient Medical/Dental/Eye Care Clinic</option>
-                                            <option value="27">Organizing/Sending Short Term Medical/Dental/Eye Care Missions Agency</option>
-                                            <option value="28">Supplying/Enhancing Short Term Medical/Dental/Eye Care Missions Agency</option>
-                                            <option value="29">Community Development Agency</option>
-                                            <option value="30">Emergency Medical Relief Agency</option>
-                                            <option value="31">Medical/Dental/Eye Care Equipment Supplier</option>
-                                            <option value="32">Water Purification/Drilling</option>
-                                            <option value="33">Medical/Dental/Eye Care Training/Education Agency</option>
+                                            <option id="0" value="23">Missions Hospital without Surgical Facilities</option>
+                                            <option id="1" value="24">Missions Hospital with Surgical Facilities</option>
+                                            <option id="2" value="25">Missions Hospital with Dental Care Facilities</option>
+                                            <option id="3" value="26">Outpatient Medical/Dental/Eye Care Clinic</option>
+                                            <option id="4" value="27">Organizing/Sending Short Term Medical/Dental/Eye Care Missions Agency</option>
+                                            <option id="5" value="28">Supplying/Enhancing Short Term Medical/Dental/Eye Care Missions Agency</option>
+                                            <option id="6" value="29">Community Development Agency</option>
+                                            <option id="7" value="30">Emergency Medical Relief Agency</option>
+                                            <option id="8" value="31">Medical/Dental/Eye Care Equipment Supplier</option>
+                                            <option id="9" value="32">Water Purification/Drilling</option>
+                                            <option id="10" value="33">Medical/Dental/Eye Care Training/Education Agency</option>
                                         </select>
                             </td>
                         </tr>
@@ -2076,16 +2080,16 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                             <td style="width: 97px">
                                         <select id="profile-org-offern" multiple="multiple" class="profile-org-offern" onclick="selectMultiple(this,1);">
                                             <!--<option value="0" selected="selected">Select Medical Skills</option>-->
-                                            <option value="34">Evangelism and Church Planning Ministry</option>
-                                            <option value="35">Food Access</option>
-                                            <option value="36">Transportation (In Country)</option>
-                                            <option value="37">Translators</option>
-                                            <option value="38">Trip Planning/Itinerary Building</option>
-                                            <option value="39">Crowd Control</option>
-                                            <option value="40">Press Relations</option>
-                                            <option value="41">Housing for the Missions Team</option>
-                                            <option value="42">Help getting through Customs</option>
-                                            <option value="43">Building Supplies (Construction)</option>
+                                            <option id="0" value="34">Evangelism and Church Planning Ministry</option>
+                                            <option id="1" value="35">Food Access</option>
+                                            <option id="2" value="36">Transportation (In Country)</option>
+                                            <option id="3" value="37">Translators</option>
+                                            <option id="4" value="38">Trip Planning/Itinerary Building</option>
+                                            <option id="5" value="39">Crowd Control</option>
+                                            <option id="6" value="40">Press Relations</option>
+                                            <option id="7" value="41">Housing for the Missions Team</option>
+                                            <option id="8" value="42">Help getting through Customs</option>
+                                            <option id="9" value="43">Building Supplies (Construction)</option>
                                         </select>
                             </td>
                         </tr>												
@@ -2097,19 +2101,19 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                             <td style="width: 97px">
                                         <select id="profile-org-medical" multiple="multiple" class="profile-org-medical" onclick="selectMultiple(this,2);">
                                             <!--<option value="0" selected="selected">Select Medical Skills</option>-->
-                                            <option value="1">Advanced Practice Nursing</option>
-                                            <option value="2">Dental Professional</option>
-                                            <option value="3">Medical Educator</option>
-                                            <option value="4">Mental Health Professional</option>
-                                            <option value="5">Nurse</option>
-                                            <option value="6">Optometrist or Opthalmologist</option>
-                                            <option value="7">Pharmacist</option>
-                                            <option value="8">Physician</option>
-                                            <option value="9">Physician Assistant</option>
-                                            <option value="10">Physical or Occupational Therapist</option>
-                                            <option value="11">Public Health/Community Development Worker</option>
-                                            <option value="12">Speech Therapist</option>
-                                            <option value="13">Other</option>
+                                            <option id="0" value="1">Advanced Practice Nursing</option>
+                                            <option id="1" value="2">Dental Professional</option>
+                                            <option id="2" value="3">Medical Educator</option>
+                                            <option id="3" value="4">Mental Health Professional</option>
+                                            <option id="4" value="5">Nurse</option>
+                                            <option id="5" value="6">Optometrist or Opthalmologist</option>
+                                            <option id="6" value="7">Pharmacist</option>
+                                            <option id="7" value="8">Physician</option>
+                                            <option id="8" value="9">Physician Assistant</option>
+                                            <option id="9" value="10">Physical or Occupational Therapist</option>
+                                            <option id="10" value="11">Public Health/Community Development Worker</option>
+                                            <option id="11" value="12">Speech Therapist</option>
+                                            <option id="12" value="13">Other</option>
                                         </select>
                             </td>
                         </tr>
@@ -2121,19 +2125,19 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                             <td style="width: 197px">
                                         <select id="profile-org-nonmedical" multiple="multiple" class="profile-org-nonmedical" onclick="selectMultiple(this,3);">
                                             <!--<option value="0" selected="selected">Select Non-Medical Skills</option>-->
-                                            <option value="14">General Help/Labor</option>
-                                            <option value="15">Team Leader/Primary Organizer</option>
-                                            <option value="16">Account and/or Business Management</option>
-                                            <option value="17">Skilled Construction and/or Maintenance</option>
-                                            <option value="18">Computer Science/Other Technical</option>
-                                            <option value="19">Agriculture and/or Animal Husbandry</option>
-                                            <option value="45">Mechanic</option>
-                                            <option value="46">Office/Secretarial</option>
-                                            <option value="47">Teaching</option>
-                                            <option value="48">Veterinary</option>
-                                            <option value="49">Water Supply Improvement</option>
-                                            <option value="50">Writing and/or Translating</option>
-                                            <option value="52">Engineering</option>
+                                            <option id="0" value="14">General Help/Labor</option>
+                                            <option id="1" value="15">Team Leader/Primary Organizer</option>
+                                            <option id="2" value="16">Account and/or Business Management</option>
+                                            <option id="3" value="17">Skilled Construction and/or Maintenance</option>
+                                            <option id="4" value="18">Computer Science/Other Technical</option>
+                                            <option id="5" value="19">Agriculture and/or Animal Husbandry</option>
+                                            <option id="6" value="45">Mechanic</option>
+                                            <option id="7" value="46">Office/Secretarial</option>
+                                            <option id="8" value="47">Teaching</option>
+                                            <option id="9" value="48">Veterinary</option>
+                                            <option id="10" value="49">Water Supply Improvement</option>
+                                            <option id="11" value="50">Writing and/or Translating</option>
+                                            <option id="12" value="52">Engineering</option>
                                         </select>
                             </td>
                         </tr>
@@ -2145,11 +2149,11 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                             <td style="width: 197px">
                                         <select id="profile-org-spiritual" multiple="multiple" class="profile-org-spiritual" onclick="selectMultiple(this,4);">
                                             <!--<option value="0" selected="selected">Select Spiritual Service</option>-->
-                                            <option value="20">Team Spiritual Leader</option>
-                                            <option value="21">Individual Outreach (Prayer and Counseling)</option>
-                                            <option value="22">Evangelism</option>
-                                            <option value="44">Worship Team</option>
-                                            <option value="51">Public Speaking</option>
+                                            <option id="0" value="20">Team Spiritual Leader</option>
+                                            <option id="1" value="21">Individual Outreach (Prayer and Counseling)</option>
+                                            <option id="2" value="22">Evangelism</option>
+                                            <option id="3" value="44">Worship Team</option>
+                                            <option id="4" value="51">Public Speaking</option>
                                         </select>
                             </td>
                         </tr>
@@ -2161,10 +2165,10 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                             <td style="width: 197px">
                                         <select id="profile-org-religion" class="profile-org-religion">
                                             <!--<option value="0", selected="selected">Select Religious Affiliation</option>-->
-                                            <option value="1">Secular</option>
-                                            <option value="2">Christian: Protestant</option>
-                                            <option value="3">Christian: Catholic</option>
-                                            <option value="4">Nondenominational</option>
+                                            <option id="0" value="Secular">Secular</option>
+                                            <option id="1" value="Christian: Protestant">Christian: Protestant</option>
+                                            <option id="2" value="Christian: Catholic">Christian: Catholic</option>
+                                            <option id="3" value="Nondenominational">Nondenominational</option>
                                         </select>
                             </td>
                         </tr>
@@ -2248,13 +2252,13 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                             <td style="width: 197px">
                                         <select id="profile-org-region" multiple="multiple" class="profile-org-region" onclick="selectMultiple(this,5);">
                                             <!--<option value="0" selected="selected">Select Regions of Interest</option>-->
-                                            <option value="1">Africa</option>
-                                            <option value="2">Asia and Oceana</option>
-                                            <option value="3">Europe and Russia</option>
-                                            <option value="4">Latin America</option>
-                                            <option value="5">Middle East</option>
-                                            <option value="6">North America</option>
-                                            <option value="7">Caribbean</option>
+                                            <option id="0" value="1">Africa</option>
+                                            <option id="1" value="2">Asia and Oceana</option>
+                                            <option id="2" value="3">Europe and Russia</option>
+                                            <option id="3" value="4">Latin America</option>
+                                            <option id="4" value="5">Middle East</option>
+                                            <option id="5" value="6">North America</option>
+                                            <option id="6" value="7">Caribbean</option>
                                         </select>
                             </td>
                         </tr>
@@ -2267,14 +2271,16 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                                         <select id="profile-org-countryserved" multiple="multiple" class="profile-org-countryserved" onclick="selectMultiple(this,6);">
                                         <?php
                                         $i=1;
+                                        $jj=0;
                       //echo '<option selected="selected" value="Select Countries Served">Select Countries Served</option>';
                       foreach($aCountries as $key => $country) {                      
                                               if ($country == "United States")
-                            echo '<option value="'.$i.'">'.$country.'</option>';
+                            echo '<option id="'.$jj.'" value="'.$i.'">'.$country.'</option>';
                                               else {
-                        echo '<option value="'.$i.'">'.$country.'</option>';
+                        echo '<option id="'.$jj.'" value="'.$i.'">'.$country.'</option>';
                                               }
                                               $i++;
+                                              $jj++;
                       }
                                         ?>
                                         </select>
@@ -2369,10 +2375,10 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                             <td style="width: 197px">
                                         <select id="profile-trip-religion" class="profile-trip-religion">
                                             <!--<option value="0", selected="selected">Select Religious Affiliation</option>-->
-                                            <option value="1">Secular</option>
-                                            <option value="2">Christian: Protestant</option>
-                                            <option value="3">Christian: Catholic</option>
-                                            <option value="4">Nondenominational</option>
+                                            <option value="Secular">Secular</option>
+                                            <option value="Christian: Protestant">Christian: Protestant</option>
+                                            <option value="Christian: Catholic">Christian: Catholic</option>
+                                            <option value="Nondenominational">Nondenominational</option>
                                         </select>
                             </td>
                         </tr>
@@ -2431,6 +2437,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                                         </select>
                             </td>
                         </tr>
+                        <div id="tripzip" class="tripzip" style="display: none">
                         <tr>
                             <td>
                                 <label>
@@ -2440,6 +2447,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                                 <input type="text" id="profile-trip-zipcode" class="profile-trip-zipcode"/>
                             </td>
                         </tr>						
+                        </div>
                         <tr>
                             <td>
                                 <label>
@@ -2458,10 +2466,11 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                             <td style="width: 197px">
                                         <select id="profile-trip-country" class="profile-trip-country">
                                         <?php
+                                        echo '<option value="Select your Country" selected="selected">Select yourDestination Country</option>';
                                         $i=1;
                       foreach($aCountries as $key => $country) {
                                               if ($country == "United States")
-                            echo '<option selected="selected" value="'.$i.'">'.$country.'</option>';
+                            echo '<option value="'.$i.'">'.$country.'</option>';
                                               else {
                             echo '<option value="'.$i.'">'.$country.'</option>';
                                               }

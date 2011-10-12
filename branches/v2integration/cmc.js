@@ -33,6 +33,7 @@ var CMC = {
   SearchState : {},
   prelength : [],
   postlen : [],
+  currentOptions : [],
   tripsjoinbtns : [],
   tripdescbtns : [],
   tripinvitebtns : [],
@@ -268,6 +269,7 @@ var CMC = {
     this.ajaxNotifyStart(); // one for good measure, we want the spinner for the whole search
 	
 	  this.showuserid = userid;
+
     $.ajax({
       type: "POST",
       url: "api/profile.php",
@@ -1353,6 +1355,11 @@ var CMC = {
     this.profileshowflag=0;
     this.getProfile(this.me.id);
 
+      for (var i=0; i <7; i++) {
+          this.currentOptions[i]=new Array();
+      }
+
+
     if (this.isreceiver ==0) {
       var id = "#profile-volunteer-dialog";
 
@@ -1365,18 +1372,13 @@ var CMC = {
 
       if (this.profiledata.MedicalSkills !== undefined) {
         if (this.profiledata.MedicalSkills.length > 0) {
-          var selstr = "[";
+          var arparts = JSON.stringify(this.profiledata.MedicalSkills).split(',');
+          this.prelength[0] = arparts.length-1;
+          this.postlen[0] = arparts.length;
           for (var each in this.profiledata.MedicalSkills) {
-            if (each > 0) {
-              selstr += ", ";
-            }
-            selstr += this.profiledata.MedicalSkillsid[each];
+            $('select#profile-medical option[value="' + this.profiledata.MedicalSkillsid[each] + '"]').attr('selected', 'selected');
+            this.currentOptions[0][each] = $('select#profile-medical option[value="' + this.profiledata.MedicalSkillsid[each] + '"]').attr('id');
           }
-          selstr += "]";
-
-          this.prelength[0] = this.profiledata.MedicalSkills.length-1;
-          this.postlen[0] = this.profiledata.MedicalSkills.length;
-          $("input#profile-medical").val(selstr);
         }
         else {
           this.prelength[0] = 0;
@@ -1385,18 +1387,13 @@ var CMC = {
       }
       if (this.profiledata.Non_MedicalSkills !== undefined) {
         if (this.profiledata.Non_MedicalSkills.length > 0) {
-          var selstr = "[";
+          var arparts = JSON.stringify(this.profiledata.Non_MedicalSkills).split(',');
+          this.prelength[1] = arparts.length-1;
+          this.postlen[1] = arparts.length;
           for (var each in this.profiledata.Non_MedicalSkills) {
-            if (each > 0) {
-              selstr += ", ";
-            }
-            selstr += this.profiledata.Non_MedicalSkillsid[each];
+            $('select#profile-nonmedical option[value="' + this.profiledata.Non_MedicalSkillsid[each] + '"]').attr('selected', 'selected');
+            this.currentOptions[1][each] = $('select#profile-nonmedical option[value="' + this.profiledata.Non_MedicalSkillsid[each] + '"]').attr('id');
           }
-          selstr += "]";
-          this.prelength[1] = this.profiledata.Non_MedicalSkills.length-1;
-          this.postlen[1] = this.profiledata.Non_MedicalSkills.length;
-
-          $("input#profile-nonmedical").val(selstr);
         }
         else {
           this.prelength[1] = 0;
@@ -1405,18 +1402,13 @@ var CMC = {
       }
       if (this.profiledata.SpiritualSkills !== undefined) {
         if (this.profiledata.SpiritualSkills.length > 0) {
-          var selstr = "[";
+          var arparts = JSON.stringify(this.profiledata.SpiritualSkills).split(',');
+          this.prelength[2] = arparts.length-1;
+          this.postlen[2] = arparts.length;
           for (var each in this.profiledata.SpiritualSkills) {
-            if (each > 0) {
-              selstr += ", ";
-            }
-            selstr += this.profiledata.SpiritualSkillsid[each];
+            $('select#profile-spiritual option[value="' + this.profiledata.SpiritualSkillsid[each] + '"]').attr('selected', 'selected');
+            this.currentOptions[2][each] = $('select#profile-spiritual option[value="' + this.profiledata.SpiritualSkillsid[each] + '"]').attr('id');
           }
-          selstr += "]";
-
-          this.prelength[2] = this.profiledata.SpiritualSkills.length-1;
-          this.postlen[2] = this.profiledata.SpiritualSkills.length;
-          $("input#profile-spiritual").val(selstr);
         }
         else {
           this.prelength[2] = 0;
@@ -1447,18 +1439,13 @@ var CMC = {
       if (this.profiledata.GeographicAreasofInterest !== undefined) {
         if (this.profiledata.GeographicAreasofInterest.Regions !== undefined) {
           if (this.profiledata.GeographicAreasofInterest.Regions.length > 0) {
-            var selstr = "[";
+            var arparts = JSON.stringify(this.profiledata.GeographicAreasofInterest.Regions).split(',');
+            this.prelength[3] = arparts.length-1;
+            this.postlen[3] = arparts.length;
             for (var each in this.profiledata.GeographicAreasofInterest.Regions) {
-              if (each > 0) {
-                selstr += ", ";
-              }
-              selstr += this.profiledata.GeographicAreasofInterest.Regionsid[each];
+              $('select#profile-region option[value="' + this.profiledata.GeographicAreasofInterest.Regionsid[each] + '"]').attr('selected', 'selected');
+              this.currentOptions[3][each] = $('select#profile-region option[value="' + this.profiledata.GeographicAreasofInterest.Regionsid[each] + '"]').attr('id');
             }
-            selstr += "]";
-            this.prelength[3] = this.profiledata.GeographicAreasofInterest.Regions.length-1;
-            this.postlen[3] = this.profiledata.GeographicAreasofInterest.Regions.length;
-
-            $("input#profile-region").val(selstr);
           }
           else {
             this.prelength[3] = 0;
@@ -1469,20 +1456,13 @@ var CMC = {
       if (this.profiledata.GeographicAreasofInterest !== undefined) {
         if (this.profiledata.GeographicAreasofInterest.Countries !== undefined) {
           if (this.profiledata.GeographicAreasofInterest.Countries.length > 0) {
-            var selstr = "[";
+            var arparts = JSON.stringify(this.profiledata.GeographicAreasofInterest.Countries).split(',');
+            this.prelength[4] = arparts.length-1;
+            this.postlen[4] = arparts.length;
             for (var each in this.profiledata.GeographicAreasofInterest.Countries) {
-              if (each > 0) {
-                selstr += ", ";
-              }
-              selstr += this.profiledata.GeographicAreasofInterest.Countriesid[each];
+              $('select#profile-countryserved option[value="' + this.profiledata.GeographicAreasofInterest.Countriesid[each] + '"]').attr('selected', 'selected');
+              this.currentOptions[4][each] = $('select#profile-countryserved option[value="' + this.profiledata.GeographicAreasofInterest.Countriesid[each] + '"]').attr('id');
             }
-            selstr += "]";
-            this.prelength[4] = this.profiledata.GeographicAreasofInterest.Countries.length-1;
-            this.postlen[4] = this.profiledata.GeographicAreasofInterest.Countries.length;
-
-            $("input#profile-region").val(selstr);
-
-            $("input#profile-country-served").val(selstr);
           }
           else {
             this.prelength[4] = 0;
@@ -1521,18 +1501,13 @@ var CMC = {
       }
       if (this.profiledata.FacilityMedicalOfferings !== undefined) {
         if (this.profiledata.FacilityMedicalOfferings.length>0) {
-          var selstr = "[";
+          var arparts = JSON.stringify(this.profiledata.FacilityNon_MedicalOfferings).split(',');
+          this.prelength[0] = arparts.length-1;
+          this.postlen[0] = arparts.length;
           for (var each in this.profiledata.FacilityMedicalOfferings) {
-            if (each > 0) {
-              selstr += ", ";
-            }
-            selstr += this.profiledata.FacilityMedicalOfferingsid[each];
+            $('select#profile-org-offer option[value="' + this.profiledata.FacilityMedicalOfferingsid[each] + '"]').attr('selected', 'selected');
+            this.currentOptions[0][each] = $('select#profile-org-offer option[value="' + this.profiledata.FacilityMedicalOfferingsid[each] + '"]').attr('id');
           }
-          selstr += "]";
-          this.prelength[0] = this.profiledata.FacilityMedicalOfferings.length-1;
-          this.postlen[0] = this.profiledata.FacilityMedicalOfferings.length;
-
-          $("input#profile-org-offer").val(selstr);
         }
         else {
           this.prelength[0] = 0;
@@ -1541,18 +1516,13 @@ var CMC = {
       }
       if (this.profiledata.FacilityNon_MedicalOfferings !== undefined) {
         if (this.profiledata.FacilityNon_MedicalOfferings.length > 0) {
-          var selstr = "[";
+          var arparts = JSON.stringify(this.profiledata.FacilityNon_MedicalOfferings).split(',');
+          this.prelength[1] = arparts.length-1;
+          this.postlen[1] = arparts.length;
           for (var each in this.profiledata.FacilityNon_MedicalOfferings) {
-            if (each > 0) {
-              selstr += ", ";
-            }
-            selstr += this.profiledata.FacilityNon_MedicalOfferingsid[each];
+            $('select#profile-org-offern option[value="' + this.profiledata.FacilityNon_MedicalOfferingsid[each] + '"]').attr('selected', 'selected');
+            this.currentOptions[1][each] = $('select#profile-org-offern option[value="' + this.profiledata.FacilityNon_MedicalOfferingsid[each] + '"]').attr('id');
           }
-          selstr += "]";
-          this.prelength[1] = this.profiledata.FacilityNon_MedicalOfferings.length-1;
-          this.postlen[1] = this.profiledata.FacilityNon_MedicalOfferings.length;
-
-          $("input#profile-org-offern").val(selstr);
         }
         else {
           this.prelength[1] = 0;
@@ -1561,18 +1531,13 @@ var CMC = {
       }
       if (this.profiledata.MedicalSkills !== undefined) {
         if (this.profiledata.MedicalSkills.length > 0) {
-          var selstr = "[";
+          var arparts = JSON.stringify(this.profiledata.MedicalSkills).split(',');
+          this.prelength[2] = arparts.length-1;
+          this.postlen[2] = arparts.length;
           for (var each in this.profiledata.MedicalSkills) {
-            if (each > 0) {
-              selstr += ", ";
-            }
-            selstr += this.profiledata.MedicalSkillsid[each];
+            $('select#profile-org-medical option[value="' + this.profiledata.MedicalSkillsid[each] + '"]').attr('selected', 'selected');
+            this.currentOptions[2][each] = $('select#profile-org-medical option[value="' + this.profiledata.MedicalSkillsid[each] + '"]').attr('id');
           }
-          selstr += "]";
-
-          this.prelength[2] = this.profiledata.MedicalSkills.length-1;
-          this.postlen[2] = this.profiledata.MedicalSkills.length;
-          $("input#profile-org-medical").val(selstr);
         }
         else {
           this.prelength[2] = 0;
@@ -1581,19 +1546,13 @@ var CMC = {
       }
       if (this.profiledata.Non_MedicalSkills !== undefined) {
         if (this.profiledata.Non_MedicalSkills.length > 0) {
-          var selstr = "[";
+          var arparts = JSON.stringify(this.profiledata.Non_MedicalSkills).split(',');
+          this.prelength[3] = arparts.length-1;
+          this.postlen[3] = arparts.length;
           for (var each in this.profiledata.Non_MedicalSkills) {
-            if (each > 0) {
-              selstr += ", ";
-            }
-            selstr += this.profiledata.Non_MedicalSkillsid[each];
+            $('select#profile-org-nonmedical option[value="' + this.profiledata.Non_MedicalSkillsid[each] + '"]').attr('selected', 'selected');
+            this.currentOptions[3][each] = $('select#profile-org-nonmedical option[value="' + this.profiledata.Non_MedicalSkillsid[each] + '"]').attr('id');
           }
-          selstr += "]";
-          alert("selstr " + selstr);
-
-          this.prelength[3] = this.profiledata.Non_MedicalSkills.length-1;
-          this.postlen[3] = this.profiledata.Non_MedicalSkills.length;
-          $("input#profile-org-nonmedical").val(selstr);
         }
         else {
           this.prelength[3] = 0;
@@ -1602,18 +1561,13 @@ var CMC = {
       }
       if (this.profiledata.SpiritualSkills !== undefined) {
         if (this.profiledata.SpiritualSkills.length > 0) {
-          var selstr = "[";
+          var arparts = JSON.stringify(this.profiledata.SpiritualSkills).split(',');
+          this.prelength[4] = arparts.length-1;
+          this.postlen[4] = arparts.length;
           for (var each in this.profiledata.SpiritualSkills) {
-            if (each > 0) {
-              selstr += ", ";
-            }
-            selstr += this.profiledata.SpiritualSkillsid[each];
+            $('select#profile-org-spiritual option[value="' + this.profiledata.SpiritualSkillsid[each] + '"]').attr('selected', 'selected');
+            this.currentOptions[4][each] = $('select#profile-org-spiritual option[value="' + this.profiledata.SpiritualSkillsid[each] + '"]').attr('id');
           }
-          selstr += "]";
-          this.prelength[4] = this.profiledata.SpiritualSkills.length-1;
-          this.postlen[4] = this.profiledata.SpiritualSkills.length;
-
-          $("input#profile-org-spiritual").val(selstr);
         }
         else {
           this.prelength[4] = 0;
@@ -1644,18 +1598,13 @@ var CMC = {
       if (this.profiledata.GeographicAreasofInterest !== undefined) {
         if (this.profiledata.GeographicAreasofInterest.Regions !== undefined) {
           if (this.profiledata.GeographicAreasofInterest.Regions.length > 0) {
-            var selstr = "[";
+            var arparts = JSON.stringify(this.profiledata.GeographicAreasofInterest.Regions).split(',');
+            this.prelength[5] = arparts.length-1;
+            this.postlen[5] = arparts.length;
             for (var each in this.profiledata.GeographicAreasofInterest.Regions) {
-              if (each > 0) {
-                selstr += ", ";
-              }
-              selstr += this.profiledata.GeographicAreasofInterest.Regionsid[each];
+              $('select#profile-org-region option[value="' + this.profiledata.GeographicAreasofInterest.Regionsid[each] + '"]').attr('selected', 'selected');
+              this.currentOptions[5][each] = $('select#profile-org-region option[value="' + this.profiledata.GeographicAreasofInterest.Regionsid[each] + '"]').attr('id');
             }
-            selstr += "]";
-
-            this.prelength[5] = this.profiledata.GeographicAreasofInterest.Regions.length-1;
-            this.postlen[5] = this.profiledata.GeographicAreasofInterest.Regions.length;
-            $("input#profile-org-region").val(selstr);
           }
           else {
             this.prelength[5] = 0;
@@ -1666,18 +1615,13 @@ var CMC = {
       if (this.profiledata.GeographicAreasofInterest !== undefined) {
         if (this.profiledata.GeographicAreasofInterest.Countries !== undefined) {
           if (this.profiledata.GeographicAreasofInterest.Countries.length > 0) {
-            var selstr = "[";
+            var arparts = JSON.stringify(this.profiledata.GeographicAreasofInterest.Countries).split(',');
+            this.prelength[6] = arparts.length-1;
+            this.postlen[6] = arparts.length;
             for (var each in this.profiledata.GeographicAreasofInterest.Countries) {
-              if (each > 0) {
-                selstr += ", ";
-              }
-              selstr += this.profiledata.GeographicAreasofInterest.Countriesid[each];
+              $('select#profile-org-countryserved option[value="' + this.profiledata.GeographicAreasofInterest.Countriesid[each] + '"]').attr('selected', 'selected');
+              this.currentOptions[6][each] = $('select#profile-org-countryserved option[value="' + this.profiledata.GeographicAreasofInterest.Countriesid[each] + '"]').attr('id');
             }
-            selstr += "]";
-
-            this.prelength[6] = this.profiledata.GeographicAreasofInterest.Countries.length-1;
-            this.postlen[6] = this.profiledata.GeographicAreasofInterest.Countries.length;
-            $("input#profile-org-countryserved").val(selstr);
           }
           else {
             this.prelength[6] = 0;
@@ -2594,6 +2538,7 @@ $(function() {
      
       //alert("ajax submit : " + JSON.stringify(profiletripformdata));
 
+      var tripsuccess=false;
       $.ajax({
         type: "POST",
         url: "api/profilein.php",
@@ -2606,6 +2551,7 @@ $(function() {
         success: function(data) {
           if (!data.has_error) {
           alert('Thank you - your submission has been successfully entered into our database');
+          tripsuccess = true;
           }
           else {
             alert("We are sorry, the trip was not created due to: " + data.err_msg);
@@ -2616,7 +2562,9 @@ $(function() {
         }
       });
       
-	    $("#profile-trip-dialog").dialog('close');
+      if (tripsuccess)
+	      $("#profile-trip-dialog").dialog('close');
+
       return true;
     }
     });
@@ -2660,7 +2608,7 @@ $(function() {
   }); 
   $("#profile-phone").validate({
     expression: "if (VAL.match(new RegExp(/(^[0-9]{10}$)/)) && VAL) return true; else if (!VAL) return true; else return false;",
-    message: "Please enter a valid Phone Number"
+    message: "Please enter a valid Phone Number: For Example: 1234567899"
   }); 
   $("#profile-org-phone").validate({
     expression: "if (VAL.match(new RegExp(/(^[0-9]{10}$)/)) && VAL) return true; else if (!VAL) return true; else return false;",
