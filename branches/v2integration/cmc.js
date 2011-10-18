@@ -46,6 +46,27 @@ var CMC = {
     //@/END/DEBUGONLYSECTION
   },
 
+  // backend translation maps -- describe the mapping of form IDs to server API
+  // call variables
+  BackendTranslation : {
+    Profile : {
+      "profile-medical-skills" : "medskills",
+      "profile-nonmedical-skills" : "otherskills",
+      "profile-spiritual-skills" : "spiritserv",
+      "profile-religion" : "relg",
+      "profile-duration" : "dur",
+      "profile-state" : "state",
+      "profile-city" : "city",
+      "profile-zipcode" : "zipcode",
+      "profile-country" : "country",
+      "profile-region" : "region",
+      "profile-country-served" : "countriesserved",
+      "profile-phone" : "phone",
+      "profile-email" : "email",
+      "profile-experience" : "misexp"
+    },
+  },
+
   // methods
   performStartupActions : function () {
     //@/BEGIN/DEBUGONLYSECTION
@@ -230,6 +251,30 @@ var CMC = {
     //@/BEGIN/DEBUGONLYSECTION
     this.updateDebugAjaxRequestInformation();
     //@/END/DEBUGONLYSECTION
+  },
+
+  applyTranslationMap : function(object, translationMap) {
+    this.beginFunction();
+    var ret = {};
+    if (object) {
+      if (translationMap) {
+        for (var each in object) {
+          if (object.hasOwnProperty(each)) {
+            if (translationMap.hasOwnProperty(each)) {
+              ret[translationMap[each]] = object[each];
+            } else {
+              this.assert("don't know how to map property '" + each + "' -- possibly update map?");
+            }
+          }
+        }
+      } else {
+        this.assert("translationMap was null. you must specify a translation map");
+      }
+    } else {
+      this.assert("null object passed for applying translation map");
+    }
+    this.endFunction();
+    return ret;
   },
 
   recalculateTextareaLimit : function(messageID, labelID, limit, customText) {
@@ -1645,9 +1690,165 @@ var CMC = {
     this.endFunction();
   },
 
+  retrieveOneFormField : function (formSelector, fieldSelector, allowEmptyFieldValues) {
+    this.beginFunction();
+    allowEmptyFieldValues = allowEmptyFieldValues || false; // optional argument
+    var fieldObject = $(formSelector).find(fieldSelector);
+    var ret = undefined;
+    if (fieldObject) {
+      if (fieldObject.size() > 0) {
+        if (fieldObject.size() == 1) {
+          var fieldValue = fieldObject.val();
+          if (fieldValue != "" || allowEmptyFieldValues) {
+            ret = fieldValue;
+          }
+        } else {
+          this.assert("more than one result for form selector: " + formSelector + ", field: " + fieldSelector);
+        }
+      } else {
+        this.assert("form field is missing! form: " + formSelector + ", field: " + fieldSelector);
+      }
+    } else {
+      this.assert("null value from form selector: " + formSelector + ", field: " + fieldSelector);
+    }
+    this.endFunction();
+    return ret;
+  },
+
+  getFormData : function (formSelector, allowEmptyFieldValues) {
+    this.beginFunction();
+    allowEmptyFieldValues = allowEmptyFieldValues || false; // optional argument
+    var ret = {};
+    var formFieldContainerObject = $(formSelector).find(".cmc-form-spec");
+    this.assert(formFieldContainerObject.size() > 0, "form " + formSelector + " did not contain any values!");
+    formFieldContainerObject.each(function (index, element) {
+      var fieldID = $(element).attr("id");
+      var field = CMC.retrieveOneFormField(formSelector, "#" + fieldID, allowEmptyFieldValues);
+      if (field != undefined) {
+        ret[fieldID] = field;
+      }
+    });
+    this.endFunction();
+    return ret;
+  },
+
+  submitProfile : function (profileData) {
+    this.beginFunction();
+    var zipisvalid = false;
+    var emailisvalid = false;
+    var reason="";
+    var errornum=1;
+    var ret = false;
+
+    if (profileData.hasOwnProperty("profile-zipcode")) {
+      zipisvalid = this.validateZipCode(profileData["profile-zipcode"]);
+      if (!zipisvalid) {
+        reason += errornum+'. Incorrect Zipcode format entered\n';
+        errornum = errornum + 1;
+        isValid = false;
+      }
+    }
+
+    if (profileData.hasOwnProperty("profile-email")) {
+      emailisvalid = this.validateEmail(profileData["profile-email"]);
+      if (!emailisvalid) {
+        reason += errornum + '. Incorrect Email format entered\n';
+        errornum = errornum + 1;
+        isValid = false;
+      }
+    }
+
+    if (profileData.hasOwnProperty("profile-phone")) {
+      var country = profileData.hasOwnProperty("profile-country") ? profileData["profile-country"] : null;
+      var phoneerror = this.validatePhone(profileData["profile-phone"], country);
+      if (phoneerror != "") {
+        reason += errornum + ' ' + phoneerror + '\n';
+        errornum = errornum + 1;
+        isValid = false;
+      }
+    }
+
+    if (reason != "") {
+      alert('Some input fields need correction:\n'+ reason);
+    } else {
+      var profileformdata = {};
+
+      profileformdata.profiletype=1;
+      if (CMC.profileedit == 1)
+        profileformdata.update = 1;
+
+      $.extend(profileformdata, this.applyTranslationMap(profileData, this.BackendTranslation.Profile));
+
+      $.ajax({
+        type: "POST",
+        url: "api/profilein.php",
+        data: {
+          fbid: CMC.me.id ? CMC.me.id : "",
+          profileinfo: JSON.stringify(profileformdata)
+        },
+        dataType: "json",
+        context: this,
+        success: function(data) {
+          if (!data.has_error) {
+            $("#profile-volunteer-dialog").dialog('close');
+            alert('Thank you - your submission has been successfully entered into our database');
+          } else {
+            alert('We are sorry - there was an error: ' + data.err_msg);
+          }
+        },
+        error: function(data) {
+          alert('We are sorry - there was an error: ' + data.err_msg);
+        }
+      });
+      ret = true;
+    }
+    this.endFunction();
+    return ret;
+  },
+
   createTrip : function () {
     $("#profile-trip-dialog").dialog('open');
   },
+
+  // validation functions
+
+  validateZipCode : function (elementValue) {
+    var zisValid = false;
+    var zipCodePattern = /^\d{5}$|^\d{5}-\d{4}$/;
+    zisValid = zipCodePattern.test(elementValue);
+    return zisValid;
+  },
+
+  validateEmail : function (email) {
+    var eisValid =  false;
+    var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+[\.]{1}[a-zA-Z]{2,4}$/;  
+    eisValid = emailPattern.test(email);  
+    return eisValid;
+  },
+
+  isUrl : function (s) {
+    var regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
+      return regexp.test(s);
+  },
+
+  validatePhone : function (fld,country) {
+    var error = "";
+    var stripped = fld.replace(/[\(\)\.\-\ ]/g, ''); 
+    // for international numbers
+    var regex = /^\+(?:[0-9] ?){6,14}[0-9]$/;
+    if (isNaN(parseInt(stripped))) {
+      error = "The phone number contains illegal characters.\n";
+    } else if (country != "United States") {
+      if (!regex.test(fld)) {
+        error = "The phone number is not a valid International Number.\n";
+      }
+    } else if (!(stripped.length == 10)) {
+      error = "The phone number is the wrong length. Make sure you included an area code.\n";
+    }
+    return error;
+  },
+
+  // login functions
 
   cacheFacebookResponseProperties : function (response) {
     this.beginFunction();
@@ -1822,9 +2023,10 @@ $(function() {
   $("#profile-volunteer-dialog").dialog({
     autoOpen: false,
     draggable: true,
-    position: [477, 190],
+    position: [25, 25],
     resizable: true,
     width: 700,
+    height: 465,
     open: function() {
       CMC.dialogOpen(this);
     },
@@ -1836,9 +2038,10 @@ $(function() {
   $("#edit-volunteer-dialog").dialog({
     autoOpen: false,
     draggable: true,
-    position: [477, 190],
+    position: [25, 25],
     resizable: true,
     width: 700,
+    height: 465,
     open: function() {
       CMC.dialogOpen(this);
     },
@@ -1854,9 +2057,10 @@ $(function() {
   $("#profile-organizer-dialog").dialog({
     autoOpen: false,
     draggable: true,
-    position: [477, 190],
+    position: [25, 25],
     resizable: true,
     width: 700,
+    height: 465,
     open: function() {
       CMC.dialogOpen(this);
     },
@@ -1872,9 +2076,10 @@ $(function() {
   $("#profile-trip-dialog").dialog({
     autoOpen: false,
     draggable: true,
-    position: [477, 190],
+    position: [25, 25],
     resizable: true,
     width: 700,
+    height: 465,
     open: function() {
       CMC.dialogOpen(this);
     },
@@ -2082,171 +2287,16 @@ $(function() {
   }
 
   $("#report-problem-message")
-    .click(function() {
-      CMC.recalculateProblemMessageLimit();
-    })
-    .focus(function() {
-      CMC.recalculateProblemMessageLimit();
-    })
-    .keyup(function() {
-      CMC.recalculateProblemMessageLimit();
-    })
-    .keypress(function() {
-      CMC.recalculateProblemMessageLimit();
-    });
-
-  function validateZipCode(elementValue){
-    var zisValid = false;
-    var zipCodePattern = /^\d{5}$|^\d{5}-\d{4}$/;
-    zisValid = zipCodePattern.test(elementValue);
-    return zisValid;
-  }
-
-  function validateEmail(email){
-    var eisValid =  false;
-    var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+[\.]{1}[a-zA-Z]{2,4}$/;  
-    eisValid = emailPattern.test(email);  
-    return eisValid;
-  } 
-
-  function isUrl(s) {
-    var regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
-      return regexp.test(s);
-  }
-
-  function validatePhone(fld,country) {
-    var error = "";
-    var stripped = fld.replace(/[\(\)\.\-\ ]/g, ''); 
-    // for international numbers
-    var regex = /^\+(?:[0-9] ?){6,14}[0-9]$/;
-    if (isNaN(parseInt(stripped))) {
-      error = "The phone number contains illegal characters.\n";
-    } else if (country != "United States") {
-      if (!regex.test(fld)) {
-        error = "The phone number is not a valid International Number.\n";
-      }
-    } else if (!(stripped.length == 10)) {
-      error = "The phone number is the wrong length. Make sure you included an area code.\n";
-    }
-    return error;
-  }
+    .click(function() { CMC.recalculateProblemMessageLimit(); })
+    .focus(function() { CMC.recalculateProblemMessageLimit(); })
+    .keyup(function() { CMC.recalculateProblemMessageLimit(); })
+    .keypress(function() { CMC.recalculateProblemMessageLimit(); });
 
   $("#profile-submit").click(function() {
-    var mtype = $("#profile-volunteer-form").find('.profile-ddl-type-medical');
-    var nmtype = $("#profile-volunteer-form").find('.profile-ddl-type-nonmedical');
-    var sptype = $("#profile-volunteer-form").find('.profile-ddl-type-spiritual');
-    var reltype = $("#profile-volunteer-form").find('.profile-ddl-type-religious');
-    var durtype = $("#profile-volunteer-form").find('.profile-ddl-type-duration');
-    var state = $("#profile-volunteer-form").find('.profile-ddl-type-state');
-    var city = $("#profile-volunteer-form").find('.profile-input-city');
-    var zipcode = $("#profile-volunteer-form").find('.profile-input-zipcode');
-
-    var country = $("#profile-volunteer-form").find('.profile-ddl-type-country');
-    var region = $("#profile-volunteer-form").find('.profile-ddl-type-region');
-    var countriesserved = $("#profile-volunteer-form").find('.profile-ddl-type-countriesserved');
-    var phone = $("#profile-volunteer-form").find('.profile-input-phone');
-    var email = $("#profile-volunteer-form").find('.profile-input-email');
-    var misexp = $("#profile-volunteer-form").find('.profile-input-experience');           
-
-    var zipisvalid = false;
-    var emailisvalid = false;
-    var reason="";
-    var errornum=1;
-
-    if (zipcode !== undefined) {
-    if (zipcode.val() != "") {
-      zipisvalid = validateZipCode(zipcode.val());
-      if (!zipisvalid) {
-        reason += errornum+'. Incorrect Zipcode format entered\n';
-        errornum = errornum + 1;
-        isValid = false;
-      }
-    }
-    }
-
-    if (email.val() != "") {
-      emailisvalid = validateEmail(email.val());
-      if (!emailisvalid) {
-        reason += errornum + '. Incorrect Email format entered\n';
-        errornum = errornum + 1;
-        isValid = false;
-      }
-    }
-
-    if (phone.val() != "") {
-      var phoneerror = validatePhone(phone.val(),country.val());
-      if (phoneerror != "") {
-        reason += errornum + ' ' + phoneerror + '\n';
-        errornum = errornum + 1;
-        isValid = false;
-      }
-    }
-
-    if (reason != "") {
-      alert('Some input fields need correction:\n'+ reason);
-      return false;
-    } else {
-      var profileformdata = {};
-      
-      profileformdata.profiletype=1;
-      if (CMC.profileedit == 1)
-         profileformdata.update = 1;
-
-      if (mtype.val() != "")
-        profileformdata.medskills= mtype.val();
-      if (nmtype.val() != "")
-        profileformdata.otherskills=nmtype.val();         
-      if (sptype.val() != "")
-        profileformdata.spiritserv=sptype.val();        
-      if (region.val() != "")
-        profileformdata.region=region.val();  
-      if (country.val() != "")
-        profileformdata.country=country.val();  
-      if (state.val() != "Select your State")
-        profileformdata.state=state.val();  
-      if (durtype.val() != "")
-        profileformdata.dur=durtype.val();
-      if (reltype.val() != "")
-        profileformdata.relg=reltype.val();           
-      if (zipcode.val() != "")
-        profileformdata.zip=zipcode.val();
-      if (email.val() != "")
-        profileformdata.email=email.val();
-      if (city.val() != "")
-        profileformdata.city=city.val();
-      if (phone.val() != "")
-        profileformdata.phone=phone.val();
-      if (misexp.val() != "")
-        profileformdata.misexp=misexp.val();            
-      
-      $.ajax({
-        type: "POST",
-        url: "api/profilein.php",
-        data: {
-          fbid: CMC.me.id ? CMC.me.id : "",
-        profileinfo: JSON.stringify(profileformdata)
-        },
-        dataType: "json",
-        context: this,
-        success: function(data) {
-          if (!data.has_error) {
-            $("#profile-volunteer-dialog").dialog('close');
-            alert('Thank you - your submission has been successfully entered into our database');
-          }
-          else {
-           alert('We are sorry - there was an error: ' + data.err_msg);
-          }
-        },
-        error: function(data) {
-           alert('We are sorry - there was an error: ' + data.err_msg);
-        }
-      });
-      return true;
-    }
+    CMC.submitProfile(CMC.getFormData("#profile-volunteer-form"));
   });
 
-    $("#profile-org-submit").click(function() {
-
+  $("#profile-org-submit").click(function() {
     var aname = $("#profile-organizer-form").find('.profile-org-name');
     var aurl = $("#profile-organizer-form").find('.profile-org-website');
     var aabout = $("#profile-organizer-form").find('.profile-org-about');
@@ -2276,7 +2326,7 @@ $(function() {
     
 
 	if (aurl.val() != "") {
-		if (!isUrl(aurl.val())) {
+		if (!CMC.isUrl(aurl.val())) {
 			reason += errornum+'. Incorrect Website Entered\n';
 			errornum = errornum + 1;
 			isValid = false;		
@@ -2285,7 +2335,7 @@ $(function() {
 	
     if (zipcode !== undefined) {
     if (zipcode.val() != "") {
-      zipisvalid = validateZipCode(zipcode.val());
+      zipisvalid = CMC.validateZipCode(zipcode.val());
       if (!zipisvalid) {
         reason += errornum+'. Incorrect Zipcode format entered\n';
         errornum = errornum + 1;
@@ -2295,7 +2345,7 @@ $(function() {
     }
 
     if (email.val() != "") {
-      emailisvalid = validateEmail(email.val());
+      emailisvalid = CMC.validateEmail(email.val());
       if (!emailisvalid) {
         reason += errornum + '. Incorrect Email format entered\n';
         errornum = errornum + 1;
@@ -2304,7 +2354,7 @@ $(function() {
     }
 
     if (phone.val() != "") {
-      var phoneerror = validatePhone(phone.val(),country.val());
+      var phoneerror = CMC.validatePhone(phone.val(),country.val());
       if (phoneerror != "") {
         reason += errornum + ' ' + phoneerror + '\n';
         errornum = errornum + 1;
@@ -2423,7 +2473,7 @@ $(function() {
     var errornum=1;
 
 	if (aurl.val() != "") {
-		if (!isUrl(aurl.val())) {
+		if (!CMC.isUrl(aurl.val())) {
 			reason += errornum+'. Incorrect Website Entered\n';
 			errornum = errornum + 1;
 			isValid = false;		
@@ -2432,7 +2482,7 @@ $(function() {
 	
     if (zipcode !== undefined) {
     if (zipcode.val() != "") {
-      zipisvalid = validateZipCode(zipcode.val());
+      zipisvalid = CMC.validateZipCode(zipcode.val());
       if (!zipisvalid) {
         reason += errornum+'. Incorrect Zipcode format entered\n';
         errornum = errornum + 1;
@@ -2442,7 +2492,7 @@ $(function() {
     }
 
     if (email.val() != "") {
-      emailisvalid = validateEmail(email.val());
+      emailisvalid = CMC.validateEmail(email.val());
       if (!emailisvalid) {
         reason += errornum + '. Incorrect Email format entered\n';
         errornum = errornum + 1;
@@ -2451,7 +2501,7 @@ $(function() {
     }
 
     if (phone.val() != "") {
-      var phoneerror = validatePhone(phone.val(),country.val());
+      var phoneerror = CMC.validatePhone(phone.val(),country.val());
       if (phoneerror != "") {
         reason += errornum + ' ' + phoneerror + '\n';
         errornum = errornum + 1;

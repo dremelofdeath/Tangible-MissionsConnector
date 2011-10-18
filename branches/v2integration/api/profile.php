@@ -135,13 +135,6 @@ if(mysql_num_rows($result) != 0) {
 	$json['name'] = $name;
 
   if ($isleader == 1) {
-    $volstring = " is leading missions";
-  } else {
-    $volstring = " is a volunteer";   
-  }
-  $json['volstring'] = $volstring;
-
-  if ($isleader == 1) {
   if (!empty($organization))
 	$json['AgencyName'] = $organization;
   if (!empty($website))

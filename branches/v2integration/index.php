@@ -875,60 +875,14 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
 
 <html>
   <head>
-    <meta charset="utf-8">
-    <title>Christian Missions Connector</title>
-  </head>
-  <body>
+    <meta charset="utf-8" />
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-    <!-- Include jQuery stuff and link stylesheet to the specified theme -->
-    <?php cmc_jquery_startup("1.6.1", "1.8.11", "custom-theme"); ?>
-    <link rel="stylesheet" href="fcbkcomplete-style.css" type="text/css"
-          media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="fcbkcomplete-style.css" type="text/css" media="screen" charset="utf-8" />
     <link rel="stylesheet" href="tipTip.css" type="text/css" />
-    <script src="jquery.fcbkcomplete.js" type="text/javascript"></script>
-    <script src="jquery.tipTip.js" type="text/javascript"></script>
-    <!-- imagesLoaded plugin obtained from https://gist.github.com/268257 -->
-    <script src="jquery.imagesLoaded.js" type="text/javascript"></script>
-    <div id="fb-root"></div>
-    <script src="https://connect.facebook.net/en_US/all.js"></script>
-    <script src="base64.js"></script>
-    <script src="json2-min.js"></script>
-    <script type="text/javascript" src="cmc.js"></script>
-    <script src="jquery.validate.js" type="text/javascript"></script>
-    <script src="jquery.validation.functions.js" type="text/javascript"></script> 
     <link rel="stylesheet" type="text/css" href="jquery.validate.css" />
     <link rel="stylesheet" type="text/css" href="style.css" />
-	  <script src="datepicker.js" type="text/javascript"></script>
 	  <link href="datepicker.css" rel="stylesheet" type="text/css" />
-    <!-- THIS IS THE ADMIN CODE BLOCK! Do NOT put code here for end users, they won't see it! -zack -->
-    <script type="text/javascript">
-      $(function() {
-        CMC.log("loading admin only code");
-        $("#secret-hideout-dialog").dialog({
-          autoOpen: false,
-          draggable: false,
-          position: [25, 25],
-          resizable: false,
-          height: 465,
-          width: 700,
-          open: function() {
-            CMC.dialogOpen(this);
-          },
-          close: function() {
-            CMC.dialogClose(this);
-          }
-        });
-
-        $("#secret-hideout").click(function() {
-          $("#secret-hideout-dialog").dialog('open');
-        });
-
-        $("#debug-detach-handlers").button().click(function() { CMC.detachDebugHandlers(); });
-        $("#debug-force-login").button().click(function() { CMC.login(); });
-
-        CMC.log("admin load complete");
-      });
-    </script>
+    <title>Christian Missions Connector</title>
     <!-- Custom CSS markup goes here -->
     <style type="text/css">
 
@@ -1154,79 +1108,6 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
        * --zack
        */
       
-        #wrapper
-        {
-            width: 900px;
-            height: 700px;
-            margin: auto;
-            border: solid 1px black;
-            -moz-border-radius: 8px;
-            -webkit-border-radius: 8px;
-            border-radius: 8px;
-            -moz-border-radius: 8px;
-            -webkit-border-radius: 8px;
-            border-radius: 8px;
-        }
-        #wrapper #header
-        {
-            /*width: 99%;*/
-            height: 40px;
-            color: White;
-            font-size: 24px;
-            font-weight: bold;
-            padding-left: 20px;
-            padding-top: 20px;
-            -moz-border-radius-topleft: 8px;
-            -webkit-border-top-left-radius: 8px;
-            border-top-left-radius: 8px;
-            -moz-border-radius-topright: 8px;
-            -webkit-border-top-right-radius: 8px;
-            border-top-right-radius: 8px;
-            background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#747577), to(#363739));
-            background-image: -moz-linear-gradient(#747577, #363739);
-            background-image: -webkit-linear-gradient(#747577, #363739);
-            background-image: -o-linear-gradient(#747577, #363739);
-            filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#747577, endColorstr=#363739)";
-            -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#747577, endColorstr=#363739)";
-        }
-        #wrapper #menu-bar
-        {
-            width: 100%;
-            height: 29px;
-            padding-top: 4px;
-            background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#E5E5E5), to(#CFCFCF));
-            background-image: -moz-linear-gradient(#E5E5E5, #CFCFCF);
-            background-image: -webkit-linear-gradient(#E5E5E5, #CFCFCF);
-            background-image: -o-linear-gradient(#E5E5E5, #CFCFCF);
-            filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#E5E5E5, endColorstr=#CFCFCF)";
-            -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#E5E5E5, endColorstr=#CFCFCF)";
-            border-bottom: solid 1px #747577;
-        }
-        #wrapper #contents
-        {
-            width: 600px;
-            height: 940px;
-            padding-top: 10px;
-        }
-     
-        #wrapper #footer
-        {
-            width: 100%;
-            height: 30px;
-            background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#747577), to(#363739));
-            background-image: -moz-linear-gradient(#747577, #363739);
-            background-image: -webkit-linear-gradient(#747577, #363739);
-            background-image: -o-linear-gradient(#747577, #363739);
-            filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#747577, endColorstr=#363739)";
-            -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#747577, endColorstr=#363739)";
-            -moz-border-radius-bottomleft: 8px;
-            -webkit-border-bottom-left-radius: 8px;
-            border-bottom-left-radius: 8px;
-            -moz-border-radius-bottomright: 8px;
-            -webkit-border-bottom-right-radius: 8px;
-            border-bottom-right-radius: 8px;
-            border-top: solid 1px #747577;
-        }
         #menu-bar ul
         {
             list-style: none;
@@ -1268,6 +1149,52 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
             color: white;
         }   
     </style>
+  </head>
+  <body>
+    <!-- Include jQuery stuff and link stylesheet to the specified theme -->
+    <!-- FIXME: don't use PHP here, put stylesheet links in the right place -zack -->
+    <?php cmc_jquery_startup("1.6.1", "1.8.11", "custom-theme"); ?>
+    <script src="jquery.fcbkcomplete.js" type="text/javascript"></script>
+    <script src="jquery.tipTip.js" type="text/javascript"></script>
+    <!-- imagesLoaded plugin obtained from https://gist.github.com/268257 -->
+    <script src="jquery.imagesLoaded.js" type="text/javascript"></script>
+    <div id="fb-root"></div>
+    <script src="https://connect.facebook.net/en_US/all.js"></script>
+    <script src="base64.js"></script>
+    <script src="json2-min.js"></script>
+    <script type="text/javascript" src="cmc.js"></script>
+    <script src="jquery.validate.js" type="text/javascript"></script>
+    <script src="jquery.validation.functions.js" type="text/javascript"></script> 
+	  <script src="datepicker.js" type="text/javascript"></script>
+    <!-- THIS IS THE ADMIN CODE BLOCK! Do NOT put code here for end users, they won't see it! -zack -->
+    <script type="text/javascript">
+      $(function() {
+        CMC.log("loading admin only code");
+        $("#secret-hideout-dialog").dialog({
+          autoOpen: false,
+          draggable: false,
+          position: [25, 25],
+          resizable: false,
+          height: 465,
+          width: 700,
+          open: function() {
+            CMC.dialogOpen(this);
+          },
+          close: function() {
+            CMC.dialogClose(this);
+          }
+        });
+
+        $("#secret-hideout").click(function() {
+          $("#secret-hideout-dialog").dialog('open');
+        });
+
+        $("#debug-detach-handlers").button().click(function() { CMC.detachDebugHandlers(); });
+        $("#debug-force-login").button().click(function() { CMC.login(); });
+
+        CMC.log("admin load complete");
+      });
+    </script>
   
   <script type="text/JavaScript">
   
@@ -1795,262 +1722,236 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
       </div>
       <div id="profile-volunteer-dialog" title="Please enter your profile information">
         <form id="profile-volunteer-form">
-      <div id="wrapper">
-        <div id="header">
-            CMC Profile Submission
-        </div>
-        <div id="contents">
-            <div class="profile-container">
-                <div class="profile-header">
-                    Please enter your profile information</div>
+          <div id="wrapper">
+            <div id="contents">
+              <div class="profile-container">
                 <div class="profile-contents">
-                    <table cellpadding="4" cellspacing="0">
-                        <tr>
-                            <td style="width: 97px">
-                                <label>
-                                    Medical Skills</label>
-                            </td>
-                            <td style="width: 97px">
-                                        <select id="profile-medical" multiple="multiple" class="profile-ddl-type-medical" onclick="selectMultiple(this,0);">
-                                            <!--<option value="0" selected="selected">Select Medical Skills</option>-->
-                                            <option id="0" value="1">Advanced Practice Nursing</option>
-                                            <option id="1" value="2">Dental Professional</option>
-                                            <option id="2" value="3">Medical Educator</option>
-                                            <option id="3" value="4">Mental Health Professional</option>
-                                            <option id="4" value="5">Nurse</option>
-                                            <option id="5" value="6">Optometrist or Opthalmologist</option>
-                                            <option id="6" value="7">Pharmacist</option>
-                                            <option id="7" value="8">Physician</option>
-                                            <option id="8" value="9">Physician Assistant</option>
-                                            <option id="9" value="10">Physical or Occupational Therapist</option>
-                                            <option id="10" value="11">Public Health/Community Development Worker</option>
-                                            <option id="11" value="12">Speech Therapist</option>
-                                            <option id="12" value="13">Other</option>
-                                        </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="width: 97px">
-                                <label>
-                                    Non-Medical Skills</label>
-                            </td>
-                            <td style="width: 197px">
-                                        <select id="profile-nonmedical" multiple="multiple" class="profile-ddl-type-nonmedical" onclick="selectMultiple(this,1);">
-                                            <!--<option value="0" selected="selected">Select Non-Medical Skills</option>-->
-                                            <option id="0" value="14">General Help/Labor</option>
-                                            <option id="1" value="15">Team Leader/Primary Organizer</option>
-                                            <option id="2" value="16">Account and/or Business Management</option>
-                                            <option id="3" value="17">Skilled Construction and/or Maintenance</option>
-                                            <option id="4" value="18">Computer Science/Other Technical</option>
-                                            <option id="5" value="19">Agriculture and/or Animal Husbandry</option>
-                                            <option id="6" value="45">Mechanic</option>
-                                            <option id="7" value="46">Office/Secretarial</option>
-                                            <option id="8" value="47">Teaching</option>
-                                            <option id="9" value="48">Veterinary</option>
-                                            <option id="10" value="49">Water Supply Improvement</option>
-                                            <option id="11" value="50">Writing and/or Translating</option>
-                                            <option id="12" value="52">Engineering</option>
-                                        </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="width: 97px">
-                                <label>
-                                    Spiritual Service</label>
-                            </td>
-                            <td style="width: 197px">
-                                        <select id="profile-spiritual" multiple="multiple" class="profile-ddl-type-spiritual" onclick="selectMultiple(this,2);">
-                                            <!--<option value="0" selected="selected">Select Spiritual Service</option>-->
-                                            <option id="0" value="20">Team Spiritual Leader</option>
-                                            <option id="1" value="21">Individual Outreach (Prayer and Counseling)</option>
-                                            <option id="2" value="22">Evangelism</option>
-                                            <option id="3" value="44">Worship Team</option>
-                                            <option id="4" value="51">Public Speaking</option>
-                                        </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="width: 97px">
-                                <label>
-                                    Religious Affiliation</label>
-                            </td>
-                            <td style="width: 197px">
-                                        <select id="profile-religion" class="profile-ddl-type-religious">
-                                            <!--<option value="0", selected="selected">Select Religious Affiliation</option>-->
-                                            <option value="Secular">Secular</option>
-                                            <option value="Christian: Protestant">Christian: Protestant</option>
-                                            <option value="Christian: Catholic">Christian: Catholic</option>
-                                            <option value="Nondenominational">Nondenominational</option>
-                                        </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="width: 97px">
-                                <label>
-                                    Duration of Missions</label>
-                            </td>
-                            <td style="width: 197px">
-                                        <select id="profile-duration" class="profile-ddl-type-duration">
-                                            <!--<option value="0" selected="selected">Select Duration of Missions</option>-->
-                                            <option value="1">Short Term: 1-2 weeks</option>
-                                            <option value="2">Medium Term: 1 Month-2 Years</option>
-                                            <option value="3">Long Term: 2+ Years</option>
-                                        </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="width: 197px">
-                                <label>
-                                    State</label>
-                            </td>
-                            <td style="width: 197px">
-                                        <select id="profile-state" class="profile-ddl-type-state">
-                                        <?php
-                                        echo '<option value="Select your State" selected="selected">Select your State</option>';
-                                        $i=1;
-                      foreach($usstates as $key => $state) {
-                                              echo '<option value="'.$i.'">'.$state.'</option>';
-                                              $i++;
-                      }
-                                        ?>
-                                        </select>
-                            </td>
-                        </tr>           
-                        <tr>
-                            <td>
-                                <label>
-                                    City</label>
-                            </td>
-                            <td>
-                                <input type="text" id="profile-city" class="profile-input-city"/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="width: 197px">
-                                <label>
-                                    Country</label>
-                            </td>
-                            <td style="width: 197px">
-                                        <select id="profile-country" class="profile-ddl-type-country" onchange="volzipdisplay();">
-                                        <?php
-                                        $i=1;
-                      foreach($aCountries as $key => $country) {
-                                              if ($country == "United States")
-                            echo '<option selected="selected" value="'.$i.'">'.$country.'</option>';
-                                              else {
-                            echo '<option value="'.$i.'">'.$country.'</option>';
-                                              }
-                                              $i++;
-                      }
-                                        ?>
-                                        </select>
-                            </td>
-                        </tr>             
-                        <tbody id="volzip" style="display: none;">
-                        <tr>
-                            <td>
-                                <label>
-                                    Zipcode</label>
-                            </td>
-                            <td>
-                                <input type="text" id="profile-zipcode" class="profile-input-zipcode"/>
-                            </td>
-                        </tr>
-                        </tbody>
-                        <tr>
-                            <td style="width: 197px">
-                                <label>
-                                    Regions of Interest</label>
-                            </td>
-                            <td style="width: 197px">
-                                        <select id="profile-region" multiple="multiple" class="profile-ddl-type-region" onclick="selectMultiple(this,3);">
-                                            <!--<option value="0" selected="selected">Select Regions of Interest</option>-->
-                                            <option id="0" value="1">Africa</option>
-                                            <option id="1" value="2">Asia and Oceana</option>
-                                            <option id="2" value="3">Europe and Russia</option>
-                                            <option id="3" value="4">Latin America</option>
-                                            <option id="4" value="5">Middle East</option>
-                                            <option id="5" value="6">North America</option>
-                                            <option id="6" value="7">Caribbean</option>
-                                        </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="width: 197px">
-                                <label>
-                                    Countries Served</label>
-                            </td>
-                            <td style="width: 197px">
-                                        <select id="profile-country-served" multiple="multiple" class="profile-ddl-type-countriesserved" onclick="selectMultiple(this,4);">
-                                        <?php
-                                        $i=1;
-                                        $jj=0;
-                      //echo '<option selected="selected" value="Select Countries Served">Select Countries Served</option>';
-                      foreach($aCountries as $key => $country) {                      
-                                              if ($country == "United States")
-                            echo '<option id="'.$jj.'" value="'.$i.'">'.$country.'</option>';
-                                              else {
-                        echo '<option id="'.$jj.'" value="'.$i.'">'.$country.'</option>';
-                                              }
-                                              $i++;
-                                              $jj++;
-                      }
-                                        ?>
-                                        </select>
-                            </td>
-                        </tr>           
-                        <tr>
-                            <td>
-                                <label>
-                                    Phone</label>
-                            </td>
-                            <td>
-                                <input type="text" id="profile-phone" class="profile-input-phone" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label>
-                                    Email Id</label>
-                            </td>
-                            <td>
-                                <input type="text" id="profile-email" class="profile-input-email" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label>
-                                    My Missions Experience</label>
-                            </td>
-                            <td>
-                                <input type="text" id="profile-experience" class="profile-input-experience" />
-                            </td>
-                        </tr>             
-                        <tr>
-                            <td>&nbsp;
-                                
-                            </td>
-                            <td>
-                                <input type="submit" value="Submit" class="profile-submit" id="profile-submit" />
-                            </td>
-                        </tr>
-                    </table>
+                  <table cellpadding="4" cellspacing="0">
+                    <tr>
+                      <td style="width: 97px">
+                        <label>Medical Skills</label>
+                      </td>
+                      <td style="width: 97px">
+                        <select id="profile-medical-skills" multiple="multiple" class="cmc-form-spec" onclick="selectMultiple(this,0);">
+                          <!--<option value="0" selected="selected">Select Medical Skills</option>-->
+                          <option id="0" value="1">Advanced Practice Nursing</option>
+                          <option id="1" value="2">Dental Professional</option>
+                          <option id="2" value="3">Medical Educator</option>
+                          <option id="3" value="4">Mental Health Professional</option>
+                          <option id="4" value="5">Nurse</option>
+                          <option id="5" value="6">Optometrist or Opthalmologist</option>
+                          <option id="6" value="7">Pharmacist</option>
+                          <option id="7" value="8">Physician</option>
+                          <option id="8" value="9">Physician Assistant</option>
+                          <option id="9" value="10">Physical or Occupational Therapist</option>
+                          <option id="10" value="11">Public Health/Community Development Worker</option>
+                          <option id="11" value="12">Speech Therapist</option>
+                          <option id="12" value="13">Other</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="width: 97px">
+                        <label>Non-Medical Skills</label>
+                      </td>
+                      <td style="width: 197px">
+                        <select id="profile-nonmedical-skills" multiple="multiple" class="cmc-form-spec" onclick="selectMultiple(this,1);">
+                          <!--<option value="0" selected="selected">Select Non-Medical Skills</option>-->
+                          <option id="0" value="14">General Help/Labor</option>
+                          <option id="1" value="15">Team Leader/Primary Organizer</option>
+                          <option id="2" value="16">Account and/or Business Management</option>
+                          <option id="3" value="17">Skilled Construction and/or Maintenance</option>
+                          <option id="4" value="18">Computer Science/Other Technical</option>
+                          <option id="5" value="19">Agriculture and/or Animal Husbandry</option>
+                          <option id="6" value="45">Mechanic</option>
+                          <option id="7" value="46">Office/Secretarial</option>
+                          <option id="8" value="47">Teaching</option>
+                          <option id="9" value="48">Veterinary</option>
+                          <option id="10" value="49">Water Supply Improvement</option>
+                          <option id="11" value="50">Writing and/or Translating</option>
+                          <option id="12" value="52">Engineering</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="width: 97px">
+                        <label>Spiritual Service</label>
+                      </td>
+                      <td style="width: 197px">
+                        <select id="profile-spiritual-skills" multiple="multiple" class="cmc-form-spec" onclick="selectMultiple(this,2);">
+                          <!--<option value="0" selected="selected">Select Spiritual Service</option>-->
+                          <option id="0" value="20">Team Spiritual Leader</option>
+                          <option id="1" value="21">Individual Outreach (Prayer and Counseling)</option>
+                          <option id="2" value="22">Evangelism</option>
+                          <option id="3" value="44">Worship Team</option>
+                          <option id="4" value="51">Public Speaking</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="width: 97px">
+                        <label>Religious Affiliation</label>
+                      </td>
+                      <td style="width: 197px">
+                        <select id="profile-religion" class="cmc-form-spec">
+                          <!--<option value="0", selected="selected">Select Religious Affiliation</option>-->
+                          <option value="Secular">Secular</option>
+                          <option value="Christian: Protestant">Christian: Protestant</option>
+                          <option value="Christian: Catholic">Christian: Catholic</option>
+                          <option value="Nondenominational">Nondenominational</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="width: 97px">
+                        <label>Duration of Missions</label>
+                      </td>
+                      <td style="width: 197px">
+                        <select id="profile-duration" class="cmc-form-spec">
+                          <!--<option value="0" selected="selected">Select Duration of Missions</option>-->
+                          <option value="1">Short Term: 1-2 weeks</option>
+                          <option value="2">Medium Term: 1 Month-2 Years</option>
+                          <option value="3">Long Term: 2+ Years</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="width: 197px">
+                        <label>State</label>
+                      </td>
+                      <td style="width: 197px">
+                        <select id="profile-state" class="cmc-form-spec">
+                          <option value="" selected="selected">Select your State</option>
+                          <?php
+                            $i=1;
+                            foreach($usstates as $key => $state) {
+                              echo '<option value="'.$i.'">'.$state.'</option>';
+                              $i++;
+                            }
+                          ?>
+                        </select>
+                      </td>
+                    </tr>           
+                    <tr>
+                      <td>
+                        <label>City</label>
+                      </td>
+                      <td>
+                        <input type="text" id="profile-city" class="cmc-form-spec"/>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="width: 197px">
+                        <label>Country</label>
+                      </td>
+                      <td style="width: 197px">
+                        <select id="profile-country" class="cmc-form-spec" onchange="volzipdisplay();">
+                          <?php
+                            $i=1;
+                            foreach($aCountries as $key => $country) {
+                              if ($country == "United States")
+                                echo '<option selected="selected" value="'.$i.'">'.$country.'</option>';
+                              else {
+                                echo '<option value="'.$i.'">'.$country.'</option>';
+                              }
+                              $i++;
+                            }
+                          ?>
+                        </select>
+                      </td>
+                    </tr>             
+                    <tbody id="volzip" style="display: none;">
+                      <tr>
+                        <td>
+                          <label>Zipcode</label>
+                        </td>
+                        <td>
+                          <input type="text" id="profile-zipcode" class="cmc-form-spec"/>
+                        </td>
+                      </tr>
+                    </tbody>
+                    <tr>
+                      <td style="width: 197px">
+                        <label>Regions of Interest</label>
+                      </td>
+                      <td style="width: 197px">
+                        <select id="profile-region" multiple="multiple" class="cmc-form-spec" onclick="selectMultiple(this,3);">
+                          <!--<option value="0" selected="selected">Select Regions of Interest</option>-->
+                          <option id="0" value="1">Africa</option>
+                          <option id="1" value="2">Asia and Oceana</option>
+                          <option id="2" value="3">Europe and Russia</option>
+                          <option id="3" value="4">Latin America</option>
+                          <option id="4" value="5">Middle East</option>
+                          <option id="5" value="6">North America</option>
+                          <option id="6" value="7">Caribbean</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="width: 197px">
+                        <label>Countries Served</label>
+                      </td>
+                      <td style="width: 197px">
+                        <select id="profile-country-served" multiple="multiple" class="cmc-form-spec" onclick="selectMultiple(this,4);">
+                          <?php
+                            $i=1;
+                            $jj=0;
+                            //echo '<option selected="selected" value="Select Countries Served">Select Countries Served</option>';
+                            foreach($aCountries as $key => $country) {                      
+                              if ($country == "United States")
+                                echo '<option id="'.$jj.'" value="'.$i.'">'.$country.'</option>';
+                              else {
+                                echo '<option id="'.$jj.'" value="'.$i.'">'.$country.'</option>';
+                              }
+                              $i++;
+                              $jj++;
+                            }
+                          ?>
+                        </select>
+                      </td>
+                    </tr>           
+                    <tr>
+                      <td>
+                        <label>Phone</label>
+                      </td>
+                      <td>
+                        <input type="text" id="profile-phone" class="cmc-form-spec" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <label>Email Id</label>
+                      </td>
+                      <td>
+                        <input type="text" id="profile-email" class="cmc-form-spec" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <label>My Missions Experience</label>
+                      </td>
+                      <td>
+                        <input type="text" id="profile-experience" class="cmc-form-spec" />
+                      </td>
+                    </tr>             
+                    <tr>
+                      <td>&nbsp;</td>
+                      <td>
+                        <input type="submit" value="Submit" id="profile-submit" />
+                      </td>
+                    </tr>
+                  </table>
                 </div>
+              </div>
             </div>
-        </div>
-    </div>
-    </form>      
+          </div>
+        </form>      
       </div>    
       <div id="profile-organizer-dialog" title="Please enter your profile information">
         <form id="profile-organizer-form">
       <div id="wrapper">
-        <div id="header">
-            CMC Profile Submission
-        </div>
         <div id="contents">
             <div class="profile-container">
-                <div class="profile-header">
-                    Please enter your profile information</div>
                 <div class="profile-contents">
                     <table id="orgtable" cellpadding="4" cellspacing="0">
                         <tr>
@@ -2363,13 +2264,8 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
       <div id="profile-trip-dialog" title="Please enter your trip profile information">
         <form id="profile-trip-form">
       <div id="wrapper">
-        <div id="header">
-            CMC Trip Profile Submission
-        </div>
         <div id="contents">
             <div class="profile-container">
-                <div class="profile-header">
-                    Please enter your trip information</div>
                 <div class="profile-contents">
                     <table cellpadding="4" cellspacing="0">
                         <tr>
