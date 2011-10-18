@@ -292,7 +292,7 @@ if($num_userids > 0){
 }
 
 if (!$has_error) {
-  $json['sql'] = $sql;
+  //$json['sql'] = $sql;
 $result = mysql_query($sql,$con);
 if (!$result) {
 	setjsonmysqlerror($has_error,$err_msg,$sql);
@@ -673,7 +673,7 @@ else
 
   return $res;
 }
-
+/*
 function validate_date($val,$year,$month,$day,$update,&$has_error,&$err_msg) {
 
 if ($month%2==0) {
@@ -735,6 +735,7 @@ if ($month%2==0) {
 }
 
 }
+*/
 
 function validate_return($year1,$month1,$day1,$year2,$month2,$day2,$update,&$has_error,&$err_msg) {
 
@@ -761,7 +762,10 @@ if (isset($myobj->{'DepartYear'})) {
 if ((!empty($myobj->{'DepartYear'})) && (!empty($myobj->{'DepartMonth'})) && (!empty($myobj->{'DepartDay'}))) {
         //$thisyear = date("Y");
 
-	//validate_date(1,$myobj->{'DepartYear'},$myobj->{'DepartMonth'},$myobj->{'DepartDay'},$update,$has_error,$err_msg);
+if (!checkdate($myobj->{'DepartMonth'},$myobj->{'DepartDay'},$myobj->{'DepartYear'})) {
+	$has_error = TRUE;
+	$err_msg = "Invalid Departure Date";
+}	//validate_date(1,$myobj->{'DepartYear'},$myobj->{'DepartMonth'},$myobj->{'DepartDay'},$update,$has_error,$err_msg);
 
 	$tripdpt = getdatestring($myobj->{'DepartYear'},$myobj->{'DepartMonth'},$myobj->{'DepartDay'});
 
@@ -783,6 +787,11 @@ if ((!empty($myobj->{'DepartYear'})) && (!empty($myobj->{'DepartMonth'})) && (!e
 
 if (isset($myobj->{'ReturnYear'})) {
 if ((!empty($myobj->{'ReturnYear'})) && (!empty($myobj->{'ReturnMonth'})) && (!empty($myobj->{'ReturnDay'}))) {
+
+if (!checkdate($myobj->{'ReturnMonth'},$myobj->{'ReturnDay'},$myobj->{'ReturnYear'})) {
+	$has_error = TRUE;
+	$err_msg = "Invalid Return Date";
+}
 	//validate_date(2,$myobj->{'ReturnYear'},$myobj->{'ReturnMonth'},$myobj->{'ReturnDay'},$update,$has_error,$err_msg);
 
 	validate_return($myobj->{'DepartYear'},$myobj->{'DepartMonth'},$myobj->{'DepartDay'},$myobj->{'ReturnYear'},$myobj->{'ReturnMonth'},$myobj->{'ReturnDay'},$update,$has_error,$err_msg);

@@ -1338,6 +1338,9 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
               <div id="profile-image">
                 <img class="profile-picture" src="ajax-spinner.gif" />
               </div>
+			  <div id="toggle-profile" style="display: none">
+				<a href="#" onclick="CMC.ToggleProfile();">&lt;&lt; Toggle Profile </a>
+			  </div>
               <div id="profile-section-about-me">
                 <h3>About Me:</h3>
                 <div id="profile-section-about-me-content">
@@ -1794,7 +1797,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                       </td>
                       <td style="width: 197px">
                         <select id="profile-religion" class="cmc-form-spec">
-                          <!--<option value="0", selected="selected">Select Religious Affiliation</option>-->
+                          <option value="Select Religious Affiliation", selected="selected">Select Religious Affiliation</option>
                           <option value="Secular">Secular</option>
                           <option value="Christian: Protestant">Christian: Protestant</option>
                           <option value="Christian: Catholic">Christian: Catholic</option>
@@ -1808,7 +1811,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                       </td>
                       <td style="width: 197px">
                         <select id="profile-duration" class="cmc-form-spec">
-                          <!--<option value="0" selected="selected">Select Duration of Missions</option>-->
+                          <option value="Select Duration of Missions" selected="selected">Select Duration of Missions</option>
                           <option value="1">Short Term: 1-2 weeks</option>
                           <option value="2">Medium Term: 1 Month-2 Years</option>
                           <option value="3">Long Term: 2+ Years</option>
@@ -1821,7 +1824,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                       </td>
                       <td style="width: 197px">
                         <select id="profile-state" class="cmc-form-spec">
-                          <option value="" selected="selected">Select your State</option>
+                          <option value="Select your State" selected="selected">Select your State</option>
                           <?php
                             $i=1;
                             foreach($usstates as $key => $state) {
@@ -2095,7 +2098,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                             </td>
                             <td style="width: 197px">
                                         <select id="profile-org-religion" class="profile-org-religion">
-                                            <!--<option value="0", selected="selected">Select Religious Affiliation</option>-->
+                                            <option value="Select Religious Affiliation", selected="selected">Select Religious Affiliation</option>
                                             <option id="0" value="Secular">Secular</option>
                                             <option id="1" value="Christian: Protestant">Christian: Protestant</option>
                                             <option id="2" value="Christian: Catholic">Christian: Catholic</option>
@@ -2110,7 +2113,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                             </td>
                             <td style="width: 197px">
                                         <select id="profile-org-duration" class="profile-org-duration">
-                                            <!--<option value="0" selected="selected">Select Duration of Missions</option>-->
+                                            <option value="Select Duration of Missions" selected="selected">Select Duration of Missions</option>
                                             <option value="1">Short Term: 1-2 weeks</option>
                                             <option value="2">Medium Term: 1 Month-2 Years</option>
                                             <option value="3">Long Term: 2+ Years</option>
@@ -2302,7 +2305,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                             </td>
                             <td style="width: 197px">
                                         <select id="profile-trip-religion" class="profile-trip-religion">
-                                            <!--<option value="0", selected="selected">Select Religious Affiliation</option>-->
+                                            <option value="Select Religious Affiliation", selected="selected">Select Religious Affiliation</option>
                                             <option value="Secular">Secular</option>
                                             <option value="Christian: Protestant">Christian: Protestant</option>
                                             <option value="Christian: Catholic">Christian: Catholic</option>
@@ -2345,10 +2348,26 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                             </td>
                             <td style="width: 197px">
                                         <select id="profile-trip-duration" class="profile-trip-duration">
-                                            <!--<option value="0" selected="selected">Select Duration of Missions</option>-->
+                                            <option value="Select Duration of Missions" selected="selected">Select Duration of Missions</option>
                                             <option value="1">Short Term: 1-2 weeks</option>
                                             <option value="2">Medium Term: 1 Month-2 Years</option>
                                             <option value="3">Long Term: 2+ Years</option>
+                                        </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 97px">
+                                <label>
+                                    Trip Accommodation Level</label>
+                            </td>
+                            <td style="width: 197px">
+                                        <select id="profile-trip-acco" class="profile-trip-acco">
+                                            <option value="Select Accommodation Level" selected="selected">Select Accommodation Level</option>
+                                            <option value="Basic shelter without indoor plumbing">Basic shelter without indoor plumbing</option>
+                                            <option value="Basic shelter with indoor plumbing">Basic shelter with indoor plumbing</option>
+                                            <option value="Modest accomodations without hot water">Modest accomodations without hot water</option>
+                                            <option value="Modest accomodations with hot water">Modest accomodations with hot water</option>
+                                            <option value="Very comfortable accomodations">Very comfortable accomodations</option>
                                         </select>
                             </td>
                         </tr>
@@ -2359,7 +2378,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                             </td>
                             <td style="width: 197px">
                                         <select id="profile-trip-stage" class="profile-trip-stage">
-                                            <!--<option value="0" selected="selected">Select Duration of Missions</option>-->
+                                            <option value="Select Mission Stage" selected="selected">Select Mission Stage</option>
                                             <option value="1">Planning</option>
                                             <option value="2">Execution</option>
                                         </select>
@@ -2383,7 +2402,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                             <td style="width: 197px">
                                         <select id="profile-trip-country" class="profile-trip-country" onchange="tripzipdisplay();">
                                         <?php
-                                        echo '<option value="Select your Country" selected="selected">Select yourDestination Country</option>';
+                                        echo '<option value="Select your Destination Country" selected="selected">Select yourDestination Country</option>';
                                         $i=1;
                       foreach($aCountries as $key => $country) {
                                               if ($country == "United States")

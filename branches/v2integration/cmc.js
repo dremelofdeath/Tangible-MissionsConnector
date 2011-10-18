@@ -396,6 +396,19 @@ var CMC = {
       $("#profile-name").html(data.name ? data.name : "");
       $("img.profile-picture").attr("src", "http://graph.facebook.com/"+this.showuserid+"/picture?type=large");
       this.ajaxNotifyComplete();
+      
+	  // update the toggle profile link according to condition
+	  if (data.isreceiver == 0) {
+		$("#show-profile").find("#toggle-profile").show();
+		var mystr = '<a href="#" onclick="CMC.ToggleProfile();"> I\'d like my profile to be for an agency instead of a volunteer. </a>';
+		$("#show-profile").find("#toggle-profile").html(mystr);
+	  }
+	  else if (data.isreceiver == 1) {
+		$("#show-profile").find("#toggle-profile").show();
+		var mystr = '<a href="#" onclick="CMC.ToggleProfile();"> I\'d like my profile to be for a volunteer instead of an agency. </a>';
+		$("#show-profile").find("#toggle-profile").html(mystr);
+	  }
+    
       $("#profile-section-about-me-content").html(data.about ? data.about : "");
       if (data.MedicalSkills == undefined) {
         $("#profile-medskills").html("");
@@ -656,6 +669,69 @@ var CMC = {
     this.endFunction();
   },
 
+  ToggleProfile : function() {
+    this.beginFunction();
+    this.log("Toggling profile information");
+    var profileformdata = {};
+
+    profileformdata.toggle=1;
+
+    $.ajax({
+      type: "POST",
+      url: "api/toggleprofile.php",
+      data: {
+          fbid: CMC.me.id ? CMC.me.id : "",
+          profileinfo: JSON.stringify(profileformdata)
+      },
+      dataType: "json",
+      context: this,
+      success: this.onToggleSuccess,
+      error: this.onToggleError
+    });
+    this.endFunction();
+	},
+
+  onToggleSuccess : function(data, textStatus, jqXHR) {
+    this.beginFunction();
+    this.assert(data != undefined, "data is undefined in onGetTripsDataSuccess");
+    if(data.has_error !== undefined && data.has_error !== null) {
+      if(data.has_error) {
+          // we have a known error, handle it
+          this.handleToggleSuccessHasError(data);
+      } else {
+		  // update the CMC profile info object
+          this.getProfile(CMC.me.id);
+		  // refresh the profile page
+		  $("#tabs").tabs('load', 1);
+      }
+    } else {
+      // an unknown error occurred? do something!
+      this.handleGenericUnexpectedCallbackError(data, textStatus, jqXHR, "future trips data");
+    }
+    this.endFunction();
+	},
+
+  onToggleError : function(jqXHR, textStatus, errorThrown) {
+    // we might also want to log this or surface an error message or something
+    this.handleGenericServerError(jqXHR, textStatus, errorThrown);
+  },
+  
+  handleToggleSuccessHasError : function(data) {
+    this.beginFunction();
+    this.assert(data != undefined, "data is undefined in handleToggleSuccessHasError");
+    // we have a known error, handle it
+    if(data.err_msg !== undefined) {
+      if(data.err_msg != '') {
+        this.error("caught an error from the server while performing profile toggle: \""+data.err_msg+"\"");
+      } else {
+        this.error("caught an error from the server while performing profile toggle, but it was blank");
+      }
+    } else {
+      this.error("caught an error from the server while performing profile toggle, but it did not return an error message");
+    }
+    this.endFunction();
+  },
+  
   GetTripProfile : function(index) {
 	  this.beginFunction();
       $.ajax({
@@ -2396,9 +2472,9 @@ $(function() {
         profileformdata.country=country.val();  
       if (state.val() != "Select your State")
         profileformdata.state=state.val();  
-      if (durtype.val() != "")
+      if (durtype.val() != "Select Duration of Missions")
         profileformdata.dur=durtype.val();
-      if (reltype.val() != "")
+      if (reltype.val() != "Select Religious Affiliation")
         profileformdata.relg=reltype.val();           
       if (zipcode.val() != "")
         profileformdata.zip=zipcode.val();
@@ -2465,6 +2541,7 @@ $(function() {
     var tripdepart = $("#profile-trip-form").find('.profile-trip-depart');
     var tripreturn = $("#profile-trip-form").find('.profile-trip-return');
     var numberofmembers = $("#profile-trip-form").find('.profile-trip-number');
+    var accolevel = $("#profile-trip-form").find('.profile-trip-acco');
 
     var zipisvalid = false;
     var emailisvalid = false;
@@ -2557,7 +2634,7 @@ $(function() {
         profiletripformdata.about= aabout.val();
 	    if (aurl.val() != "")
         profiletripformdata.url = aurl.val();
-	    if (stage.val() != "")
+	    if (stage.val() != "Select Mission Stage")
         profiletripformdata.stage= stage.val();
       if ((tripdepart !== undefined) && (tripdepart.val() !==  null)) {
           var departdate = tripdepart.val().split(".");
@@ -2575,13 +2652,13 @@ $(function() {
 	    if (numberofmembers.val() != "")
         profiletripformdata.numpeople= numberofmembers.val();
       
-	    if (country.val() != "")
+	    if (country.val() != "Select your Destination Country")
         profiletripformdata.country=country.val();  
 	    if (languages.val() != "")
         profiletripformdata.languages=languages.val(); 
-	    if (durtype.val() != "")
+	    if (durtype.val() != "Select Duration of Missions")
         profiletripformdata.dur=durtype.val();
-	    if (reltype.val() != "")
+	    if (reltype.val() != "Select Religious Affiliation")
         profiletripformdata.relg=reltype.val();           
 	    if (zipcode.val() != "")
         profiletripformdata.zip=zipcode.val();
@@ -2591,7 +2668,11 @@ $(function() {
         profiletripformdata.city=city.val();
 	    if (phone.val() != "")
         profiletripformdata.phone=phone.val();
-     
+    
+      if (accolevel.val() != "Select Accommodation Level") {
+        profiletripformdata.acco=accolevel.val();
+      }
+
       $.ajax({
         type: "POST",
         url: "api/profilein.php",
