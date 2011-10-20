@@ -228,6 +228,7 @@ if($num_userids > 0){
     $sql = $sql.', state="'.$myobj->{'state'}.'"';
 
 
+   if (isset($myobj->{'city'})) {
    $mycity = $myobj->{'city'};
    if (empty($mycity))
 	$sql = $sql.', city=NULL';
@@ -239,6 +240,7 @@ if($num_userids > 0){
        else {
     		$sql = $sql.', city="'.$myobj->{'city'}.'"';
        }
+   }
    }
 
    if (empty($myobj->{'url'}))

@@ -261,7 +261,11 @@ var CMC = {
         for (var each in object) {
           if (object.hasOwnProperty(each)) {
             if (translationMap.hasOwnProperty(each)) {
-              ret[translationMap[each]] = object[each];
+              if ((String(object[each]) == "Select Religious Affiliation") || (String(object[each]) == "Select Duration of Missions") || (String(object[each]) == "Select your State")) {
+              }
+              else {
+                ret[translationMap[each]] = object[each];
+              }
             } else {
               this.assert("don't know how to map property '" + each + "' -- possibly update map?");
             }
@@ -396,7 +400,7 @@ var CMC = {
       $("#profile-name").html(data.name ? data.name : "");
       $("img.profile-picture").attr("src", "http://graph.facebook.com/"+this.showuserid+"/picture?type=large");
       this.ajaxNotifyComplete();
-      
+      /*
 	  // update the toggle profile link according to condition
 	  if (data.isreceiver == 0) {
 		$("#show-profile").find("#toggle-profile").show();
@@ -408,7 +412,8 @@ var CMC = {
 		var mystr = '<a href="#" onclick="CMC.ToggleProfile();"> I\'d like my profile to be for a volunteer instead of an agency. </a>';
 		$("#show-profile").find("#toggle-profile").html(mystr);
 	  }
-    
+	  */
+	
       $("#profile-section-about-me-content").html(data.about ? data.about : "");
       if (data.MedicalSkills == undefined) {
         $("#profile-medskills").html("");
@@ -699,8 +704,20 @@ var CMC = {
           // we have a known error, handle it
           this.handleToggleSuccessHasError(data);
       } else {
-		  // update the CMC profile info object
-          this.getProfile(CMC.me.id);
+		  // This means original dialog open was that of agency, so close that dialog
+		  if (CMC.isreceiver == 1) {
+			$("#profile-organizer-dialog").dialog('close');
+			$("#profile-toggle-dialog").dialog('open');
+			$("#profile-toggle-dialog").dialog().dialog("widget").find(".ui-dialog-titlebar-close").hide();
+			CMC.editProfile();
+		  }
+		  else if (CMC.isreceiver == 0) {
+			$("#profile-volunteer-dialog").dialog('close');		
+			$("#profile-toggle-dialog").dialog('open');
+			$("#profile-toggle-dialog").dialog().dialog("widget").find(".ui-dialog-titlebar-close").hide();			
+			CMC.editProfile();
+		  }
+		  
 		  // refresh the profile page
 		  $("#tabs").tabs('load', 1);
       }
@@ -1601,7 +1618,8 @@ var CMC = {
         $("input#profile-experience").val(this.profiledata.misexp);
       }	 
 
-      $(id).children("form").children("#wrapper").children("#contents").children(".profile-container").children(".profile-header").html("Please edit your profile information");   
+      $(id).children("form").children("#wrapper").children("#contents").children(".profile-container").children(".profile-header").html("Please edit your profile information"); 
+	  $("#profile-toggle-dialog").dialog('close');	  
       $("#profile-volunteer-dialog").dialog('open');
     } else {
       // First modify the profile organizer dialog form, then display for editing
@@ -1760,7 +1778,8 @@ var CMC = {
         $("input#profile-org-experience").val(this.profiledata.misexp);
       }
 
-      $(id).children("form").children("#wrapper").children("#contents").children(".profile-container").children(".profile-header").html("Please edit your profile information");   
+      $(id).children("form").children("#wrapper").children("#contents").children(".profile-container").children(".profile-header").html("Please edit your profile information");
+	  $("#profile-toggle-dialog").dialog('close');	  
       $("#profile-organizer-dialog").dialog('open');
     }
     this.endFunction();
@@ -2137,6 +2156,21 @@ $(function() {
     resizable: true,
     width: 700,
     height: 465,
+    open: function() {
+      CMC.dialogOpen(this);
+    },
+    close: function() {
+      CMC.dialogClose(this);
+    }
+  });  
+  
+  $("#profile-toggle-dialog").dialog({
+    autoOpen: false,
+    draggable: false,
+    position: [25, 25],
+    resizable: false,
+    width: 200,
+    height: 165,
     open: function() {
       CMC.dialogOpen(this);
     },
@@ -2768,48 +2802,6 @@ $(function() {
     $(this).parent().parent().find('.profile-ddl-title').html($(this).html());
     $(this).parent().parent().find('.profile-ddl-contents').fadeOut("slow");
   });
-
-
-    /*
-  $.each(CMC.tripsjoinbtns, function() {
-    $("#" +this).click(function() {
-      var tripparts = this.id.split('-');
-      var index = parseInt(tripparts[tripparts.length-1],10);;
-      alert("Trip Index = " + index + " " + CMC.profiledata.tripid[index]);
-	  jointrip(index);
-    });
-  });
-
-  $.each(CMC.tripsdescbtns, function() {
-    $("#" +this).click(function() {
-      alert("Came into Trips description click");
-      var tripparts = this.id.split('-');
-      var index = parseInt(tripparts[tripparts.length-1],10);;
-      alert("Trips Index = " + index + " " + CMC.profiledata.tripid[index]);
-	  CMC.GetTripProfile(index);
-    });
-  });
-
-  $.each(CMC.tripinvitebtns, function() {
-    $("#" +this).click(function() {
-      alert("Came into Trip Invite click");
-      var tripparts = this.id.split('-');
-      var index = parseInt(tripparts[tripparts.length-1],10);;
-      alert("Trip Index = " + index + " " + CMC.profiledata.tripid[index]);
-	  //invitetotrip(index);
-    });
-  });
-
-  $.each(CMC.tripdescbtns, function() {
-    $("#" +this).click(function() {
-      alert("Came into trip desctiption");
-      var descparts = this.id.split('-');
-      var index = parseInt(descparts[descparts.length-1],10);
-      alert("TripDesc Index = " + index + " " + CMC.profiledata.tripid[index]);
-	  CMC.GetTripProfile(index);
-    });
-  });
-  */
 
   // this should be the last thing that happens
   CMC.log("load callback complete, fading in canvas");

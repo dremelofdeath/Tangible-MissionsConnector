@@ -1198,22 +1198,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
   
   <script type="text/JavaScript">
   
-/*
-  var currentOptions = new Array(7);
-  for (i=0; i <7; i++) {
-    currentOptions[i]=new Array()   
-  }
-  */
   var current = new Array(7);
-  /*
-  var prelength = new Array(6);
-  var postlen = new Array(6);
-
-  for (i=0;i<6;i++) {
-    prelength[i] = 0;
-    postlen[i] = 0;
-  }
-  */
 
   function selectMultiple(s,k)
   {
@@ -1338,9 +1323,6 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
               <div id="profile-image">
                 <img class="profile-picture" src="ajax-spinner.gif" />
               </div>
-			  <div id="toggle-profile" style="display: none">
-				<a href="#" onclick="CMC.ToggleProfile();">&lt;&lt; Toggle Profile </a>
-			  </div>
               <div id="profile-section-about-me">
                 <h3>About Me:</h3>
                 <div id="profile-section-about-me-content">
@@ -1726,6 +1708,9 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
       <div id="profile-volunteer-dialog" title="Please enter your profile information">
         <form id="profile-volunteer-form">
           <div id="wrapper">
+	  	<div id="toggle-profile-volunteer">
+			<a href="#" onclick="CMC.ToggleProfile();">I'd like my profile to be for an agency instead of a volunteer. </a>
+		 </div>		  
             <div id="contents">
               <div class="profile-container">
                 <div class="profile-contents">
@@ -1953,6 +1938,9 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
       <div id="profile-organizer-dialog" title="Please enter your profile information">
         <form id="profile-organizer-form">
       <div id="wrapper">
+	  	<div id="toggle-profile-agency">
+			<a href="#" onclick="CMC.ToggleProfile();">I'd like my profile to be for a volunteer instead of an agency. </a>
+		 </div>
         <div id="contents">
             <div class="profile-container">
                 <div class="profile-contents">
@@ -2263,7 +2251,12 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
         </div>
     </div>
     </form>   
-      </div>	  	  
+      </div>
+      <div id="profile-toggle-dialog" title="Please wait...">
+        <div id="toggle-image">
+            <img class="toggle-wait-image" src="ajax-spinner.gif" />
+        </div>
+	  </div>	  
       <div id="profile-trip-dialog" title="Please enter your trip profile information">
         <form id="profile-trip-form">
       <div id="wrapper">
