@@ -27,6 +27,7 @@ var CMC = {
   tripuserid : false,
   dialogsOpen : 0,
   version : "1.9.18",
+  ignorableFormFields : null, // access this with fetchIgnorableFormFields()
   searchPageCache : [],
   currentDisplayedSearchPage : 0,
   searchPageImageClearJobQueue : [],
@@ -200,18 +201,26 @@ var CMC = {
   },
 
   dialogOpen : function(dialog) {
+    this.beginFunction();
     this.dialogsOpen++;
     this.closeAllDialogs(dialog);
     if ($.support.opacity && this.dialogsOpen == 1) {
       $("#tabs, #cmc-footer").fadeTo('fast', 0.5);
     }
+    this.endFunction();
   },
 
   dialogClose : function(dialog) {
+    this.beginFunction();
     if ($.support.opacity && this.dialogsOpen == 1) {
       $("#tabs, #cmc-footer").fadeTo('fast', 1.0);
     }
-    this.dialogsOpen--;
+    if (this.dialogsOpen <= 0) {
+      this.assert("closing a dialog when none was open!");
+    } else {
+      this.dialogsOpen--;
+    }
+    this.endFunction();
   },
 
   showAjaxSpinner : function() {
@@ -261,11 +270,7 @@ var CMC = {
         for (var each in object) {
           if (object.hasOwnProperty(each)) {
             if (translationMap.hasOwnProperty(each)) {
-              if ((String(object[each]) == "Select Religious Affiliation") || (String(object[each]) == "Select Duration of Missions") || (String(object[each]) == "Select your State")) {
-              }
-              else {
-                ret[translationMap[each]] = object[each];
-              }
+              ret[translationMap[each]] = object[each];
             } else {
               this.assert("don't know how to map property '" + each + "' -- possibly update map?");
             }
@@ -400,19 +405,6 @@ var CMC = {
       $("#profile-name").html(data.name ? data.name : "");
       $("img.profile-picture").attr("src", "http://graph.facebook.com/"+this.showuserid+"/picture?type=large");
       this.ajaxNotifyComplete();
-      /*
-	  // update the toggle profile link according to condition
-	  if (data.isreceiver == 0) {
-		$("#show-profile").find("#toggle-profile").show();
-		var mystr = '<a href="#" onclick="CMC.ToggleProfile();"> I\'d like my profile to be for an agency instead of a volunteer. </a>';
-		$("#show-profile").find("#toggle-profile").html(mystr);
-	  }
-	  else if (data.isreceiver == 1) {
-		$("#show-profile").find("#toggle-profile").show();
-		var mystr = '<a href="#" onclick="CMC.ToggleProfile();"> I\'d like my profile to be for a volunteer instead of an agency. </a>';
-		$("#show-profile").find("#toggle-profile").html(mystr);
-	  }
-	  */
 	
       $("#profile-section-about-me-content").html(data.about ? data.about : "");
       if (data.MedicalSkills == undefined) {
@@ -685,8 +677,8 @@ var CMC = {
       type: "POST",
       url: "api/toggleprofile.php",
       data: {
-          fbid: CMC.me.id ? CMC.me.id : "",
-          profileinfo: JSON.stringify(profileformdata)
+        fbid: CMC.me.id ? CMC.me.id : "",
+        profileinfo: JSON.stringify(profileformdata)
       },
       dataType: "json",
       context: this,
@@ -698,28 +690,26 @@ var CMC = {
 
   onToggleSuccess : function(data, textStatus, jqXHR) {
     this.beginFunction();
-    this.assert(data != undefined, "data is undefined in onGetTripsDataSuccess");
+    this.assert(data != undefined, "data is undefined in onToggleSuccess");
     if(data.has_error !== undefined && data.has_error !== null) {
       if(data.has_error) {
-          // we have a known error, handle it
-          this.handleToggleSuccessHasError(data);
+        // we have a known error, handle it
+        this.handleToggleSuccessHasError(data);
       } else {
-		  // This means original dialog open was that of agency, so close that dialog
-		  if (CMC.isreceiver == 1) {
-			$("#profile-organizer-dialog").dialog('close');
-			$("#profile-toggle-dialog").dialog('open');
-			$("#profile-toggle-dialog").dialog().dialog("widget").find(".ui-dialog-titlebar-close").hide();
-			CMC.editProfile();
-		  }
-		  else if (CMC.isreceiver == 0) {
-			$("#profile-volunteer-dialog").dialog('close');		
-			$("#profile-toggle-dialog").dialog('open');
-			$("#profile-toggle-dialog").dialog().dialog("widget").find(".ui-dialog-titlebar-close").hide();			
-			CMC.editProfile();
-		  }
-		  
-		  // refresh the profile page
-		  $("#tabs").tabs('load', 1);
+        // This means original dialog open was that of agency, so close that dialog
+        if (CMC.isreceiver == 1) {
+          $("#profile-organizer-dialog").dialog('close');
+          $("#profile-toggle-dialog").dialog('open');
+          $("#profile-toggle-dialog").dialog().dialog("widget").find(".ui-dialog-titlebar-close").hide();
+          CMC.editProfile();
+        } else if (CMC.isreceiver == 0) {
+          $("#profile-volunteer-dialog").dialog('close');		
+          $("#profile-toggle-dialog").dialog('open');
+          $("#profile-toggle-dialog").dialog().dialog("widget").find(".ui-dialog-titlebar-close").hide();			
+          CMC.editProfile();
+        }
+        // refresh the profile page
+        $("#tabs").tabs('load', 1);
       }
     } else {
       // an unknown error occurred? do something!
@@ -1110,6 +1100,7 @@ var CMC = {
       if (requestsCompleted != fbids.length) {
         this.log("only " + requestsCompleted + " of " + fbids.length + " FBID requests completed in time (2s)");
         this.log("dumping results variable:");
+        //@/BEGIN/DEBUGONLYSECTION
         for (var each in results) {
           var eachstr = "";
           for (var e in results[each]) {
@@ -1117,6 +1108,7 @@ var CMC = {
           }
           this.log("results["+each+"] = " + eachstr);
         }
+        //@/END/DEBUGONLYSECTION
         if(!isRetryCall) {
           this.log("first getDataForEachFBID attempt failed. retrying...");
           if(!hasRetryPosted) {
@@ -1517,8 +1509,7 @@ var CMC = {
             $('select#profile-medical option[value="' + this.profiledata.MedicalSkillsid[each] + '"]').attr('selected', 'selected');
             this.currentOptions[0][each] = $('select#profile-medical option[value="' + this.profiledata.MedicalSkillsid[each] + '"]').attr('id');
           }
-        }
-        else {
+        } else {
           this.prelength[0] = 0;
           this.postlen[0] = 0;
         }
@@ -1532,8 +1523,7 @@ var CMC = {
             $('select#profile-nonmedical option[value="' + this.profiledata.Non_MedicalSkillsid[each] + '"]').attr('selected', 'selected');
             this.currentOptions[1][each] = $('select#profile-nonmedical option[value="' + this.profiledata.Non_MedicalSkillsid[each] + '"]').attr('id');
           }
-        }
-        else {
+        } else {
           this.prelength[1] = 0;
           this.postlen[1] = 0;
         }
@@ -1547,8 +1537,7 @@ var CMC = {
             $('select#profile-spiritual option[value="' + this.profiledata.SpiritualSkillsid[each] + '"]').attr('selected', 'selected');
             this.currentOptions[2][each] = $('select#profile-spiritual option[value="' + this.profiledata.SpiritualSkillsid[each] + '"]').attr('id');
           }
-        }
-        else {
+        } else {
           this.prelength[2] = 0;
           this.postlen[2] = 0;
         }
@@ -1584,8 +1573,7 @@ var CMC = {
               $('select#profile-region option[value="' + this.profiledata.GeographicAreasofInterest.Regionsid[each] + '"]').attr('selected', 'selected');
               this.currentOptions[3][each] = $('select#profile-region option[value="' + this.profiledata.GeographicAreasofInterest.Regionsid[each] + '"]').attr('id');
             }
-          }
-          else {
+          } else {
             this.prelength[3] = 0;
             this.postlen[3] = 0;
           }
@@ -1601,8 +1589,7 @@ var CMC = {
               $('select#profile-countryserved option[value="' + this.profiledata.GeographicAreasofInterest.Countriesid[each] + '"]').attr('selected', 'selected');
               this.currentOptions[4][each] = $('select#profile-countryserved option[value="' + this.profiledata.GeographicAreasofInterest.Countriesid[each] + '"]').attr('id');
             }
-          }
-          else {
+          } else {
             this.prelength[4] = 0;
             this.postlen[4] = 0;
           }
@@ -1810,6 +1797,46 @@ var CMC = {
     return ret;
   },
 
+  // Please DON'T access this.ignorableFormFields directly. Always use
+  // fetchIgnorableFormFields()! It'll make your life easier, promise :) --zack
+  fetchIgnorableFormFields : function (forceRefetch) {
+    this.beginFunction();
+    forceRefetch = forceRefetch || false; // optional argument
+    if (!this.ignorableFormFields || forceRefetch) {
+      this.ignorableFormFields = {};
+      var subcontext = this;
+      $(".cmc-default-opt").each(function (index, element) {
+        var elem = $(element);
+        var value = elem.val();
+        var html = elem.html();
+        $.proxy(function () {
+          if (value && value != "" && !this.ignorableFormFields.hasOwnProperty(value)) {
+            this.ignorableFormFields[value] = true;
+          }
+          if (html && html != "" && html != value && !this.ignorableFormFields.hasOwnProperty(html)) {
+            this.ignorableFormFields[html] = true;
+          }
+        }, subcontext)();
+      });
+    }
+    this.endFunction();
+    return this.ignorableFormFields;
+  },
+
+  stripIgnorableFormFields : function (dataToStrip) {
+    this.beginFunction();
+    var ignorableFields = this.fetchIgnorableFormFields();
+    for (var each in dataToStrip) {
+      if (dataToStrip.hasOwnProperty(each)) {
+        if (dataToStrip[each] !== undefined && ignorableFields.hasOwnProperty(dataToStrip[each]) && ignorableFields[dataToStrip[each]]) {
+          delete dataToStrip[each];
+        }
+      }
+    }
+    this.endFunction();
+    return dataToStrip;
+  },
+
   getFormData : function (formSelector, allowEmptyFieldValues) {
     this.beginFunction();
     allowEmptyFieldValues = allowEmptyFieldValues || false; // optional argument
@@ -1823,6 +1850,7 @@ var CMC = {
         ret[fieldID] = field;
       }
     });
+    ret = this.stripIgnorableFormFields(ret);
     this.endFunction();
     return ret;
   },
@@ -1869,8 +1897,9 @@ var CMC = {
       var profileformdata = {};
 
       profileformdata.profiletype=1;
-      if (CMC.profileedit == 1)
+      if (CMC.profileedit == 1) {
         profileformdata.update = 1;
+      }
 
       $.extend(profileformdata, this.applyTranslationMap(profileData, this.BackendTranslation.Profile));
 
@@ -1885,6 +1914,7 @@ var CMC = {
         context: this,
         success: function(data) {
           if (!data.has_error) {
+            CMC.getProfile(CMC.me.id);
             $("#profile-volunteer-dialog").dialog('close');
             alert('Thank you - your submission has been successfully entered into our database');
           } else {
@@ -2167,10 +2197,10 @@ $(function() {
   $("#profile-toggle-dialog").dialog({
     autoOpen: false,
     draggable: false,
-    position: [25, 25],
+    position: ['center', 200],
     resizable: false,
-    width: 200,
-    height: 165,
+    width: 150,
+    height: 75,
     open: function() {
       CMC.dialogOpen(this);
     },
