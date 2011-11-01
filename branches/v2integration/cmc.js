@@ -1217,7 +1217,7 @@ var CMC = {
               ++showsCompleted;
               if (showsCompleted == this.results.length) {
                 if (this.results.length < maxSearchResults) {
-                  this.log("incomplete page, hiding the the results that need cleanup");
+                  CMC.log("incomplete page, hiding the the results that need cleanup");
                   for (var point = maxSearchResults - this.results.length; point > 0; point--) {
                     // clean up the slots that weren't being shown
                     var tempId = "#cmc-search-result-" + (maxSearchResults - point);
