@@ -163,7 +163,7 @@ jQuery(function($) {
             //public method to remove item
             $(this).bind("removeItem",
             function(event, data) {
-                var item = holder.children('li[rel=' + data.value + ']');
+                var item = holder.children('li[rel="' + data.value + '"]');
                 if (item.length) {
                     removeItem(item);
                 }

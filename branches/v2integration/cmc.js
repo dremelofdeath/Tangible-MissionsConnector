@@ -1,8 +1,5 @@
-// JavaScript code goes here
-
-// first things first, some browser compatibility hacks
-// add Object.keys() support to browsers that do not have it
-if(!Object.keys) Object.keys = function(o){
+// first things first, some polyfills (browser compatibility hacks)
+if (!Object.keys) Object.keys = function(o){
   if (o !== Object(o))
     throw new TypeError('Object.keys called on non-object');
   var ret=[],p;
@@ -28,6 +25,9 @@ var CMC = {
   dialogsOpen : 0,
   version : "1.9.18",
   ignorableFormFields : null, // access this with fetchIgnorableFormFields()
+  _searchLockKeyExpected : null,
+  _lastSearchLockKeyGenerated : 0,
+  isSearchLocked : false,
   searchPageCache : [],
   currentDisplayedSearchPage : 0,
   searchPageImageClearJobQueue : [],
@@ -923,6 +923,38 @@ var CMC = {
       });
     },
 
+  // This will return you a key, which you will provide to releaseSearchLock()
+  // when you are finished locking search. For as long as search is locked,
+  // calling search() will trigger an assert.
+  obtainSearchLock : function() {
+    this.beginFunction();
+    var key = null;
+    if (this.isSearchLocked) {
+      this.assert("attempted to obtain the search lock while it was already held!");
+    } else {
+      this._searchLockKeyExpected = "lock" + this._lastSearchLockKeyGenerated;
+      key = this._lastSearchLockKeyGenerated;
+      this.isSearchLocked = true;
+      this._lastSearchLockKeyGenerated++;
+    }
+    this.endFunction();
+    return key;
+  },
+
+  releaseSearchLock : function(key) {
+    this.beginFunction();
+    if (this.isSearchLocked) {
+      if ("lock" + key == this._searchLockKeyExpected) {
+        this.isSearchLocked = false;
+      } else {
+        this.assert("wrong key used to try to release the search lock!");
+      }
+    } else {
+      this.assert("tried to release the search lock when no lock was held!");
+    }
+    this.endFunction();
+  },
+
   handleSearchSelect : function(item) {
     this.beginFunction();
     var value = null, errorWhileParsing = false;
@@ -938,18 +970,35 @@ var CMC = {
         // this is a special value, we handle these differently
         if (value.substring(2,3) == "z") { // this detection could definitely be better
           // it's a zipcode
-          if (this.SearchState.z == undefined) {
-            this.SearchState.z = [value.substring(4,9), value.substring(10, value.length)];
-          } else {
+          if (this.SearchState.z != undefined) {
+            var oldValue = "!!z:" + this.SearchState.z[0] + ":" + this.SearchState.z[1];
+            var oldTitleText = $('li.bit-box[rel="' + oldValue + '"]').filter(":first").html().split("<", 1)[0]; // godforsaken hack
             // we have a problem, you can't have more than one zipcode
+            // ...so let's solve it by removing the previous one and replacing it with the new one --zack
+            // note: this trigger (somewhat surprisingly) implicitly calls handleSearchRemove(), so we are going to
+            // lock search to prevent multiple searches from being fired. --zack
+            var key = this.obtainSearchLock();
+            $("#search-box-select").trigger('removeItem', { value: oldValue });
+            if (value == oldValue) {
+              // we'll have to add it back in, since removeItem just killed both of them
+              this.log("silly user, you were already using that zipcode!");
+              // and yes. if you were thinking it already, you get a cookie.
+              // this call does indeed call handleSearchSelect() implicitly (this function) O_O --zack
+              $("#search-box-select").trigger('addItem', [{ title: oldTitleText, value: oldValue }]);
+            }
+            this.releaseSearchLock(key);
           }
+          this.SearchState.z = [value.substring(4,9), value.substring(10, value.length)];
         }
       } else {
         // this is a text item
         // (note: we are going to handle text items as names for now)
         this.SearchState.name = value;
       }
-      this.search();
+      // it's rare, but handleSearchSelect can be called with while the search lock is held.
+      if (!this.isSearchLocked) {
+        this.search();
+      }
     }
     this.endFunction();
   },
@@ -977,52 +1026,61 @@ var CMC = {
         // delete the name. This will need to be fixed in the future.
         delete this.SearchState.name;
       }
-      this.search();
+      // We will expect that sometimes when handleSearchRemove() is called, it's
+      // because of a manually triggered remove, and therefore we should lock
+      // search. If search is locked, we'll skip search().
+      if (!this.isSearchLocked) {
+        this.search();
+      }
     }
     this.endFunction();
   },
 
   search : function () {
     this.beginFunction();
-    this.searchPageCache = [];
-    this.currentDisplayedSearchPage = 1;
-    this.updateSearchPagingControls();
-    this.animateHideSearchResults();
-    $(".cmc-search-result").each(function () { $(this).fadeOut('fast'); });
-    if (Object.keys(this.SearchState).length == 0) {
-      this.log("search is now blank; hide the results panels");
-      var _fadeoutsCompleted = 0, _onSearchFadeoutComplete = $.proxy(function () {
-        _fadeoutsCompleted++;
-        this.log("_onSearchFadeoutComplete triggered, _fadeoutsCompleted="+_fadeoutsCompleted);
-        if (_fadeoutsCompleted == 2) {
-          $("#cmc-search-results").hide();
-        }
-      }, this);
-      $("#cmc-search-results-title").fadeOut(400, _onSearchFadeoutComplete);
-      $("#cmc-search-results-noresultmsg").fadeOut(400, _onSearchFadeoutComplete);
+    if (this.isSearchLocked) {
+      this.assert("called search() while search was locked!");
     } else {
-      this.log("we have a new search to perform");
-      //@/BEGIN/DEBUGONLYSECTION
-      if(!this.me.id) {
-       this.log("this.me.id isn't available; using blank fbid for search");
+      this.searchPageCache = [];
+      this.currentDisplayedSearchPage = 1;
+      this.updateSearchPagingControls();
+      this.animateHideSearchResults();
+      $(".cmc-search-result").each(function () { $(this).fadeOut('fast'); });
+      if (Object.keys(this.SearchState).length == 0) {
+        this.log("search is now blank; hide the results panels");
+        var _fadeoutsCompleted = 0, _onSearchFadeoutComplete = $.proxy(function () {
+          _fadeoutsCompleted++;
+          this.log("_onSearchFadeoutComplete triggered, _fadeoutsCompleted="+_fadeoutsCompleted);
+          if (_fadeoutsCompleted == 2) {
+            $("#cmc-search-results").hide();
+          }
+        }, this);
+        $("#cmc-search-results-title").fadeOut(400, _onSearchFadeoutComplete);
+        $("#cmc-search-results-noresultmsg").fadeOut(400, _onSearchFadeoutComplete);
+      } else {
+        this.log("we have a new search to perform");
+        $("#cmc-search-results-noresultmsg").fadeOut(400);
+        //@/BEGIN/DEBUGONLYSECTION
+        if(!this.me.id) {
+         this.log("this.me.id isn't available; using blank fbid for search");
+        }
+        //@/END/DEBUGONLYSECTION
+        this.ajaxNotifyStart(); // one for good measure, we want the spinner for the whole search
+        $.ajax({
+          url: "api/searchresults.php",
+          data: {
+            fbid: this.me.id ? this.me.id : "",
+            searchkeys: encode64(JSON.stringify(this.SearchState)),
+            page: this.currentDisplayedSearchPage,
+            perpage: 20
+          },
+          dataType: "json",
+          context: this,
+          success: this.onSearchSuccess,
+          error: this.onSearchError
+        });
+        $("#cmc-search-results-title").fadeIn();
       }
-      //@/END/DEBUGONLYSECTION
-      this.ajaxNotifyStart(); // one for good measure, we want the spinner for the whole search
-      $.ajax({
-        url: "api/searchresults.php",
-        data: {
-          fbid: this.me.id ? this.me.id : "",
-          searchkeys: encode64(JSON.stringify(this.SearchState)),
-          page: this.currentDisplayedSearchPage,
-          perpage: 20
-        },
-        dataType: "json",
-        context: this,
-        success: this.onSearchSuccess,
-        error: this.onSearchError
-      });
-
-      $("#cmc-search-results-title").fadeIn();
     }
     this.endFunction();
   },
