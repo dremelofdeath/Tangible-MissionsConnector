@@ -509,13 +509,14 @@ var CMC = {
           }
 
           // replace the existing template with the new template that is the length of the trips array
-          $(id).children("#profile-right-column").children("#table_wrapper").children("#tbody").html("<table>" + eachstr + "</table>");
+          $(id).children("#profile-right-column").find("#tbody").html("<table>" + eachstr + "</table>");
 
           //Now update the new template with the trips information
-          for (var each in data.trips) {      
-            $(id).children("#profile-right-column").children("#table_wrapper").children("#tbody").find(".profile-picture-"+each).children("img").attr("src", "http://graph.facebook.com/"+this.me.id+"/picture?type=small");
-            $(id).children("#profile-right-column").children("#table_wrapper").children("#tbody").find(".profile-tripname-"+each).html(data.trips[each] ? data.trips[each] : "");
-          }			
+          for (var each in data.trips) {     
+            $(id).children("#profile-right-column").find("#tbody").find(".profile-picture-"+each).children("img").attr("src", "http://graph.facebook.com/"+this.me.id+"/picture?type=small");
+            $(id).children("#profile-right-column").find("#tbody").find(".profile-tripname-"+each).html(data.trips[each] ? data.trips[each] : "");
+          }
+          this.associateProfileTripClicks(data);
 
         } else {
           $(id).children("#profile-right-column").children("#table_wrapper").children("#tbody").html("<table></table>");
@@ -662,6 +663,23 @@ var CMC = {
     }
     this.endFunction();
   },
+
+    associateProfileTripClicks : function(data) {
+        this.beginFunction();
+        this.log("Associating Profile Trip Clicks");
+
+        for (var each in data.trips) {
+        
+        /* 
+        $("input#trip-desc-submit-"+each).click(function() {
+              alert("Clicked Trip id = " + each);
+                    //this.GetTripProfile(each);
+              }
+          */    
+        }
+        this.endFunction();
+    },
+
 
   ToggleProfile : function() {
     this.beginFunction();
@@ -2072,7 +2090,8 @@ $(function() {
                  : $(this).parent().attr('id'))
                : $(this).attr('id');
     CMC.log("click event: " + $(this).get(0).tagName.toLowerCase() + "#" + id);
-      
+  
+    /*
     // FIXME: This stuff should never be in the debug click event logger! --zack
       if (id.indexOf("trip-desc-submit") >=0) {
         var descparts = id.split('-');
@@ -2104,7 +2123,7 @@ $(function() {
         // Show the Trip owner's profile
         CMC.getProfile(CMC.tripuserid);
       }
-
+     */
   });
   //@/END/DEBUGONLYSECTION
 
