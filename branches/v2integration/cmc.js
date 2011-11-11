@@ -32,9 +32,6 @@ var CMC = {
   currentDisplayedSearchPage : 0,
   searchPageImageClearJobQueue : [],
   SearchState : {},
-  prelength : [],
-  postlen : [],
-  currentOptions : [],
   tripsjoinbtns : [],
   tripdescbtns : [],
   tripinvitebtns : [],
@@ -435,9 +432,9 @@ var CMC = {
           }
           eachstr += "</ul>";
 
-          $(id).children("#profile-right-column").children(".box1").children(".profile-nonmedskills").html(data.Non_MedicalSkills ? eachstr : "");
+          $("#profile-nonmedskills").html(data.Non_MedicalSkills ? eachstr : "");
         } else {
-          $(id).children("#profile-right-column").children(".box1").children(".profile-nonmedskills").html("");
+          $("#profile-nonmedskills").html("");
         }
       }
 
@@ -1543,11 +1540,6 @@ var CMC = {
     this.profileshowflag=0;
     this.getProfile(this.me.id);
 
-      for (var i=0; i <7; i++) {
-          this.currentOptions[i]=new Array();
-      }
-
-
     if (this.isreceiver ==0) {
       var id = "#profile-volunteer-dialog";
 
@@ -1560,46 +1552,28 @@ var CMC = {
 
       if (this.profiledata.MedicalSkills !== undefined) {
         if (this.profiledata.MedicalSkills.length > 0) {
-          var arparts = JSON.stringify(this.profiledata.MedicalSkills).split(',');
-          this.prelength[0] = arparts.length-1;
-          this.postlen[0] = arparts.length;
           for (var each in this.profiledata.MedicalSkills) {
             $('select#profile-medical option[value="' + this.profiledata.MedicalSkillsid[each] + '"]').attr('selected', 'selected');
-            this.currentOptions[0][each] = $('select#profile-medical option[value="' + this.profiledata.MedicalSkillsid[each] + '"]').attr('id');
           }
-        } else {
-          this.prelength[0] = 0;
-          this.postlen[0] = 0;
         }
       }
+        $("#profile-medical-skills").multiselect();
       if (this.profiledata.Non_MedicalSkills !== undefined) {
         if (this.profiledata.Non_MedicalSkills.length > 0) {
-          var arparts = JSON.stringify(this.profiledata.Non_MedicalSkills).split(',');
-          this.prelength[1] = arparts.length-1;
-          this.postlen[1] = arparts.length;
           for (var each in this.profiledata.Non_MedicalSkills) {
             $('select#profile-nonmedical option[value="' + this.profiledata.Non_MedicalSkillsid[each] + '"]').attr('selected', 'selected');
-            this.currentOptions[1][each] = $('select#profile-nonmedical option[value="' + this.profiledata.Non_MedicalSkillsid[each] + '"]').attr('id');
           }
-        } else {
-          this.prelength[1] = 0;
-          this.postlen[1] = 0;
         }
       }
+        $("#profile-nonmedical-skills").multiselect();
       if (this.profiledata.SpiritualSkills !== undefined) {
         if (this.profiledata.SpiritualSkills.length > 0) {
-          var arparts = JSON.stringify(this.profiledata.SpiritualSkills).split(',');
-          this.prelength[2] = arparts.length-1;
-          this.postlen[2] = arparts.length;
           for (var each in this.profiledata.SpiritualSkills) {
             $('select#profile-spiritual option[value="' + this.profiledata.SpiritualSkillsid[each] + '"]').attr('selected', 'selected');
-            this.currentOptions[2][each] = $('select#profile-spiritual option[value="' + this.profiledata.SpiritualSkillsid[each] + '"]').attr('id');
           }
-        } else {
-          this.prelength[2] = 0;
-          this.postlen[2] = 0;
         }
       }
+        $("#profile-spiritual-skills").multiselect();
       if (this.profiledata.relg !== undefined) {
         $("input#profile-religion").val(this.profiledata.relg);
       }
@@ -1624,35 +1598,23 @@ var CMC = {
       if (this.profiledata.GeographicAreasofInterest !== undefined) {
         if (this.profiledata.GeographicAreasofInterest.Regions !== undefined) {
           if (this.profiledata.GeographicAreasofInterest.Regions.length > 0) {
-            var arparts = JSON.stringify(this.profiledata.GeographicAreasofInterest.Regions).split(',');
-            this.prelength[3] = arparts.length-1;
-            this.postlen[3] = arparts.length;
             for (var each in this.profiledata.GeographicAreasofInterest.Regions) {
               $('select#profile-region option[value="' + this.profiledata.GeographicAreasofInterest.Regionsid[each] + '"]').attr('selected', 'selected');
-              this.currentOptions[3][each] = $('select#profile-region option[value="' + this.profiledata.GeographicAreasofInterest.Regionsid[each] + '"]').attr('id');
             }
-          } else {
-            this.prelength[3] = 0;
-            this.postlen[3] = 0;
           }
         }
       }
+          $("#profile-region").multiselect();
       if (this.profiledata.GeographicAreasofInterest !== undefined) {
         if (this.profiledata.GeographicAreasofInterest.Countries !== undefined) {
           if (this.profiledata.GeographicAreasofInterest.Countries.length > 0) {
-            var arparts = JSON.stringify(this.profiledata.GeographicAreasofInterest.Countries).split(',');
-            this.prelength[4] = arparts.length-1;
-            this.postlen[4] = arparts.length;
             for (var each in this.profiledata.GeographicAreasofInterest.Countries) {
               $('select#profile-countryserved option[value="' + this.profiledata.GeographicAreasofInterest.Countriesid[each] + '"]').attr('selected', 'selected');
-              this.currentOptions[4][each] = $('select#profile-countryserved option[value="' + this.profiledata.GeographicAreasofInterest.Countriesid[each] + '"]').attr('id');
             }
-          } else {
-            this.prelength[4] = 0;
-            this.postlen[4] = 0;
           }
         }
       }
+          $("#profile-country-served").multiselect();
       if (this.profiledata.phone !== undefined) {
         $("input#profile-phone").val(this.profiledata.phone);
       }
@@ -1685,79 +1647,44 @@ var CMC = {
       }
       if (this.profiledata.FacilityMedicalOfferings !== undefined) {
         if (this.profiledata.FacilityMedicalOfferings.length>0) {
-          var arparts = JSON.stringify(this.profiledata.FacilityNon_MedicalOfferings).split(',');
-          this.prelength[0] = arparts.length-1;
-          this.postlen[0] = arparts.length;
           for (var each in this.profiledata.FacilityMedicalOfferings) {
             $('select#profile-org-offer option[value="' + this.profiledata.FacilityMedicalOfferingsid[each] + '"]').attr('selected', 'selected');
-            this.currentOptions[0][each] = $('select#profile-org-offer option[value="' + this.profiledata.FacilityMedicalOfferingsid[each] + '"]').attr('id');
           }
         }
-        else {
-          this.prelength[0] = 0;
-          this.postlen[0] = 0;
-        }
       }
+        $("#profile-org-offer").multiselect({selectedList: 11});
       if (this.profiledata.FacilityNon_MedicalOfferings !== undefined) {
         if (this.profiledata.FacilityNon_MedicalOfferings.length > 0) {
-          var arparts = JSON.stringify(this.profiledata.FacilityNon_MedicalOfferings).split(',');
-          this.prelength[1] = arparts.length-1;
-          this.postlen[1] = arparts.length;
           for (var each in this.profiledata.FacilityNon_MedicalOfferings) {
             $('select#profile-org-offern option[value="' + this.profiledata.FacilityNon_MedicalOfferingsid[each] + '"]').attr('selected', 'selected');
-            this.currentOptions[1][each] = $('select#profile-org-offern option[value="' + this.profiledata.FacilityNon_MedicalOfferingsid[each] + '"]').attr('id');
           }
         }
-        else {
-          this.prelength[1] = 0;
-          this.postlen[1] = 0;
-        }
       }
+        $("#profile-org-offern").multiselect();
       if (this.profiledata.MedicalSkills !== undefined) {
         if (this.profiledata.MedicalSkills.length > 0) {
-          var arparts = JSON.stringify(this.profiledata.MedicalSkills).split(',');
-          this.prelength[2] = arparts.length-1;
-          this.postlen[2] = arparts.length;
           for (var each in this.profiledata.MedicalSkills) {
             $('select#profile-org-medical option[value="' + this.profiledata.MedicalSkillsid[each] + '"]').attr('selected', 'selected');
-            this.currentOptions[2][each] = $('select#profile-org-medical option[value="' + this.profiledata.MedicalSkillsid[each] + '"]').attr('id');
           }
         }
-        else {
-          this.prelength[2] = 0;
-          this.postlen[2] = 0;
-        }
       }
+        $("#profile-org-medical").multiselect();
       if (this.profiledata.Non_MedicalSkills !== undefined) {
         if (this.profiledata.Non_MedicalSkills.length > 0) {
-          var arparts = JSON.stringify(this.profiledata.Non_MedicalSkills).split(',');
-          this.prelength[3] = arparts.length-1;
-          this.postlen[3] = arparts.length;
           for (var each in this.profiledata.Non_MedicalSkills) {
             $('select#profile-org-nonmedical option[value="' + this.profiledata.Non_MedicalSkillsid[each] + '"]').attr('selected', 'selected');
-            this.currentOptions[3][each] = $('select#profile-org-nonmedical option[value="' + this.profiledata.Non_MedicalSkillsid[each] + '"]').attr('id');
           }
         }
-        else {
-          this.prelength[3] = 0;
-          this.postlen[3] = 0;
-        }
       }
+        $("#profile-org-nonmedical").multiselect();
       if (this.profiledata.SpiritualSkills !== undefined) {
         if (this.profiledata.SpiritualSkills.length > 0) {
-          var arparts = JSON.stringify(this.profiledata.SpiritualSkills).split(',');
-          this.prelength[4] = arparts.length-1;
-          this.postlen[4] = arparts.length;
           for (var each in this.profiledata.SpiritualSkills) {
             $('select#profile-org-spiritual option[value="' + this.profiledata.SpiritualSkillsid[each] + '"]').attr('selected', 'selected');
-            this.currentOptions[4][each] = $('select#profile-org-spiritual option[value="' + this.profiledata.SpiritualSkillsid[each] + '"]').attr('id');
           }
         }
-        else {
-          this.prelength[4] = 0;
-          this.postlen[4] = 0;
-        }
       }
+        $("#profile-org-spiritual").multiselect();
       if (this.profiledata.relg !== undefined) {
         $("input#profile-org-religion").val(this.profiledata.relg);
       }
@@ -1782,37 +1709,23 @@ var CMC = {
       if (this.profiledata.GeographicAreasofInterest !== undefined) {
         if (this.profiledata.GeographicAreasofInterest.Regions !== undefined) {
           if (this.profiledata.GeographicAreasofInterest.Regions.length > 0) {
-            var arparts = JSON.stringify(this.profiledata.GeographicAreasofInterest.Regions).split(',');
-            this.prelength[5] = arparts.length-1;
-            this.postlen[5] = arparts.length;
             for (var each in this.profiledata.GeographicAreasofInterest.Regions) {
               $('select#profile-org-region option[value="' + this.profiledata.GeographicAreasofInterest.Regionsid[each] + '"]').attr('selected', 'selected');
-              this.currentOptions[5][each] = $('select#profile-org-region option[value="' + this.profiledata.GeographicAreasofInterest.Regionsid[each] + '"]').attr('id');
             }
-          }
-          else {
-            this.prelength[5] = 0;
-            this.postlen[5] = 0;
           }
         }
       }
+          $("#profile-org-region").multiselect();
       if (this.profiledata.GeographicAreasofInterest !== undefined) {
         if (this.profiledata.GeographicAreasofInterest.Countries !== undefined) {
           if (this.profiledata.GeographicAreasofInterest.Countries.length > 0) {
-            var arparts = JSON.stringify(this.profiledata.GeographicAreasofInterest.Countries).split(',');
-            this.prelength[6] = arparts.length-1;
-            this.postlen[6] = arparts.length;
             for (var each in this.profiledata.GeographicAreasofInterest.Countries) {
               $('select#profile-org-countryserved option[value="' + this.profiledata.GeographicAreasofInterest.Countriesid[each] + '"]').attr('selected', 'selected');
-              this.currentOptions[6][each] = $('select#profile-org-countryserved option[value="' + this.profiledata.GeographicAreasofInterest.Countriesid[each] + '"]').attr('id');
             }
-          }
-          else {
-            this.prelength[6] = 0;
-            this.postlen[6] = 0;
           }
         }
       }
+          $("#profile-org-countryserved").multiselect();
       if (this.profiledata.phone !== undefined) {
         $("input#profile-org-phone").val(this.profiledata.phone);
       }
@@ -2199,7 +2112,14 @@ $(function() {
 
   $("#make-trip, #profile-trip-dialog").hide();
 
+
+
   $("#make-volunteer").click(function() {
+          $("#profile-medical-skills").multiselect();
+          $("#profile-nonmedical-skills").multiselect();
+          $("#profile-spiritual-skills").multiselect();
+          $("#profile-region").multiselect();
+          $("#profile-country-served").multiselect();
     $("#profile-volunteer-dialog").dialog('open');
   });
 
@@ -2234,6 +2154,13 @@ $(function() {
   });  
 
   $("#make-organizer").click(function() {
+  $("#profile-org-offer").multiselect();
+  $("#profile-org-offern").multiselect();
+  $("#profile-org-medical").multiselect();
+  $("#profile-org-nonmedical").multiselect();
+  $("#profile-org-spiritual").multiselect();
+  $("#profile-org-region").multiselect();
+  $("#profile-org-countryserved").multiselect();
     $("#profile-organizer-dialog").dialog('open');
   });
 
@@ -2268,6 +2195,7 @@ $(function() {
   });  
   
   $("#make-trip").click(function() {
+    $("#profile-trip-languages").multiselect();
     $("#profile-trip-dialog").dialog('open');
   });
 
@@ -2498,12 +2426,13 @@ $(function() {
     var aname = $("#profile-organizer-form").find('.profile-org-name');
     var aurl = $("#profile-organizer-form").find('.profile-org-website');
     var aabout = $("#profile-organizer-form").find('.profile-org-about');
-    var medfacil = $("#profile-organizer-form").find('.profile-org-offer');
-    var nonmedfacil = $("#profile-organizer-form").find('.profile-org-offern');
+
+    //var medfacil = $("#profile-organizer-form").find('.profile-org-offer');
+    //var nonmedfacil = $("#profile-organizer-form").find('.profile-org-offern');
 	
-    var mtype = $("#profile-organizer-form").find('.profile-org-medical');
-    var nmtype = $("#profile-organizer-form").find('.profile-org-nonmedical');
-    var sptype = $("#profile-organizer-form").find('.profile-org-spiritual');
+    //var mtype = $("#profile-organizer-form").find('.profile-org-medical');
+    //var nmtype = $("#profile-organizer-form").find('.profile-org-nonmedical');
+    //var sptype = $("#profile-organizer-form").find('.profile-org-spiritual');
     var reltype = $("#profile-organizer-form").find('.profile-org-religion');
     var durtype = $("#profile-organizer-form").find('.profile-org-duration');
     var state = $("#profile-organizer-form").find('.profile-org-state');
@@ -2511,8 +2440,8 @@ $(function() {
     var zipcode = $("#profile-organizer-form").find('.profile-org-zipcode');
 
     var country = $("#profile-organizer-form").find('.profile-org-country');
-    var region = $("#profile-organizer-form").find('.profile-org-region');
-    var countriesserved = $("#profile-organizer-form").find('.profile-org-countryserved');
+    //var region = $("#profile-organizer-form").find('.profile-org-region');
+    //var countriesserved = $("#profile-organizer-form").find('.profile-org-countryserved');
     var phone = $("#profile-organizer-form").find('.profile-org-phone');
     var email = $("#profile-organizer-form").find('.profile-org-email');
     var misexp = $("#profile-organizer-form").find('.profile-org-experience');           
@@ -2579,17 +2508,17 @@ $(function() {
       if (aurl.val() != "")
         profileformdata.url= aurl.val();
       if (medfacil.val() != "")
-        profileformdata.medfacil= medfacil.val();
+        profileformdata.medfacil= $("#profile-org-offer").val();
       if (nonmedfacil.val() != "")
-        profileformdata.nonmedfacil= nonmedfacil.val();		
+        profileformdata.nonmedfacil= $("#profile-org-offern").val();
       if (mtype.val() != "")
-        profileformdata.medskills= mtype.val();
+        profileformdata.medskills= $("#profile-org-medical").val();
       if (nmtype.val() != "")
-        profileformdata.otherskills=nmtype.val();         
+        profileformdata.otherskills=$("#profile-org-nonmedical").val();
       if (sptype.val() != "")
-        profileformdata.spiritserv=sptype.val();        
+        profileformdata.spiritserv=$("#profile-org-spiritual").val();
       if (region.val() != "")
-        profileformdata.region=region.val();  
+        profileformdata.region=$("#profile-org-region").val();
       if (country.val() != "")
         profileformdata.country=country.val();  
       if (state.val() != "Select your State")
@@ -2656,7 +2585,7 @@ $(function() {
     var zipcode = $("#profile-trip-form").find('.profile-trip-zipcode');
 
     var country = $("#profile-trip-form").find('.profile-trip-country');
-    var languages = $("#profile-trip-form").find('.profile-trip-languages');
+    var languages = $("#profile-trip-form").find('#profile-trip-languages');
     var phone = $("#profile-trip-form").find('.profile-trip-phone');
     var email = $("#profile-trip-form").find('.profile-trip-email');
     var stage = $("#profile-trip-form").find('.profile-trip-stage');
@@ -2777,7 +2706,7 @@ $(function() {
 	    if (country.val() != "Select your Destination Country")
         profiletripformdata.country=country.val();  
 	    if (languages.val() != "")
-        profiletripformdata.languages=languages.val(); 
+        profiletripformdata.languages=$("#profile-trip-languages").val(); 
 	    if (durtype.val() != "Select Duration of Missions")
         profiletripformdata.dur=durtype.val();
 	    if (reltype.val() != "Select Religious Affiliation")
