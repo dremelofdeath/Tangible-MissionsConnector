@@ -1297,7 +1297,7 @@ var CMC = {
       }, this);
       this.assert(results.length <= 10, "more than 10 results passed to showSearchResults");
       //@/BEGIN/DEBUGONLYSECTION
-      if ($(".result-picture img").length == 0) {
+      if ($(".result-picture img").length > 0) {
         this.log("found " + $(".result-picture img").length + " junk pictures lying around");
       }
       //@/END/DEBUGONLYSECTION
@@ -1404,7 +1404,7 @@ var CMC = {
       }
     }, this);
     $(".cmc-search-result").queue("custom-SearchResultsQueue", function () {
-      $(this).stop(true, true).fadeOut('fast', function () {
+      $(this).stop(true, true).fadeOut(100, function () {
         _processFadeComplete();
       });
     }).dequeue("custom-SearchResultsQueue");
