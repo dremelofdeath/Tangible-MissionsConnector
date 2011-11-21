@@ -152,6 +152,7 @@ function get_rest_of_string(&$sql3,&$sql1,&$sql2,$val,$searchkeys) {
   $sql2 = '';
   $sql1 = ' ';
   $sql3='';
+  $joins = '';
   $usersinc=0;
   $firstone = 0;
 
@@ -194,78 +195,20 @@ function get_rest_of_string(&$sql3,&$sql1,&$sql2,$val,$searchkeys) {
       }
     }
   }
-  if (isset($searchkeys->{'medskills'})) {
-    if ($searchkeys->{'medskills'} != 0) {
+  if (isset($searchkeys->{'skills'})) {
+    if ($searchkeys->{'skills'} != 0) {
 
-      if ($firstone==1) {
-        $sql3 = $sql3.' and skills.id="'.$searchkeys->{'medskills'}.'"';
-      } else {
-        $sql3 = $sql3.' skills.id="'.$searchkeys->{'medskills'}.'"';
-        $firstone = 1;
+      $skillsArray = $searchkeys->{'skills'};
+      if (!is_array($searchkeys->{'skills'})) {
+        $skillsArray = array(0 => $searchkeys->{'skills'});
       }
 
-      $sql2 = $sql2.' and skills.id=skillsselected.id and users.userid=skillsselected.userid';
-
-      if ($val==1) {
-        if ($usersinc == 0) {
-          $sql1 = $sql1.',users,skills,skillsselected';
-          $usersinc = 1;
-        }
-      } else {
-        $sql1 = $sql1.',skills,skillsselected';
+      $i = 0;
+      foreach ($skillsArray as $value) {
+        $joins .= "\nINNER JOIN skillsselected AS ss" . ++$i . " ON users.userid=ss" . $i . ".userid AND ss" . $i . ".id=\"" . $value . "\"";
       }
+
       $skills = 1;
-    }
-  }
-  if (isset($searchkeys->{'otherskills'})) {
-    if ($searchkeys->{'otherskills'} != 0) {
-
-      if ($firstone==1) {
-        $sql3 = $sql3.' and skills.id="'.$searchkeys->{'otherskills'}.'"';
-      } else {
-        $sql3 = $sql3.' skills.id="'.$searchkeys->{'otherskills'}.'"';
-        $firstone=1;
-      }
-
-      if ($skills==0) {
-        $sql2 = $sql2.' and skills.id=skillsselected.id and users.userid=skillsselected.userid';
-
-        if ($val==1) {
-          if ($usersinc == 0) {
-            $sql1 = $sql1.',users,skills,skillsselected';
-            $usersinc = 1;
-          }
-        } else {
-          $sql1 = $sql1.',skills,skillsselected';
-        }
-
-        $skills = 1;
-      }
-    }
-  }
-  if (isset($searchkeys->{'spiritserv'})) {
-    if ($searchkeys->{'spiritserv'} != 0) {
-
-      if ($firstone==1)
-        $sql3 = $sql3.' and skills.id="'.$searchkeys->{'spiritserv'}.'"';
-      else {
-        $sql3 = $sql3.' skills.id="'.$searchkeys->{'spiritserv'}.'"';
-        $firstone = 1;
-      }
-
-      if ($skills==0) {
-        $sql2 = $sql2.' and skills.id=skillsselected.id and users.userid=skillsselected.userid';
-        if ($val==1) {
-          if ($usersinc == 0) {
-            $sql1 = $sql1.',users,skills,skillsselected';
-            $usersinc = 1;
-          }
-        }
-        else
-          $sql1 = $sql1.',skills,skillsselected';
-
-        $skills = 1;
-      }
     }
   }
   if (isset($searchkeys->{'country'})) {
@@ -334,6 +277,7 @@ function get_rest_of_string(&$sql3,&$sql1,&$sql2,$val,$searchkeys) {
       $sql2 = $sql2.' and durations.id=durationsselected.id and users.userid=durationsselected.userid';
     }
   }
+  $sql1 .= $joins;
 }
 
 function getzipsearchstring($result,$con,&$has_error,&$err_msg,&$sqlstr,&$sqlstr2,$sql3) {
@@ -435,6 +379,7 @@ if (!$has_error) {
   }
    */
 
+    $sql4 = $sql5 = ''; // warning fix after isset($searchradius) below
     if (isset($searchradius)) {
       $result = getZipsWithin($myzipcode,$searchradius,$has_error,$err_msg,$con);
       if (!$result) {
@@ -443,16 +388,16 @@ if (!$has_error) {
           . ($err_msg && $err_msg != "" ? " (Internal error: ".$err_msg.")" : "");
         // this should suppress an annoying warning from PHP that I don't want 
         // to bother fixing right now --zack
-        $sql4 = $sql5 = ''; // warning fix after isset($searchradius) below
       }
       else {
         // this call gets additional filter strings for the mysql query
         getzipsearchstring($result,$con,$has_error,$err_msg,$sql4,$sql5,$sql3);
       }
-    }
-    else {
+    } else {
       // In this case no sorting is done, simply sends the relevant data to the front-end
-      $sql4 = ' where ';
+      if (!empty($sql2) or !empty($sql3)) {
+        $sql4 = ' where ';
+      }
       $sql5 = '';
     }
 

@@ -107,6 +107,8 @@ var CMC = {
         var message = "ASSERT FAILED!\nIf you're reporting this, please use this message:\n";
         message += bugmsg;
         this.log(message);
+        $("#assert-message").html(bugmsg);
+        $("#assert-dialog").dialog('open');
       }
     },
 
@@ -439,44 +441,63 @@ var CMC = {
       }
 
       //display profile information
-      if (data.email == undefined) {
-        $("#profile-email").html("<h6></h6>");
+      if (data.email) {
+        $("span#profile-email").html(data.email);
+        $("#profile-email-display").show();
       } else {
-        $("#profile-email").html(data.email ? "<h6>" + data.email + "</h6>" : "");
+        $("#profile-email-display").hide();
+        $("span#profile-email").html("");
       }
 
-      if (data.phone == undefined) {
-        $("#profile-phone").html("<h6></h6>");
+      if (data.phone) {
+        $("span#profile-phone").html(data.phone);
+        $("#profile-phone-display").show();
       } else {
-        $("#profile-phone").html(data.phone ? "<h6>" + data.phone + "</h6>" : "");
+        $("#profile-phone-display").hide();
+        $("span#profile-phone").html("");
       }
 
-      if (data.country == undefined) {
-        $("#profile-country").html("<h6></h6>");
+      if (data.country) {
+        $("span#profile-country").html(data.country);
+        $("#profile-country-display").show();
       } else {
-        $("#profile-country").html(data.country ? "<h6>" + data.country + "</h6>" : "");
+        $("#profile-country-display").hide();
+        $("span#profile-country").html("");
       }
 
-
-      if (data.zip == undefined) {
-        $("#profile-zip").html("<h6></h6>");
+      if (data.zip) {
+        $("span#profile-zip").html(data.zip);
+        $("#profile-zip-display").show();
       } else {
-        $("#profile-zip").html(data.zip ? "<h6>" + data.zip + "</h6>" : "");
+        $("#profile-zip-display").hide();
+        $("span#profile-zip").html("");
       }
 
-      if (data.Durations == undefined) {
-        $("#profile-dur").html("<h6></h6>");
+      if (data.Durations && data.Durations.PreferredDurationofMissionTrips) {
+        var durationsstring = "";
+        for(var each in data.Durations.PreferredDurationofMissionTrips) {
+          durationsstring += data.Durations.PreferredDurationofMissionTrips[each] + ", ";
+        }
+        durationsstring = durationsstring.slice(0, durationsstring.length-2);
+        $("span#profile-dur").html(durationsstring);
+        $("#profile-dur-display").show();
       } else {
-        $("#profile-dur").html(data.Durations.PreferredDurationofMissionTrips ? "<h6>" + data.Durations.PreferredDurationofMissionTrips + "</h6>" : "");
+        $("#profile-dur-display").hide();
+        $("span#profile-dur").html("");
       }
 
-
-      if (data.GeographicAreasofInterest == undefined) {
-        $("#profile-countries").html("<h6></h6>");
+      if (data.GeographicAreasofInterest && data.GeographicAreasofInterest.Countries) {
+        var countriesstring = "";
+        for(var each in data.GeographicAreasofInterest.Countries) {
+          countriesstring += data.GeographicAreasofInterest.Countries[each] + ", ";
+        }
+        countriesstring = countriesstring.slice(0, countriesstring.length-2);
+        $("span#profile-countries").html(countriesstring);
+        $("#profile-countries-display").show();
       } else {
-        $("#profile-countries").html(data.GeographicAreasofInterest.Countries ? "<h6>" + data.GeographicAreasofInterest.Countries + "</h6>" : "");
+        $("#profile-countries-display").hide();
+        $("span#profile-countries").html("");
       }
-
 
       if (data.trips == undefined) {
         $(id).children("#profile-right-column").children("#table_wrapper").children("#tbody").html("<table></table>");
@@ -536,6 +557,7 @@ var CMC = {
 
   handleGetProfileDataSuccessHasError : function(data) {
     this.beginFunction();
+    this.ajaxNotifyComplete();
     this.assert(data != undefined, "data is undefined in handleGetProfileDataSuccessHasError");
     // we have a known error, handle it
     if(data.err_msg !== undefined) {
@@ -1004,6 +1026,16 @@ var CMC = {
             this.releaseSearchLock(key);
           }
           this.SearchState.z = [value.substring(4,9), value.substring(10, value.length)];
+        } else if (value.substring(2,3) == "s") { // still could be better
+          // it's a skill
+          var skillid = value.substring(4, value.length);
+          if (this.SearchState.skills != undefined) {
+            this.SearchState.skills.push(skillid);
+          } else {
+            this.SearchState.skills = [skillid];
+          }
+        } else {
+          this.assert("incoming unknown object type '" + value.substring(2,3) + "' can't be handled!");
         }
       } else {
         // this is a text item
@@ -1031,9 +1063,31 @@ var CMC = {
       this.assert(typeof value == "string", "type of value was not a string, actual type = " + typeof value);
       if (value.substring(0,2) == "!!") {
         // this is a special value, we handle these differently
-        if (value.substring(2,3) == "z") {
+        var objectType = value.substring(2,3);
+        if (objectType == "z") {
           // it's a zipcode. we don't care what it is, just nuke it
           delete this.SearchState.z;
+        } else if (objectType == "s") {
+          // it's a skill.
+          if (this.SearchState.skills.length <= 1) {
+            delete this.SearchState.skills;
+          } else {
+            var skillid = value.substring(4, value.length);
+            var foundObject = false;
+            var i = 0; // this is a really stupid bug in the chrome JS engine
+            for (i = 0; i < this.SearchState.skills.length; i++) {
+              if (this.SearchState.skills[i] == skillid) {
+                if (foundObject) {
+                  this.assert("found multiple copies of the same object");
+                } else {
+                  this.SearchState.skills.splice(i, 1);
+                  foundObject = true;
+                }
+              }
+            }
+          }
+        } else {
+          this.assert("outgoing unknown object type '" + value.substring(2,3) + "' can't be handled!");
         }
       } else {
         // this is a text item
@@ -1056,6 +1110,7 @@ var CMC = {
     if (this.isSearchLocked) {
       this.assert("called search() while search was locked!");
     } else {
+      var searchUnlockKey = this.obtainSearchLock();
       this.searchPageCache = [];
       this.currentDisplayedSearchPage = 1;
       this.updateSearchPagingControls();
@@ -1074,7 +1129,7 @@ var CMC = {
         $("#cmc-search-results-noresultmsg").fadeOut(400, _onSearchFadeoutComplete);
       } else {
         this.log("we have a new search to perform");
-        $("#cmc-search-results-noresultmsg").fadeOut(400);
+        $("#cmc-search-results-noresultmsg").fadeOut(200);
         //@/BEGIN/DEBUGONLYSECTION
         if(!this.me.id) {
          this.log("this.me.id isn't available; using blank fbid for search");
@@ -1096,6 +1151,7 @@ var CMC = {
         });
         $("#cmc-search-results-title").fadeIn();
       }
+      this.releaseSearchLock(searchUnlockKey);
     }
     this.endFunction();
   },
@@ -1149,6 +1205,7 @@ var CMC = {
 
   handleSearchSuccessHasError : function(data) {
     this.beginFunction();
+    this.ajaxNotifyComplete();
     this.assert(data != undefined, "data is undefined in handleSearchSuccessHasError");
     // we have a known error, handle it
     if(data.err_msg !== undefined) {
@@ -1239,7 +1296,11 @@ var CMC = {
         }
       }, this);
       this.assert(results.length <= 10, "more than 10 results passed to showSearchResults");
-      this.assert($(".result-picture img").length == 0, "found " + $(".result-picture img").length + " junk pictures lying around");
+      //@/BEGIN/DEBUGONLYSECTION
+      if ($(".result-picture img").length == 0) {
+        this.log("found " + $(".result-picture img").length + " junk pictures lying around");
+      }
+      //@/END/DEBUGONLYSECTION
       for(var each in results) {
         this.assert(results[each].id !== undefined, "id is missing from result at each=" + each);
         var id = "#cmc-search-result-" + each;
@@ -2131,14 +2192,12 @@ $(function() {
 
   $("#make-trip, #profile-trip-dialog").hide();
 
-
-
   $("#make-volunteer").click(function() {
-          $("#profile-medical-skills").multiselect();
-          $("#profile-nonmedical-skills").multiselect();
-          $("#profile-spiritual-skills").multiselect();
-          $("#profile-region").multiselect();
-          $("#profile-country-served").multiselect();
+    $("#profile-medical-skills").multiselect();
+    $("#profile-nonmedical-skills").multiselect();
+    $("#profile-spiritual-skills").multiselect();
+    $("#profile-region").multiselect();
+    $("#profile-country-served").multiselect();
     $("#profile-volunteer-dialog").dialog('open');
   });
 
@@ -2212,6 +2271,18 @@ $(function() {
       CMC.dialogClose(this);
     }
   });  
+  
+  //@/BEGIN/DEBUGONLYSECTION
+  $("#assert-dialog").dialog({
+    autoOpen: false,
+    draggable: false,
+    position: ['center', 100],
+    resizable: false,
+    modal: true,
+    width: 400,
+    height: 275,
+  });  
+  //@/END/DEBUGONLYSECTION
   
   $("#make-trip").click(function() {
     $("#profile-trip-languages").multiselect();

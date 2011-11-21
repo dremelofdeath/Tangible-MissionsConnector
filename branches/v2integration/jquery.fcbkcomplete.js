@@ -279,7 +279,7 @@ jQuery(function($) {
                         var _item = element.children("option[value=\"" + item.attr("rel") + "\"]");
                         funCall(options.onremove, _item)
                     }
-                    element.children('option[value=\""' + item.attr("rel") + '"\"]').removeAttr("selected").removeClass("selected");
+                    element.children('option[value="' + item.attr("rel") + '"]').removeAttr("selected").removeClass("selected");
                     item.remove();
                     element.change();
                     deleting = 0;

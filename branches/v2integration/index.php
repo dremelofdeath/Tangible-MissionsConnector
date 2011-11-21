@@ -4,792 +4,45 @@
 include_once 'api/common.php';
 $con = arena_connect();
 
-  $aCountries = array(
-"United States",
-"Afghanistan",
-"Aland Islands",
-"Albania",
-"Algeria",
-"American Samoa",
-"Andorra",
-"Angola",
-"Anguilla",
-"Antarctica",
-"Antigua and Barbuda",
-"Argentina",
-"Armenia",
-"Aruba",
-"Australia",
-"Austria",
-"Azerbaijan",
-"Bahamas",
-"Bahrain",
-"Bangladesh",
-  "Barbados",
-  "Belarus",
-  "Belgium",
-  "Belize",
-  "Benin",
-  "Bermuda",
-  "Bhutan",
-  "Bolivia",
-  "Bosnia and Herzegovina",
-  "Botswana",
-  "Bouvet Island",
-  "Brazil",
-  "British Indian Ocean Territory",
-  "Brunei Darussalam",
-  "Bulgaria",
-  "Burkina Faso",
-  "Burundi",
-  "Cambodia",
-  "Cameroon",
-  "Canada",
-  "Cape Verde",
-  "Cayman Islands",
-  "Central African Republic",
-  "Chad",
-  "Chile",
-  "China",
-  "Christmas Island",
-  "Cocos (Keeling) Islands",
-  "Colombia",
-  "Comoros",
-  "Congo",
-  "Congo, the Democratic Republic of th",
-  "Cook Islands",
-  "Costa Rica",
-  "Cote D'Ivoire",
-  "Croatia",
-  "Cuba",
-  "Cyprus",
-  "Czech Republic",
-  "Denmark",
-  "Djibouti",
-  "Dominica",
-  "Dominican Republic",
-  "Ecuador",
-  "Egypt",
-  "El Salvador",
-  "Equatorial Guinea",
-  "Eritrea",
-  "Estonia",
-  "Ethiopia",
-  "Falkland Islands (Malvinas)",
-  "Faroe Islands",
-  "Fiji",
-  "Finland",
-  "France",
-  "French Guiana",
-  "French Polynesia",
-  "French Southern Territories",
-  "Gabon",
-  "Gambia",
-  "Georgia",
-  "Germany",
-  "Ghana",
-  "Gibraltar",
-  "Greece",
-  "Greenland",
-  "Grenada",
-  "Guadeloupe",
-  "Guam",
-  "Guatemala",
-  "Guinea",
-  "Guinea-Bissau",
-  "Guyana",
-  "Haiti",
-  "Heard and McDonald Islands",
-  "Holy See (Vatican City State",
-  "Honduras",
-  "Hong Kong",
-  "Hungary",
-  "Iceland",
-  "India",
-  "Indonesia",
-  "Iran, Islamic Republic o",
-  "Iraq",
-  "Ireland",
-  "Israel",
-  "Italy",
-  "Jamaica",
-  "Japan",
-  "Jordan",
-  "Kazakhstan",
-  "Kenya",
-  "Kiribati",
-  "Korea, Democratic People's Republic of",
-  "Korea, Republic of",
-  "Kuwait",
-  "Kyrgyzstan",
-  "Lao People's Democratic Republic",
-  "Latvia",
-  "Lebanon",
-  "Lesotho",
-  "Liberia",
-  "Libyan Arab Jamahiriya",
-  "Liechtenstein",
-  "Lithuania",
-  "Luxembourg",
-  "Macao",
-  "Macedonia, the former Yugoslav Republic of",
-  "Madagascar",
-  "Malawi",
-  "Malaysia",
-  "Maldives",
-  "Mali",
-  "Malta",
-  "Marshall Islands",
-  "Martinique",
-  "Mauritania",
-  "Mauritius",
-  "Mayotte",
-  "Mexico",
-  "Micronesia, Federated States of",
-  "Moldova, Republic of",
-  "Monaco",
-  "Mongolia",
-  "Montserrat",
-  "Morocco",
-  "Mozambique",
-  "Myanmar",
-  "Namibia",
-  "Nauru",
-  "Nepal",
-  "Netherlands",
-  "Netherlands Antilles",
-  "New Caledonia",
-  "New Zealand",
-  "Nicaragua",
-  "Niger",
-  "Nigeria",
-  "Niue",
-  "Norfolk Island",
-  "Northern Mariana Islands",
-  "Norway",
-  "Oman",
-  "Pakistan",
-  "Palau",
-  "Palestinian Territory, Occupie",
-  "Panama",
-  "Papua New Guinea",
-  "Paraguay",
-  "Peru",
-  "Philippines",
-  "Pitcairn",
-  "Poland",
-  "Portugal",
-  "Puerto Rico",
-  "Qatar",
-  "Reunion",
-  "Romania",
-  "Russian Federation",
-  "Rwanda",
-  "Saint Helena",
-  "Saint Kitts and Nevis",
-  "Saint Lucia",
-  "Saint Pierre and Miquelon",
-  "Saint Vincent and the Grenadines",
-  "Samoa",
-  "San Marino",
-  "Sao Tome and Principe",
-  "Saudi Arabia",
-  "Senegal",
-  "Serbia and Montenegro",
-  "Seychelles",
-  "Sierra Leone",
-  "Singapore",
-  "Slovakia",
-  "Slovenia",
-  "Solomon Islands",
-  "Somalia",
-  "South Africa",
-  "South Georgia and the South Sandwich Island",
-  "Spain",
-  "Sri Lanka",
-  "Sudan",
-  "Suriname",
-  "Svalbard and Jan Mayen",
-  "Swaziland",
-  "Sweden",
-  "Switzerland",
-  "Syrian Arab Republic",
-  "Taiwan",
-  "Tajikistan",
-  "Tanzania, United Republic of",
-  "Thailand",
-  "Timor-Lest",
-  "Togo",
-  "Tokelau",
-  "Tonga",
-  "Trinidad and Tobago",
-  "Tunisia",
-  "Turkey",
-  "Turkmenistan",
-  "Turks and Caicos Islands",
-  "Tuvalu",
-  "Uganda",
-  "Ukraine",
-  "United Arab Emirates",
-  "United Kingdom",
-  "United States Minor Outlying Islands",
-  "Uruguay",
-  "Uzbekistan",
-  "Vanuatu",
-  "Venezuela",
-  "Vietnam",
-  "Virgin Islands (British)",
-  "Virgin Islands (U.S.)",
-  "Wallis And Futuna Islands",
-  "Western Sahara",
-  "Yemen",
-  "Zambia",
-  "Zimbabwe"
-  );
-  
-  $usstates = array(
-  "Alabama",
-  "Alaska",
-  "Arizona",
-    "Arkansas",
-    "California",
-    "Colorado",
-    "Connecticut",
-    "Delaware",
-    "District of Columbia",
-    "Florida",
-    "Georgia",
-    "Hawaii",
-    "Idaho",
-    "Illinois",
-    "Indiana",
-    "Iowa",
-    "Kansas",
-    "Kentucky",
-    "Louisiana",
-    "Maine",
-    "Maryland",
-    "Massachusetts",
-    "Michigan",
-    "Minnesota",
-    "Mississippi",
-    "Missouri",
-    "Montana",
-    "Nebraska",
-    "Nevada",
-    "New Hampshire",
-    "New Jersey",
-    "New Mexico",
-    "New York",
-    "North Carolina",
-    "North Dakota",
-    "Ohio",
-    "Oklahoma",
-    "Oregon",
-    "Pennsylvania",
-    "Rhode Island",
-    "South Carolina",
-    "South Dakota",
-    "Tennessee",
-    "Texas",
-    "Utah",
-    "Vermont",
-    "Virginia",
-    "Washington",
-    "West Virginia",
-    "Wisconsin",
-    "Wyoming"
-  );
- 
-  $languages = array(
-"Afar",
-"Abkhazian",
-"Achinese",
-"Acoli",
-"Adangme",
-"Adyghe; Adygei",
-"Afro-Asiatic languages",
-"Afrihili",
-"Afrikaans",
-"Ainu",
-"Akan",
-"Akkadian",
-"Aleut",
-"Algonquian languages",
-"Southern Altai",
-"Amharic",
-"English, Old (ca.450-1100)",
-"Angika",
-"Apache languages",
-"Arabic",
-  "Official Aramaic (700-300 BCE); Imperial Aramaic (700-300 BCE)",
-  "Aragonese",
-  "Armenian",
-  "Mapudungun; Mapuche",
-  "Arapaho",
-  "Artificial languages",
-  "Arawak",
-  "Assamese",
-  "Asturian; Bable; Leonese; Asturleonese",
-  "Athapascan languages",
-  "Australian languages",
-  "Avaric",
-  "Avestan",
-  "Awadhi",
-  "Aymara",
-  "Azerbaijani",
-  "Banda languages",
-  "Bamileke languages",
-  "Bashkir",
-  "Baluchi",
-  "Bambara",
-  "Balinese",
-  "Basque",
-  "Basa",
-  "Baltic languages",
-  "Beja; Bedawiyet",
-  "Belarusian",
-  "Bemba",
-  "Bengali",
-  "Berber languages",
-  "Bhojpuri",
-  "Bihari",
-  "Bikol",
-  "Bini; Edo",
-  "Bislama",
-  "Siksika",
-  "Bantu languages",
-  "Tibetan",
-  "Bosnian",
-  "Braj",
-  "Breton",
-  "Batak languages",
-  "Buriat",
-  "Buginese",
-  "Bulgarian",
-  "Blin; Bilin",
-  "Caddo",
-  "Central American Indian languages",
-  "Galibi Carib",
-  "Catalan; Valencian",
-  "Caucasian languages",
-  "Cebuano",
-  "Celtic languages",
-  "Chamorro",
-  "Chibcha",
-  "Chechen",
-  "Chagatai",
-  "Chinese",
-  "Chuukese",
-  "Mari",
-  "Chinook jargon",
-  "Choctaw",
-  "Chipewyan; Dene Suline",
-  "Cherokee",
-  "Church Slavic; Old Slavonic; Church Slavonic; Old Bulgarian; Old Church Slavonic",
-  "Chuvash",
-  "Cheyenne",
-  "Chamic languages",
-  "Coptic",
-  "Cornish",
-  "Corsican",
-  "Creoles and pidgins, English based",
-  "Creoles and pidgins, French-based",
-  "Creoles and pidgins, Portuguese-based",
-  "Cree",
-  "Crimean Tatar; Crimean Turkish",
-  "Creoles and pidgins",
-  "Kashubian",
-  "Cushitic languages",
-  "Welsh",
-  "Czech",
-  "Dakota",
-  "Danish",
-  "Dargwa",
-  "Land Dayak languages",
-  "Delaware",
-  "Slave (Athapascan)",
-  "Dogrib",
-  "Dinka",
-  "Divehi; Dhivehi; Maldivian",
-  "Dogri",
-  "Dravidian languages",
-  "Lower Sorbian",
-  "Duala",
-  "Dutch, Middle (ca.1050-1350)",
-  "Dyula",
-  "Dzongkha",
-  "Efik",
-  "Egyptian (Ancient)",
-  "Ekajuk",
-  "Elamite",
-  "English",
-  "English, Middle (1100-1500)",
-  "Esperanto",
-  "Estonian",
-  "Ewe",
-  "Ewondo",
-  "Fang",
-  "Faroese",
-  "Fanti",
-  "Fijian",
-  "Filipino; Pilipino",
-  "Finnish",
-  "Finno-Ugrian languages",
-  "Fon",
-  "French",
-  "French, Middle (ca.1400-1600)",
-  "French, Old (842-ca.1400)",
-  "Northern Frisian",
-  "Eastern Frisian",
-  "Western Frisian",
-  "Fulah",
-  "Friulian",
-  "Ga",
-  "Gayo",
-  "Gbaya",
-  "Germanic languages",
-  "Georgian",
-  "German",
-  "Geez",
-  "Gilbertese",
-  "Gaelic; Scottish Gaelic",
-  "Irish",
-  "Galician",
-  "Manx",
-  "German, Middle High (ca.1050-1500)",
-  "German, Old High (ca.750-1050)",
-  "Gondi",
-  "Gorontalo",
-  "Gothic",
-  "Grebo",
-  "Greek, Ancient (to 1453)",
-  "Greek, Modern (1453-)",
-  "Guarani",
-  "Swiss German; Alemannic; Alsatian",
-  "Gujarati",
-  "Gwich'in",
-  "Haida",
-  "Haitian; Haitian Creole",
-  "Hausa",
-  "Hawaiian",
-  "Hebrew",
-  "Herero",
-  "Hiligaynon",
-  "Himachali",
-  "Hindi",
-  "Hittite",
-  "Hmong",
-  "Hiri Motu",
-  "Croatian",
-  "Upper Sorbian",
-  "Hungarian",
-  "Hupa",
-  "Iban",
-  "Igbo",
-  "Icelandic",
-  "Ido",
-  "Sichuan Yi; Nuosu",
-  "Ijo languages",
-  "Inuktitut",
-  "Interlingue; Occidental",
-  "Iloko",
-  "Interlingua (International Auxiliary Language Association)",
-  "Indic languages",
-  "Indonesian",
-  "Indo-European languages",
-  "Ingush",
-  "Inupiaq",
-  "Iranian languages",
-  "Iroquoian languages",
-  "Italian",
-  "Javanese",
-  "Lojban",
-  "Japanese",
-  "Judeo-Persian",
-  "Judeo-Arabic",
-  "Kara-Kalpak",
-  "Kabyle",
-  "Kachin; Jingpho",
-  "Kalaallisut; Greenlandic",
-  "Kamba",
-  "Kannada",
-  "Karen languages",
-  "Kashmiri",
-  "Kanuri",
-  "Kawi",
-  "Kazakh",
-  "Kabardian",
-  "Khasi",
-  "Khoisan languages",
-  "Central Khmer",
-  "Khotanese; Sakan",
-  "Kikuyu; Gikuyu",
-  "Kinyarwanda",
-  "Kirghiz; Kyrgyz",
-  "Kimbundu",
-  "Konkani",
-  "Komi",
-  "Kongo",
-  "Korean",
-  "Kosraean",
-  "Kpelle",
-  "Karachay-Balkar",
-  "Karelian",
-  "Kru languages",
-  "Kurukh",
-  "Kuanyama; Kwanyama",
-  "Kumyk",
-  "Kurdish",
-  "Kutenai",
-  "Ladino",
-  "Lahnda",
-  "Lamba",
-  "Lao",
-  "Latin",
-  "Latvian",
-  "Lezghian",
-  "Limburgan; Limburger; Limburgish",
-  "Lingala",
-  "Lithuanian",
-  "Mongo",
-  "Lozi",
-  "Luxembourgish; Letzeburgesch",
-  "Luba-Lulua",
-  "Luba-Katanga",
-  "Ganda",
-  "Luiseno",
-  "Lunda",
-  "Luo (Kenya and Tanzania)",
-  "Lushai",
-  "Macedonian",
-  "Madurese",
-  "Magahi",
-  "Marshallese",
-  "Maithili",
-  "Makasar",
-  "Malayalam",
-  "Mandingo",
-  "Maori",
-  "Austronesian languages",
-  "Marathi",
-  "Masai",
-  "Moksha",
-  "Mandar",
-  "Mende",
-  "Irish, Middle (900-1200)",
-  "Mi'kmaq; Micmac",
-  "Minangkabau",
-  "Uncoded languages",
-  "Mon-Khmer languages",
-  "Malagasy",
-  "Maltese",
-  "Manchu",
-  "Manipuri",
-  "Manobo languages",
-  "Mohawk",
-  "Mongolian",
-  "Mossi",
-  "Malay",
-  "Multiple languages",
-  "Munda languages",
-  "Creek",
-  "Mirandese",
-  "Marwari",
-  "Burmese",
-  "Mayan languages",
-  "Erzya",
-  "Nahuatl languages",
-  "North American Indian languages",
-  "Neapolitan",
-  "Nauru",
-  "Navajo; Navaho",
-  "Ndebele, South; South Ndebele",
-  "Ndebele, North; North Ndebele",
-  "Ndonga",
-  "Low German; Low Saxon; German, Low; Saxon, Low",
-  "Nepali",
-  "Nepal Bhasa; Newari",
-  "Nias",
-  "Niger-Kordofanian languages",
-  "Niuean",
-  "Dutch; Flemish",
-  "Norwegian Nynorsk; Nynorsk, Norwegian",
-  "Bokmål, Norwegian; Norwegian Bokmål",
-  "Nogai",
-  "Norse, Old",
-  "Norwegian",
-  "N'Ko",
-  "Pedi; Sepedi; Northern Sotho",
-  "Nubian languages",
-  "Classical Newari; Old Newari; Classical Nepal Bhasa",
-  "Chichewa; Chewa; Nyanja",
-  "Nyamwezi",
-  "Nyankole",
-  "Nyoro",
-  "Nzima",
-  "Occitan (post 1500)",
-  "Ojibwa",
-  "Oriya",
-  "Oromo",
-  "Osage",
-  "Ossetian; Ossetic",
-  "Turkish, Ottoman (1500-1928)",
-  "Otomian languages",
-  "Papuan languages",
-  "Pangasinan",
-  "Pahlavi",
-  "Pampanga; Kapampangan",
-  "Panjabi; Punjabi",
-  "Papiamento",
-  "Palauan",
-  "Persian, Old (ca.600-400 B.C.)",
-  "Persian",
-  "Philippine languages",
-  "Phoenician",
-  "Pali",
-  "Polish",
-  "Pohnpeian",
-  "Portuguese",
-  "Prakrit languages",
-  "Provençal, Old (to 1500);Occitan, Old (to 1500)",
-  "Pushto; Pashto",
-  "Reserved for local use",
-  "Quechua",
-  "Rajasthani",
-  "Rapanui",
-  "Rarotongan; Cook Islands Maori",
-  "Romance languages",
-  "Romansh",
-  "Romany",
-  "Romanian; Moldavian; Moldovan",
-  "Rundi",
-  "Aromanian; Arumanian; Macedo-Romanian",
-  "Russian",
-  "Sandawe",
-  "Sango",
-  "Yakut",
-  "South American Indian languages",
-  "Salishan languages",
-  "Samaritan Aramaic",
-  "Sanskrit",
-  "Sasak",
-  "Santali",
-  "Sicilian",
-  "Scots",
-  "Selkup",
-  "Semitic languages",
-  "Irish, Old (to 900)",
-  "Sign Languages",
-  "Shan",
-  "Sidamo",
-  "Sinhala; Sinhalese",
-  "Siouan languages",
-  "Sino-Tibetan languages",
-  "Slavic languages",
-  "Slovak",
-  "Slovenian",
-  "Southern Sami",
-  "Northern Sami",
-  "Sami languages",
-  "Lule Sami",
-  "Inari Sami",
-  "Samoan",
-  "Skolt Sami",
-  "Shona",
-  "Sindhi",
-  "Soninke",
-  "Sogdian",
-  "Somali",
-  "Songhai languages",
-  "Sotho, Southern",
-  "Spanish; Castilian",
-  "Albanian",
-  "Sardinian",
-  "Sranan Tongo",
-  "Serbian",
-  "Serer",
-  "Nilo-Saharan languages",
-  "Swati",
-  "Sukuma",
-  "Sundanese",
-  "Susu",
-  "Sumerian",
-  "Swahili",
-  "Swedish",
-  "Classical Syriac",
-  "Syriac",
-  "Tahitian",
-  "Tai languages",
-  "Tamil",
-  "Tatar",
-  "Telugu",
-  "Timne",
-  "Tereno",
-  "Tetum",
-  "Tajik",
-  "Tagalog",
-  "Thai",
-  "Tigre",
-  "Tigrinya",
-  "Tiv",
-  "Tokelau",
-  "Klingon; tlhIngan-Hol",
-  "Tlingit",
-  "Tamashek",
-  "Tonga (Nyasa)",
-  "Tonga (Tonga Islands)",
-  "Tok Pisin",
-  "Tsimshian",
-  "Tswana",
-  "Tsonga",
-  "Turkmen",
-  "Tumbuka",
-  "Tupi languages",
-  "Turkish",
-  "Altaic languages",
-  "Tuvalu",
-  "Twi",
-  "Tuvinian",
-  "Udmurt",
-  "Ugaritic",
-  "Uighur; Uyghur",
-  "Ukrainian",
-  "Umbundu",
-  "Undetermined",
-  "Urdu",
-  "Uzbek",
-  "Vai",
-  "Venda",
-  "Vietnamese",
-  "Volapük",
-  "Votic",
-  "Wakashan languages",
-  "Wolaitta; Wolaytta",
-  "Waray",
-  "Washo",
-  "Sorbian languages",
-  "Walloon",
-  "Wolof",
-  "Kalmyk; Oirat",
-  "Xhosa",
-  "Yao",
-  "Yapese",
-  "Yiddish",
-  "Yoruba",
-  "Yupik languages",
-  "Zapotec",
-  "Blissymbols; Blissymbolics; Bliss",
-  "Zenaga",
-  "Zhuang; Chuang",
-  "Zande languages",
-  "Zulu",
-  "Zuni",
-  "No linguistic content; Not applicable",
-  "Zaza; Dimili; Dimli; Kirdki; Kirmanjki; Zazaki"
-  );
+function cmc_get_opts_for_result($result, $idColumn, $nameColumn, $valuePrefix='') {
+  $optiontext = '';
+  if ($result) {
+    if (mysql_num_rows($result) > 0) {
+      while($row = mysql_fetch_assoc($result)) {
+        $optiontext .= '<option value="'.$valuePrefix.$row[$idColumn].'">'.$row[$nameColumn].'</option>';
+      }
+    }
+  }
+  return $optiontext;
+}
 
-// put PHP code here
+function cmc_get_opts_for_table($table, $idColumn, $nameColumn, $valuePrefix='') {
+  global $con;
+  return cmc_get_opts_for_result(mysql_query("SELECT * FROM ".$table.";", $con), $idColumn, $nameColumn, $valuePrefix);
+}
+
+function cmc_echo_opt_countries($valuePrefix='') {
+  echo cmc_get_opts_for_table("countries", "id", "longname", $valuePrefix);
+}
+
+function cmc_echo_opt_usstates($valuePrefix='') {
+  echo cmc_get_opts_for_table("usstates", "id", "longname", $valuePrefix);
+}
+
+function cmc_echo_opt_languages($valuePrefix='') {
+  echo cmc_get_opts_for_table("languages", "id", "englishname", $valuePrefix);
+}
+
+function cmc_echo_opt_skills($skilltype=FALSE, $valuePrefix='') {
+  global $con;
+  $result = false;
+  if (!$skilltype) {
+    $result = mysql_query("SELECT * FROM skills WHERE type=1 OR type=2 OR type=3;", $con);
+  } else {
+    $result = mysql_query("SELECT * FROM skills WHERE type=".$skilltype.";", $con);
+  }
+  echo cmc_get_opts_for_result($result, "id", "skilldesc", $valuePrefix);
+}
 
 function cmc_js_load($src) {
   echo '<script type="text/javascript" src="'.$src.'"></script>';
@@ -831,9 +84,7 @@ function cmc_jquery_startup($jquery_version, $jquery_ui_version, $theme) {
   echo "\n";
 }
 
-function
-cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
-               $imgstyle=FALSE, $imgw=75, $imgh=75) {
+function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $imgstyle=FALSE, $imgw=75, $imgh=75) {
   echo '<a href="#" class="cmc-button-link"';
   if($onclick) {
     echo ' onclick="'.$onclick.'"';
@@ -1331,30 +582,12 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                 </div>
                 <div class="box1">
                   <h3>Personal Information:</h3>
-                  <h5> Email: </h5>
-                  <div id="profile-email">
-                    <h6> Email </h6>
-                  </div>		
-                  <h5> Phone: </h5>
-                  <div id="profile-phone">
-                    <h6> Phone </h6>
-                  </div>	
-                  <h5> Country: </h5>
-                  <div id="profile-country">
-                    <h6> Country </h6>
-                  </div>	
-                  <h5> Zip: </h5>
-                  <div id="profile-zip">
-                    <h6> Zip </h6>
-                  </div>	
-                  <h5> Preferred Duration of Mission Trips: </h5>
-                  <div id="profile-dur">
-                    <h6> Duration </h6>
-                  </div>	
-                  <h5> Countries of Interest: </h5>
-                  <div id="profile-countries">
-                    <h6> Countries </h6>
-                  </div>	
+                  <h5 id="profile-email-display">Email: <span id="profile-email">Email</span></h5>
+                  <h5 id="profile-phone-display">Phone: <span id="profile-phone">Phone</span></h5>
+                  <h5 id="profile-country-display">Country: <span id="profile-country">Country</span></h5>
+                  <h5 id="profile-zip-display">Zip: <span id="profile-zip">Zip</span></h5>
+                  <h5 id="profile-dur-display">Preferred Duration of Mission Trips: <span id="profile-dur">Duration</span></h5>
+                  <h5 id="profile-countries-display">Countries of Interest: <span id="profile-countries">Countries</span></h5>
                 </div>
                 <h3>Trips Information:</h3>
                 <div id="table_wrapper">
@@ -1541,37 +774,10 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
             <div id="cmc-search-icon" class="ui-icon ui-icon-search cmc-search-icon"></div>
             <div id="cmc-search-box">
               <select id="search-box-select" name="search-box-select">
-                <option value="1">Advanced Practice Nursing</option>
-                <option value="2">Dental Professional</option>
-                <option value="3">Medical Educator</option>
-                <option value="4">Mental Health Professional</option>
-                <option value="5">Nurse</option>
-                <option value="6">Optometrist or Opthalmologist</option>
-                <option value="7">Pharmacist</option>
-                <option value="8">Physician</option>
-                <option value="9">Physician Assistant</option>
-                <option value="10">Physical or Occupational Therapist</option>
-                <option value="11">Public Health/Community Development Worker</option>
-                <option value="12">Speech Therapist</option>
-                <option value="13">Other</option>
-                <option value="14">General Help/Labor</option>
-                <option value="15">Team Leader/Primary Organizer</option>
-                <option value="16">Account and/or Business Management</option>
-                <option value="17">Skilled Construction and/or Maintenance</option>
-                <option value="18">Computer Science/Other Technical</option>
-                <option value="19">Agriculture and/or Animal Husbandry</option>
-                <option value="45">Mechanic</option>
-                <option value="46">Office/Secretarial</option>
-                <option value="47">Teaching</option>
-                <option value="48">Veterinary</option>
-                <option value="49">Water Supply Improvement</option>
-                <option value="50">Writing and/or Translating</option>
-                <option value="52">Engineering</option>
-                <option value="20">Team Spiritual Leader</option>
-                <option value="21">Individual Outreach (Prayer or Counseling)</option>
-                <option value="22">Evangelism</option>
-                <option value="44">Worship Team</option>
-                <option value="51">Public Speaking</option>
+                <?php
+                  cmc_echo_opt_skills(false, "!!s:");
+                  cmc_echo_opt_countries("!!c:");
+                ?>
               </select>
             </div>
           </div>
@@ -1704,19 +910,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                       <td style="width: 97px">
                         <select id="profile-medical-skills" multiple="multiple" name="profile-medical-skills">
                           <!--<option class="cmc-default-opt" value="0" selected="selected">Select Medical Skills</option>-->
-                          <option value="1">Advanced Practice Nursing</option>
-                          <option value="2">Dental Professional</option>
-                          <option value="3">Medical Educator</option>
-                          <option value="4">Mental Health Professional</option>
-                          <option value="5">Nurse</option>
-                          <option value="6">Optometrist or Opthalmologist</option>
-                          <option value="7">Pharmacist</option>
-                          <option value="8">Physician</option>
-                          <option value="9">Physician Assistant</option>
-                          <option value="10">Physical or Occupational Therapist</option>
-                          <option value="11">Public Health/Community Development Worker</option>
-                          <option value="12">Speech Therapist</option>
-                          <option value="13">Other</option>
+                          <?php cmc_echo_opt_skills(1); ?>
                         </select>
                       </td>
                     </tr>
@@ -1727,19 +921,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                       <td style="width: 197px">
                         <select id="profile-nonmedical-skills" multiple="multiple" name="profile-nonmedical-skills">
                           <!--<option class="cmc-default-opt" value="0" selected="selected">Select Non-Medical Skills</option>-->
-                          <option value="14">General Help/Labor</option>
-                          <option value="15">Team Leader/Primary Organizer</option>
-                          <option value="16">Account and/or Business Management</option>
-                          <option value="17">Skilled Construction and/or Maintenance</option>
-                          <option value="18">Computer Science/Other Technical</option>
-                          <option value="19">Agriculture and/or Animal Husbandry</option>
-                          <option value="45">Mechanic</option>
-                          <option value="46">Office/Secretarial</option>
-                          <option value="47">Teaching</option>
-                          <option value="48">Veterinary</option>
-                          <option value="49">Water Supply Improvement</option>
-                          <option value="50">Writing and/or Translating</option>
-                          <option value="52">Engineering</option>
+                          <?php cmc_echo_opt_skills(2); ?>
                         </select>
                       </td>
                     </tr>
@@ -1750,11 +932,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                       <td style="width: 197px">
                         <select id="profile-spiritual-skills" multiple="multiple" name="profile-spiritual-skills">
                           <!--<option class="cmc-default-opt" value="0" selected="selected">Select Spiritual Service</option>-->
-                          <option value="20">Team Spiritual Leader</option>
-                          <option value="21">Individual Outreach (Prayer and Counseling)</option>
-                          <option value="22">Evangelism</option>
-                          <option value="44">Worship Team</option>
-                          <option value="51">Public Speaking</option>
+                          <?php cmc_echo_opt_skills(3); ?>
                         </select>
                       </td>
                     </tr>
@@ -1792,13 +970,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                       <td style="width: 197px">
                         <select id="profile-state" class="cmc-form-spec">
                           <option class="cmc-default-opt" value="Select your State" selected="selected">Select your State</option>
-                          <?php
-                            $i=1;
-                            foreach($usstates as $key => $state) {
-                              echo '<option value="'.$i.'">'.$state.'</option>';
-                              $i++;
-                            }
-                          ?>
+                          <?php cmc_echo_opt_usstates(); ?>
                         </select>
                       </td>
                     </tr>           
@@ -1816,17 +988,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                       </td>
                       <td style="width: 197px">
                         <select id="profile-country" class="cmc-form-spec" onchange="volzipdisplay();">
-                          <?php
-                            $i=1;
-                            foreach($aCountries as $key => $country) {
-                              if ($country == "United States")
-                                echo '<option selected="selected" value="'.$i.'">'.$country.'</option>';
-                              else {
-                                echo '<option value="'.$i.'">'.$country.'</option>';
-                              }
-                              $i++;
-                            }
-                          ?>
+                          <?php cmc_echo_opt_countries(); ?>
                         </select>
                       </td>
                     </tr>             
@@ -1863,20 +1025,8 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                       </td>
                       <td style="width: 197px">
                         <select id="profile-country-served" multiple="multiple" name="profile-country-served">
-                          <?php
-                            $i=1;
-                            $jj=0;
-                            //echo '<option class="cmc-default-opt" selected="selected" value="Select Countries Served">Select Countries Served</option>';
-                            foreach($aCountries as $key => $country) {                      
-                              if ($country == "United States")
-                                echo '<option id="'.$jj.'" value="'.$i.'">'.$country.'</option>';
-                              else {
-                                echo '<option id="'.$jj.'" value="'.$i.'">'.$country.'</option>';
-                              }
-                              $i++;
-                              $jj++;
-                            }
-                          ?>
+                          <!-- <option class="cmc-default-opt" selected="selected" value="Select Countries Served">Select Countries Served</option> -->
+                          <?php cmc_echo_opt_countries(); ?>
                         </select>
                       </td>
                     </tr>           
@@ -1962,17 +1112,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                             <td style="width: 97px">
                                         <select id="profile-org-offer" name="profile-org-offer" multiple="multiple">
                                             <!--<option class="cmc-default-opt" value="0" selected="selected">Select Medical Skills</option>-->
-                                            <option value="23">Missions Hospital without Surgical Facilities</option>
-                                            <option value="24">Missions Hospital with Surgical Facilities</option>
-                                            <option value="25">Missions Hospital with Dental Care Facilities</option>
-                                            <option value="26">Outpatient Medical/Dental/Eye Care Clinic</option>
-                                            <option value="27">Organizing/Sending Short Term Medical/Dental/Eye Care Missions Agency</option>
-                                            <option value="28">Supplying/Enhancing Short Term Medical/Dental/Eye Care Missions Agency</option>
-                                            <option value="29">Community Development Agency</option>
-                                            <option value="30">Emergency Medical Relief Agency</option>
-                                            <option value="31">Medical/Dental/Eye Care Equipment Supplier</option>
-                                            <option value="32">Water Purification/Drilling</option>
-                                            <option value="33">Medical/Dental/Eye Care Training/Education Agency</option>
+                                          <?php cmc_echo_opt_skills(4); ?>
                                         </select>
                             </td>
                         </tr>
@@ -1984,16 +1124,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                             <td style="width: 97px">
                                         <select id="profile-org-offern" name="profile-org-offern" multiple="multiple">
                                             <!--<option class="cmc-default-opt" value="0" selected="selected">Select Medical Skills</option>-->
-                                            <option value="34">Evangelism and Church Planning Ministry</option>
-                                            <option value="35">Food Access</option>
-                                            <option value="36">Transportation (In Country)</option>
-                                            <option value="37">Translators</option>
-                                            <option value="38">Trip Planning/Itinerary Building</option>
-                                            <option value="39">Crowd Control</option>
-                                            <option value="40">Press Relations</option>
-                                            <option value="41">Housing for the Missions Team</option>
-                                            <option value="42">Help getting through Customs</option>
-                                            <option value="43">Building Supplies (Construction)</option>
+                                          <?php cmc_echo_opt_skills(5); ?>
                                         </select>
                             </td>
                         </tr>												
@@ -2097,14 +1228,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                             </td>
                             <td style="width: 197px">
                                         <select id="profile-org-state" class="profile-org-state">
-                                        <?php
-                                        echo '<option class="cmc-default-opt" value="Select your State" selected="selected">Select your State</option>';
-                                        $i=1;
-                      foreach($usstates as $key => $state) {
-                                              echo '<option value="'.$i.'">'.$state.'</option>';
-                                              $i++;
-                      }
-                                        ?>
+                                          <?php cmc_echo_opt_usstates(); ?>
                                         </select>
                             </td>
                         </tr>           
@@ -2124,18 +1248,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                             </td>
                             <td style="width: 197px">
                                         <select id="profile-org-country" class="profile-org-country" onchange="orgzipdisplay();">
-                                        <?php
-                                        $i=1;
-                      foreach($aCountries as $key => $country) {
-                                              if ($country == "United States")
-                            echo '<option selected="selected" value="'.$i.'">'.$country.'</option>';
-                                              else {
-                            echo '<option value="'.$i.'">'.$country.'</option>';
-                                              }
-                                              $i++;
-
-                      }
-                                        ?>
+                                          <?php cmc_echo_opt_countries(); ?>
                                         </select>
                             </td>
                         </tr>             
@@ -2175,20 +1288,8 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                             </td>
                             <td style="width: 197px">
                                         <select id="profile-org-countryserved" name="profile-org-countryserved" multiple="multiple">
-                                        <?php
-                                        $i=1;
-                                        $jj=0;
-                      //echo '<option class="cmc-default-opt" selected="selected" value="Select Countries Served">Select Countries Served</option>';
-                      foreach($aCountries as $key => $country) {                      
-                                              if ($country == "United States")
-                            echo '<option id="'.$jj.'" value="'.$i.'">'.$country.'</option>';
-                                              else {
-                        echo '<option id="'.$jj.'" value="'.$i.'">'.$country.'</option>';
-                                              }
-                                              $i++;
-                                              $jj++;
-                      }
-                                        ?>
+                      <!-- <option class="cmc-default-opt" selected="selected" value="Select Countries Served">Select Countries Served</option> -->
+                                          <?php cmc_echo_opt_countries(); ?>
                                         </select>
                             </td>
                         </tr>           
@@ -2378,16 +1479,7 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                                         <select id="profile-trip-country" class="profile-trip-country" onchange="tripzipdisplay();">
                                         <?php
                                         echo '<option class="cmc-default-opt" value="Select your Destination Country" selected="selected">Select your Destination Country</option>';
-                                        $i=1;
-                      foreach($aCountries as $key => $country) {
-                                              if ($country == "United States")
-                            echo '<option value="'.$i.'">'.$country.'</option>';
-                                              else {
-                            echo '<option value="'.$i.'">'.$country.'</option>';
-                                              }
-                                              $i++;
-
-                      }
+                                        cmc_echo_opt_countries();
                                         ?>
                                         </select>
                             </td>
@@ -2410,18 +1502,8 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
                             </td>
                             <td style="width: 197px">
                                         <select id="profile-trip-languages" name="profile-trip-languages" multiple="multiple">
-                                        <?php
-                                        $i=1;
-                      //echo '<option class="cmc-default-opt" selected="selected" value="Select Countries Served">Select Countries Served</option>';
-                      foreach($languages as $key => $language) {                      
-                                              if ($language == "English")
-                            echo '<option selected="selected" value="'.$language.'">'.$language.'</option>';
-                                              else {
-                        echo '<option value="'.$language.'">'.$language.'</option>';
-                                              $i++;
-                                              }
-                      }
-                                        ?>
+                      <!-- <option class="cmc-default-opt" selected="selected" value="Select Countries Served">Select Countries Served</option> -->
+                                        <?php cmc_echo_opt_languages(); ?>
                                         </select>
                             </td>
                         </tr>           
@@ -2467,6 +1549,11 @@ cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE,
             300 characters left<!-- just some placeholder text -->
           </div>
         </form>
+      </div>
+      <!-- debug only dialogs! remove these before shipping!! -zack -->
+      <div id="assert-dialog" title="Assertion failure!">
+        <h2>You hit an assert!</h2>
+        <p id="assert-message"></p>
       </div>
       <div id="secret-hideout-dialog" title="Administration">
         <p>This is an area for magical unicorns and rainbows.</p>
