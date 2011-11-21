@@ -42,6 +42,21 @@ if (array_key_exists('fbid', $saferequest)) {
       case JSON_ERROR_NONE:
           break;
       }
+
+    $safesearchkeys = array();
+    foreach ($searchkeys as $key => $value) {
+      if (is_array($value)) {
+        $nested_array = array();
+        foreach ($value as $nested_key => $nested_value) {
+          $nested_array[mysql_real_escape_string($nested_key)] = mysql_real_escape_string($nested_value);
+        }
+        $safesearchkeys[mysql_real_escape_string($key)] = $nested_array;
+      } else {
+        $safesearchkeys[mysql_real_escape_string($key)] = mysql_real_escape_string($value);
+      }
+    }
+    $searchkeys = (object)$safesearchkeys;
+    unset($safesearchkeys);
 	  
 	  // If page and perpage are given in the arguments, then get that information
 	  if (array_key_exists('page',$saferequest) && (array_key_exists('perpage',$saferequest))) {

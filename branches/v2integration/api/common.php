@@ -1,37 +1,6 @@
 <?php
 require 'facebook/facebook.php';
 
-// This function is not needed in the new backend
-/*
-// function to display profile picture
-function displayprofilepic($facebook,$fbid) {
-
-    if ($fb_uid == false) { return array(null, 2, 'No valid FB user in Session'); }
-           
-    $albums=$facebook->api_client->photos_getAlbums($fb_uid,NULL);
-    $aid_profile = null;
-    foreach($albums as $album){
-      if($album['type']=='profile'){
-        $aid_profile = $album['aid'];
-        break;
-      }
-      return null;
-    }
-    $photos_profile = null;
-    //It s a bit tricky but if you use also the uid like params then you will get a empty string ... Mistery
-    if(!empty($aid_profile))$photos_profile = $facebook->api_client->photos_get('',$aid_profile,'');
-    
-    return $photos_profile;
-  
-//you  can test it in the tool box... it s works but it s not optimized...
-//link to the orignal picture in  the array (key = src_big)
-
-}
-*/
-
-// here for reference because I have no idea what it does --zack <3
-//$tabstring="<fb:tabs><fb:tab-item href='http://apps.facebook.com/missionsconnector/index.php' title='Invite'/><fb:tab-item href='http://apps.facebook.com/missionsconnector/searchform.php' title='Find New Connections'/><fb:tab-item href='http://apps.facebook.com/missionsconnector//profile.php?id='".$profileid."' title='My Profile'/><fb:tab-item href='http://apps.facebook.com/missionsconnector//mynetwork.php' title='People in My Network'/><fb:tab-item href='http://apps.facebook.com/missionsconnector//trips.php' title='My Trips'/></fb:tabs>";
-
 function arena_connect() {
   $host = "localhost";
   $user = "arena";
@@ -230,11 +199,11 @@ function cmc_safe_request_strip() {
 		if(is_array($value)) {
 			$localValue = array();
 			foreach($value as $nested_key => $nested_value) {
-				$localValue[$nested_key] = htmlspecialchars(strip_tags($nested_value));
+				$localValue[mysql_real_escape_string($nested_key)] = mysql_real_escape_string(htmlspecialchars(strip_tags($nested_value)));
 			}
-			$returnArrayMap[$key] = $localValue;
+			$returnArrayMap[mysql_real_escape_string($key)] = $localValue;
 		} else {
-			$returnArrayMap[$key] = htmlspecialchars(strip_tags($value));
+			$returnArrayMap[mysql_real_escape_string($key)] = mysql_real_escape_string(htmlspecialchars(strip_tags($value)));
 		}
 	}
   date_default_timezone_set('America/New_York');
@@ -253,74 +222,3 @@ function get_name_from_fb_using_curl($fbid) {
   return $name;
 
 }
-
-// There is no need for this function in the new backend. 
-/*
-// Make sure to call this function at the top of every CMC page. It will return 
-// the application's Facebook object.
-function cmc_startup($appapikey, $appsecret,$val) {
-
-  //$facebook = new Facebook($appapikey, $appsecret,true);
-  
-  $facebook = new Facebook(array( 'appId' => $appapikey, 'secret' => $appsecret, 'cookie' => true, ));
-
-  //$facebook->setSession(null,true);
-  $params = array(
-    'canvas'     => 1,
-    'fbconnect'  => 0,
-    'next'       => URL_CANVAS,
-    'cancel_url' => 'http://www.facebook.com/',
-    'req_perms'  => 'publish_stream, status_update, offline_acces'
-  );
-
-
-  // The userid should come from the JAVASCRIPT SDK Facebook FrontEnd
-  // This should come as a JSON Object, so we should first decode the JSON object and then get
-  // facebook userid and other details
-  
-  $response = array('response' => array('hasError' => false, 'welcomemessage' => 'Welcome to CMC', 'uid' => 100000022664372));
-  $somejson = json_encode($response);
-
-  $fbid = get_user_id($somejson);
-
-  
-  // During actual implementation, $somejson will come from frontend
-  // through either get or post
-  //$mydataobj = json_decode($somejson);
-
-  // Now process the json object
-  //if ($mydataobj->{'response'}->{'hasError'}) {
-    // have appropriate response if there is an error
-  //  echo 'Error <br />';
-  //}
-  //else { 
-  //  $fbid = $mydataobj->{'response'}->{'uid'};
- // }
-
-  // create app admin ids - facebook ids of people who have admin rights for this application
-  $appadminids = array();
-  $appadminids[] = 100000022664372;
-  $appadminids[] = 707283972;
-  $appadminids[] = 25826994;
-
-  arena_connect();
-  //db_check_user($fbid);
-  if ($val != 2) {
-    echo_dashboard($fbid,$appadminids);
-    echo_tabbar($appadminids,$fbid);
-    if ($val==1) {
-      // display profile picture only if $val is 1 
-      echo '<a href="http://www.facebook.com/profile.php?id='.$fbid.'"><img src="http://graph.facebook.com/'.$fbid.'/picture" /></a>';
-    }
-  }
-  //displayprofilepic($facebook,$fbid);
-  
-  date_default_timezone_set('Europe/London');
-
-  return $facebook;
-}
-*/
-
-?>
-
-

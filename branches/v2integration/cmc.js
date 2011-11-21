@@ -1268,7 +1268,7 @@ var CMC = {
         if (!response) {
           this.error("response value was null in Facebook API call");
         } else if (response.error) {
-          this.error("caught error from Facebook API call: " + response.error);
+          this.handleFacebookResponseError(response);
         } else {
           results[idPosMap[response.id]] = response;
           __notifyComplete();
@@ -2025,6 +2025,18 @@ var CMC = {
 
   // login functions
 
+  handleFacebookResponseError : function (response) {
+    this.beginFunction();
+    if (response.error) {
+      this.assert(response.error.message, "facebook error response didn't contain a message!");
+      this.assert(response.error.type, "facebook error response didn't contain a type!");
+      this.error("caught error from Facebook API call -- " + response.error.type + ": " + response.error.message);
+    } else {
+      this.assert("handling a Facebook error when apparently none happened.");
+    }
+    this.endFunction();
+  },
+
   cacheFacebookResponseProperties : function (response) {
     this.beginFunction();
     if (response.hasOwnProperty("authResponse")) {
@@ -2047,22 +2059,38 @@ var CMC = {
     this.beginFunction();
     CMC.ajaxNotifyStart();
     FB.api('/me', function (response) {
-      CMC.log("got user data from Facebook");
       CMC.ajaxNotifyComplete();
-      CMC.me = response;
-      // now check whether profile is volunteer or mission organizer	  
-      CMC.profileshowflag=1;
-      // This is the default profile display - showing the logged in user's profile
-      CMC.getProfile(CMC.me.id);
-      CMC.log(CMC.me.name + " (" + CMC.me.id + ") logged in to the app");
-      // Get upcoming trips information
-      CMC.getFutureTrips();
+      if (response) {
+        if (response.error) {
+          CMC.handleFacebookErrorResponse(response);
+        } else {
+          CMC.log("got user data from Facebook");
+          CMC.me = response;
+          // now check whether profile is volunteer or mission organizer	  
+          CMC.profileshowflag=1;
+          // This is the default profile display - showing the logged in user's profile
+          CMC.getProfile(CMC.me.id);
+          CMC.log(CMC.me.name + " (" + CMC.me.id + ") logged in to the app");
+          // Get upcoming trips information
+          CMC.getFutureTrips();
+        }
+      } else {
+        this.error("FB API call failed: can't cache user data (invalid response)");
+      }
     });
     CMC.ajaxNotifyStart();
     FB.api('/me/friends', function (friends) {
-      CMC.log("got friend data from Facebook");
       CMC.ajaxNotifyComplete();
-      CMC.friends = friends.data;
+      if (friends) {
+        if (friends.error) {
+          CMC.handleFacebookErrorResponse(friends);
+        } else {
+          CMC.log("got friend data from Facebook");
+          CMC.friends = friends.data;
+        }
+      } else {
+        this.error("FB API call failed: can't get friends list (invalid response)");
+      }
     });
     this.endFunction();
   },
