@@ -243,6 +243,20 @@ if($num_userids > 0){
    }
    }
 
+   if (isset($myobj->{'mycountry'})) {
+   $mycountry = $myobj->{'mycountry'};
+   if (empty($mycountry))
+	$sql = $sql.', country=NULL';
+   else {
+      if (validateString($mycountry)==0) {
+	$has_error = TRUE;
+	$err_msg = "You entered an invalid country string";
+       }
+       else {
+    		$sql = $sql.', country="'.$myobj->{'mycountry'}.'"';
+       }
+   }
+   }
    if (empty($myobj->{'url'}))
 	$sql = $sql.', website=NULL';
    else
@@ -277,6 +291,18 @@ if($num_userids > 0){
     		$sql = $sql.', city ="'.$myobj->{'city'}.'"';
        }
     }
+
+    $mycountry = $myobj->{'mycountry'};
+
+   if (!empty($mycountry)) {
+      if (validateString($mycountry)==0) {
+	$has_error = TRUE;
+	$err_msg = "You entered an invalid country string";
+       }
+       else {
+    		$sql = $sql.', country ="'.$myobj->{'mycountry'}.'"';
+       }
+    }
    if (!empty($myobj->{'url'}))
     $sql = $sql.', website = "'.$myobj->{'url'}.'"';
 
@@ -286,9 +312,9 @@ if($num_userids > 0){
 } else if($num_userids == 0) {
 
   $sql = 'INSERT INTO users '.
-    '(userid, name, organization, isreceiver, state, city, zipcode, phone, email, missionsexperience,'.
+    '(userid, name, organization, isreceiver, state, city,country, zipcode, phone, email, missionsexperience,'.
     ' religion, aboutme, Languages, website, partnersite) '.
-    'VALUES ("'.$fbid.'","'.$name.'","'.$myobj->{'name'}.'","'.$isreceiver.'","'.$myobj->{'state'}.'","'.strip_tags($myobj->{'city'}).'","'.strip_tags($myobj->{'zip'}).'","'.
+    'VALUES ("'.$fbid.'","'.$name.'","'.$myobj->{'name'}.'","'.$isreceiver.'","'.$myobj->{'state'}.'","'.strip_tags($myobj->{'city'}).'","'.strip_tags($myobj->{'mycountry'}).'","'.strip_tags($myobj->{'zip'}).'","'.
     strip_tags($myobj->{'phone'}).'","'.strip_tags($myobj->{'email'}).'","'.strip_tags($myobj->{'misexp'}).'","'.
     $myobj->{'relg'}.'","'.$myobj->{'about'}.'","'.$myobj->{'languages'}.'","'.$myobj->{'url'}.'","0")';
 }

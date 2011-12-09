@@ -335,7 +335,21 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
         width: 180px;
       }
 
+      #trip-profile-left-column {
+        float: left;
+        margin-right: 9px;
+        height: 450px;
+        width: 180px;
+      }
+
       #profile-right-content-section {
+        height: 410px;
+        width: 72%;
+        display: inline-block;
+        overflow: auto;
+      }
+
+      #trip-profile-right-content-section {
         height: 410px;
         width: 72%;
         display: inline-block;
