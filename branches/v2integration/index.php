@@ -438,9 +438,9 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
     <script src="jquery.validate.js" type="text/javascript"></script>
     <script src="jquery.validation.functions.js" type="text/javascript"></script> 
 	  <script src="datepicker.js" type="text/javascript"></script>
-	  
-	  <script src="jquery.multiselect.js" type="text/javascript"></script>
-	  <link href="jquery.multiselect.css" rel="stylesheet" type="text/css" />
+	
+    <link rel="stylesheet" type="text/css" href="jquery.multiselect.css" />
+    <script type="text/javascript" src="jquery.multiselect.js"></script>
 	  
     <!-- THIS IS THE ADMIN CODE BLOCK! Do NOT put code here for end users, they won't see it! -zack -->
     <script type="text/javascript">
@@ -1212,7 +1212,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                                     Religious Affiliation</label>
                             </td>
                             <td style="width: 197px">
-                                        <select id="profile-org-religion" class="profile-org-religion">
+                                        <select id="profile-org-religion" class="cmc-form-spec">
                                             <option class="cmc-default-opt" value="Select Religious Affiliation", selected="selected">Select Religious Affiliation</option>
                                             <option value="Secular">Secular</option>
                                             <option value="Christian: Protestant">Christian: Protestant</option>
@@ -1227,7 +1227,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                                     Duration of Missions</label>
                             </td>
                             <td style="width: 197px">
-                                        <select id="profile-org-duration" class="profile-org-duration">
+                                        <select id="profile-org-duration" class="cmc-form-spec">
                                             <option class="cmc-default-opt" value="Select Duration of Missions" selected="selected">Select Duration of Missions</option>
                                             <option value="1">Short Term: 1-2 weeks</option>
                                             <option value="2">Medium Term: 1 Month-2 Years</option>
@@ -1241,7 +1241,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                                     State</label>
                             </td>
                             <td style="width: 197px">
-                                        <select id="profile-org-state" class="profile-org-state">
+                                        <select id="profile-org-state" class="cmc-form-spec">
                                           <?php cmc_echo_opt_usstates(); ?>
                                         </select>
                             </td>
@@ -1252,7 +1252,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                                     City</label>
                             </td>
                             <td>
-                                <input type="text" id="profile-org-city" class="profile-org-city"/>
+                                <input type="text" id="profile-org-city" class="cmc-form-spec"/>
                             </td>
                         </tr>
                         <tr>
@@ -1261,7 +1261,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                                     Country</label>
                             </td>
                             <td style="width: 197px">
-                                        <select id="profile-org-country" class="profile-org-country" onchange="orgzipdisplay();">
+                                        <select id="profile-org-country" class="cmc-form-spec" onchange="orgzipdisplay();">
                                           <?php cmc_echo_opt_countries(); ?>
                                         </select>
                             </td>
@@ -1273,7 +1273,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                                     Zipcode</label>
                             </td>
                             <td>
-                                <input type="text" id="profile-org-zipcode" class="profile-org-zipcode"/>
+                                <input type="text" id="profile-org-zipcode" class="cmc-form-spec"/>
                             </td>
                         </tr>
                         </tbody>
@@ -1313,7 +1313,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                                     Phone</label>
                             </td>
                             <td>
-                                <input type="text" id="profile-org-phone" class="profile-org-phone" />
+                                <input type="text" id="profile-org-phone" class="cmc-form-spec" />
                             </td>
                         </tr>
                         <tr>
@@ -1322,7 +1322,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                                     Email Id</label>
                             </td>
                             <td>
-                                <input type="text" id="profile-org-email" class="profile-org-email" />
+                                <input type="text" id="profile-org-email" class="cmc-form-spec" />
                             </td>
                         </tr>
                         <tr>
@@ -1331,7 +1331,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                                     My Missions Experience</label>
                             </td>
                             <td>
-                                <input type="text" id="profile-org-experience" class="profile-org-experience" />
+                                <input type="text" id="profile-org-experience" class="cmc-form-spec" />
                             </td>
                         </tr>             
                         <tr>

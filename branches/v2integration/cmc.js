@@ -66,6 +66,29 @@ var CMC = {
     },
   },
 
+  BackendTranslationorg : {
+    Profile : {
+      "profile-org-name" : "name",
+      "profile-org-website" : "website",
+      "profile-org-about" : "about",
+      "profile-org-offer" : "medoffers",
+      "profile-org-offern" : "nonmedoffers",
+      "profile-org-medical" : "medskills",
+      "profile-org-nonmedical" : "otherskills",
+      "profile-org-spiritual" : "spiritserv",
+      "profile-org-religion" : "relg",
+      "profile-org-duration" : "dur",
+      "profile-org-state" : "state",
+      "profile-org-city" : "city",
+      "profile-org-zipcode" : "zipcode",
+      "profile-org-country" : "country",
+      "profile-org-region" : "region",
+      "profile-org-countryserved" : "countriesserved",
+      "profile-org-phone" : "phone",
+      "profile-org-email" : "email",
+      "profile-org-experience" : "misexp"
+    },
+  },
   // methods
   performStartupActions : function () {
     //@/BEGIN/DEBUGONLYSECTION
@@ -770,11 +793,13 @@ var CMC = {
           $("#profile-organizer-dialog").dialog('close');
           $("#profile-toggle-dialog").dialog('open');
           $("#profile-toggle-dialog").dialog().dialog("widget").find(".ui-dialog-titlebar-close").hide();
+          CMC.isreceiver = 0;
           CMC.editProfile();
         } else if (CMC.isreceiver == 0) {
           $("#profile-volunteer-dialog").dialog('close');		
           $("#profile-toggle-dialog").dialog('open');
           $("#profile-toggle-dialog").dialog().dialog("widget").find(".ui-dialog-titlebar-close").hide();			
+          CMC.isreceiver = 1;
           CMC.editProfile();
         }
         // refresh the profile page
@@ -1673,6 +1698,7 @@ var CMC = {
     this.profileshowflag=0;
     this.getProfile(this.me.id);
 
+
     if (this.isreceiver ==0) {
       var id = "#profile-volunteer-dialog";
 
@@ -2031,6 +2057,95 @@ var CMC = {
       });
       ret = true;
     }
+    this.endFunction();
+    return ret;
+  },
+  
+   submitorgProfile : function (profileData) {
+    this.beginFunction();
+    var zipisvalid = false;
+    var emailisvalid = false;
+    var reason="";
+    var isValid;
+    var errornum=1;
+    var ret = false;
+    
+    if (profileData.hasOwnProperty("profile-org-website")) {
+      if (!CMC.isUrl(profileData["profile-org-website"])) {
+			  reason += errornum+'. Incorrect Website Entered\n';
+        errornum = errornum + 1;
+        isValid = false;
+      }
+    }
+    
+    if (profileData.hasOwnProperty("profile-org-zipcode")) {
+      zipisvalid = this.validateZipCode(profileData["profile-org-zipcode"]);
+      if (!zipisvalid) {
+        reason += errornum+'. Incorrect Zipcode format entered\n';
+        errornum = errornum + 1;
+        isValid = false;
+      }
+    }
+
+    if (profileData.hasOwnProperty("profile-org-email")) {
+      emailisvalid = this.validateEmail(profileData["profile-org-email"]);
+      if (!emailisvalid) {
+        reason += errornum + '. Incorrect Email format entered\n';
+        errornum = errornum + 1;
+        isValid = false;
+      }
+    }
+
+    if (profileData.hasOwnProperty("profile-org-phone")) {
+      var country = profileData.hasOwnProperty("profile-org-country") ? profileData["profile-orgcountry"] : null;
+      var phoneerror = this.validatePhone(profileData["profile-org-phone"], country);
+      if (phoneerror != "") {
+        reason += errornum + ' ' + phoneerror + '\n';
+        errornum = errornum + 1;
+        isValid = false;
+      }
+    }
+    
+    if (reason != "") {
+      alert('Some input fields need correction:\n'+ reason);
+    } else {
+      var profileformdata = {};
+      profileformdata.profiletype=3;
+
+      if (this.profileedit == 1) {
+         profileformdata.update = 1;
+      }
+
+      $.extend(profileformdata, this.applyTranslationMap(profileData, this.BackendTranslationorg.Profile));
+      
+      $.ajax({
+        type: "POST",
+        url: "api/profilein.php",
+        data: {
+           fbid: CMC.me.id ? CMC.me.id : "",
+           profileinfo: JSON.stringify(profileformdata)
+        },
+        dataType: "json",
+        success: function(data) {
+          if (!data.has_error) {
+          // now close the profile submission window
+          $("#profile-organizer-dialog").dialog('close');
+          alert('Thank you - your submission has been successfully entered into our database ');
+            CMC.profileshowflag=1;
+            CMC.getProfile(CMC.me.id);
+          }
+          else {
+            alert("We are sorry, there was an error :  " + data.err_msg);
+          }
+        },
+        error: function(data, textStatus, errorThrown) {
+                alert("We are sorry, the profile was not submitted with the following error: " + data.err_msg);
+        }
+      });
+   
+      ret = true;
+    }
+    
     this.endFunction();
     return ret;
   },
@@ -2570,156 +2685,9 @@ $(function() {
   });
 
   $("#profile-org-submit").click(function() {
-    var aname = $("#profile-organizer-form").find('.profile-org-name');
-    var aurl = $("#profile-organizer-form").find('.profile-org-website');
-    var aabout = $("#profile-organizer-form").find('.profile-org-about');
-
-    //var medfacil = $("#profile-organizer-form").find('.profile-org-offer');
-    //var nonmedfacil = $("#profile-organizer-form").find('.profile-org-offern');
-	
-    //var mtype = $("#profile-organizer-form").find('.profile-org-medical');
-    //var nmtype = $("#profile-organizer-form").find('.profile-org-nonmedical');
-    //var sptype = $("#profile-organizer-form").find('.profile-org-spiritual');
-    var reltype = $("#profile-organizer-form").find('.profile-org-religion');
-    var durtype = $("#profile-organizer-form").find('.profile-org-duration');
-    var state = $("#profile-organizer-form").find('.profile-org-state');
-    var city = $("#profile-organizer-form").find('.profile-org-city');
-    var zipcode = $("#profile-organizer-form").find('.profile-org-zipcode');
-
-    var country = $("#profile-organizer-form").find('.profile-org-country');
-    //var region = $("#profile-organizer-form").find('.profile-org-region');
-    //var countriesserved = $("#profile-organizer-form").find('.profile-org-countryserved');
-    var phone = $("#profile-organizer-form").find('.profile-org-phone');
-    var email = $("#profile-organizer-form").find('.profile-org-email');
-    var misexp = $("#profile-organizer-form").find('.profile-org-experience');           
-
-    var zipisvalid = false;
-    var emailisvalid = false;
-    var reason="";
-    var errornum=1;
-    
-
-	if (aurl.val() != "") {
-		if (!CMC.isUrl(aurl.val())) {
-			reason += errornum+'. Incorrect Website Entered\n';
-			errornum = errornum + 1;
-			isValid = false;		
-		}
-	}
-	
-    if (zipcode !== undefined) {
-    if (zipcode.val() != "") {
-      zipisvalid = CMC.validateZipCode(zipcode.val());
-      if (!zipisvalid) {
-        reason += errornum+'. Incorrect Zipcode format entered\n';
-        errornum = errornum + 1;
-        isValid = false;
-      }
-    }
-    }
-
-    if (email.val() != "") {
-      emailisvalid = CMC.validateEmail(email.val());
-      if (!emailisvalid) {
-        reason += errornum + '. Incorrect Email format entered\n';
-        errornum = errornum + 1;
-        isValid = false;
-      }
-    }
-
-    if (phone.val() != "") {
-      var phoneerror = CMC.validatePhone(phone.val(),country.val());
-      if (phoneerror != "") {
-        reason += errornum + ' ' + phoneerror + '\n';
-        errornum = errornum + 1;
-        isValid = false;
-      }
-    }
-
-
-    if (reason != "") {
-      alert('Some input fields need correction:\n'+ reason);
-      return false;
-    } else {
-      var profileformdata = {};
-      profileformdata.profiletype=3;
-
-      if (CMC.profileedit == 1) {
-         profileformdata.update = 1;
-      }
-
-      if (aname.val() != "")
-        profileformdata.name= aname.val();	  
-      if (aabout.val() != "")
-        profileformdata.about= aabout.val();
-      if (aurl.val() != "")
-        profileformdata.url= aurl.val();
-      if (medfacil.val() != "")
-        profileformdata.medfacil= $("#profile-org-offer").val();
-      if (nonmedfacil.val() != "")
-        profileformdata.nonmedfacil= $("#profile-org-offern").val();
-      if (mtype.val() != "")
-        profileformdata.medskills= $("#profile-org-medical").val();
-      if (nmtype.val() != "")
-        profileformdata.otherskills=$("#profile-org-nonmedical").val();
-      if (sptype.val() != "")
-        profileformdata.spiritserv=$("#profile-org-spiritual").val();
-      if (region.val() != "")
-        profileformdata.region=$("#profile-org-region").val();
-      if (country.val() != "")
-        profileformdata.country=country.val();  
-      if (state.val() != "Select your State")
-        profileformdata.state=state.val();  
-      if (durtype.val() != "Select Duration of Missions")
-        profileformdata.dur=durtype.val();
-      if (reltype.val() != "Select Religious Affiliation")
-        profileformdata.relg=reltype.val();           
-      if (zipcode.val() != "")
-        profileformdata.zip=zipcode.val();
-      if (email.val() != "")
-        profileformdata.email=email.val();
-      if (city.val() != "")
-        profileformdata.city=city.val();
-      if (phone.val() != "")
-        profileformdata.phone=phone.val();
-      if (misexp.val() != "")
-        profileformdata.misexp=misexp.val();            
-     
-     // alert("AJAX Submit: " + JSON.stringify(profileformdata));
-      $.ajax({
-        type: "POST",
-        url: "api/profilein.php",
-        data: {
-           fbid: CMC.me.id ? CMC.me.id : "",
-           profileinfo: JSON.stringify(profileformdata)
-        },
-        dataType: "json",
-        context: this,
-        success: function(data) {
-          if (!data.has_error) {
-          // now close the profile submission window
-          $("#profile-organizer-dialog").dialog('close');
-          alert('Thank you - your submission has been successfully entered into our database ');
-          }
-          else {
-            alert("We are sorry, there was an error :  " + data.err_msg);
-          }
-        },
-        error: function(data, textStatus, errorThrown) {
-                alert("We are sorry, the profile was not submitted with the following error: " + data.err_msg);
-        }
-      });
-   
-      // Now show the updated profile
-      CMC.profileshowflag=1;
-      CMC.getProfile(CMC.me.id);
-
-      return true;
-    }
-
-    
+      CMC.submitorgProfile(CMC.getFormData("#profile-organizer-form"));
   });
-  
+
   $("#profile-trip-submit").click(function() {
   
     var aname = $("#profile-trip-form").find('.profile-trip-name');
