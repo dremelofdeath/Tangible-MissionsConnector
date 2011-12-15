@@ -64,10 +64,7 @@ var CMC = {
       "profile-email" : "email",
       "profile-experience" : "misexp"
     },
-  },
-
-  BackendTranslationorg : {
-    Profile : {
+    OrganizerProfile : {
       "profile-org-name" : "name",
       "profile-org-website" : "website",
       "profile-org-about" : "about",
@@ -87,8 +84,9 @@ var CMC = {
       "profile-org-phone" : "phone",
       "profile-org-email" : "email",
       "profile-org-experience" : "misexp"
-    },
+    }
   },
+
   // methods
   performStartupActions : function () {
     //@/BEGIN/DEBUGONLYSECTION
@@ -724,39 +722,28 @@ var CMC = {
     this.endFunction();
   },
 
-    associateProfileTripClicks : function(data) {
-        this.beginFunction();
-        this.log("Associating Profile Trip Clicks");
-
-			for (var each in data.trips) {
-        $("#trip-desc-submit-"+each).click(function() {
-              CMC.GetTripProfile(parseInt($(this).attr("tripid"),10),1);
-        });
-        /*
-        $("#invite-trip-submit-"+each).click(function() {
-              CMC.invitetoTrip(parseInt($(this).attr("tripid"),10));
-        });
-         */
-        }
-        this.endFunction();
-    },
+  associateProfileTripClicks : function(data) {
+    this.beginFunction();
+    for (var each in data.trips) {
+      $("#trip-desc-submit-"+each).click(function() {
+        CMC.GetTripProfile(parseInt($(this).attr("tripid"),10),1);
+      });
+    }
+    this.endFunction();
+  },
     
-    associateTripClicks : function(data) {
-        this.beginFunction();
-        this.log("Associating Trip Clicks");
-
-			for (var each in data.tripnames) {
-        $("#trips-desc-submit-"+each).click(function() {
-              CMC.GetTripProfile(parseInt($(this).attr("tripid"),10),2);
-              }
-         );
-        $("#join-trips-submit-"+each).click(function() {
-              CMC.JoinTrip(parseInt($(this).attr("tripid"),10));
-              }
-         );
-        }
-        this.endFunction();
-    },
+  associateTripClicks : function(data) {
+    this.beginFunction();
+    for (var each in data.tripnames) {
+      $("#trips-desc-submit-"+each).click(function() {
+        CMC.GetTripProfile(parseInt($(this).attr("tripid"),10),2);
+      });
+      $("#join-trips-submit-"+each).click(function() {
+        CMC.JoinTrip(parseInt($(this).attr("tripid"),10));
+      });
+    }
+    this.endFunction();
+  },
 
   ToggleProfile : function() {
     this.beginFunction();
@@ -836,7 +823,7 @@ var CMC = {
   GetTripProfile : function(index,index2) {
 	  this.beginFunction();
     if (index2 == 1) {
-    this.log("Getting Trip information for : " + parseInt(CMC.profiledata.tripid[index],10));
+      this.log("Getting Trip information for : " + parseInt(CMC.profiledata.tripid[index],10));
       $.ajax({
         type: "POST",
         url: "api/profileT.php",
@@ -849,9 +836,8 @@ var CMC = {
         success: this.onGetTripProfileDataSuccess,
         error: this.onGetTripProfileDataError
       });
-    }
-    else {
-    this.log("Getting Trip information for : " + parseInt(CMC.futuretripsdata.tripids[index],10));
+    } else {
+      this.log("Getting Trip information for : " + parseInt(CMC.futuretripsdata.tripids[index],10));
       $.ajax({
         type: "POST",
         url: "api/profileT.php",
@@ -867,7 +853,7 @@ var CMC = {
     }
 
 	  this.endFunction();
-    },  
+  },  
 
   onGetTripProfileDataSuccess : function(data, textStatus, jqXHR) {
     this.beginFunction();
@@ -1148,22 +1134,27 @@ var CMC = {
           delete this.SearchState.z;
         } else if (objectType == "s") {
           // it's a skill.
-          if (this.SearchState.skills.length <= 1) {
-            delete this.SearchState.skills;
-          } else {
-            var skillid = value.substring(4, value.length);
-            var foundObject = false;
-            var i = 0; // this is a really stupid bug in the chrome JS engine
-            for (i = 0; i < this.SearchState.skills.length; i++) {
-              if (this.SearchState.skills[i] == skillid) {
-                if (foundObject) {
-                  this.assert("found multiple copies of the same object");
-                } else {
-                  this.SearchState.skills.splice(i, 1);
-                  foundObject = true;
+          if (this.SearchState.skills) {
+            if (this.SearchState.skills.length <= 1) {
+              delete this.SearchState.skills;
+            } else {
+              var skillid = value.substring(4, value.length);
+              var foundObject = false;
+              var i = 0; // this is a really stupid bug in the chrome JS engine
+              for (i = 0; i < this.SearchState.skills.length; i++) {
+                if (this.SearchState.skills[i] == skillid) {
+                  if (foundObject) {
+                    this.assert("found multiple copies of the same object you're trying to delete! (" + value + ")");
+                  } else {
+                    this.SearchState.skills.splice(i, 1);
+                    foundObject = true;
+                  }
                 }
               }
+              this.assert(foundObject, "couldn't find the object you're trying to delete! (" + value + ")");
             }
+          } else {
+            this.assert("trying to delete a skill when the skills object is dead!");
           }
         } else {
           this.assert("outgoing unknown object type '" + value.substring(2,3) + "' can't be handled!");
@@ -1228,7 +1219,7 @@ var CMC = {
           success: this.onSearchSuccess,
           error: this.onSearchError
         });
-        $("#cmc-search-results-title").fadeIn();
+        $("#cmc-search-results-title").stop(true, true).fadeIn();
       }
       this.releaseSearchLock(searchUnlockKey);
     }
@@ -1358,14 +1349,18 @@ var CMC = {
     this.endFunction();
   },
 
-  showSearchResults : function (results) {
+  showSearchResults : function (results, isRetryCall) {
     this.beginFunction();
+    isRetryCall = isRetryCall || false; // optional parameter
+    if (isRetryCall) {
+      $("#cmc-search-results").show();
+    }
     if (results === undefined) {
       // this is a bug! do NOT pass this function undefined! say null to inform it that you have no results!
       this.assert(results === undefined, "undefined passed as results for showSearchResults");
     } else if (results == null || results.length == 0) {
       // no results
-      $("#cmc-search-results-noresultmsg").fadeIn();
+      $("#cmc-search-results-noresultmsg").stop(true, true).fadeIn();
     } else {
       var imageLoadsCompleted = 0, __notifyImageLoadCompleted = $.proxy(function() {
         imageLoadsCompleted++;
@@ -1375,11 +1370,17 @@ var CMC = {
         }
       }, this);
       this.assert(results.length <= 10, "more than 10 results passed to showSearchResults");
-      //@/BEGIN/DEBUGONLYSECTION
       if ($(".result-picture img").length > 0) {
         this.log("found " + $(".result-picture img").length + " junk pictures lying around");
+        if (!isRetryCall) {
+          this.log("delaying and retrying showSearchResults");
+          setTimeout($.proxy(function () {
+            this.showSearchResults(results, true);
+          }, this), 200);
+          this.endFunction();
+          return;
+        }
       }
-      //@/END/DEBUGONLYSECTION
       for(var each in results) {
         this.assert(results[each].id !== undefined, "id is missing from result at each=" + each);
         var id = "#cmc-search-result-" + each;
@@ -2116,7 +2117,7 @@ var CMC = {
          profileformdata.update = 1;
       }
 
-      $.extend(profileformdata, this.applyTranslationMap(profileData, this.BackendTranslationorg.Profile));
+      $.extend(profileformdata, this.applyTranslationMap(profileData, this.BackendTranslation.OrganizerProfile));
       
       $.ajax({
         type: "POST",
@@ -2334,31 +2335,6 @@ $(function() {
   CMC.log("begin load callback");
 
   CMC.performStartupActions();
-
-  //@/BEGIN/DEBUGONLYSECTION
-  CMC.log("attaching global click event handler");
-  $('*').live('click', function(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    var id = $(this).attr('id') == '' || $(this).attr('id') == undefined ? (
-               $(this).parent().attr('id') == '' || $(this).parent().attr('id') == undefined ? (
-                 $(this).parent().parent().attr('id') == ''  || $(this).parent().parent().attr('id') == undefined ?
-                   "(unknown ID)"
-                   : $(this).parent().parent().attr('id'))
-                 : $(this).parent().attr('id'))
-               : $(this).attr('id');
-    CMC.log("click event: " + $(this).get(0).tagName.toLowerCase() + "#" + id);
-    /*
-    // FIXME: This stuff should never be in the debug click event logger! --zack
-      if (id.indexOf("tripprofileimage") >= 0) {
-        // change to the Profile Tab
-        $("#tabs").tabs('select', 1);
-        // Show the Trip owner's profile
-        CMC.getProfile(CMC.tripuserid);
-      }
-     */
-  });
-  //@/END/DEBUGONLYSECTION
 
   $("#make-profile, #make-volunteer, #make-organizer").hide();
 
@@ -2613,9 +2589,8 @@ $(function() {
   CMC.log("attempting to get facebook login status");
   CMC.checkFacebookLoginStatus(function (response) {
     if (response.authResponse) {
-	  CMC.loggedInUserID = response.authResponse.userID;
+      CMC.loggedInUserID = response.authResponse.userID;
       CMC.log("user " + CMC.loggedInUserID + " is already logged in, cache their data");
-      //CMC.log("user " + response.authResponse.userID + " is already logged in, cache their data");
       CMC.cacheFacebookData();
     } else {
       CMC.log("authResponse is null; no user session, do not cache data yet");
