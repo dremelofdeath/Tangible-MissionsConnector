@@ -21,7 +21,6 @@ var CMC = {
   profileexists : false,
   profileedit : false,
   requestsOutstanding : 0,
-  showuserid : false,
   tripuserid : false,
   dialogsOpen : 0,
   version : "1.9.18",
@@ -342,9 +341,6 @@ var CMC = {
     this.beginFunction();
     this.log("Obtaining data from the profile");
     this.ajaxNotifyStart(); // one for good measure, we want the spinner for the whole search
-	
-	  this.showuserid = userid;
-
     $.ajax({
       type: "POST",
       url: "api/profile.php",
@@ -421,10 +417,11 @@ var CMC = {
     } else {
       var id = "#profilecontent";
       this.ajaxNotifyStart();
-      this.assert(data.name !== undefined, "name is missing from result set");
-      this.updateProfileControls(CMC.showuserid);
+      this.assert(data.id != undefined, "id is missing from result set");
+      this.updateProfileControls(data.id);
+      this.assert(data.name != undefined, "name is missing from result set");
       $("#profile-name").html(data.name ? data.name : "");
-      $("img.profile-picture").attr("src", "http://graph.facebook.com/"+this.showuserid+"/picture?type=large");
+      $("img.profile-picture").attr("src", "http://graph.facebook.com/"+data.id+"/picture?type=large");
       this.ajaxNotifyComplete();
 	
       $("#profile-section-about-me-content").html(data.about ? data.about : "");
@@ -1002,28 +999,28 @@ var CMC = {
     this.endFunction();
   },
   
-     JoinTrip : function(index) {
-      $.ajax({
-        type: "POST",
-        url: "api/addtripmember.php",
-        data: {
-		    tripid: CMC.profiledata.tripid[index],
-			  fbid: CMC.me.id ? CMC.me.id : "",
-		    type: 2
-        },
-        dataType: "json",
-        context: this,
-        success: function(data) {
-          if (!data.has_error)
-            alert('You have successfully joined this trip');
-          else 
-            alert('Sorry, you could not be added to the trip due to: ' + data.err_msg);
-        },
-        error: function(data) {
-            alert('Sorry, you could not be added to the trip due to: ' + data.err_msg);
-        }
-      });
-    },
+  JoinTrip : function(index) {
+    $.ajax({
+      type: "POST",
+      url: "api/addtripmember.php",
+      data: {
+        tripid: CMC.profiledata.tripid[index],
+        fbid: CMC.me.id ? CMC.me.id : "",
+        type: 2
+      },
+      dataType: "json",
+      context: this,
+      success: function(data) {
+        if (!data.has_error)
+          alert('You have successfully joined this trip');
+        else 
+          alert('Sorry, you could not be added to the trip due to: ' + data.err_msg);
+      },
+      error: function(data) {
+          alert('Sorry, you could not be added to the trip due to: ' + data.err_msg);
+      }
+    });
+  },
 
   // This will return you a key, which you will provide to releaseSearchLock()
   // when you are finished locking search. For as long as search is locked,

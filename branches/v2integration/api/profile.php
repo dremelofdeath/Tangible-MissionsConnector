@@ -131,6 +131,8 @@ if(mysql_num_rows($result) != 0) {
   
   } 
 
+  $json['id'] = $showuserid;
+
   if (!empty($name))
 	$json['name'] = $name;
 
