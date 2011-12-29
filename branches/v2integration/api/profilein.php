@@ -88,10 +88,11 @@ else {
 }
 
 if ($myobj->{'profiletype'} != 2) {
+
 // Zip code is a required field for volunteer or missions - return an error if the country is USA
 if (($isreceiver == 0) || ($isreceiver==1)) {
 	if (isset($myobj->{'country'})) {
-		if ((!isset($myobj->{'zip'})) && (!strcmp($myobj->{'country'},'United States'))) {
+		if ((!isset($myobj->{'zip'})) && (!strcmp($myobj->{'mycountry'},"1"))) {
 			  $has_error = TRUE;
   			$err_msg = "If country is USA, zip code is a required field";
 		}
@@ -1316,7 +1317,7 @@ foreach($country as $ms) {
 }
 }
 else {
-  $sql = "INSERT INTO countriesselected VALUES ('".$fbid."','".$country."')";
+  $sql = "INSERT INTO countriesselected VALUES ('".$fbid."','".$country[0]."')";
   $result = mysql_query($sql,$con);
   if(!$result) {
     setjsonmysqlerror($has_error,$err_msg,$sql);
