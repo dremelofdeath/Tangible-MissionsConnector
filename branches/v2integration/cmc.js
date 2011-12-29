@@ -420,6 +420,7 @@ var CMC = {
       this.assert(data.id != undefined, "id is missing from result set");
       this.updateProfileControls(data.id);
       this.assert(data.name != undefined, "name is missing from result set");
+
       $("#profile-name").html(data.name ? data.name : "");
       $("img.profile-picture").attr("src", "http://graph.facebook.com/"+data.id+"/picture?type=large");
       this.ajaxNotifyComplete();
@@ -2039,19 +2040,10 @@ var CMC = {
           profileinfo: JSON.stringify(profileformdata)
         },
         dataType: "json",
+        async: false,
         context: this,
-        success: function(data) {
-          if (!data.has_error) {
-            CMC.getProfile(CMC.me.id);
-            $("#profile-volunteer-dialog").dialog('close');
-            alert('Thank you - your submission has been successfully entered into our database');
-          } else {
-            alert('We are sorry - there was an error: ' + data.err_msg);
-          }
-        },
-        error: function(data) {
-          alert('We are sorry - there was an error: ' + data.err_msg);
-        }
+        success: this.onSubmitSuccess,
+        error: this.onSubmitFailure
       });
       ret = true;
     }
@@ -2059,6 +2051,25 @@ var CMC = {
     return ret;
   },
   
+   onSubmitSuccess : function(data, textStatus, jqXHR) {
+   this.beginFunction();
+          if (!data.has_error) {
+            //CMC.getProfile(CMC.me.id);
+            $("#profile-volunteer-dialog").dialog('close');
+             alert('Thank you - your submission has been successfully entered into our database');
+             //$("#tabs").tabs('load', 1);
+          } else {
+            alert('We are sorry - there was an error: ' + data.err_msg);
+          }
+   this.endFunction();
+   },
+
+   onSubmitFailure : function(data, textStatus, jqXHR) {
+   this.beginFunction();
+   alert('We are sorry - there was an error: ' + data.err_msg);
+   this.endFunction();
+   },
+
    submitorgProfile : function (profileData) {
     this.beginFunction();
     var zipisvalid = false;
@@ -2104,8 +2115,6 @@ var CMC = {
       }
     }
     
-    alert("reason = " + reason + " " + errornum);
-
     if (reason != "") {
       alert('Some input fields need correction:\n'+ reason);
     } else {
@@ -2118,8 +2127,6 @@ var CMC = {
 
       $.extend(profileformdata, this.applyTranslationMap(profileData, this.BackendTranslation.OrganizerProfile));
 
-      alert(JSON.stringify(profileformdata));
-
       $.ajax({
         type: "POST",
         url: "api/profilein.php",
@@ -2127,26 +2134,11 @@ var CMC = {
            fbid: CMC.me.id ? CMC.me.id : "",
            profileinfo: JSON.stringify(profileformdata)
         },
+        async: false,
+        context : this,
         dataType: "json",
-        context: this,
-        success: function(data) {
-          alert("one");
-          alert("came here into success " + data.has_error);
-          if (!data.has_error) {
-          // now close the profile submission window
-          $("#profile-organizer-dialog").dialog('close');
-          alert('Thank you - your submission has been successfully entered into our database ');
-            //CMC.profileshowflag=1;
-            //CMC.getProfile(CMC.me.id);
-          }
-          else {
-            alert("We are sorry, there was an error :  " + data.err_msg);
-          }
-        },
-        error: function(data) {
-                alert("data = " + data);
-                alert("We are sorry, the profile was not submitted with the following error: " + data.err_msg);
-        }
+        success: this.onSubmitorgSuccess,
+        error: this.onSubmitorgFailure
       });
    
       ret = true;
@@ -2155,6 +2147,27 @@ var CMC = {
     this.endFunction();
     return ret;
   },
+
+
+   onSubmitorgSuccess : function(data, textStatus, jqXHR) {
+   this.beginFunction();
+   if (!data.has_error) {
+       $("#profile-organizer-dialog").dialog('close');
+       alert('Thank you - your submission has been successfully entered into our database');
+       this.profileshowflag=1;
+       //this.getProfile(this.me.id);
+       //$("#tabs").tabs('load', 1);
+   } else {
+       alert('We are sorry - there was an error: ' + data.err_msg);
+   }
+   this.endFunction();
+   },
+
+   onSubmitorgFailure : function(data, textStatus, jqXHR) {
+   this.beginFunction();
+   alert("We are sorry, the profile was not submitted with the following error: " + data.err_msg);
+   this.endFunction();
+   },
 
   createTrip : function () {
     $("#profile-trip-dialog").dialog('open');
