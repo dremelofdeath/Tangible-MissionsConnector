@@ -49,11 +49,11 @@ function cmc_js_load($src) {
 }
 
 function cmc_library_load_jquery($ver) {
-  cmc_js_load('http://code.jquery.com/jquery-'.$ver.'.js');
+  cmc_js_load('http://code.jquery.com/jquery-'.$ver.'.min.js');
 }
 
 function cmc_library_load_jquery_ui($ver) {
-  $src = 'https://ajax.googleapis.com/ajax/libs/jqueryui/'.$ver.'/jquery-ui.js';
+  $src = 'https://ajax.googleapis.com/ajax/libs/jqueryui/'.$ver.'/jquery-ui.min.js';
   cmc_js_load($src);
 }
 
