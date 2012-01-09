@@ -1,7 +1,5 @@
 <?php
 // Application: Christian Missions Connector
-// File: 'trips.php'
-//  shows all trips the user is a member of
 //
 
 include_once 'common.php';
@@ -32,75 +30,74 @@ $json = array();
 
 if (!$has_error) {
 
-// check if there is a trip corresponding to $tid
-$sql = 'select * from trips where id="'.$tid.'"';
-$result = mysql_query($sql,$con);
-if (!$result) {
-	setjsonmysqlerror($has_error,$err_msg,$sql);
-}
-else {
-
-$numrows = mysql_num_rows($result);
-if ($numrows ==0) {
-  $has_error = TRUE;
-  $err_msg = "No Trip exists with the specified ID";
-}
-else {
-if (isset($fbid)) {
-
-$sql = 'select userid from tripmembers where userid !="'.$fbid.'" and accepted="1" and tripid="'.$tid.'"';
-$result = mysql_query($sql,$con);
-if (!$result) {
+  // check if there is a trip corresponding to $tid
+  $sql = 'select * from trips where id="'.$tid.'"';
+  $result = mysql_query($sql,$con);
+  if (!$result) {
     setjsonmysqlerror($has_error,$err_msg,$sql);
-}
-else {
-	$numrows = mysql_num_rows($result);
-	if ($numrows==0) {
-		$sql2 = 'select * from tripmembers where userid="'.$fbid.'" and accepted="1" and tripid="'.$tid.'"';
-		$result2 = mysql_query($sql2,$con);
-		if (!$result2) {
-		    setjsonmysqlerror($has_error,$err_msg,$sql2);
-		}
-		else {
-		$numrows2 = mysql_num_rows($result2);
-		if ($numrows2==1) {
-			$has_error =  TRUE;
-			$err_msg = 'You are the only person in this trip'; 
-		}
-		}
-	}
-}
-}
-else if (isset($tripmembers)) {
+  } else {
+    $numrows = mysql_num_rows($result);
+    if ($numrows ==0) {
+      $has_error = TRUE;
+      $err_msg = "No Trip exists with the specified ID";
+    } else {
+      if (isset($fbid)) {
+        $sql = 'select * from tripmembers where userid="'.$fbid.'" and accepted="1" and tripid="'.$tid.'"';
+        $result = mysql_query($sql,$con);
+        if (!$result) {
+          setjsonmysqlerror($has_error,$err_msg,$sql);
+        } else {
+          $numrows = mysql_num_rows($result);
+          if ($numrows == 0) {
+            $has_error = TRUE;
+            $err_msg = 'User is not a member of that trip';
+          } else {
+            $sql = 'select COUNT(userid) from tripmembers where accepted="1" and tripid="'.$tid.'"';
+            $result = mysql_query($sql,$con);
+            if (!$result) {
+              setjsonmysqlerror($has_error,$err_msg,$sql);
+            } else {
+              $countrow = mysql_fetch_array($result);
+              $membercount = $countrow['COUNT(userid)'];
+              if ($membercount == 1) {
+                $has_error = TRUE;
+                $err_msg = 'You are the only person in this trip'; 
+              } else {
+                $sql = 'DELETE FROM tripmembers WHERE userid="'.$fbid.'" AND tripid="'.$tid.'"';
+                $result = mysql_query($sql, $con);
+                if (!$result) {
+                  setjsonmysqlerror($has_error, $err_msg, $sql);
+                }
+              }
+            }
+          }
+        }
+      } else if (isset($tripmembers)) {
 
-// Now we can delete members from the trip - which means updating the tripmembers table in the database
+        // Now we can delete members from the trip - which means updating the tripmembers table in the database
 
-if (is_array($tripmembers)) {
-	while ($mytripmember = current($tripmembers)) {
-			$sql = 'delete from tripmembers where userid="'.$mytripmember.'" and tripid="'.$tid.'"';
-			$result = mysql_query($sql,$con);
-			if (!result) {
-				setjsonmysqlerror($has_error,$err_msg,$sql);
-				continue 1;
-			}
-			next($tripmembers);
-	}
-}
-else {
+        if (is_array($tripmembers)) {
+          while ($mytripmember = current($tripmembers)) {
+            $sql = 'delete from tripmembers where userid="'.$mytripmember.'" and tripid="'.$tid.'"';
+            $result = mysql_query($sql,$con);
+            if (!result) {
+              setjsonmysqlerror($has_error,$err_msg,$sql);
+              continue 1;
+            }
+            next($tripmembers);
+          }
+        } else {
 
-$sql = 'delete from tripmembers where userid="'.$tripmembers.'" and tripid="'.$tid.'"';
-$result = mysql_query($sql,$con);
+          $sql = 'delete from tripmembers where userid="'.$tripmembers.'" and tripid="'.$tid.'"';
+          $result = mysql_query($sql,$con);
 
-if (!result) {
-	setjsonmysqlerror($has_error,$err_msg,$sql);
-}
-}
-
-}
-
-}
-}
-
+          if (!result) {
+            setjsonmysqlerror($has_error,$err_msg,$sql);
+          }
+        }
+      }
+    }
+  }
 }
 
 $json['has_error'] = $has_error;

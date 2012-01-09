@@ -912,7 +912,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                         <label>Medical Skills</label>
                       </td>
                       <td style="width: 97px">
-                        <select id="profile-medical-skills" multiple="multiple" name="profile-medical-skills">
+                        <select id="profile-medical-skills" class="cmc-form-spec" multiple="multiple" name="profile-medical-skills">
                           <!--<option class="cmc-default-opt" value="0" selected="selected">Select Medical Skills</option>-->
                           <?php cmc_echo_opt_skills(1); ?>
                         </select>
@@ -923,7 +923,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                         <label>Non-Medical Skills</label>
                       </td>
                       <td style="width: 197px">
-                        <select id="profile-nonmedical-skills" multiple="multiple" name="profile-nonmedical-skills">
+                        <select id="profile-nonmedical-skills" class="cmc-form-spec" multiple="multiple" name="profile-nonmedical-skills">
                           <!--<option class="cmc-default-opt" value="0" selected="selected">Select Non-Medical Skills</option>-->
                           <?php cmc_echo_opt_skills(2); ?>
                         </select>
@@ -934,7 +934,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                         <label>Spiritual Service</label>
                       </td>
                       <td style="width: 197px">
-                        <select id="profile-spiritual-skills" multiple="multiple" name="profile-spiritual-skills">
+                        <select id="profile-spiritual-skills" class="cmc-form-spec" multiple="multiple" name="profile-spiritual-skills">
                           <!--<option class="cmc-default-opt" value="0" selected="selected">Select Spiritual Service</option>-->
                           <?php cmc_echo_opt_skills(3); ?>
                         </select>
@@ -967,6 +967,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                         </select>
                       </td>
                     </tr>
+                    <!--
                     <tr>
                       <td style="width: 197px">
                         <label>State</label>
@@ -986,6 +987,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                         <input type="text" id="profile-city" class="cmc-form-spec"/>
                       </td>
                     </tr>
+                    -->
                     <tr>
                       <td style="width: 197px">
                         <label>Country</label>
@@ -996,23 +998,21 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                         </select>
                       </td>
                     </tr>             
-                    <tbody id="volzip" style="display: none;">
-                      <tr>
-                        <td>
-                          <label>Zipcode</label>
-                        </td>
-                        <td>
-                          <input type="text" id="profile-zipcode" class="cmc-form-spec"/>
-                        </td>
-                      </tr>
-                    </tbody>
+                    <tr>
+                      <td>
+                        <label>Zipcode</label>
+                      </td>
+                      <td>
+                        <input type="text" id="profile-zipcode" class="cmc-form-spec"/>
+                      </td>
+                    </tr>
                     <tr>
                       <td style="width: 197px">
                         <label>Regions of Interest</label>
                       </td>
                       <td style="width: 197px">
-                        <select id="profile-region" multiple="multiple" name="profile-region">
-                          <option class="cmc-default-opt" value="Select Regions of Interest" selected="selected">Select Regions of Interest</option>
+                        <select id="profile-region" class="cmc-form-spec" multiple="multiple" name="profile-region">
+                          <!-- <option class="cmc-default-opt" value="Select Regions of Interest" selected="selected">Select Regions of Interest</option> -->
                           <option id="0" value="1">Africa</option>
                           <option id="1" value="2">Asia and Oceana</option>
                           <option id="2" value="3">Europe and Russia</option>
@@ -1028,7 +1028,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                         <label>Countries Served</label>
                       </td>
                       <td style="width: 197px">
-                        <select id="profile-country-served" multiple="multiple" name="profile-country-served">
+                        <select id="profile-country-served" class="cmc-form-spec" multiple="multiple" name="profile-country-served">
                           <!-- <option class="cmc-default-opt" selected="selected" value="Select Countries Served">Select Countries Served</option> -->
                           <?php cmc_echo_opt_countries(); ?>
                         </select>
@@ -1061,7 +1061,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                     <tr>
                       <td>&nbsp;</td>
                       <td>
-                        <input type="submit" value="Submit" id="profile-submit" />
+                        <input type="button" value="Submit" id="profile-submit" />
                       </td>
                     </tr>
                   </table>
@@ -1330,7 +1330,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                                 
                             </td>
                             <td>
-                                <input type="submit" value="Submit" class="profile-org-submit" id="profile-org-submit" />
+                                <input type="button" value="Submit" class="profile-org-submit" id="profile-org-submit" />
                             </td>
                         </tr>
                     </table>
@@ -1535,7 +1535,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                                 
                             </td>
                             <td>
-                                <input type="submit" value="Submit" class="profile-trip-submit" id="profile-trip-submit" />
+                                <input type="button" value="Submit" class="profile-trip-submit" id="profile-trip-submit" />
                             </td>
                         </tr>
                     </table>

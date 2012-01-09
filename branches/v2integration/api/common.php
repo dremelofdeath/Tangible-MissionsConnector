@@ -210,6 +210,22 @@ function cmc_safe_request_strip() {
 	return $returnArrayMap;
 }
 
+function cmc_safe_object_strip($obj) {
+  $safeobj = array();
+  foreach ($obj as $key => $value) {
+    if (is_array($value)) {
+      $nested_array = array();
+      foreach ($value as $nested_key => $nested_value) {
+        $nested_array[mysql_real_escape_string($nested_key)] = mysql_real_escape_string(htmlspecialchars($nested_value));
+      }
+      $safeobj[mysql_real_escape_string($key)] = $nested_array;
+    } else {
+      $safeobj[mysql_real_escape_string($key)] = mysql_real_escape_string(htmlspecialchars($value));
+    }
+  }
+  return (object)$safeobj;
+}
+
 function get_name_from_fb_using_curl($fbid) {
  
   $urlx = 'http://graph.facebook.com/'.$fbid.'/';

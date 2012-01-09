@@ -44,11 +44,13 @@ if(!$result) {
 }
 else {
 
-function cmc_profile_render_id_join($title2,$title,$desc, $descdb, $selecteddb, $fbid, &$msg, &$k,&$has_error,&$err_msg,&$json,$con) {
+function cmc_profile_render_id_join($title2,$title,$desc, $descdb, $selecteddb, $shortname, $fbid, &$msg, &$k,&$has_error,&$err_msg,&$json,$con) {
   $sql = "SELECT * FROM ".$descdb.
      " JOIN ".$selecteddb." ON ".$descdb.".id = ".$selecteddb.".id".
      " WHERE ".$selecteddb.".userid='".$fbid."'";
   $result = mysql_query($sql,$con);
+  $id2 = str_replace (" ", "", $title2);
+  $id1 = str_replace (" ", "", $title);
   if (!$result) {
     setjsonmysqlerror($has_error,$err_msg,$sql);
   }
@@ -58,17 +60,22 @@ function cmc_profile_render_id_join($title2,$title,$desc, $descdb, $selecteddb, 
 
   if ($i==0) {
     if ($k==0) {
-	  $json[str_replace (" ", "", $title2)] = array();
+	  $json[$id2] = array();
       $k++;
     }
-	$json[str_replace (" ", "", $title2)][str_replace (" ", "", $title)] = array();
-	$json[str_replace (" ", "", $title2)][str_replace (" ", "", $title)."id"] = array();
+	$json[$id2][$id1] = array();
+	$json[$id2][$id1."id"] = array();
   }
   
   $i++;
 	  
-	  $json[str_replace (" ", "", $title2)][str_replace (" ", "", $title)][] = $row[$desc];
-	  $json[str_replace (" ", "", $title2)][str_replace (" ", "", $title)."id"][] = $row["id"];
+	  $json[$id2][$id1][] = $row[$desc];
+	  $json[$id2][$id1."id"][] = $row["id"];
+
+    if ($shortname) {
+      $json[$id2][$shortname][] = $row[$shortname];
+    }
+
     }
   }
 }
@@ -169,19 +176,19 @@ if(mysql_num_rows($result) != 0) {
   cmc_profile_render_skills("Spiritual Skills", '3', $showuserid,$has_error,$err_msg,$json,$con);
   
   $pp=-1;
-  cmc_profile_render_id_join("States","State",'longname', 'usstates', 'usstatesselected', $showuserid, $message, $pp,$has_error,$err_msg,$json,$con);
+  cmc_profile_render_id_join("States","State",'longname', 'usstates', 'usstatesselected', 'shortname', $showuserid, $message, $pp,$has_error,$err_msg,$json,$con);
 
   if (!empty($city)) {
 	$json['city'] = $city;
   }
   
   $kk=0;
-  cmc_profile_render_id_join("Geographic Areas of Interest","Regions",'name', 'regions', 'regionsselected', $showuserid, $message, $kk,$has_error,$err_msg,$json,$con);
+  cmc_profile_render_id_join("Geographic Areas of Interest","Regions",'name', 'regions', 'regionsselected', false, $showuserid, $message, $kk,$has_error,$err_msg,$json,$con);
 
-  cmc_profile_render_id_join("Geographic Areas of Interest","Countries",'longname', 'countries', 'countriesselected', $showuserid, $message, $kk,$has_error,$err_msg,$json,$con);
+  cmc_profile_render_id_join("Geographic Areas of Interest","Countries",'longname', 'countries', 'countriesselected', false, $showuserid, $message, $kk,$has_error,$err_msg,$json,$con);
 
   $pp=-1;
-  cmc_profile_render_id_join("Durations","Preferred Duration of Mission Trips",'name', 'durations', 'durationsselected', $showuserid, $message, $pp,$has_error,$err_msg,$json,$con);
+  cmc_profile_render_id_join("Durations","Preferred Duration of Mission Trips",'name', 'durations', 'durationsselected', false, $showuserid, $message, $pp,$has_error,$err_msg,$json,$con);
 
   $json['tripids'] = array();
   $json['tripnames'] = array();

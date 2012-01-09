@@ -25,13 +25,15 @@ if (array_key_exists('fbid', $saferequest) && array_key_exists('profileinfo',$sa
 
   $fbid = $saferequest['fbid'];
  
-  if (get_magic_quotes_gpc())
+  /*if (get_magic_quotes_gpc())
   {
   $myobj = json_decode(htmlspecialchars_decode(array_map("stripslashes_deep",$saferequest['profileinfo'])));
   }
   else {
   $myobj = json_decode(htmlspecialchars_decode($saferequest['profileinfo']));
-  }
+  }*/
+
+  $myobj = json_decode(base64_decode($saferequest['profileinfo']));
 
     switch(json_last_error())
     {
@@ -50,6 +52,8 @@ if (array_key_exists('fbid', $saferequest) && array_key_exists('profileinfo',$sa
       case JSON_ERROR_NONE:
           break;
       }
+
+    $myobj = cmc_safe_object_strip($myobj);
 
 }
 else {
