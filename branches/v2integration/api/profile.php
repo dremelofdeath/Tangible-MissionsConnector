@@ -18,7 +18,7 @@ $has_error = FALSE;
 $err_msg = '';
 
 if (array_key_exists('userid', $saferequest) && array_key_exists('fbid', $saferequest)) {
-  // invitation ids, tripid and facebook userid should be provided
+  // invitation ids, userid and facebook userid should be provided
   $showuserid = $saferequest['userid'];
   $fbid = $saferequest['fbid'];
 } 
@@ -183,32 +183,31 @@ if(mysql_num_rows($result) != 0) {
   $pp=-1;
   cmc_profile_render_id_join("Durations","Preferred Duration of Mission Trips",'name', 'durations', 'durationsselected', $showuserid, $message, $pp,$has_error,$err_msg,$json,$con);
 
-  $json['tripid'] = array();
-  $json['trips'] = array();
+  $json['tripids'] = array();
+  $json['tripnames'] = array();
   $trips = array();
   $sql = "select tripid from tripmembers where userid='".$showuserid."'";
   $result = mysql_query($sql,$con);
   if($result) {
     $ii=0;
     while($row= mysql_fetch_array($result)) {
-      $tid=$row['tripid'];
-	  $json['tripid'][] = $tid;
+      $tid = $row['tripid'];
+      $json['tripids'][] = $tid;
       $sql2 = 'select tripname from trips where id="'.$tid.'"';
       $result2 = mysql_query($sql2,$con);
-	  if (!$result2) {
-	  		setjsonmysqlerror($has_error,$err_msg,$sql2);
-			continue 1;
-	  }
-	  else {
-		$row2 = mysql_fetch_array($result2);
-		$tname = $row2['tripname'];
-		$trips[]=$tname;    
-		$json['trips'][] = $trips[$ii];
-		$ii++;
-	  }
+      if (!$result2) {
+        setjsonmysqlerror($has_error,$err_msg,$sql2);
+        continue 1;
+      } else {
+        $row2 = mysql_fetch_array($result2);
+        $tname = $row2['tripname'];
+        $trips[]=$tname;    
+        $json['tripnames'][] = $trips[$ii];
+        $ii++;
+      }
     }
   } else {
-  		setjsonmysqlerror($has_error,$err_msg,$sql);
+    setjsonmysqlerror($has_error,$err_msg,$sql);
   }
   
 } else {

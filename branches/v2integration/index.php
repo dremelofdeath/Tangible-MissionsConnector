@@ -376,6 +376,27 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
         width: 180px;
       }
 
+      ul.trip-list {
+        list-style-type: none;
+        padding: 0px;
+      }
+
+      .trip-item-control {
+        float: right;
+      }
+
+      .trip-item-name {
+        font-size: 1em;
+        font-weight: bold;
+        padding-top: 6px;
+        position: absolute;
+      }
+
+      li.trip-list-item {
+        margin-bottom: 12px;
+        height: 16px;
+      }
+
       /* the stuff below here appears to be stylization for edit profile dialogs 
        * --zack
        */
@@ -604,34 +625,18 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                   <h5 id="profile-countries-display">Countries of Interest: <span id="profile-countries">Countries</span></h5>
                 </div>
                 <h3>Trips Information:</h3>
-                <div id="table_wrapper">
-                  <div id="tbody">
-                    <table>
-                      <tr>
-                        <td>
-                          <div class="profile-picture">
-                            <img src="ajax-spinner.gif" alt="" height="35"/>
-                          </div>
-                        </td>
-                        <td>
-                          <div class="box3 profile-tripname">
-                            TripName 
-                          </div>						
-                        </td>
-                        <td class="td2"><input type="submit" value="Trip Description" class="button" id="trip-desc-submit" /></td>
-                        <td class="td2"><input type="submit" value="Join This Trip" class="button" id="join-trip-submit" /></td>
-                      </tr>
-                    </table>
-                  </div>
+                <div id="profile-trips-list-section">
+                  <ul id="profile-trip-list" class="trip-list">
+                    <li class="trip-list-item">
+                      <span class="trip-item-name">Example Trip Name</span>
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>
           </div>
         </div>
         <div id="no-profile" style="display: none">
-          <script type="text/javascript">
-            CMC.profileedit = 0;
-          </script>
           <div class="ui-state-highlight ui-corner-all ui-widget cmc-infobar">
             <p class="cmc-infobar-text">
              <span class="ui-icon ui-icon-info cmc-infobar-icon"></span>
@@ -654,104 +659,89 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
               "icon-organizer.png"
             );
           ?>
-         </div>
+        </div>
         <div id="show-trip-profile" style="display: none">
-		<div id="tripprofilecontent">
-			<div id="backtotrips" style="display: none">
-				<a href="#" onclick="CMC.getFutureTrips();">&lt;&lt; Go back to Upcoming Trips </a>
-			</div>			
-			<div id="trip-profile-left-column">
-        <div id="tripprofileimage">
-          <div class="trip-owner-picture">
-            <img src="ajax-spinner.gif" width="190" />
+          <div id="tripprofilecontent">
+            <div id="backtotrips" style="display: none">
+              <a href="#" onclick="CMC.getFutureTrips();">&lt;&lt; Go back to Upcoming Trips </a>
+            </div>			
+            <div id="trip-profile-left-column">
+              <div id="tripprofileimage">
+                <div class="trip-owner-picture">
+                  <img src="ajax-spinner.gif" width="190" />
+                </div>
+              </div>
+              <div class="box2">Trip Owner: <div class="profile-trip-owner">Name</div></div>
+              <div class="box2">
+                <h3>Trip Description:</h3>
+                <div class="trip-profile-about">
+                  <h4>About</h4>
+                </div>
+              </div>
+            </div>
+            <div id="trip-profile-right-column">
+              <div class="box1">
+                <h2>Trip Information:</h2>
+                <h5>Trip Name:</h5>
+                <div class="profile-trip-name">
+                  <h6>Trip Name</h6> 
+                </div>
+                <h5>Trip Website:</h5>
+                <div class="profile-trip-url"><a href="http://www.example.com/">http://www.example.com/</a></div>
+                <h5>Trip Destination:</h5>
+                <div class="profile-trip-dest">
+                  <h6>Trip Destination</h6>
+                </div>					
+                <h5>Email:</h5>
+                <div class="profile-trip-email">
+                  <h6>Email</h6>
+                </div>
+                <h5>Phone:</h5>
+                <div class="profile-trip-phone">
+                  <h6>Phone</h6>
+                </div>
+                <h5>Execution Stage:</h5>
+                <div class="profile-trip-stage">
+                  <h6>Trip Execution Stage</h6>
+                </div>	
+                <h5>Date of Departure:</h5>
+                <div class="profile-trip-depart">
+                  <h6>Departure Date</h6>
+                </div>	
+                <h5>Date of Return</h5>
+                <div class="profile-trip-return">
+                  <h6>Return</h6>
+                </div>	
+                <h5>Trip Religion:</h5>
+                <div class="profile-trip-religion">
+                  <h6>Trip religion</h6>
+                </div>
+                <h5>Trip Accommodation Level:</h5>
+                <div class="profile-trip-acco">
+                  <h6>Trip Accommodation Level</h6>
+                </div>	
+                <h5>Number of People involved in this Trip:</h5>
+                <div class="profile-trip-numpeople">
+                  <h6>Number of people</h6>
+                </div>						
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="box2">
-          Trip Owner:
-          <div class="profile-trip-owner">Name
-          </div>
-        </div>
-        <div class="box2">
-          <h3>
-            Trip Description: <br />
-          </h3>
-          <div class="trip-profile-about">
-            <h4> About </h4>
-          </div>
-        </div>
-			</div>
-			<div id="trip-profile-right-column">
-				<div class="box1">
-					<h2>Trip Information:</h2>
-					<h5> Trip Name: </h5>
-					<div class="profile-trip-name">
-						<h6> Trip Name </h6> 
-					</div>
-					<h5> Trip Website: </h5>
-					<div class="profile-trip-url">
-						<h6> Trip Website </h6>
-					</div>
-					<h5> Trip Destination: </h5>
-					<div class="profile-trip-dest">
-						<h6> Trip Destination </h6>
-					</div>					
-					<h5> Email: </h5>
-					<div class="profile-trip-email">
-						<h6> Email </h6>
-					</div>		
-					<h5> Phone: </h5>
-					<div class="profile-trip-phone">
-						<h6> Phone </h6>
-					</div>	
-					<h5> Execution Stage: </h5>
-					<div class="profile-trip-stage">
-						<h6> Trip Execution Stage </h6>
-					</div>	
-					<h5> Date of Departure: </h5>
-					<div class="profile-trip-depart">
-						<h6> Departure Date </h6>
-					</div>	
-					<h5> Date of Return </h5>
-					<div class="profile-trip-return">
-						<h6> Return </h6>
-					</div>	
-					<h5> Trip Religion: </h5>
-					<div class="profile-trip-religion">
-						<h6> Trip religion </h6>
-					</div>
-					<h5> Trip Accommodation Level: </h5>
-					<div class="profile-trip-acco">
-						<h6> Trip Accommodation Level </h6>
-					</div>	
-					<h5> Number of People involved in this Trip: </h5>
-					<div class="profile-trip-numpeople">
-						<h6> Number of people </h6>
-					</div>						
-				</div>
-			</div>
-		</div>
         </div>		 
-		 <div id="show-trips" style="display: none">
-        <br /><br/>
-				<h2>Upcoming Trips:</h2>
-				<table>	
-				<tr>
-				<td>
-				<div class="trips-tripname">
-					TripName 
-				</div>						
-				</td>	
-				<td class="td2"><input type="submit" value="Trip Description" class="button" id="trips-desc-submit" /></td>
-				<td class="td2"><input type="submit" value="Join This Trip" class="button" id="join-trips-submit" /></td>
-				</tr>
-				</table>
-		 </div>		 
-         <div id="no-trip" style="display: none">
-          <h1>Currently there are no trips scheduled to begin in the future. But, you can create a missions trip very quickly</h1>
-          <h1>
-            <a href="#" onclick="CMC.page('#no-trip', '#make-trip');">Create a Trip &gt;&gt;</a>
-          </h1>
+        <div id="show-trips" style="display: none">
+          <h2>Upcoming Trips:</h2>
+          <div id="upcoming-trips-list-section">
+            <ul id="upcoming-trip-list" class="trip-list">
+              <li class="trip-list-item">
+                <span class="trip-item-name">Example Trip Name</span>
+              </li>
+            </ul>
           </div>
+        </div>		 
+        <div id="no-trip" style="display: none">
+          <h1>There aren't any trips coming up soon.</h1>
+          <h1>Why don't you <a href="#" onclick="CMC.page('#no-trip', '#make-trip');">create one</a>?</h1>
+        </div>
       </div>
       <div id="search-tab">
         <div id="search-box">
