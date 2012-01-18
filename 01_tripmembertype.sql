@@ -1,0 +1,1 @@
+ALTER TABLE tripmembers add type tinyint(1) AFTER accepted;
