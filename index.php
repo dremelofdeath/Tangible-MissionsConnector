@@ -719,7 +719,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
         <div id="search-box">
           <div id="search-tipbar" style="position: relative; height: 16px">
             <div id="search-tipbar-left" style="position: absolute; left: 2px;">
-              <a class="tipbar-link" href="#">Search history...</a>
+              <a class="tipbar-link" href="#" style="display: none;">Search history...</a>
               <div class="tipbar-content" style="display: none">
                 <div id="recent-searches">
                   <h4>Recent Searches</h4>
@@ -851,10 +851,6 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
       </div>
     </div>
     <div id="cmc-footer" style="display: none">
-      <div class="leftside">
-        <a href="#" id="secret-hideout">Admin</a> :
-        <a href="#" id="report-problem">Report a Problem</a> : <a href="#" id="contact-link">Contact Us</a>
-      </div>
       <div class="rightside">
         <a href="#" id="copyrights">Copyrights</a> :
         <a href="http://www.tangiblesoft.net/" target="_blank" id="tangible-link">Tangible, LLC</a>
