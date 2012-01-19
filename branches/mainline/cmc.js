@@ -21,7 +21,7 @@ var CMC = {
   requestsOutstanding : 0,
   tripuserid : false,
   dialogsOpen : 0,
-  version : "2.0 Build 6E",
+  version : "2.0 Build 76",
   ignorableFormFields : null, // access this with fetchIgnorableFormFields()
   _searchLockKeyExpected : null,
   _lastSearchLockKeyGenerated : 0,
@@ -59,7 +59,7 @@ var CMC = {
     },
     OrganizerProfile : {
       "profile-org-name" : "name",
-      "profile-org-website" : "website",
+      "profile-org-website" : "url",
       "profile-org-about" : "about",
       "profile-org-offer" : "medfacil",
       "profile-org-offern" : "nonmedfacil",
@@ -479,6 +479,14 @@ var CMC = {
       } else {
         $("#profile-email-display").hide();
         $("span#profile-email").html("");
+      }
+
+      if (data.AgencyWebsite) {
+        $("span#profile-website").html(data.AgencyWebsite);
+        $("#profile-website").show();
+      } else {
+        $("#profile-website").hide();
+        $("span#profile-website").html("");
       }
 
       if (data.phone) {
