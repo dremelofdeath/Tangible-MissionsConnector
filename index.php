@@ -463,6 +463,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
     <link rel="stylesheet" type="text/css" href="jquery.multiselect.css" />
     <script type="text/javascript" src="jquery.multiselect.js"></script>
 	  
+    <!-- @/BEGIN/ADMINCODEBLOCK -->
     <!-- THIS IS THE ADMIN CODE BLOCK! Do NOT put code here for end users, they won't see it! -zack -->
     <script type="text/javascript">
       $(function() {
@@ -492,6 +493,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
         CMC.log("admin load complete");
       });
     </script>
+    <!-- @/END/ADMINCODEBLOCK -->
   
   <script type="text/JavaScript">
   
@@ -1556,6 +1558,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
           </div>
         </form>
       </div>
+      <!-- @/BEGIN/ADMINCODEBLOCK -->
       <!-- debug only dialogs! remove these before shipping!! -zack -->
       <div id="assert-dialog" title="Assertion failure!">
         <h2>You hit an assert!</h2>
@@ -1564,7 +1567,9 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
       <div id="secret-hideout-dialog" title="Administration">
         <p>This is an area for magical unicorns and rainbows.</p>
       </div>
+      <!-- @/END/ADMINCODEBLOCK -->
     </div>
+    <!-- @/BEGIN/ADMINCODEBLOCK -->
     <!-- The debug log. Should not be displayed by default. Enable via the admin panel. -->
     <div id="debug-section" style="display: none">
       <textarea id="debug-log" rows="10" cols="80" spellcheck="false">
@@ -1583,6 +1588,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
       </div>
     </div>
     <!-- Do not place HTML markup below this line -->
+    <!-- @/END/ADMINCODEBLOCK -->
   </body>
 </html>
 <!-- vim: ai:et:ts=2:sw=2
