@@ -607,6 +607,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                 </div>
               </div>
               <div id="profile-right-content-section">
+                <span id="profile-website">www.example.com</span>
                 <div id="profile-section-skills">
                   <h3>Medical Skills:</h3>
                   <div id="profile-medskills">Medskills
