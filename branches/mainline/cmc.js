@@ -2182,13 +2182,13 @@ var CMC = {
   },
 
   isUrl : function (s) {
-    var regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
+    var regexp = /((ftp|http|https):\/\/)?(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
       return regexp.test(s);
   },
 
   validatePhone : function (fld,country) {
     var error = "";
-    var stripped = fld.replace(/[\(\)\.\-\ ]/g, ''); 
+    /*var stripped = fld.replace(/[\(\)\.\-\ ]/g, ''); 
     // for international numbers
     var regex = /^\+(?:[0-9] ?){6,14}[0-9]$/;
     if (isNaN(parseInt(stripped))) {
@@ -2199,7 +2199,7 @@ var CMC = {
       }
     } else if (!(stripped.length == 10)) {
       error = "The phone number is the wrong length. Make sure you included an area code.\n";
-    }
+    }*/
     return error;
   },
 
@@ -2535,8 +2535,13 @@ $(function() {
   });
 
   CMC.log("setting up tipbars");
-  $("#search-tipbar-left .tipbar-link").tipTip({
-    activation: 'focus',
+  $("#search-tipbar-left .tipbar-link").click(function () {
+    $(this).focus();
+    $(this).tipTip('show');
+  }).blur(function () {
+    $(this).tipTip('hide');
+  }).tipTip({
+    activation: 'manual',
     keepAlive: true,
     maxWidth: '230px',
     forceWidth: true,
@@ -2546,12 +2551,17 @@ $(function() {
     content: $("#search-tipbar-left .tipbar-content").html()
   });
 
-  $("#search-tipbar-right .tipbar-link").tipTip({
-    activation: 'focus',
+  $("#search-tipbar-right .tipbar-link").click(function () {
+    $(this).focus();
+    $(this).tipTip('show');
+  }).blur(function () {
+    $(this).tipTip('hide');
+  }).tipTip({
+    activation: 'manual',
     keepAlive: true,
     maxWidth: '230px',
     forceWidth: true,
-    delay: 0,
+    delay: 25,
     defaultPosition: 'bottom',
     forcePosition: true,
     content: $("#search-tipbar-right .tipbar-content").html()
