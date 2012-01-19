@@ -1091,6 +1091,14 @@ var CMC = {
           } else {
             this.SearchState.skills = [skillid];
           }
+        } else if (value.substring(2,3) == "c") {
+          // it's a country
+          var countryid = value.substring(4, value.length);
+          if (this.SearchState.countries != undefined) {
+            this.SearchState.countries.push(countryid);
+          } else {
+            this.SearchState.countries = [countryid];
+          }
         } else {
           this.assert("incoming unknown object type '" + value.substring(2,3) + "' can't be handled!");
         }
@@ -1125,29 +1133,9 @@ var CMC = {
           // it's a zipcode. we don't care what it is, just nuke it
           delete this.SearchState.z;
         } else if (objectType == "s") {
-          // it's a skill.
-          if (this.SearchState.skills) {
-            if (this.SearchState.skills.length <= 1) {
-              delete this.SearchState.skills;
-            } else {
-              var skillid = value.substring(4, value.length);
-              var foundObject = false;
-              var i = 0; // this is a really stupid bug in the chrome JS engine
-              for (i = 0; i < this.SearchState.skills.length; i++) {
-                if (this.SearchState.skills[i] == skillid) {
-                  if (foundObject) {
-                    this.assert("found multiple copies of the same object you're trying to delete! (" + value + ")");
-                  } else {
-                    this.SearchState.skills.splice(i, 1);
-                    foundObject = true;
-                  }
-                }
-              }
-              this.assert(foundObject, "couldn't find the object you're trying to delete! (" + value + ")");
-            }
-          } else {
-            this.assert("trying to delete a skill when the skills object is dead!");
-          }
+          this.deleteObjectFromSearchState("skills", value.substring(4, value.length));
+        } else if (objectType == "c") {
+          this.deleteObjectFromSearchState("countries", value.substring(4, value.length));
         } else {
           this.assert("outgoing unknown object type '" + value.substring(2,3) + "' can't be handled!");
         }
@@ -1163,6 +1151,32 @@ var CMC = {
       if (!this.isSearchLocked) {
         this.search();
       }
+    }
+    this.endFunction();
+  },
+
+  deleteObjectFromSearchState : function(whichObjectType, obj) {
+    this.beginFunction();
+    if (this.SearchState[whichObjectType]) {
+      if (this.SearchState[whichObjectType].length <= 1) {
+        delete this.SearchState[whichObjectType];
+      } else {
+        var foundObject = false;
+        var i = 0; // this is a really stupid bug in the chrome JS engine
+        for (i = 0; i < this.SearchState[whichObjectType].length; i++) {
+          if (this.SearchState[whichObjectType][i] == obj) {
+            if (foundObject) {
+              this.assert("found multiple copies of the same object you're trying to delete! (delete " + obj + " from " + whichObjectType + ")");
+            } else {
+              this.SearchState[whichObjectType].splice(i, 1);
+              foundObject = true;
+            }
+          }
+        }
+        this.assert(foundObject, "couldn't find the object you're trying to delete! (delete " + obj + " from " + whichObjectType + ")");
+      }
+    } else {
+      this.assert("trying to delete a object when the container object is dead!");
     }
     this.endFunction();
   },
