@@ -229,7 +229,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
 
       .inner-tipbar-content li {
         margin: 15px;
-        line-height: 0px;
+        line-height: 1px; /* must not be zero due to a webkit bug */
       }
       
       h1.cmc-big-button-text {
