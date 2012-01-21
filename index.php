@@ -883,7 +883,9 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
     </div>
     <div id="cmc-footer" style="display: none">
       <div class="leftside">
+        <!-- @/BEGIN/ADMINCODEBLOCK -->
         <a href="#" id="secret-hideout">Admin</a> :
+        <!-- @/END/ADMINCODEBLOCK -->
         <a href="#" id="report-problem">Report a Problem</a> : <a href="#" id="contact-link">Contact Us</a>
       </div>
       <div class="rightside">

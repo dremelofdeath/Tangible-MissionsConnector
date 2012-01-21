@@ -21,7 +21,7 @@ var CMC = {
   requestsOutstanding : 0,
   tripuserid : false,
   dialogsOpen : 0,
-  version : "2.0 Build 78",
+  version : /* @/VERSIONMARKER */ "2.0 Debug",
   ignorableFormFields : null, // access this with fetchIgnorableFormFields()
   _searchLockKeyExpected : null,
   _lastSearchLockKeyGenerated : 0,
