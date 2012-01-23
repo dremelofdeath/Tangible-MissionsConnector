@@ -355,23 +355,27 @@ var CMC = {
     this.beginFunction();
     this.log("Obtaining data from the profile");
     if (callback === undefined) callback = this.handleGetProfileCallbackSave;
-    this.ajaxNotifyStart(); // one for good measure, we want the spinner for the whole search
-    $.ajax({
-      type: "POST",
-      url: "api/profile.php",
-      data: {
-        fbid: userid
-      },
-      dataType: "json",
-      context: {
-        invokeData: {
-          "callback": callback
+    if (userid) {
+      this.ajaxNotifyStart(); // one for good measure, we want the spinner for the whole search
+      $.ajax({
+        type: "POST",
+        url: "api/profile.php",
+        data: {
+          fbid: userid
         },
-        cmc: this
-      },
-      success: this.onGetProfileDataSuccess,
-      error: this.onGetProfileDataError
-    });
+        dataType: "json",
+        context: {
+          invokeData: {
+            "callback": callback
+          },
+          cmc: this
+        },
+        success: this.onGetProfileDataSuccess,
+        error: this.onGetProfileDataError
+      });
+    } else {
+      this.assert("userid was blank when calling getProfile()");
+    }
     this.endFunction();
   },
   
@@ -417,7 +421,22 @@ var CMC = {
     }
     this.endFunction();
   },
+
+  hideIntermediateNewProfileCreationSteps : function () {
+    this.beginFunction();
+    $("#make-volunteer").fadeOut();
+    $("#make-organizer").fadeOut();
+    $("#make-profile").fadeOut();
+    this.endFunction();
+  },
   
+  showCreateNewProfileUI : function () {
+    this.beginFunction();
+    this.hideIntermediateNewProfileCreationSteps();
+    $("#no-profile").fadeIn();
+    this.endFunction();
+  },
+
   showProfile : function (data) {
     this.beginFunction();
     if (data === undefined) {
@@ -425,9 +444,10 @@ var CMC = {
       this.assert(data === undefined, "undefined passed as results for showProfile");
     } else if (data == null) {
       // no profile exists - so display the new profile creation dialogs
-      $("#no-profile").fadeIn();
+      this.showCreateNewProfileUI();
     } else {
       var id = "#profilecontent";
+      this.hideIntermediateNewProfileCreationSteps();
       this.ajaxNotifyStart();
       this.assert(data.id != undefined, "id is missing from result set");
       this.updateProfileControls(data.id);
@@ -1707,214 +1727,227 @@ var CMC = {
     this.endFunction();
   },
 
-  editProfile : function () {
+  editProfile : function (isNewProfile) {
     this.beginFunction();
-    this.profileedit = 1;
+    isNewProfile = isNewProfile === undefined ? false : isNewProfile;
+    this.profileedit = !isNewProfile;
 
-    // Retrieve the profile data from the backend again to make sure it is the latest information, no need to show profile
-    this.getProfile(this.me.id);
+    this.checkFacebookLoginStatus($.proxy(function (response) {
+      if (response && response.authResponse) {
+        // Retrieve the profile data from the backend again to make sure it is the latest information, no need to show profile
+        if (this.me && this.me.id) {
+          this.getProfile(this.me.id);
+        }
 
-    if (this.isreceiver ==0) {
-      var id = "#profile-volunteer-dialog";
+        if (this.isreceiver ==0) {
+          var id = "#profile-volunteer-dialog";
 
-      if (this.profiledata.zip !== undefined) {
-        $("input#profile-zipcode").val(this.profiledata.zip);
-      }
-      if (this.profiledata.about !== undefined) {
-        $("input#profile-about").val(this.profiledata.about);
-      }
-
-      if (this.profiledata.MedicalSkills !== undefined) {
-        if (this.profiledata.MedicalSkills.length > 0) {
-          for (var each in this.profiledata.MedicalSkills) {
-            $('select#profile-medical-skills option[value="' + this.profiledata.MedicalSkillsid[each] + '"]').attr('selected', 'selected');
+          if (this.profiledata.zip !== undefined) {
+            $("input#profile-zipcode").val(this.profiledata.zip);
           }
-        }
-      }
-        $("#profile-medical-skills").multiselect();
-      if (this.profiledata.Non_MedicalSkills !== undefined) {
-        if (this.profiledata.Non_MedicalSkills.length > 0) {
-          for (var each in this.profiledata.Non_MedicalSkills) {
-            $('select#profile-nonmedical-skills option[value="' + this.profiledata.Non_MedicalSkillsid[each] + '"]').attr('selected', 'selected');
+          if (this.profiledata.about !== undefined) {
+            $("input#profile-about").val(this.profiledata.about);
           }
-        }
-      }
-        $("#profile-nonmedical-skills").multiselect();
-      if (this.profiledata.SpiritualSkills !== undefined) {
-        if (this.profiledata.SpiritualSkills.length > 0) {
-          for (var each in this.profiledata.SpiritualSkills) {
-            $('select#profile-spiritual-skills option[value="' + this.profiledata.SpiritualSkillsid[each] + '"]').attr('selected', 'selected');
-          }
-        }
-      }
-        $("#profile-spiritual-skills").multiselect();
-      if (this.profiledata.relg !== undefined) {
-        $("input#profile-religion").val(this.profiledata.relg);
-      }
 
-      if (this.profiledata.Durations !== undefined) {
-        if (this.profiledata.Durations.PreferredDurationofMissionTrips !== undefined) {
-          $("input#profile-duration").val(this.profiledata.Durations.PreferredDurationofMissionTrips);
-        }
-      }
-
-      if (this.profiledata.States !== undefined) {
-        if (this.profiledata.States.State !== undefined) {
-          $("input#profile-state").val(this.profiledata.States.State);
-        }
-      }
-      if (this.profiledata.city !== undefined) {
-        $("input#profile-city").val(this.profiledata.city);
-      }
-      if (this.profiledata.country !== undefined) {
-        $("input#profile-country").val(this.profiledata.country);
-      }
-      if (this.profiledata.GeographicAreasofInterest !== undefined) {
-        if (this.profiledata.GeographicAreasofInterest.Regions !== undefined) {
-          if (this.profiledata.GeographicAreasofInterest.Regions.length > 0) {
-            for (var each in this.profiledata.GeographicAreasofInterest.Regionsid) {
-              $('select#profile-region option[value="' + this.profiledata.GeographicAreasofInterest.Regionsid[each] + '"]').attr('selected', 'selected');
+          if (this.profiledata.MedicalSkills !== undefined) {
+            if (this.profiledata.MedicalSkills.length > 0) {
+              for (var each in this.profiledata.MedicalSkills) {
+                $('select#profile-medical-skills option[value="' + this.profiledata.MedicalSkillsid[each] + '"]').attr('selected', 'selected');
+              }
             }
           }
-        }
-      }
-      $("#profile-region").multiselect();
-      if (this.profiledata.GeographicAreasofInterest !== undefined) {
-        if (this.profiledata.GeographicAreasofInterest.Countries !== undefined) {
-          if (this.profiledata.GeographicAreasofInterest.Countries.length > 0) {
-            for (var each in this.profiledata.GeographicAreasofInterest.Countriesid) {
-              $('select#profile-country-served option[value="' + this.profiledata.GeographicAreasofInterest.Countriesid[each] + '"]').attr('selected', 'selected');
+            $("#profile-medical-skills").multiselect();
+          if (this.profiledata.Non_MedicalSkills !== undefined) {
+            if (this.profiledata.Non_MedicalSkills.length > 0) {
+              for (var each in this.profiledata.Non_MedicalSkills) {
+                $('select#profile-nonmedical-skills option[value="' + this.profiledata.Non_MedicalSkillsid[each] + '"]').attr('selected', 'selected');
+              }
             }
           }
-        }
-      }
-      $("#profile-country-served").multiselect();
-      if (this.profiledata.phone !== undefined) {
-        $("input#profile-phone").val(this.profiledata.phone);
-      }
-      if (this.profiledata.email !== undefined) {
-        $("input#profile-email").val(this.profiledata.email);
-      }
-      if (this.profiledata.misexp !== undefined) {
-        $("input#profile-experience").val(this.profiledata.misexp);
-      }  
-
-      $(id).children("form").children("#wrapper").children("#contents").children(".profile-container").children(".profile-header").html("Please edit your profile information"); 
-    //$("#profile-toggle-dialog").dialog('close');    
-      $("#profile-volunteer-dialog").dialog('open');
-    } else {
-      // First modify the profile organizer dialog form, then display for editing
-
-      var id = "#profile-organizer-dialog";
-
-      if (this.profiledata.zip !== undefined) {
-        $("input#profile-org-zipcode").val(this.profiledata.zip);
-      }
-      if (this.profiledata.AgencyName !== undefined) {
-        $("input#profile-org-name").val(this.profiledata.AgencyName);
-      }
-      if (this.profiledata.AgencyWebsite !== undefined) {
-        $("input#profile-org-website").val(this.profiledata.AgencyWebsite);
-      }
-      if (this.profiledata.about !== undefined) {
-        $("input#profile-org-about").val(this.profiledata.about);
-      }
-
-      if (this.profiledata.FacilityMedicalOfferings !== undefined) {
-        if (this.profiledata.FacilityMedicalOfferings.length>0) {
-          for (var each in this.profiledata.FacilityMedicalOfferings) {
-            $('select#profile-org-offer option[value="' + this.profiledata.FacilityMedicalOfferingsid[each] + '"]').attr('selected', 'selected');
-          }
-        }
-      }
-        $("#profile-org-offer").multiselect({selectedList: 11});
-      if (this.profiledata.FacilityNon_MedicalOfferings !== undefined) {
-        if (this.profiledata.FacilityNon_MedicalOfferings.length > 0) {
-          for (var each in this.profiledata.FacilityNon_MedicalOfferings) {
-            $('select#profile-org-offern option[value="' + this.profiledata.FacilityNon_MedicalOfferingsid[each] + '"]').attr('selected', 'selected');
-          }
-        }
-      }
-        $("#profile-org-offern").multiselect();
-      if (this.profiledata.MedicalSkills !== undefined) {
-        if (this.profiledata.MedicalSkills.length > 0) {
-          for (var each in this.profiledata.MedicalSkills) {
-            $('select#profile-org-medical option[value="' + this.profiledata.MedicalSkillsid[each] + '"]').attr('selected', 'selected');
-          }
-        }
-      }
-        $("#profile-org-medical").multiselect();
-      if (this.profiledata.Non_MedicalSkills !== undefined) {
-        if (this.profiledata.Non_MedicalSkills.length > 0) {
-          for (var each in this.profiledata.Non_MedicalSkills) {
-            $('select#profile-org-nonmedical option[value="' + this.profiledata.Non_MedicalSkillsid[each] + '"]').attr('selected', 'selected');
-          }
-        }
-      }
-        $("#profile-org-nonmedical").multiselect();
-      if (this.profiledata.SpiritualSkills !== undefined) {
-        if (this.profiledata.SpiritualSkills.length > 0) {
-          for (var each in this.profiledata.SpiritualSkills) {
-            $('select#profile-org-spiritual option[value="' + this.profiledata.SpiritualSkillsid[each] + '"]').attr('selected', 'selected');
-          }
-        }
-      }
-        $("#profile-org-spiritual").multiselect();
-      if (this.profiledata.relg !== undefined) {
-        $('select#profile-org-religion option[value="' + this.profiledata.relg + '"]').attr('selected', 'selected');
-      }
-
-      if (this.profiledata.Durations !== undefined) {
-        if (this.profiledata.Durations.PreferredDurationofMissionTrips !== undefined) {
-          $('select#profile-org-duration option[value="' + this.profiledata.Durations.PreferredDurationofMissionTripsid + '"]').attr('selected', 'selected');
-        }
-      }
-
-      if (this.profiledata.States !== undefined) {
-        if (this.profiledata.States.State !== undefined) {
-          $('select#profile-org-state option[value="' + this.profiledata.States.Stateid + '"]').attr('selected', 'selected');
-        }
-      }
-      if (this.profiledata.city !== undefined) {
-        $("input#profile-org-city").val(this.profiledata.city);
-      }
-      if (this.profiledata.country !== undefined) {
-        $("input#profile-org-country").val(this.profiledata.country);
-      }
-      if (this.profiledata.GeographicAreasofInterest !== undefined) {
-        if (this.profiledata.GeographicAreasofInterest.Regions !== undefined) {
-          if (this.profiledata.GeographicAreasofInterest.Regions.length > 0) {
-            for (var each in this.profiledata.GeographicAreasofInterest.Regions) {
-              $('select#profile-org-region option[value="' + this.profiledata.GeographicAreasofInterest.Regionsid[each] + '"]').attr('selected', 'selected');
+            $("#profile-nonmedical-skills").multiselect();
+          if (this.profiledata.SpiritualSkills !== undefined) {
+            if (this.profiledata.SpiritualSkills.length > 0) {
+              for (var each in this.profiledata.SpiritualSkills) {
+                $('select#profile-spiritual-skills option[value="' + this.profiledata.SpiritualSkillsid[each] + '"]').attr('selected', 'selected');
+              }
             }
           }
-        }
-      }
-          $("#profile-org-region").multiselect();
-      if (this.profiledata.GeographicAreasofInterest !== undefined) {
-        if (this.profiledata.GeographicAreasofInterest.Countries !== undefined) {
-          if (this.profiledata.GeographicAreasofInterest.Countries.length > 0) {
-            for (var each in this.profiledata.GeographicAreasofInterest.Countries) {
-              $('select#profile-org-countryserved option[value="' + this.profiledata.GeographicAreasofInterest.Countriesid[each] + '"]').attr('selected', 'selected');
+            $("#profile-spiritual-skills").multiselect();
+          if (this.profiledata.relg !== undefined) {
+            $("input#profile-religion").val(this.profiledata.relg);
+          }
+
+          if (this.profiledata.Durations !== undefined) {
+            if (this.profiledata.Durations.PreferredDurationofMissionTrips !== undefined) {
+              $("input#profile-duration").val(this.profiledata.Durations.PreferredDurationofMissionTrips);
             }
           }
-        }
-      }
-          $("#profile-org-countryserved").multiselect();
-      if (this.profiledata.phone !== undefined) {
-        $("input#profile-org-phone").val(this.profiledata.phone);
-      }
-      if (this.profiledata.email !== undefined) {
-        $("input#profile-org-email").val(this.profiledata.email);
-      }
-      if (this.profiledata.misexp !== undefined) {
-        $("input#profile-org-experience").val(this.profiledata.misexp);
-      }
 
-      $(id).children("form").children("#wrapper").children("#contents").children(".profile-container").children(".profile-header").html("Please edit your profile information");
-    //$("#profile-toggle-dialog").dialog('close');    
-      $("#profile-organizer-dialog").dialog('open');
-    }
+          if (this.profiledata.States !== undefined) {
+            if (this.profiledata.States.State !== undefined) {
+              $("input#profile-state").val(this.profiledata.States.State);
+            }
+          }
+          if (this.profiledata.city !== undefined) {
+            $("input#profile-city").val(this.profiledata.city);
+          }
+          if (this.profiledata.country !== undefined) {
+            $("input#profile-country").val(this.profiledata.country);
+          }
+          if (this.profiledata.GeographicAreasofInterest !== undefined) {
+            if (this.profiledata.GeographicAreasofInterest.Regions !== undefined) {
+              if (this.profiledata.GeographicAreasofInterest.Regions.length > 0) {
+                for (var each in this.profiledata.GeographicAreasofInterest.Regionsid) {
+                  $('select#profile-region option[value="' + this.profiledata.GeographicAreasofInterest.Regionsid[each] + '"]').attr('selected', 'selected');
+                }
+              }
+            }
+          }
+          $("#profile-region").multiselect();
+          if (this.profiledata.GeographicAreasofInterest !== undefined) {
+            if (this.profiledata.GeographicAreasofInterest.Countries !== undefined) {
+              if (this.profiledata.GeographicAreasofInterest.Countries.length > 0) {
+                for (var each in this.profiledata.GeographicAreasofInterest.Countriesid) {
+                  $('select#profile-country-served option[value="' + this.profiledata.GeographicAreasofInterest.Countriesid[each] + '"]').attr('selected', 'selected');
+                }
+              }
+            }
+          }
+          $("#profile-country-served").multiselect();
+          if (this.profiledata.phone !== undefined) {
+            $("input#profile-phone").val(this.profiledata.phone);
+          }
+          if (this.profiledata.email !== undefined) {
+            $("input#profile-email").val(this.profiledata.email);
+          }
+          if (this.profiledata.misexp !== undefined) {
+            $("input#profile-experience").val(this.profiledata.misexp);
+          }  
+
+          $(id).children("form").children("#wrapper").children("#contents").children(".profile-container").children(".profile-header").html("Please edit your profile information"); 
+        //$("#profile-toggle-dialog").dialog('close');    
+          $("#profile-volunteer-dialog").dialog('open');
+        } else {
+          // First modify the profile organizer dialog form, then display for editing
+
+          var id = "#profile-organizer-dialog";
+
+          if (this.profiledata.zip !== undefined) {
+            $("input#profile-org-zipcode").val(this.profiledata.zip);
+          }
+          if (this.profiledata.AgencyName !== undefined) {
+            $("input#profile-org-name").val(this.profiledata.AgencyName);
+          }
+          if (this.profiledata.AgencyWebsite !== undefined) {
+            $("input#profile-org-website").val(this.profiledata.AgencyWebsite);
+          }
+          if (this.profiledata.about !== undefined) {
+            $("input#profile-org-about").val(this.profiledata.about);
+          }
+
+          if (this.profiledata.FacilityMedicalOfferings !== undefined) {
+            if (this.profiledata.FacilityMedicalOfferings.length>0) {
+              for (var each in this.profiledata.FacilityMedicalOfferings) {
+                $('select#profile-org-offer option[value="' + this.profiledata.FacilityMedicalOfferingsid[each] + '"]').attr('selected', 'selected');
+              }
+            }
+          }
+            $("#profile-org-offer").multiselect({selectedList: 11});
+          if (this.profiledata.FacilityNon_MedicalOfferings !== undefined) {
+            if (this.profiledata.FacilityNon_MedicalOfferings.length > 0) {
+              for (var each in this.profiledata.FacilityNon_MedicalOfferings) {
+                $('select#profile-org-offern option[value="' + this.profiledata.FacilityNon_MedicalOfferingsid[each] + '"]').attr('selected', 'selected');
+              }
+            }
+          }
+            $("#profile-org-offern").multiselect();
+          if (this.profiledata.MedicalSkills !== undefined) {
+            if (this.profiledata.MedicalSkills.length > 0) {
+              for (var each in this.profiledata.MedicalSkills) {
+                $('select#profile-org-medical option[value="' + this.profiledata.MedicalSkillsid[each] + '"]').attr('selected', 'selected');
+              }
+            }
+          }
+            $("#profile-org-medical").multiselect();
+          if (this.profiledata.Non_MedicalSkills !== undefined) {
+            if (this.profiledata.Non_MedicalSkills.length > 0) {
+              for (var each in this.profiledata.Non_MedicalSkills) {
+                $('select#profile-org-nonmedical option[value="' + this.profiledata.Non_MedicalSkillsid[each] + '"]').attr('selected', 'selected');
+              }
+            }
+          }
+            $("#profile-org-nonmedical").multiselect();
+          if (this.profiledata.SpiritualSkills !== undefined) {
+            if (this.profiledata.SpiritualSkills.length > 0) {
+              for (var each in this.profiledata.SpiritualSkills) {
+                $('select#profile-org-spiritual option[value="' + this.profiledata.SpiritualSkillsid[each] + '"]').attr('selected', 'selected');
+              }
+            }
+          }
+            $("#profile-org-spiritual").multiselect();
+          if (this.profiledata.relg !== undefined) {
+            $('select#profile-org-religion option[value="' + this.profiledata.relg + '"]').attr('selected', 'selected');
+          }
+
+          if (this.profiledata.Durations !== undefined) {
+            if (this.profiledata.Durations.PreferredDurationofMissionTrips !== undefined) {
+              $('select#profile-org-duration option[value="' + this.profiledata.Durations.PreferredDurationofMissionTripsid + '"]').attr('selected', 'selected');
+            }
+          }
+
+          if (this.profiledata.States !== undefined) {
+            if (this.profiledata.States.State !== undefined) {
+              $('select#profile-org-state option[value="' + this.profiledata.States.Stateid + '"]').attr('selected', 'selected');
+            }
+          }
+          if (this.profiledata.city !== undefined) {
+            $("input#profile-org-city").val(this.profiledata.city);
+          }
+          if (this.profiledata.country !== undefined) {
+            $("input#profile-org-country").val(this.profiledata.country);
+          }
+          if (this.profiledata.GeographicAreasofInterest !== undefined) {
+            if (this.profiledata.GeographicAreasofInterest.Regions !== undefined) {
+              if (this.profiledata.GeographicAreasofInterest.Regions.length > 0) {
+                for (var each in this.profiledata.GeographicAreasofInterest.Regions) {
+                  $('select#profile-org-region option[value="' + this.profiledata.GeographicAreasofInterest.Regionsid[each] + '"]').attr('selected', 'selected');
+                }
+              }
+            }
+          }
+              $("#profile-org-region").multiselect();
+          if (this.profiledata.GeographicAreasofInterest !== undefined) {
+            if (this.profiledata.GeographicAreasofInterest.Countries !== undefined) {
+              if (this.profiledata.GeographicAreasofInterest.Countries.length > 0) {
+                for (var each in this.profiledata.GeographicAreasofInterest.Countries) {
+                  $('select#profile-org-countryserved option[value="' + this.profiledata.GeographicAreasofInterest.Countriesid[each] + '"]').attr('selected', 'selected');
+                }
+              }
+            }
+          }
+              $("#profile-org-countryserved").multiselect();
+          if (this.profiledata.phone !== undefined) {
+            $("input#profile-org-phone").val(this.profiledata.phone);
+          }
+          if (this.profiledata.email !== undefined) {
+            $("input#profile-org-email").val(this.profiledata.email);
+          }
+          if (this.profiledata.misexp !== undefined) {
+            $("input#profile-org-experience").val(this.profiledata.misexp);
+          }
+
+          $(id).children("form").children("#wrapper").children("#contents").children(".profile-container").children(".profile-header").html("Please edit your profile information");
+        //$("#profile-toggle-dialog").dialog('close');    
+          $("#profile-organizer-dialog").dialog('open');
+        }
+      } else {
+        this.login($.proxy(function (response) {
+          if (response && response.authResponse) {
+            this.editProfile(isNewProfile);
+          }
+        }, this));
+      }
+    }, this));
     this.endFunction();
   },
 
@@ -2239,59 +2272,82 @@ var CMC = {
     this.endFunction();
   },
 
+  handleUserUnauthorized : function () {
+    this.beginFunction();
+    $("#no-profile").fadeIn();
+    this.endFunction();
+  },
+
   cacheFacebookResponseProperties : function (response) {
     this.beginFunction();
-    if (response.hasOwnProperty("authResponse")) {
-      if (!response.authResponse.hasOwnProperty("accessToken")) {
-        this.assert("Facebook authResponse did not contain an access token");
-        this.accessToken = null;
-        // this is about the time that we should surface an error to the user, no? --zack
+    if (response) {
+      if (response.hasOwnProperty("authResponse") && response.authResponse) {
+        if (response.authResponse.hasOwnProperty("accessToken")) {
+          this.accessToken = response.authResponse.accessToken;
+        } else {
+          this.assert("Facebook authResponse did not contain an access token");
+          this.accessToken = null;
+          // this is about the time that we should surface an error to the user, no? --zack
+        }
       } else {
-        this.accessToken = response.authResponse.accessToken;
+        // this is actually a valid case -- this happens when the user has not
+        // authorized the app. --zack
+        this.accessToken = null;
       }
     } else {
-      this.assert("Facebook response didn't contain an authResponse to cache");
-      // this is also probably a nice time to surface an error, although this
-      // shouldn't happen ever --zack
+      this.assert("Facebook did not return a response at all, can't cache data");
     }
     this.endFunction();
   },
 
-  cacheFacebookData : function () {
+  cacheFacebookData : function (callback) {
     this.beginFunction();
     CMC.ajaxNotifyStart();
-    FB.api('/me', function (response) {
-      CMC.ajaxNotifyComplete();
+    var fbapiCallbacksCompleted = 0;
+    var __notifyFBAPICallbackCompleted = function () {
+      if (++fbapiCallbacksCompleted >= 3) { // number must match number of calls to __notifyFBAPICallbackCompleted below
+        if (callback) {
+          callback();
+        }
+      }
+    };
+    FB.api('/me', $.proxy(function (response) {
+      this.ajaxNotifyComplete();
       if (response) {
         if (response.error) {
-          CMC.handleFacebookErrorResponse(response);
+          this.handleFacebookErrorResponse(response);
         } else {
-          CMC.log("got user data from Facebook");
-          CMC.me = response;
+          this.log("got user data from Facebook");
+          this.me = response;
           // This is the default profile display - showing the logged in user's profile
-          CMC.getProfile(CMC.me.id, CMC.handleGetProfileCallbackSaveAndShow);
-          CMC.log(CMC.me.name + " (" + CMC.me.id + ") logged in to the app");
+          this.getProfile(this.me.id, function (data) {
+            this.handleGetProfileCallbackSave(data);
+            __notifyFBAPICallbackCompleted();
+          });
+          this.log(this.me.name + " (" + this.me.id + ") logged in to the app");
           // Get upcoming trips information
-          CMC.getFutureTrips();
+          this.getFutureTrips();
+          __notifyFBAPICallbackCompleted();
         }
       } else {
         this.error("FB API call failed: can't cache user data (invalid response)");
       }
-    });
+    }, this));
     CMC.ajaxNotifyStart();
-    FB.api('/me/friends', function (friends) {
-      CMC.ajaxNotifyComplete();
+    FB.api('/me/friends', $.proxy(function (friends) {
+      this.ajaxNotifyComplete();
       if (friends) {
         if (friends.error) {
-          CMC.handleFacebookErrorResponse(friends);
+          this.handleFacebookErrorResponse(friends);
         } else {
-          CMC.log("got friend data from Facebook");
-          CMC.friends = friends.data;
+          this.log("got friend data from Facebook");
+          this.friends = friends.data;
         }
+        __notifyFBAPICallbackCompleted();
       } else {
         this.error("FB API call failed: can't get friends list (invalid response)");
       }
-    });
+    }, this));
     this.endFunction();
   },
 
@@ -2370,13 +2426,9 @@ $(function() {
 
   $("#make-trip, #profile-trip-dialog").hide();
 
-  $("#make-volunteer").click(function() {
-    $("#profile-medical-skills").multiselect();
-    $("#profile-nonmedical-skills").multiselect();
-    $("#profile-spiritual-skills").multiselect();
-    $("#profile-region").multiselect();
-    $("#profile-country-served").multiselect();
-    $("#profile-volunteer-dialog").dialog('open');
+  $("#make-volunteer-link").click(function() {
+    CMC.isreceiver = false;
+    CMC.editProfile(true /* isNewProfile */);
   });
 
   $("#profile-volunteer-dialog").dialog({
@@ -2409,15 +2461,9 @@ $(function() {
     }
   });  
 
-  $("#make-organizer").click(function() {
-  $("#profile-org-offer").multiselect();
-  $("#profile-org-offern").multiselect();
-  $("#profile-org-medical").multiselect();
-  $("#profile-org-nonmedical").multiselect();
-  $("#profile-org-spiritual").multiselect();
-  $("#profile-org-region").multiselect();
-  $("#profile-org-countryserved").multiselect();
-    $("#profile-organizer-dialog").dialog('open');
+  $("#make-organizer-link").click(function() {
+    CMC.isreceiver = true;
+    CMC.editProfile(true /* isNewProfile */);
   });
 
   $("#profile-organizer-dialog").dialog({
@@ -2631,9 +2677,12 @@ $(function() {
     if (response.authResponse) {
       CMC.loggedInUserID = response.authResponse.userID;
       CMC.log("user " + CMC.loggedInUserID + " is already logged in, cache their data");
-      CMC.cacheFacebookData();
+      CMC.cacheFacebookData(function () {
+        CMC.showProfile(CMC.profiledata);
+      });
     } else {
       CMC.log("authResponse is null; no user session, do not cache data yet");
+      CMC.handleUserUnauthorized();
     }
   });
 
