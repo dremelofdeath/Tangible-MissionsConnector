@@ -555,14 +555,14 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
           <h1>Cool! You're a volunteer.</h1>
           <p>We're excited you're here! Now we'd like to sync with your Facebook profile so we can connect you with mission trips all over the world. We'll also let you know if anyone invites you to join their trip!</p>
           <h1>
-            <a href="#" onclick="CMC.page('#make-volunteer', '#make-volunteer-profile');">Make your Profile &gt;&gt;</a>
+            <a href="#" id="make-volunteer-link">Make your Profile &gt;&gt;</a>
           </h1>
         </div>
         <div id="make-organizer">
           <h1>Awesome! You're an organizer.</h1>
           <p>It's great to have you onboard! We'd like to take a chance to sync with your Facebook profile so we can connect you to volunteers all over the world. If you have a Facebook page, you can link that too. We'll be sure to let you know when people join your trips!</p>
           <h1>
-            <a href="#" onclick="CMC.page('#make-organizer', '#make-org-profile');">Make your Profile &gt;&gt;</a>
+            <a href="#" id="make-organizer-link">Make your Profile &gt;&gt;</a>
           </h1>		  
         </div>
         <div id="make-profile">
