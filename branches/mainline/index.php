@@ -389,7 +389,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
         font-size: 1em;
         font-weight: bold;
         padding-top: 6px;
-        position: absolute;
+        position: relative;
       }
 
       li.trip-list-item {

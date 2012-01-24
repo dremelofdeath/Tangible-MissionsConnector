@@ -1,8 +1,8 @@
 SVNDIR = $(shell pwd | sed -E -e 's/\/(\w?\.?\_?\/?)+\///g')
 JSFILES = $(shell ls *.js | grep -v -E '\.yui\.' | grep -v -E '\.ship\.')
-BUILDNUMBER = $(shell echo "ibase=10;obase=16;`svnversion | sed -E -e 's/[^0-9]//g'`" | bc)
+BUILDNUMBER = $(shell echo "ibase=10;obase=16;`svnversion | sed -E -e 's/.*://' -e 's/[^0-9]//g'`" | bc)
 
-.PHONY: clean unfinalize
+.PHONY: clean unfinalize buildnumber
 
 all: ship
 
@@ -46,3 +46,6 @@ buildfinalize: ship
 
 unfinalize: clean
 	svn revert $(JSFILES) cmc.js *.php
+
+buildnumber:
+	@echo $(BUILDNUMBER)
