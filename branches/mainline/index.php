@@ -342,14 +342,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
         width: 180px;
       }
 
-      #profile-right-content-section {
-        height: 410px;
-        width: 72%;
-        display: inline-block;
-        overflow: auto;
-      }
-
-      #trip-profile-right-content-section {
+      .entity-right-content-section {
         height: 410px;
         width: 72%;
         display: inline-block;
@@ -608,7 +601,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                   <div id="profile-controls-back-to-my-profile" class="entity-control cmc-square-button"></div>
                 </div>
               </div>
-              <div id="profile-right-content-section">
+              <div id="profile-right-content-section" class="entity-right-content-section">
                 <span id="profile-website">www.example.com</span>
                 <div id="profile-section-skills">
                   <h3>Medical Skills:</h3>
@@ -671,7 +664,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
             <div id="trip-profile-left-column">
               <div id="tripprofileimage">
                 <div class="trip-owner-picture">
-                  <img src="ajax-spinner.gif" width="190" />
+                  <img class="profile-picture" src="ajax-spinner.gif" />
                 </div>
               </div>
               <div class="box2">Trip Owner: <div class="profile-trip-owner">Name</div></div>
@@ -682,7 +675,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                 </div>
               </div>
             </div>
-            <div id="trip-profile-right-column">
+            <div id="trip-profile-right-column" class="entity-right-content-section">
               <div class="box1">
                 <h2>Trip Information:</h2>
                 <h5>Trip Name:</h5>
