@@ -582,7 +582,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
           <div id="profilecontent">
             <div id="profile-left-column">
               <div id="profile-image">
-                <img class="profile-picture" src="ajax-spinner.gif" />
+                <img class="profile-picture" src="ajax-spinner.gif">
               </div>
               <div id="profile-section-about-me">
                 <h3>About Me:</h3>

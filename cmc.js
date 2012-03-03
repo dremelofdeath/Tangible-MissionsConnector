@@ -454,7 +454,14 @@ var CMC = {
       this.assert(data.name != undefined, "name is missing from result set");
 
       $("#profile-name").html(data.name ? data.name : "");
+     
+      FB.api(data.id, function(response) {
+      $("#profile-name").wrap('<a href="' + response.link + '" target="_blank"></a>');
+      $("img.profile-picture").wrap('<a href="' + response.link + '" target="_blank"></a>');
+      });
+
       $("img.profile-picture").attr("src", "http://graph.facebook.com/"+data.id+"/picture?type=large");
+
       this.ajaxNotifyComplete();
   
       $("#profile-section-about-me-content").html(data.about ? data.about : "");
@@ -671,6 +678,15 @@ var CMC = {
   buildTripList : function (data, showDescription, showJoin, showInvite, showLeave) {
     this.beginFunction();
     var buttons = [];
+    if (showLeave) {
+      buttons.push({
+        text: "Leave Trip",
+        icon: "ui-icon-close",
+        action: function () {
+          CMC.leaveTrip($(this).attr("tripid"));
+        }
+      });
+    }
     if (showDescription) {
       buttons.push({
         text: "More Info",
@@ -691,15 +707,6 @@ var CMC = {
     }
     if (showInvite) {
       this.assert("Invite button for trip lists cut for 2.0.");
-    }
-    if (showLeave) {
-      buttons.push({
-        text: "Leave Trip",
-        icon: "ui-icon-close",
-        action: function () {
-          CMC.leaveTrip($(this).attr("tripid"));
-        }
-      });
     }
     var ul = this.buildTripListEx(data, buttons);
     this.endFunction();
@@ -1036,7 +1043,33 @@ var CMC = {
           CMC.getProfile(CMC.me.id, CMC.handleGetProfileCallbackSaveAndShow);
           alert('You have successfully left the trip.');
         } else {
-          alert('Sorry, you could not leave the trip because: ' + data.err_msg);
+          // special case for the case when you trip has just a single member
+          // In this case, delete the tripmember as well as the trip itself
+          if (data.membercount == 1) {
+            $.ajax({
+              type: "POST",
+              url: "api/deletetrips.php",
+              data: {
+                tripid: trip
+              },
+              dataType: "json",
+              context: this,
+              success: function(data) {
+              if (!data.has_error) {
+                CMC.getProfile(CMC.me.id, CMC.handleGetProfileCallbackSaveAndShow);
+                alert('You have successfully left the trip.');
+              } else {
+                alert('Sorry, you could not leave the trip because: ' + data.err_msg);
+              }
+              },
+              error: function(data) {
+                alert('Sorry, you could not leave the trip because: ' + data.err_msg);
+              }
+            });
+          }
+          else {
+            alert('Sorry, you could not leave the trip because: ' + data.err_msg);
+          }
         }
       },
       error: function(data) {
