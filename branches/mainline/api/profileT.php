@@ -24,7 +24,7 @@ else {
 $json = array();
 
 if (!$has_error) {
-
+$json['tripid'] = $tid;
 $sql = 'select * from trips where id="'.$tid.'"';
 $result = mysql_query($sql,$con);
 if (!$result) {
@@ -58,19 +58,30 @@ else {
 		$phone=$row['phone'];
 		if (!empty($phone))
 			$json['phone'] = $phone;
+		$languages=$row['Languages'];
+		if (!empty($languages))
+			$json['languages'] = $languages;
 		$email=$row['email'];
 		if (!empty($email))
 			$json['email'] = $email;
 		$web=$row['website'];		
+    if (!empty($web))
+      $json['website'] = $web;
+		$acco=$row['accommodationlevel'];		
+    if (!empty($acco))
+      $json['acco'] = $acco;
 		$dur=$row['durationid'];
 		if (!empty($dur))
 			$json['duration'] = $dur;
 		$stage=$row['isinexecutionstage'];
 		if (!empty($stage)) {
+      $json['tripstage'] = $stage;
+      /*
 		if ($stage==0)
 			$json['tripstage'] = "Planning Phase";  
 		else if ($stage==1)
-			$json['tripstage'] = "In Execution";  
+			$json['tripstage'] = "Execution";  
+      */
 		}
 		$destination=$row['destination'];
 		if (!empty($destination))

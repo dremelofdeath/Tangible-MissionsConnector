@@ -1356,7 +1356,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                                     Trip Name</label>
                             </td>
                             <td>
-                                <input type="text" id="profile-trip-name" class="profile-trip-name" />
+                                <input type="text" id="profile-trip-name" class="cmc-form-spec" />
                             </td>
                         </tr>  
                         <tr>
@@ -1365,7 +1365,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                                     Organization Website</label>
                             </td>
                             <td>
-                                <input type="text" id="profile-trip-website" class="profile-trip-website" />
+                                <input type="text" id="profile-trip-website" class="cmc-form-spec" />
                             </td>
                         </tr>  
                         <tr>
@@ -1374,7 +1374,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                                     Trip Description</label>
                             </td>
                             <td>
-                                <input type="text" id="profile-trip-about" class="profile-trip-about" />
+                                <input type="text" id="profile-trip-about" class="cmc-form-spec" />
                             </td>
                         </tr>  						
                         <tr>
@@ -1383,7 +1383,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                                     Religious Affiliation</label>
                             </td>
                             <td style="width: 197px">
-                                        <select id="profile-trip-religion" class="profile-trip-religion">
+                                        <select id="profile-trip-religion" class="cmc-form-spec">
                                             <option class="cmc-default-opt" value="Select Religious Affiliation", selected="selected">Select Religious Affiliation</option>
                                             <option value="Secular">Secular</option>
                                             <option value="Christian: Protestant">Christian: Protestant</option>
@@ -1398,7 +1398,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                                     Anticipated Number of Team Members</label>
                             </td>
                             <td>
-                                <input type="text" id="profile-trip-number" class="profile-trip-number" />
+                                <input type="text" id="profile-trip-number" class="cmc-form-spec" />
                             </td>
                         </tr>  	
                         <tr>
@@ -1407,7 +1407,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                                     Approximate Departure Date</label>
                             </td>
                             <td style="width: 197px">
-							<input name="profile-trip-depart" id="profile-trip-depart" class="profile-trip-depart" type=button value="select" onclick="displayDatePicker('profile-trip-depart', false, 'mdy', '.');">
+							<input name="profile-trip-depart" id="profile-trip-depart" class="cmc-form-spec" type=button value="select" onclick="displayDatePicker('profile-trip-depart', false, 'mdy', '.');">
 
                             </td>
                         </tr>						
@@ -1417,7 +1417,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                                     Approximate Return Date</label>
                             </td>
                             <td style="width: 197px">
-							<input name="profile-trip-return" id="profile-trip-return" class="profile-trip-return" type=button value="select" onclick="displayDatePicker('profile-trip-return', false, 'mdy', '.');">
+							<input name="profile-trip-return" id="profile-trip-return" class="cmc-form-spec" type=button value="select" onclick="displayDatePicker('profile-trip-return', false, 'mdy', '.');">
                             </td>
                         </tr>							
                         <tr>
@@ -1426,7 +1426,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                                     Duration of Missions</label>
                             </td>
                             <td style="width: 197px">
-                                        <select id="profile-trip-duration" class="profile-trip-duration">
+                                        <select id="profile-trip-duration" class="cmc-form-spec">
                                             <option class="cmc-default-opt" value="Select Duration of Missions" selected="selected">Select Duration of Missions</option>
                                             <option value="1">Short Term: 1-2 weeks</option>
                                             <option value="2">Medium Term: 1 Month-2 Years</option>
@@ -1440,7 +1440,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                                     Trip Accommodation Level</label>
                             </td>
                             <td style="width: 197px">
-                                        <select id="profile-trip-acco" class="profile-trip-acco">
+                                        <select id="profile-trip-acco" class="cmc-form-spec">
                                             <option class="cmc-default-opt" value="Select Accommodation Level" selected="selected">Select Accommodation Level</option>
                                             <option value="Basic shelter without indoor plumbing">Basic shelter without indoor plumbing</option>
                                             <option value="Basic shelter with indoor plumbing">Basic shelter with indoor plumbing</option>
@@ -1456,7 +1456,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                                     Mission Stage</label>
                             </td>
                             <td style="width: 197px">
-                                        <select id="profile-trip-stage" class="profile-trip-stage">
+                                        <select id="profile-trip-stage" class="cmc-form-spec">
                                             <option class="cmc-default-opt" value="Select Mission Stage" selected="selected">Select Mission Stage</option>
                                             <option value="1">Planning</option>
                                             <option value="2">Execution</option>
@@ -1469,7 +1469,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                                     Destination City</label>
                             </td>
                             <td>
-                                <input type="text" id="profile-trip-city" class="profile-trip-city"/>
+                                <input type="text" id="profile-trip-city" class="cmc-form-spec"/>
                             </td>
                         </tr>
 
@@ -1479,7 +1479,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                                     Destination Country</label>
                             </td>
                             <td style="width: 197px">
-                                        <select id="profile-trip-country" class="profile-trip-country" onchange="tripzipdisplay();">
+                                        <select id="profile-trip-country" class="cmc-form-spec" onchange="tripzipdisplay();">
                                         <?php
                                         echo '<option class="cmc-default-opt" value="Select your Destination Country" selected="selected">Select your Destination Country</option>';
                                         cmc_echo_opt_countries();
@@ -1494,7 +1494,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                                     Destination Zipcode</label>
                             </td>
                             <td>
-                                <input type="text" id="profile-trip-zipcode" class="profile-trip-zipcode"/>
+                                <input type="text" id="profile-trip-zipcode" class="cmc-form-spec"/>
                             </td>
                         </tr>
                         </tbody>
@@ -1504,7 +1504,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                                     Languages</label>
                             </td>
                             <td style="width: 197px">
-                                        <select id="profile-trip-languages" name="profile-trip-languages" multiple="multiple">
+                                        <select id="profile-trip-languages" class="cmc-form-spec" name="profile-trip-languages" multiple="multiple">
                       <!-- <option class="cmc-default-opt" selected="selected" value="Select Countries Served">Select Countries Served</option> -->
                                         <?php cmc_echo_opt_languages(); ?>
                                         </select>
@@ -1516,7 +1516,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                                     Phone</label>
                             </td>
                             <td>
-                                <input type="text" id="profile-trip-phone" class="profile-trip-phone" />
+                                <input type="text" id="profile-trip-phone" class="cmc-form-spec" />
                             </td>
                         </tr>
                         <tr>
@@ -1525,7 +1525,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                                     Email Id</label>
                             </td>
                             <td>
-                                <input type="text" id="profile-trip-email" class="profile-trip-email" />
+                                <input type="text" id="profile-trip-email"class="cmc-form-spec" />
                             </td>
                         </tr>           
                         <tr>
