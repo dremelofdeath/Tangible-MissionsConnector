@@ -60,7 +60,6 @@ else {
   $err_msg = "Required parameters not defined.";
 }
 
-
 if (!$has_error) {
 
   // If profiletype == 1, then it is a volunteer profile, if profiletype==2, then it is a trip profile
@@ -88,6 +87,7 @@ if (!$has_error) {
     $isreceiver = 1;
   }
 
+  
   if ($myobj->{'profiletype'} != 2) {
 
     // Zip code is a required field for volunteer or missions - return an error if the country is USA
@@ -1021,9 +1021,9 @@ else {
           }
         }
 
-        if (isset($myobj->{'country'})) {
-          if (!empty($myobj->{'country'})) {
-            $tripcountry = $myobj->{'country'};
+        if (isset($myobj->{'mycountry'})) {
+          if (!empty($myobj->{'mycountry'})) {
+            $tripcountry = $myobj->{'mycountry'};
             $sql5 = 'select * from countries where id="'.$tripcountry[0].'"';
             $result5 = mysql_query($sql5);
             $row5 = mysql_fetch_array($result5);
@@ -1229,6 +1229,7 @@ else {
       }
     }
 
+    if (!$is_trip) {
     // clear out the old entries so that we start fresh
     $sql = "DELETE FROM skillsselected WHERE userid='".$fbid."'";
     $result = mysql_query($sql,$con);
@@ -1255,6 +1256,7 @@ else {
     $result = mysql_query($sql,$con);
     if (!$result) {
       setjsonmysqlerror($has_error,$err_msg,$sql);
+    }
     }
 
     if (isset($myobj->{'medfacil'})) {

@@ -18,6 +18,7 @@ var CMC = {
   isreceiver : false,
   profileexists : false,
   profileedit : false,
+  tripedit : false,
   requestsOutstanding : 0,
   tripuserid : false,
   dialogsOpen : 0,
@@ -77,7 +78,25 @@ var CMC = {
       "profile-org-phone" : "phone",
       "profile-org-email" : "email",
       "profile-org-experience" : "misexp"
-    }
+    },
+    TripProfile : {
+      "profile-trip-name" : "name",
+      "profile-trip-website" : "url",
+      "profile-trip-about" : "about",
+      "profile-trip-religion" : "relg",
+      "profile-trip-duration" : "dur",
+      "profile-trip-city" : "city",
+      "profile-trip-zipcode" : "zip",
+      "profile-trip-country" : "mycountry",
+      "profile-trip-languages" : "languages",
+      "profile-trip-phone" : "phone",
+      "profile-trip-email" : "email",
+      "profile-trip-stage" : "stage",
+      "profile-trip-depart" : "depart",
+      "profile-trip-return" : "return",
+	    "profile-trip-number" : "numpeople",
+      "profile-trip-acco" : "acco"
+    }	
   },
 
   // methods
@@ -695,6 +714,15 @@ var CMC = {
           CMC.getTripProfile($(this).attr("tripid"));
         }
       });
+      if (data.id == CMC.me.id) {
+      buttons.push({
+        text: "Edit Trip",
+        icon: "ui-icon-pencil",
+        action: function () {
+          CMC.editTripProfile($(this).attr("tripid"));
+        }
+      });
+      }
     }
     if (showJoin) {
       buttons.push({
@@ -838,6 +866,24 @@ var CMC = {
     this.endFunction();
   },
   
+  editTripProfile : function(tripid) {
+    this.beginFunction();
+    //First get trip profile information and then use that to popuplate the trip form
+    $.ajax({
+      type: "POST",
+      url: "api/profileT.php",
+      data: {
+        tripid: tripid,
+        fbid: CMC.me.id ? CMC.me.id : "",
+      },
+      dataType: "json",
+      context: this,
+      success: this.onGetTripProfileDataSuccessEdit,
+      error: this.onGetTripProfileDataError
+    });
+    this.endFunction();
+  },
+
   getTripProfile : function(tripid) {
     this.beginFunction();
     //this.log("Getting Trip information for : " + CMC.profiledata.tripid[index],10);
@@ -873,6 +919,23 @@ var CMC = {
     this.endFunction();
   },  
   
+  onGetTripProfileDataSuccessEdit : function(data, textStatus, jqXHR) {
+    this.beginFunction();
+    this.assert(data != undefined, "data is undefined in onGetTripProfileDataSuccess");
+    if(data.has_error !== undefined && data.has_error !== null) {
+      if(data.has_error) {
+          // we have a known error, handle it
+          this.handleGetTripProfileDataSuccessHasError(data);
+      } else {
+          this.editTrip(data);
+      }
+    } else {
+      // an unknown error occurred? do something!
+      this.handleGenericUnexpectedCallbackError(data, textStatus, jqXHR, "trip profile data");
+    }
+    this.endFunction();
+  },
+
   handleGetTripProfileDataSuccessHasError : function(data) {
     this.beginFunction();
     this.assert(data != undefined, "data is undefined in handleGetTripProfileDataSuccessHasError");
@@ -1760,6 +1823,83 @@ var CMC = {
     this.endFunction();
   },
 
+
+  editTrip : function (data) {
+    this.beginFunction();
+  
+    this.tripedit = 1;
+
+    this.checkFacebookLoginStatus($.proxy(function (response) {
+      if (response && response.authResponse) {
+        // Retrieve the profile data from the backend again to make sure it is the latest information, no need to show profile
+        if (this.me && this.me.id) {
+          this.getProfile(this.me.id);
+        }
+
+          var id = "#profile-trip-dialog";
+
+          if (data.tripname !== undefined) {
+            $("input#profile-trip-name").val(data.tripname);
+          }
+          if (data.website !== undefined) {
+            $("input#profile-trip-website").val(data.website);
+          }
+          if (data.tripdesc !== undefined) {
+            $("input#profile-trip-about").val(data.tripdesc);
+          }
+          if (data.religion !== undefined) {
+            $("input#profile-trip-religion").val(data.religion);
+          }
+          if (data.numpeople !== undefined) {
+            $("input#profile-trip-number").val(data.numpeople);
+          }
+          if (data.departyear !== undefined) {
+            var mydepart = String(data.departmonth) + '.' + String(data.departday) + '.' + String(data.departyear); 
+            $("input#profile-trip-depart").val(mydepart);
+          }
+          if (data.returnyear !== undefined) {
+            var myreturn = String(data.returnmonth) + '.' + String(data.returnday) + '.' + String(data.returnyear); 
+            $("input#profile-trip-return").val(myreturn);
+          }
+          if (data.duration !== undefined) {
+            $("input#profile-trip-duration").val(data.duration);
+          }
+          if (data.acco !== undefined) {
+            $("input#profile-trip-acco").val(data.acco);
+          }
+          if (data.tripstage !== undefined) {
+            $("input#profile-trip-stage").val(data.tripstage);
+          }
+          if (data.destination !== undefined) {
+            $("input#profile-trip-city").val(data.destination);
+          }
+          if (data.destinationcountry !== undefined) {
+            $("input#profile-trip-country").val(data.destinationcountry);
+          }
+          if (data.zip !== undefined) {
+            $("input#profile-trip-zipcode").val(data.zip);
+          }
+          if (data.languages !== undefined) {
+            var mysplitlang = data.languages.split(",");
+            if (mysplitlang.length > 0) {
+              for (var each in mysplitlang) {
+                $('select#profile-trip-languages option[value="' + parseInt(mysplitlang[each],10) + '"]').attr('selected', 'selected');
+              }
+            }
+          }
+          if (data.email !== undefined) {
+            $("input#profile-trip-email").val(data.email);
+          }
+          if (data.phone !== undefined) {
+            $("input#profile-trip-phone").val(data.phone);
+          }
+
+          $("#profile-trip-dialog").dialog('open');
+      } 
+    }, this));
+    this.endFunction();
+  },
+
   editProfile : function (isNewProfile) {
     this.beginFunction();
     isNewProfile = isNewProfile === undefined ? false : isNewProfile;
@@ -2188,7 +2328,7 @@ var CMC = {
     }
 
     if (profileData.hasOwnProperty("profile-org-phone")) {
-      var country = profileData.hasOwnProperty("profile-org-country") ? profileData["profile-orgcountry"] : null;
+      var country = profileData.hasOwnProperty("profile-org-country") ? profileData["profile-org-country"] : null;
       var phoneerror = CMC.validatePhone(profileData["profile-org-phone"], country);
       if (phoneerror != "") {
         reason += errornum + ' ' + phoneerror + '\n';
@@ -2229,7 +2369,6 @@ var CMC = {
     return ret;
   },
 
-
   onSubmitorgSuccess : function(data, textStatus, jqXHR) {
     this.beginFunction();
     if (!data.has_error) {
@@ -2249,6 +2388,171 @@ var CMC = {
     this.endFunction();
   },
 
+  submittripProfile : function (profileData) {
+    this.beginFunction();
+    var zipisvalid = false;
+    var emailisvalid = false;
+    var reason="";
+    var isValid;
+    var errornum=1;
+    var ret = false;
+     var tripdepart;
+     var tripreturn;
+     var DepartMonth,DepartDay,DepartYear;
+     var ReturnMonth,ReturnDay,ReturnYear;
+	
+    if (profileData.hasOwnProperty("profile-trip-website")) {
+      if (!CMC.isUrl(profileData["profile-trip-website"])) {
+        reason += errornum+'. Incorrect Website Entered\n';
+        errornum = errornum + 1;
+        isValid = false;
+      }
+    }
+    
+    if (profileData.hasOwnProperty("profile-trip-zipcode")) {
+      zipisvalid = CMC.validateZipCode(profileData["profile-trip-zipcode"]);
+      if (!zipisvalid) {
+        reason += errornum+'. Incorrect Zipcode format entered\n';
+        errornum = errornum + 1;
+        isValid = false;
+      }
+    }
+
+    if (profileData.hasOwnProperty("profile-trip-email")) {
+      emailisvalid = CMC.validateEmail(profileData["profile-trip-email"]);
+      if (!emailisvalid) {
+        reason += errornum + '. Incorrect Email format entered\n';
+        errornum = errornum + 1;
+        isValid = false;
+      }
+    }
+
+    if (profileData.hasOwnProperty("profile-trip-phone")) {
+      var country = profileData.hasOwnProperty("profile-trip-country") ? profileData["profile-trip-country"] : null;
+      var phoneerror = CMC.validatePhone(profileData["profile-trip-phone"], country);
+      if (phoneerror != "") {
+        reason += errornum + ' ' + phoneerror + '\n';
+        errornum = errornum + 1;
+        isValid = false;
+      }
+    }
+
+	if (profileData.hasOwnProperty("profile-trip-depart")) {
+	tripdepart = profileData["profile-trip-depart"];
+    if (tripdepart == "select") {
+      reason += errornum + ' ' + 'Trip should have a depart date' + '\n';
+      errornum = errornum + 1;
+      isValid = false;
+    }
+	}
+	if (profileData.hasOwnProperty("profile-trip-return")) {
+	tripreturn = profileData["profile-trip-return"];
+    if (tripreturn == "select") {
+      reason += errornum + ' ' + 'Trip should have a return date' + '\n';
+      errornum = errornum + 1;
+      isValid = false;
+    }
+	}
+
+     var TDeparture, TReturn;
+    // Logic to determine that the trip begin date is before the trip end date
+      if (tripdepart != "") {
+          var departdate = tripdepart.split(".");
+          DepartMonth=parseInt(departdate[0],10);   
+          DepartDay=parseInt(departdate[1],10);   
+          DepartYear=parseInt(departdate[2],10);
+      TDeparture = new Date();
+      TDeparture.setFullYear(DepartYear,DepartMonth,DepartDay);
+      }
+      if (tripreturn != "") {
+          var returndate = tripreturn.split(".");
+          ReturnMonth=parseInt(returndate[0],10);   
+          ReturnDay=parseInt(returndate[1],10);   
+          ReturnYear=parseInt(returndate[2],10);  
+      TReturn = new Date();
+      TReturn.setFullYear(ReturnYear,ReturnMonth,ReturnDay);      
+      }
+    
+    if (TDeparture > TReturn) {
+          reason += errornum + ' ' + 'Trip departure date should be before the return date' + '\n';
+      errornum = errornum + 1;
+      isValid = false;
+    }
+    
+    if (reason != "") {
+      alert('Some input fields need correction:\n'+ reason);
+    } else {
+      var profiletripformdata = {};
+      profiletripformdata.profiletype=2;
+
+      if (this.tripedit == 1) {
+         profiletripformdata.update = 1;
+      }
+
+      profiletripformdata.DepartMonth = DepartMonth;
+	  profiletripformdata.DepartDay = DepartDay;
+	  profiletripformdata.DepartYear = DepartYear;
+	  profiletripformdata.ReturnMonth = ReturnMonth;
+	  profiletripformdata.ReturnDay = ReturnDay;
+	  profiletripformdata.ReturnYear = ReturnYear;
+
+      $.extend(profiletripformdata, this.applyTranslationMap(profileData, this.BackendTranslation.TripProfile));
+	  
+      $.ajax({
+        type: "POST",
+        url: "api/profilein.php",
+        data: {
+           fbid: CMC.me.id ? CMC.me.id : "",
+           profileinfo: encode64(JSON.stringify(profiletripformdata))
+        },
+        context : this,
+        dataType: "json",
+        success: this.onSubmittripSuccess,
+        error: this.onSubmittripFailure
+      });
+   
+      ret = true;
+    }
+    
+    this.endFunction();
+    return ret;
+  },	
+  
+  onSubmittripSuccess : function(data, textStatus, jqXHR) {
+    this.beginFunction();
+    if (!data.has_error) {
+		
+	  $("#profile-trip-dialog").dialog('close');
+	  // refresh the profile page
+      $("#tabs").tabs('load', 1);
+	  if (this.tripedit) {
+		alert('Congratulations! Your trip has been edited!');
+	  }
+	  else {
+		alert('Congratulations! Your trip has been created!');
+	  }	  
+    } else {
+	  if (this.tripedit) {
+		alert('We are sorry, your trip was not edited because: ' + data.err_msg);
+	  }
+	  else {
+      alert('We are sorry - there was an error: ' + data.err_msg);
+	 }
+    }
+    this.endFunction();
+  },
+
+  onSubmittripFailure : function(data, textStatus, jqXHR) {
+    this.beginFunction();
+	  if (this.tripedit) {
+		alert('We are sorry, your trip was not edited because: ' + data.err_msg);
+	  }
+	  else {	
+		alert("We are sorry, the trip was not submitted with the following error: " + data.err_msg);
+	  }
+    this.endFunction();
+  },  
+  
   createTrip : function () {
     $("#profile-trip-dialog").dialog('open');
   },
@@ -2786,183 +3090,8 @@ $(function() {
   });
 
   $("#profile-trip-submit").click(function() {
-  
-    var aname = $("#profile-trip-form").find('.profile-trip-name');
-  var aurl = $("#profile-trip-form").find('.profile-trip-website');
-  var aabout = $("#profile-trip-form").find('.profile-trip-about');
-  
-    var reltype = $("#profile-trip-form").find('.profile-trip-religion');
-    var durtype = $("#profile-trip-form").find('.profile-trip-duration');
-    var city = $("#profile-trip-form").find('.profile-trip-city');
-    var zipcode = $("#profile-trip-form").find('.profile-trip-zipcode');
-
-    var country = $("#profile-trip-form").find('.profile-trip-country');
-    var languages = $("#profile-trip-form").find('#profile-trip-languages');
-    var phone = $("#profile-trip-form").find('.profile-trip-phone');
-    var email = $("#profile-trip-form").find('.profile-trip-email');
-    var stage = $("#profile-trip-form").find('.profile-trip-stage');
-    var tripdepart = $("#profile-trip-form").find('.profile-trip-depart');
-    var tripreturn = $("#profile-trip-form").find('.profile-trip-return');
-    var numberofmembers = $("#profile-trip-form").find('.profile-trip-number');
-    var accolevel = $("#profile-trip-form").find('.profile-trip-acco');
-
-    var zipisvalid = false;
-    var emailisvalid = false;
-
-    var reason="";
-    var errornum=1;
-
-  if (aurl.val() != "") {
-    if (!CMC.isUrl(aurl.val())) {
-      reason += errornum+'. Incorrect Website Entered\n';
-      errornum = errornum + 1;
-      isValid = false;    
-    }
-  }
-  
-    if (zipcode !== undefined) {
-    if (zipcode.val() != "") {
-      zipisvalid = CMC.validateZipCode(zipcode.val());
-      if (!zipisvalid) {
-        reason += errornum+'. Incorrect Zipcode format entered\n';
-        errornum = errornum + 1;
-        isValid = false;
-      }
-    }
-    }
-
-    if (email.val() != "") {
-      emailisvalid = CMC.validateEmail(email.val());
-      if (!emailisvalid) {
-        reason += errornum + '. Incorrect Email format entered\n';
-        errornum = errornum + 1;
-        isValid = false;
-      }
-    }
-
-    if (phone.val() != "") {
-      var phoneerror = CMC.validatePhone(phone.val(),country.val());
-      if (phoneerror != "") {
-        reason += errornum + ' ' + phoneerror + '\n';
-        errornum = errornum + 1;
-        isValid = false;
-      }
-    }
-
-    if (tripdepart.val() == "select") {
-      reason += errornum + ' ' + 'Trip should have a depart date' + '\n';
-      errornum = errornum + 1;
-      isValid = false;
-    }
-    if (tripreturn.val() == "select") {
-      reason += errornum + ' ' + 'Trip should have a return date' + '\n';
-      errornum = errornum + 1;
-      isValid = false;
-    }
-  
-    // Logic to determine that the trip begin date is before the trip end date
-      if (tripdepart.val() != "") {
-          var departdate = tripdepart.val().split(".");
-          var DepartMonth=parseInt(departdate[0],10);   
-          var DepartDay=parseInt(departdate[1],10);   
-          var DepartYear=parseInt(departdate[2],10);
-      var TDeparture = new Date();
-      TDeparture.setFullYear(DepartYear,DepartMonth,DepartDay);
-      }
-      if (tripreturn.val() != "") {
-          var returndate = tripreturn.val().split(".");
-          var ReturnMonth=parseInt(returndate[0],10);   
-          var ReturnDay=parseInt(returndate[1],10);   
-          var ReturnYear=parseInt(returndate[2],10);  
-      var TReturn = new Date();
-      TReturn.setFullYear(ReturnYear,ReturnMonth,ReturnDay);      
-      }
-    
-    if (TDeparture > TReturn) {
-          reason += errornum + ' ' + 'Trip departure date should be before the return date' + '\n';
-      errornum = errornum + 1;
-      isValid = false;
-    }
-    
-    if (reason != "") {
-      alert('Some input fields need correction:\n'+ reason);
-      return false;
-    } else {
-      var profiletripformdata = {};
-      profiletripformdata.profiletype=2;
-
-      if (aname.val() != "")
-        profiletripformdata.name= aname.val();    
-      if (aabout.val() != "")
-        profiletripformdata.about= aabout.val();
-      if (aurl.val() != "")
-        profiletripformdata.url = aurl.val();
-      if (stage.val() != "Select Mission Stage")
-        profiletripformdata.stage= stage.val();
-      if ((tripdepart !== undefined) && (tripdepart.val() !==  null)) {
-          var departdate = tripdepart.val().split(".");
-          profiletripformdata.DepartMonth=parseInt(departdate[0],10);   
-          profiletripformdata.DepartDay=parseInt(departdate[1],10);   
-          profiletripformdata.DepartYear=parseInt(departdate[2],10);    
-      }
-      if ((tripreturn !== undefined) && (tripreturn.val() !==  null)) {
-          var returndate = tripreturn.val().split(".");
-          profiletripformdata.ReturnMonth=parseInt(returndate[0],10);   
-          profiletripformdata.ReturnDay=parseInt(returndate[1],10);   
-          profiletripformdata.ReturnYear=parseInt(returndate[2],10);    
-      }
-
-      if (numberofmembers.val() != "")
-        profiletripformdata.numpeople= numberofmembers.val();
-      
-      if (country.val() != "Select your Destination Country")
-        profiletripformdata.country=country.val();  
-      if (languages.val() != "")
-        profiletripformdata.languages=$("#profile-trip-languages").val(); 
-      if (durtype.val() != "Select Duration of Missions")
-        profiletripformdata.dur=durtype.val();
-      if (reltype.val() != "Select Religious Affiliation")
-        profiletripformdata.relg=reltype.val();           
-      if (zipcode.val() != "")
-        profiletripformdata.zip=zipcode.val();
-      if (email.val() != "")
-        profiletripformdata.email=email.val();
-      if (city.val() != "")
-        profiletripformdata.city=city.val();
-      if (phone.val() != "")
-        profiletripformdata.phone=phone.val();
-    
-      if (accolevel.val() != "Select Accommodation Level") {
-        profiletripformdata.acco=accolevel.val();
-      }
-
-      $.ajax({
-        type: "POST",
-        url: "api/profilein.php",
-        data: {
-           fbid: CMC.me.id ? CMC.me.id : "",
-          profileinfo: encode64(JSON.stringify(profiletripformdata))
-        },
-        dataType: "json",
-        context: this,
-        success: function(data) {
-          if (!data.has_error) {
-            $("#profile-trip-dialog").dialog('close');
-            // refresh the profile page
-            $("#tabs").tabs('load', 1);
-            alert('Congratulations! Your trip has been created!');
-          } else {
-            alert("We are sorry, the trip was not created because: " + data.err_msg);
-          }
-        },
-        error: function(data) {
-          alert('We are sorry, the trip was not created because: ' + data.err_msg);
-        }
-      });
-      
-      return true;
-    }
-    });
+	CMC.submittripProfile(CMC.getFormData("#profile-trip-form"));
+ });
 
   // Handles the live form validation
   $("#profile-trip-name").validate({
