@@ -136,6 +136,28 @@ else {
 	$json['member'] = false;
 }
 }
+
+// now get all the tripmembers information to display on the trips page
+$sql = 'select * from tripmembers where tripid="'.$tid.'"';
+$result = mysql_query($sql,$con);
+
+if (!$result) {
+	setjsonmysqlerror($has_error,$err_msg,$sql);
+}
+else {
+
+$json['memberids'] = array();
+
+$numrows = mysql_num_rows($result);
+  if ($numrows > 0) {
+  while($row= mysql_fetch_array($result)) {
+    if ($creatorid != $row['userid']) {
+      $json['memberids'][] = $row['userid'];
+    }
+  }
+  }
+}
+
 }
 else {
   $has_error = TRUE;

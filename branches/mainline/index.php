@@ -719,7 +719,16 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                 <h5>Number of People involved in this Trip:</h5>
                 <div class="profile-trip-numpeople">
                   <h6>Number of people</h6>
-                </div>						
+                </div>	
+				<h5>People involved in this Trip:</h5>
+                <div id="profile-trip-people">
+				  <div id="cmc-trip-member-0" class="cmc-tripmember-results">
+				  <div id="profile-tripmember-image">
+                   <img class="profile-tripmember-picture" src="ajax-spinner.gif">
+                  </div>
+				  <div class="profile-tripmember-name">Member Name</div>			
+				  </div>
+                </div>	
               </div>
             </div>
           </div>

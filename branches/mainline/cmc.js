@@ -963,6 +963,7 @@ var CMC = {
     } else {
 
         var id = "#tripprofilecontent";
+		var id2;
 
         this.ajaxNotifyStart();
         this.assert(data.tripname !== undefined, "Trip name is missing from result set");
@@ -1054,6 +1055,43 @@ var CMC = {
       else {
       $(id).children("#trip-profile-right-column").children(".box1").children(".profile-trip-numpeople").html(data.numpeople ? "<h6>" + data.numpeople + "</h6>" : "");
       }
+	  
+      if (data.memberids === undefined) {
+   //$(id).children("#trip-profile-right-column").children(".box1").children(".profile-trip-people").html("<h6></h6>");
+	  $("#profile-trip-people").html("");
+      }
+      else {
+        //display trip member information
+        if (data.memberids.length > 0) {
+		  //first update the html part
+          var eachstr = "";
+          for (var each in data.memberids) {
+		  
+		  eachstr += "<div id=\"cmc-trip-member-"+each+"\" class=\"cmc-tripmember-results\">";
+		  eachstr += "<div id=\"profile-tripmember-image\">";
+     
+          eachstr += "<img class=\"profile-tripmember-picture\" src=\"ajax-spinner.gif\">";
+          eachstr += "</div>";
+		  eachstr += "<div class=\"profile-tripmember-name\">Member Name</div>";			
+		  eachstr += "</div>";
+		  }
+		  
+      $("#profile-trip-people").html(data.memberids ? eachstr : "");
+		  
+		  for (var each in data.memberids) {
+			id2 = "#profile-trip-people";
+		  FB.api(data.memberids[each], function(response) {
+		  $(id2).children("#cmc-trip-member-"+each).children(".profile-tripmember-name").html(response.name ? response.name : "");
+		$(id2).children("#cmc-trip-member-"+each).children("#profile-tripmember-image").children("img.profile-tripmember-picture").attr("src", "http://graph.facebook.com/"+data.memberids[each]+"/picture");	
+		  $(id2).children("#cmc-trip-member-"+each).children("#profile-tripmember-image").children("img.profile-tripmember-picture").wrap('<a href="' + response.link + '" target="_blank"></a>');
+		  });
+		  
+		  }
+
+        } else {
+          $("#profile-trip-people").html("");
+        }	  
+      }	  
 
       // change to the Trips Tab
       $("#tabs").tabs('select', 2);
