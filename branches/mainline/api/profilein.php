@@ -26,13 +26,6 @@ if (array_key_exists('fbid', $saferequest) && array_key_exists('profileinfo',$sa
 
   $fbid = $saferequest['fbid'];
 
-  /*if (get_magic_quotes_gpc())
-  {
-    $myobj = json_decode(htmlspecialchars_decode(array_map("stripslashes_deep",$saferequest['profileinfo'])));
-  } else {
-    $myobj = json_decode(htmlspecialchars_decode($saferequest['profileinfo']));
-  }*/
-
   $myobj = json_decode(base64_decode($saferequest['profileinfo']));
 
   switch(json_last_error()) {
@@ -913,11 +906,21 @@ if ($month%2==0) {
             $mystr = "";
             $ii=0;
             foreach($languages as $ms) {
-              $mystr = $mystr.$ms;
+				// store characters, not values from input
+				$sqll = 'select * from languages where id="'.$ms.'"';
+				$resultl = mysql_query($sqll, $con);
+
+				if (!$resultl) {
+					setjsonmysqlerror($has_error, $err_msg, $sqll);
+				} else {			
+				$rowl = mysql_fetch_array($resultl);
+			
+              $mystr = $mystr.$rowl['englishname'];
               $ii++;
               if ((count($languages)>1)&&($ii<count($languages))) {
                 $mystr = $mystr.",";
               }
+			  }
             }
 
             if ($update) {
@@ -1226,8 +1229,8 @@ else {
           }
         }
 
-      }
-    }
+      } //if no error
+    } //trip section ends
 
     if (!$is_trip) {
     // clear out the old entries so that we start fresh
@@ -1256,7 +1259,6 @@ else {
     $result = mysql_query($sql,$con);
     if (!$result) {
       setjsonmysqlerror($has_error,$err_msg,$sql);
-    }
     }
 
     if (isset($myobj->{'medfacil'})) {
@@ -1373,6 +1375,8 @@ else {
         }
       }
     }
+	
+	}
 
   }
 
