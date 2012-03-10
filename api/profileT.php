@@ -59,8 +59,37 @@ else {
 		if (!empty($phone))
 			$json['phone'] = $phone;
 		$languages=$row['Languages'];
-		if (!empty($languages))
+		if (!empty($languages)) {
 			$json['languages'] = $languages;
+			$json['languageid'] = array();
+      $test = strpos($languages,',');
+      if ($test !== false) {
+			$languages = explode(",", $languages); 
+				foreach($languages as $lg) {
+					$sqll = 'select * from languages where englishname="'.$lg.'"';
+					$resultl = mysql_query($sqll,$con);	
+					if (!$resultl) {
+						setjsonmysqlerror($has_error,$err_msg);
+						continue 1;
+					}
+					else {
+						$rowl = mysql_fetch_array($resultl);
+						$json['languageid'][] = $rowl['id'];
+					}
+				}
+			}
+			else {
+				$sqll = 'select * from languages where englishname="'.$languages.'"';
+				$resultl = mysql_query($sqll,$con);	
+				if (!$resultl) {
+					setjsonmysqlerror($has_error,$err_msg);
+				}
+				else {
+					$rowl = mysql_fetch_array($resultl);
+					$json['languageid'][] = $rowl['id'];
+				}				
+			}
+		}
 		$email=$row['email'];
 		if (!empty($email))
 			$json['email'] = $email;
@@ -87,8 +116,20 @@ else {
 		if (!empty($destination))
 			$json['destination'] = $destination;
 		$destinationcountry=$row['country'];
-		if (!empty($destinationcountry))
-			$json['destinationcountry'] = $destinationcountry;
+		if (!empty($destinationcountry)) {
+	     $json['countryid'] = array();
+			 $json['destinationcountry'] = $destinationcountry;
+				$sqlc = 'select * from countries where longname="'.$destinationcountry.'"';
+				$resultc = mysql_query($sqlc,$con);	
+				if (!$resultc) {
+					setjsonmysqlerror($has_error,$err_msg);
+				}
+				else {
+					$rowc = mysql_fetch_array($resultc);
+					$json['countryid'][] = $rowc['id'];
+				}				
+
+    }
 		$departn = explode(' ',$row['departure']);
 		$depart = explode('-',$departn[0]);
 		if (!empty($depart)) {

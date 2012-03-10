@@ -15,6 +15,7 @@ var CMC = {
   me : false,
   friends : false,
   profiledata :  {},
+  tripdata : {},
   isreceiver : false,
   profileexists : false,
   profileedit : false,
@@ -975,7 +976,6 @@ var CMC = {
         this.tripuserid = data.creatorid;
 
         $(id).children("#trip-profile-left-column").children("#tripprofileimage").children(".trip-owner-picture").children("img").attr("src", "http://graph.facebook.com/"+data.creatorid+"/picture?type=large");
-        this.ajaxNotifyComplete();
       
         $(id).children("#trip-profile-left-column").children(".box2").children(".trip-profile-about").html(data.tripdesc ? "<h4>" + data.tripdesc + "</h4>" : "");
       
@@ -1083,9 +1083,14 @@ var CMC = {
 		  FB.api(data.memberids[each], function(response) {
 		  $(id2).children("#cmc-trip-member-"+each).children(".profile-tripmember-name").html(response.name ? response.name : "");
 		$(id2).children("#cmc-trip-member-"+each).children("#profile-tripmember-image").children("img.profile-tripmember-picture").attr("src", "http://graph.facebook.com/"+data.memberids[each]+"/picture");	
-		  $(id2).children("#cmc-trip-member-"+each).children("#profile-tripmember-image").children("img.profile-tripmember-picture").wrap('<a href="' + response.link + '" target="_blank"></a>');
+		  //$(id2).children("#cmc-trip-member-"+each).children("#profile-tripmember-image").children("img.profile-tripmember-picture").wrap('<a href="' + response.link + '" target="_blank"></a>');
 		  });
 		  
+		  $("#cmc-trip-member-"+each).attr("fbid", data.memberids[each]);
+	
+      $(".cmc-tripmember-results")
+      .click(function () { CMC.handleShowTripMemberProfile(this); });
+
 		  }
 
         } else {
@@ -1096,6 +1101,7 @@ var CMC = {
       // change to the Trips Tab
       $("#tabs").tabs('select', 2);
 
+        this.ajaxNotifyComplete();
       $("#show-trips").hide();
       $("#backtotrips").fadeIn();
       $("#show-trip-profile").fadeIn();
@@ -1861,6 +1867,48 @@ var CMC = {
     this.endFunction();
   },
 
+  animateTripMemberResultSelected : function (whichResult) {
+    this.beginFunction();
+    $(".cmc-tripmember-results").not(whichResult).each(function () {
+      var _onHideComplete = function() {
+        setTimeout($.proxy(function () {
+          $(this).show().fadeTo(0, 1);
+        }, this), 300);
+      };
+      $(this)
+        .stop(true, true)
+        .show()
+        .hide("drop", {direction: "right", distance: 115, easing: "easeOutQuart"}, 350, _onHideComplete)
+        .show(0) // the 0 forces the show to be an animation event, and therefore happen after the hide() above
+        .fadeTo(0, 0);
+    });
+    setTimeout(function () {
+      $("#tabs").tabs('select', 1);
+    }, 285);
+    this.endFunction();
+  },  
+  
+  handleShowTripMemberProfile : function (whichResult) {
+    this.beginFunction();
+    if($(whichResult).children(".profile-tripmember-name").html() != "") {
+      var whichFBID = $(whichResult).attr("fbid");
+      this.assert(whichFBID != null && whichFBID != "", "fbid attr is null for clicked search result");
+      this.getProfile(whichFBID, this.showProfile);      
+      this.animateTripMemberResultSelected(whichResult);
+    } else {
+      this.log("search result clicked, but name is empty; ignoring");
+    }
+    this.endFunction();
+  },
+  
+  emptyTripForm : function () {
+    this.beginFunction();
+
+  $(':input', '#profile-trip-form').removeAttr('checked').removeAttr('selected');
+  $(':text, :password, :file, SELECT', '#profile-trip-form').val('');
+
+    this.endFunction();
+  },
 
   editTrip : function (data) {
     this.beginFunction();
@@ -1873,11 +1921,13 @@ var CMC = {
         if (this.me && this.me.id) {
           this.getProfile(this.me.id);
         }
-
+          
+          this.emptyTripForm();
           var id = "#profile-trip-dialog";
 
           if (data.tripname !== undefined) {
             $("input#profile-trip-name").val(data.tripname);
+            $("input#profile-trip-name").attr('disabled','disabled');
           }
           if (data.website !== undefined) {
             $("input#profile-trip-website").val(data.website);
@@ -1886,7 +1936,7 @@ var CMC = {
             $("input#profile-trip-about").val(data.tripdesc);
           }
           if (data.religion !== undefined) {
-            $("input#profile-trip-religion").val(data.religion);
+            $('select#profile-trip-religion option[value="' + parseInt(data.religion,10) + '"]').attr('selected', 'selected');
           }
           if (data.numpeople !== undefined) {
             $("input#profile-trip-number").val(data.numpeople);
@@ -1900,28 +1950,29 @@ var CMC = {
             $("input#profile-trip-return").val(myreturn);
           }
           if (data.duration !== undefined) {
-            $("input#profile-trip-duration").val(data.duration);
+            $('select#profile-trip-duration option[value="' + parseInt(data.duration,10) + '"]').attr('selected', 'selected');
           }
           if (data.acco !== undefined) {
-            $("input#profile-trip-acco").val(data.acco);
+            $('select#profile-trip-acco option[value="' + parseInt(data.acco,10) + '"]').attr('selected', 'selected');
           }
           if (data.tripstage !== undefined) {
-            $("input#profile-trip-stage").val(data.tripstage);
+            $('select#profile-trip-stage option[value="' + parseInt(data.tripstage,10) + '"]').attr('selected', 'selected');
           }
           if (data.destination !== undefined) {
             $("input#profile-trip-city").val(data.destination);
           }
           if (data.destinationcountry !== undefined) {
-            $("input#profile-trip-country").val(data.destinationcountry);
+            $('select#profile-trip-country option[value="' + parseInt(data.countryid[0],10) + '"]').attr('selected', 'selected');
           }
           if (data.zip !== undefined) {
             $("input#profile-trip-zipcode").val(data.zip);
           }
+          
           if (data.languages !== undefined) {
             var mysplitlang = data.languages.split(",");
             if (mysplitlang.length > 0) {
               for (var each in mysplitlang) {
-                $('select#profile-trip-languages option[value="' + parseInt(mysplitlang[each],10) + '"]').attr('selected', 'selected');
+                $('select#profile-trip-languages option[value="' + parseInt(data.languageid[each],10) + '"]').attr('selected', 'selected');
               }
             }
           }
@@ -2523,10 +2574,6 @@ var CMC = {
       var profiletripformdata = {};
       profiletripformdata.profiletype=2;
 
-      if (this.tripedit == 1) {
-         profiletripformdata.update = 1;
-      }
-
       profiletripformdata.DepartMonth = DepartMonth;
 	  profiletripformdata.DepartDay = DepartDay;
 	  profiletripformdata.DepartYear = DepartYear;
@@ -2535,7 +2582,7 @@ var CMC = {
 	  profiletripformdata.ReturnYear = ReturnYear;
 
       $.extend(profiletripformdata, this.applyTranslationMap(profileData, this.BackendTranslation.TripProfile));
-	  
+
       $.ajax({
         type: "POST",
         url: "api/profilein.php",
@@ -3043,6 +3090,8 @@ $(function() {
     .click(function () { CMC.handleSearchResultSelected(this); })
     .each(function () { $(this).hide(); });
 
+//    .click(function () { CMC.getProfile(data.memberids[each], CMC.showProfile); })	
+	
   // this should fix the junk picture assert on first search
   CMC.log("clearing the placeholder images");
   $(".result-picture img").remove();
