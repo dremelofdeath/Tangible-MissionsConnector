@@ -1468,7 +1468,7 @@ var CMC = {
   getDataForEachFBID : function (fbids, callback, isRetryCall) {
     this.beginFunction();
     if (isRetryCall === null || isRetryCall === undefined) isRetryCall = false;
-    var results = new Array(fbids.length), requestsCompleted = 0, idPosMap = {}, hasRetryPosted = false;
+    var results = new Array(fbids.length), requestsCompleted = 0, hasRetryPosted = false;
     this.log("starting timer __timerNotificationTimeout");
     var __timerNotificationTimeout = setTimeout($.proxy(function () {
       this.log("__timerNotificationTimeout is checking getDataForEachFBID");
@@ -1507,19 +1507,39 @@ var CMC = {
       }
     };
     for(var each in fbids) {
-      idPosMap[fbids[each]] = each;
-      //this.ajaxNotifyStart();
-      FB.api('/' + fbids[each], $.proxy(function (response) {
+      var __handleApiCall = function (response) {
         if (!response) {
-          this.error("response value was null in Facebook API call");
+          CMC.error("response value was null in Facebook API call");
         } else if (response.error) {
-          this.handleFacebookResponseError(response);
-        } else {
-          results[idPosMap[response.id]] = response;
-          __notifyComplete();
+          CMC.handleFacebookResponseError(response);
         }
-        //this.ajaxNotifyComplete();
-      }, this));
+        if (this.target) {
+          results[this.target] = response;
+        } else {
+          CMC.assert("couldn't read target for __handleApiCall");
+        }
+        __notifyComplete();
+      };
+      __handleApiCall.target = each;
+      FB.api('/' + fbids[each], $.proxy(__handleApiCall, __handleApiCall));
+    }
+    this.endFunction();
+  },
+
+  coalesceDefinedSearchResults : function (results) {
+    this.beginFunction();
+    var resultsOffset = 0;
+    var __swapResults = function (results, firstid, secondid) {
+      var temp = results[firstid];
+      results[firstid] = results[secondid];
+      results[secondid] = temp;
+    };
+    for (var each in results) {
+      if (results[each].id === undefined || results[each].id === undefined) {
+        resultsOffset++;
+      } else if (resultsOffset > 0) {
+        __swapResults(results, each - resultsOffset, each);
+      }
     }
     this.endFunction();
   },
@@ -1545,6 +1565,9 @@ var CMC = {
         }
       }, this);
       this.assert(results.length <= 10, "more than 10 results passed to showSearchResults");
+      if (!isRetryCall) {
+        this.coalesceDefinedSearchResults(results); // fixes the "missing teeth" problem with invalid searches
+      }
       if ($(".result-picture img").length > 0) {
         this.log("found " + $(".result-picture img").length + " junk pictures lying around");
         if (!isRetryCall) {
@@ -1557,10 +1580,11 @@ var CMC = {
         }
       }
       for(var each in results) {
-        this.assert(results[each].id !== undefined, "id is missing from result at each=" + each);
+        this.assert(results[each] !== undefined, "result[each] is missing at each=" + each);
+        //this.assert(results[each].id !== undefined, "id is missing from result at each=" + each);
         var id = "#cmc-search-result-" + each;
         this.ajaxNotifyStart();
-        this.assert(results[each].name !== undefined, "name is missing from result at each=" + each);
+        //this.assert(results[each].name !== undefined, "name is missing from result at each=" + each);
         $(id).children(".result-name").html(results[each].name ? results[each].name : "");
         $(id).attr("fbid", results[each].id);
         $(id).children("div.result-picture").children("img").remove();
@@ -2779,9 +2803,27 @@ var CMC = {
     $("#logged-in-user-value").html("(synchronizing)");
     //@/END/DEBUGONLYSECTION
     CMC.ajaxNotifyStart();
+    var userLoggedIn = false;
+    var __timerLoginTimeout = setTimeout($.proxy(function () {
+      this.ajaxNotifyComplete();
+      if (!userLoggedIn) {
+        this.error("Facebook did not respond to login status handshake in time");
+        //@/BEGIN/DEBUGONLYSECTION
+        $("#logged-in-user-value").html("(handshake failure!)");
+        //@/END/DEBUGONLYSECTION
+      } else {
+        this.assert("userLoggedIn=true, but the timeout still fired");
+      }
+    }, this), 2500);
+    var __notifyLoginComplete = function () {
+      userLoggedIn = true;
+      clearTimeout(__timerLoginTimeout);
+    };
     FB.getLoginStatus(function(response) {
       CMC.ajaxNotifyComplete();
       CMC.log("got the response for FB.getLoginStatus()");
+      CMC.assert(!userLoggedIn, "user already logged in when the handshake callback fired");
+      __notifyLoginComplete();
       CMC.cacheFacebookResponseProperties(response);
       //@/BEGIN/DEBUGONLYSECTION
       if (response.authResponse) {
