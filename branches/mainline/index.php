@@ -354,6 +354,10 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
         float: left;
       }
 
+      .entity-link {
+        text-decoration: none;
+      }
+
       .entity-control {
         display: inline-block;
         margin: 2px 0;
@@ -387,53 +391,8 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
 
       li.trip-list-item {
         margin-bottom: 12px;
-        height: 16px;
+        height: 18px;
       }
-
-      /* the stuff below here appears to be stylization for edit profile dialogs 
-       * --zack
-       */
-      
-        #menu-bar ul
-        {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            margin-left: 4px;
-        }
-        #menu-bar ul li
-        {
-            float: left;
-            display: inline-block;
-            padding: 4px;
-        }
-        #menu-bar ul li a, #menu-bar ul li a:active, #menu-bar ul li a:visited
-        {
-            text-decoration: none;
-            color: #747577;
-        }
-        #menu-bar ul li a:hover
-        {
-            text-decoration: underline;
-            color: #747577;
-        }
-        #footer div
-        {
-            padding-top: 14px;
-            width: 180px;
-            margin: auto;
-            color: White;
-        }
-        #footer div a, #footer div a:active, #footer div a:visited
-        {
-            text-decoration: none;
-            color: white;
-        }
-        #footer div a:hover
-        {
-            text-decoration: underline;
-            color: white;
-        }   
     </style>
   </head>
   <body>
@@ -581,8 +540,10 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
         <div id="show-profile" style="display: none">
           <div id="profilecontent">
             <div id="profile-left-column">
-              <div id="profile-image">
-                <img class="profile-picture" src="ajax-spinner.gif">
+              <div id="profile-picture-section">
+                <a id="profile-picture-link" class="entity-link" href="#" target="_blank">
+                  <img class="profile-picture" src="ajax-spinner.gif">
+                </a>
               </div>
               <div id="profile-section-about-me">
                 <h3>About Me:</h3>
@@ -593,7 +554,9 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
             </div>
             <div id="profile-right-column">
               <div id="profile-title-section">
-                <span id="profile-name" class="entity-title">Sample Long Name</span>
+                <a id="profile-name-link" class="entity-link" href="#" target="_blank">
+                  <span id="profile-name" class="entity-title">Sample Long Name</span>
+                </a>
                 <div id="profile-controls" class="entity-controls">
                   <div id="profile-controls-spacer" class="entity-control-spacer"></div>
                   <div id="profile-controls-edit" class="entity-control cmc-square-button"></div>

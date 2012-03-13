@@ -467,6 +467,10 @@ var CMC = {
       this.showCreateNewProfileUI();
     } else {
       var id = "#profilecontent";
+      var __setProfileLinkInternal = function (link) {
+        $("#profile-name-link").attr('href', link);
+        $("#profile-picture-link").attr('href', link);
+      };
       this.hideIntermediateNewProfileCreationSteps();
       this.ajaxNotifyStart();
       this.assert(data.id != undefined, "id is missing from result set");
@@ -475,10 +479,13 @@ var CMC = {
 
       $("#profile-name").html(data.name ? data.name : "");
      
-      FB.api(data.id, function(response) {
-      $("#profile-name").wrap('<a href="' + response.link + '" target="_blank"></a>');
-      $("img.profile-picture").wrap('<a href="' + response.link + '" target="_blank"></a>');
-      });
+      if (!data.link) {
+        FB.api(data.id, function(response) {
+          __setProfileLinkInternal(response.link);
+        });
+      } else {
+        __setProfileLinkInternal(data.link);
+      }
 
       $("img.profile-picture").attr("src", "http://graph.facebook.com/"+data.id+"/picture?type=large");
 
@@ -1566,7 +1573,7 @@ var CMC = {
       }, this);
       this.assert(results.length <= 10, "more than 10 results passed to showSearchResults");
       if (!isRetryCall) {
-        this.coalesceDefinedSearchResults(results); // fixes the "missing teeth" problem with invalid searches
+        this.coalesceDefinedSearchResults(results); // fixes the "missing teeth" problem with invalid search results
       }
       if ($(".result-picture img").length > 0) {
         this.log("found " + $(".result-picture img").length + " junk pictures lying around");
@@ -1587,6 +1594,7 @@ var CMC = {
         //this.assert(results[each].name !== undefined, "name is missing from result at each=" + each);
         $(id).children(".result-name").html(results[each].name ? results[each].name : "");
         $(id).attr("fbid", results[each].id);
+        $(id).attr("fblink", results[each].link);
         $(id).children("div.result-picture").children("img").remove();
         if (results[each].id) {
           $("<img />")
@@ -1882,8 +1890,16 @@ var CMC = {
     this.beginFunction();
     if($(whichResult).children(".result-name").html() != "") {
       var whichFBID = $(whichResult).attr("fbid");
+      var whichFBLink = $(whichResult).attr("fblink");
+      var __showProfileWithLinkPrecacheInternal = function (data) { // should match prototype for showProfile()
+        if (!data.link) {
+          data.link = whichFBLink;
+        }
+        CMC.showProfile(data);
+      };
       this.assert(whichFBID != null && whichFBID != "", "fbid attr is null for clicked search result");
-      this.getProfile(whichFBID, this.showProfile);      
+      this.assert(whichFBLink != null && whichFBLink != "", "fblink attr is null for clicked search result");
+      this.getProfile(whichFBID, __showProfileWithLinkPrecacheInternal);      
       this.animateSearchResultSelected(whichResult);
     } else {
       this.log("search result clicked, but name is empty; ignoring");
