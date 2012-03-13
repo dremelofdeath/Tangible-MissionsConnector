@@ -57,12 +57,12 @@ function cmc_library_load_jquery_ui($ver) {
   cmc_js_load($src);
 }
 
-function cmc_library_load_jquery_ui_theme($ver, $theme, $custom=false) {
+function cmc_library_load_jquery_ui_theme($theme, $custom=false) {
   $href = '';
   if($custom) {
     // NOTE: $theme is ignored for custom themes -- perhaps allow multiple 
     // custom themes in the future? -zack
-    $href .= 'css/custom-theme/jquery-ui-' . $ver . '.custom.css';
+    $href .= 'css/custom-theme/jquery-ui-.custom.css';
   } else {
     $href .= 'http://ajax.googleapis.com/ajax/libs/jqueryui/';
     $href .= $ver;
@@ -75,9 +75,9 @@ function cmc_library_load_jquery_ui_theme($ver, $theme, $custom=false) {
 
 function cmc_jquery_startup($jquery_version, $jquery_ui_version, $theme) {
   if($theme == 'custom' || $theme == 'custom-theme') {
-    cmc_library_load_jquery_ui_theme($jquery_ui_version, $theme, true);
+    cmc_library_load_jquery_ui_theme($theme, true);
   } else {
-    cmc_library_load_jquery_ui_theme($jquery_ui_version, $theme);
+    cmc_library_load_jquery_ui_theme($theme);
   }
   cmc_library_load_jquery($jquery_version);
   cmc_library_load_jquery_ui($jquery_ui_version);
@@ -398,7 +398,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
   <body>
     <!-- Include jQuery stuff and link stylesheet to the specified theme -->
     <!-- FIXME: don't use PHP here, put stylesheet links in the right place -zack -->
-    <?php cmc_jquery_startup("1.6.1", "1.8.11", "custom-theme"); ?>
+    <?php cmc_jquery_startup("1.7.1", "1.8.18", "custom-theme"); ?>
     <script src="jquery.fcbkcomplete.js" type="text/javascript"></script>
     <script src="jquery.tipTip.js" type="text/javascript"></script>
     <!-- imagesLoaded plugin obtained from https://gist.github.com/268257 -->
