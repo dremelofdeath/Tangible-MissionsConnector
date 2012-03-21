@@ -612,7 +612,7 @@ var CMC = {
       if (data.trips == undefined || data.trips.length <= 0) {
         $("div#profile-trips-list-section").hide();
       } else {
-        var ul = this.buildTripList(data, true, true, false, false, data.id == this.me.id);
+        var ul = this.buildTripList(data, true, data.id == this.me.id, false, false, data.id == this.me.id);
         ul.attr("id", "profile-trip-list");
         $("ul#profile-trip-list").remove();
         $("div#profile-trips-list-section").append(ul).show();
