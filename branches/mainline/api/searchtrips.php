@@ -1,10 +1,4 @@
 <?php
-// Application: Christian Missions Connector
-// File: 'trips.php'
-//  shows all trips the user is a member of
-//
-//require_once 'facebook.php';
-
 include_once 'common.php';
 
 $con = arena_connect();
@@ -15,41 +9,28 @@ $err_msg = '';
 
 $json = array();
 
-function getdatestring($year,$month,$date) {
-
-if ($month<10)
-	$smonth = strval($month);
-else
-	$smonth = strval($month);
-
-if ($date<10)
-	$sdate = strval($date);
-else
-	$sdate = strval($date);
-
-$res = $year.'-'.$smonth.'-'.$sdate.' '.'00:00:00';
-return $res;
-}
-
-$todayy = date("Y");
-$todaym = date("m");
-$todayd = date("d");
-$today = getdatestring($todayy,$todaym,$todayd);
-
 // get all trips that are in the future
-$sql = 'select * from trips where departure >="'.$today.'"';
+$sql = null;
+if (array_key_exists('fbid', $saferequest) && $saferequest['fbid'] != '') {
+  $sql =
+    'SELECT t.*, tm.isadmin '.
+    'FROM trips AS t '.
+    'INNER JOIN tripmembers AS tm '.
+    'ON t.id=tm.tripid '.
+    'WHERE tm.userid = "'.$saferequest['fbid'].'" AND t.departure >= NOW()';
+} else {
+  $sql = 'SELECT * FROM trips WHERE departure >= NOW()';
+}
 $result = mysql_query($sql,$con);
 
 if ($result) {
 
    $numrows = mysql_num_rows($result);
-	$json['tripnames'] = array();
-	$json['tripids'] = array();
+	$json['trips'] = array();
 
    if ($numrows!=0) {
   	while ($row = mysql_fetch_array($result)) {
-		$json['tripnames'][] = $row['tripname'];
-		$json['tripids'][] = $row['id'];
+		$json['trips'][] = $row;
   	}
    }
  
@@ -66,8 +47,3 @@ if ($has_error) {
 }
 
 echo json_encode($json);
-
-?>
-
-
-

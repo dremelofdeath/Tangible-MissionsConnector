@@ -23,6 +23,7 @@ var CMC = {
   requestsOutstanding : 0,
   tripuserid : false,
   dialogsOpen : 0,
+  currentlyShownUserProfileID : null,
   version : /* @/VERSIONMARKER */ "2.0 Debug",
   ignorableFormFields : null, // access this with fetchIgnorableFormFields()
   _searchLockKeyExpected : null,
@@ -349,6 +350,7 @@ var CMC = {
 
   handleGenericServerError : function(jqXHR, textStatus, errorThrown) {
     this.error("can't contact server (" + textStatus + ") " + jqXHR.status + " " + errorThrown);
+    this.assert(textStatus != "parsererror", "Web service failure!<br/>Response contents:<br/><br/>" + jqXHR.responseText);
   },
 
   handleGetProfileCallbackSave : function(data) {
@@ -398,7 +400,7 @@ var CMC = {
     }
     this.endFunction();
   },
-  
+ 
   onGetProfileDataSuccess : function(data, textStatus, jqXHR) {
     this.cmc.beginFunction();
     this.cmc.assert(data != undefined, "data is undefined in onGetProfileDataSuccess");
@@ -449,7 +451,7 @@ var CMC = {
     $("#make-profile").fadeOut();
     this.endFunction();
   },
-  
+ 
   showCreateNewProfileUI : function () {
     this.beginFunction();
     this.hideIntermediateNewProfileCreationSteps();
@@ -465,6 +467,7 @@ var CMC = {
     } else if (data == null) {
       // no profile exists - so display the new profile creation dialogs
       this.showCreateNewProfileUI();
+      this.currentlyShownUserProfileID = null;
     } else {
       var id = "#profilecontent";
       var __setProfileLinkInternal = function (link) {
@@ -474,11 +477,12 @@ var CMC = {
       this.hideIntermediateNewProfileCreationSteps();
       this.ajaxNotifyStart();
       this.assert(data.id != undefined, "id is missing from result set");
+      this.currentlyShownUserProfileID = data.id;
       this.updateProfileControls(data.id);
       this.assert(data.name != undefined, "name is missing from result set");
 
       $("#profile-name").html(data.name ? data.name : "");
-     
+ 
       if (!data.link) {
         FB.api(data.id, function(response) {
           __setProfileLinkInternal(response.link);
@@ -490,7 +494,7 @@ var CMC = {
       $("img.profile-picture").attr("src", "http://graph.facebook.com/"+data.id+"/picture?type=large");
 
       this.ajaxNotifyComplete();
-  
+
       $("#profile-section-about-me-content").html(data.about ? data.about : "");
       if (data.MedicalSkills == undefined) {
         $("#profile-medskills").html("");
@@ -605,10 +609,10 @@ var CMC = {
         $("span#profile-countries").html("");
       }
 
-      if (data.tripnames == undefined || data.tripnames.length <= 0) {
+      if (data.trips == undefined || data.trips.length <= 0) {
         $("div#profile-trips-list-section").hide();
       } else {
-        var ul = this.buildTripList(data, true, false, false, data.id == this.me.id);
+        var ul = this.buildTripList(data, true, true, false, false, data.id == this.me.id);
         ul.attr("id", "profile-trip-list");
         $("ul#profile-trip-list").remove();
         $("div#profile-trips-list-section").append(ul).show();
@@ -620,6 +624,7 @@ var CMC = {
   
   onGetProfileDataError : function(jqXHR, textStatus, errorThrown) {
     // we might also want to log this or surface an error message or something
+    this.cmc.ajaxNotifyComplete();
     this.cmc.handleGenericServerError(jqXHR, textStatus, errorThrown);
   },
 
@@ -640,12 +645,25 @@ var CMC = {
     this.endFunction();
   },
 
+  refreshUserProfile : function (data) {
+    this.beginFunction();
+    if (this.me.id == this.currentlyShownUserProfileID) {
+      this.getProfile(this.me.id, this.handleGetProfileCallbackSaveAndShow);
+    } else {
+      this.getProfile(this.me.id, this.handleGetProfileCallbackSave);
+    }
+    this.endFunction();
+  },
+
   getFutureTrips : function() {
     this.beginFunction();
     this.log("Obtaining future trip information from the database");
     $.ajax({
       type: "POST",
       url: "api/searchtrips.php",
+      data: {
+        fbid: CMC.me.id ? CMC.me.id : ""
+      },
       dataType: "json",
       context: this,
       success: this.onGetTripsDataSuccess,
@@ -653,7 +671,7 @@ var CMC = {
     });
     this.endFunction();
   },
-  
+
   onGetTripsDataSuccess : function(data, textStatus, jqXHR) {
     this.beginFunction();
     this.assert(data != undefined, "data is undefined in onGetTripsDataSuccess");
@@ -676,25 +694,31 @@ var CMC = {
     var ul = $("<ul></ul>", {
       "class": "trip-list"
     });
-    for (var each in data.tripnames) {
+    for (var each in data.trips) {
       var li = $("<li></li>", {
         "class": "trip-list-item"
       });
       var span = $("<span></span>", {
         "class": "trip-item-name",
-        text: data.tripnames[each]
+        text: data.trips[each].tripname
       });
       li.append(span);
       for (var eachButton in buttons) {
-        var button = $("<div></div>", {
-          "class": "trip-item-control",
-          text: buttons[eachButton]["text"],
-          tripid: data.tripids[each]
-        }).button({
-          text: true,
-          icons: { primary: buttons[eachButton]["icon"]}
-        }).click(buttons[eachButton]["action"]);
-        li.append(button);
+        var shouldDisplay = true;
+        if (buttons[eachButton].hasOwnProperty("test")) {
+          shouldDisplay = buttons[eachButton].test(data.trips[each]);
+        }
+        if (shouldDisplay) {
+          var button = $("<div></div>", {
+            "class": "trip-item-control",
+            text: buttons[eachButton]["text"],
+            tripid: data.trips[each].tripid
+          }).button({
+            text: true,
+            icons: { primary: buttons[eachButton]["icon"]}
+          }).click(buttons[eachButton]["action"]);
+          li.append(button);
+        }
       }
       ul.append(li);
     }
@@ -702,7 +726,7 @@ var CMC = {
     return ul;
   },
 
-  buildTripList : function (data, showDescription, showJoin, showInvite, showLeave) {
+  buildTripList : function (data, showDescription, showEditIfOwner, showJoin, showInvite, showLeave) {
     this.beginFunction();
     var buttons = [];
     if (showLeave) {
@@ -722,15 +746,18 @@ var CMC = {
           CMC.getTripProfile($(this).attr("tripid"));
         }
       });
-      if (data.id == CMC.me.id) {
+    }
+    if (showEditIfOwner) {
       buttons.push({
         text: "Edit Trip",
         icon: "ui-icon-pencil",
         action: function () {
           CMC.editTripProfile($(this).attr("tripid"));
+        },
+        test: function (trip) {
+          return trip && trip.isadmin && trip.isadmin != 0;
         }
       });
-      }
     }
     if (showJoin) {
       buttons.push({
@@ -759,14 +786,13 @@ var CMC = {
       $("#no-trip").fadeIn();
     } else {
       var id = "#show-trips";
-      this.assert(data.tripnames !== undefined, "Trip names are missing from result set");
-      this.assert(data.tripids !== undefined, "Trip IDs are missing from result set");
-      if (data.tripnames == null) {
+      this.assert(data.trips !== undefined, "Trips are missing from result set");
+      if (!data.trips || data.trips.length <= 0) {
         $("#no-trip").fadeIn();
       } else {
         //finally update the upcoming trips information
-        if (data.tripnames.length > 0) {
-          var ul = this.buildTripList(data, true, true).attr("id", "upcoming-trip-list");
+        if (data.trips.length > 0) {
+          var ul = this.buildTripList(data, true, true, true).attr("id", "upcoming-trip-list");
           $("ul#upcoming-trip-list").remove();
           $("div#upcoming-trips-list-section").append(ul);
 
@@ -782,7 +808,7 @@ var CMC = {
     } // end else
     this.endFunction();
   },
-  
+
   handleGetTripsDataSuccessHasError : function(data) {
     this.beginFunction();
     this.assert(data != undefined, "data is undefined in handleGetTripsDataSuccessHasError");
@@ -843,8 +869,6 @@ var CMC = {
           CMC.isreceiver = 1;
           CMC.editProfile();
         }
-        // refresh the profile page
-        $("#tabs").tabs('load', 1);
       }
     } else {
       // an unknown error occurred? do something!
@@ -1943,10 +1967,8 @@ var CMC = {
   
   emptyTripForm : function () {
     this.beginFunction();
-
-  $(':input', '#profile-trip-form').removeAttr('checked').removeAttr('selected');
-  $(':text, :password, :file, SELECT', '#profile-trip-form').val('');
-
+    $(':input', '#profile-trip-form').removeAttr('checked').removeAttr('selected');
+    $(':text, :password, :file, SELECT', '#profile-trip-form').val('');
     this.endFunction();
   },
 
@@ -2408,7 +2430,6 @@ var CMC = {
        CMC.getProfile(CMC.me.id, this.handleGetProfileCallbackSaveAndShow);
        $("#profile-volunteer-dialog").dialog('close');
        alert('Thank you - your submission has been successfully entered into our database');
-       //$("#tabs").tabs('load', 1);
      } else {
        alert('We are sorry - there was an error: ' + data.err_msg);
      }
@@ -2504,7 +2525,6 @@ var CMC = {
       this.getProfile(this.me.id, this.handleGetProfileCallbackSaveAndShow);
       $("#profile-organizer-dialog").dialog('close');
       alert('Thank you - your submission has been successfully entered into our database');
-      //$("#tabs").tabs('load', 1);
     } else {
       alert('We are sorry - there was an error: ' + data.err_msg);
     }
@@ -2517,7 +2537,7 @@ var CMC = {
     this.endFunction();
   },
 
-  submittripProfile : function (profileData) {
+  submitTripProfile : function (profileData) {
     this.beginFunction();
     var zipisvalid = false;
     var emailisvalid = false;
@@ -2632,8 +2652,8 @@ var CMC = {
         },
         context : this,
         dataType: "json",
-        success: this.onSubmittripSuccess,
-        error: this.onSubmittripFailure
+        success: this.onSubmitTripSuccess,
+        error: this.onSubmitTripFailure
       });
    
       ret = true;
@@ -2643,37 +2663,33 @@ var CMC = {
     return ret;
   },	
   
-  onSubmittripSuccess : function(data, textStatus, jqXHR) {
+  onSubmitTripSuccess : function(data, textStatus, jqXHR) {
     this.beginFunction();
     if (!data.has_error) {
-		
-	  $("#profile-trip-dialog").dialog('close');
-	  // refresh the profile page
-      $("#tabs").tabs('load', 1);
-	  if (this.tripedit) {
-		alert('Congratulations! Your trip has been edited!');
-	  }
-	  else {
-		alert('Congratulations! Your trip has been created!');
-	  }	  
+      $("#profile-trip-dialog").dialog('close');
+      this.refreshUserProfile();
+      if (this.tripedit) {
+        alert('Congratulations! Your trip has been edited!');
+      } else {
+        alert('Congratulations! Your trip has been created!');
+      }	  
     } else {
-	  if (this.tripedit) {
-		alert('We are sorry, your trip was not edited because: ' + data.err_msg);
-	  }
-	  else {
-      alert('We are sorry - there was an error: ' + data.err_msg);
-	 }
+      if (this.tripedit) {
+        alert('We are sorry, your trip was not edited because: ' + data.err_msg);
+      }
+      else {
+        alert('We are sorry - there was an error: ' + data.err_msg);
+      }
     }
     this.endFunction();
   },
 
-  onSubmittripFailure : function(data, textStatus, jqXHR) {
+  onSubmitTripFailure : function(data, textStatus, jqXHR) {
     this.beginFunction();
 	  if (this.tripedit) {
-		alert('We are sorry, your trip was not edited because: ' + data.err_msg);
-	  }
-	  else {	
-		alert("We are sorry, the trip was not submitted with the following error: " + data.err_msg);
+      alert('We are sorry, your trip was not edited because: ' + data.err_msg);
+	  } else {	
+      alert("We are sorry, the trip was not submitted with the following error: " + data.err_msg);
 	  }
     this.endFunction();
   },  
@@ -3235,7 +3251,7 @@ $(function() {
   });
 
   $("#profile-trip-submit").click(function() {
-	CMC.submittripProfile(CMC.getFormData("#profile-trip-form"));
+	CMC.submitTripProfile(CMC.getFormData("#profile-trip-form"));
  });
 
   // Handles the live form validation
