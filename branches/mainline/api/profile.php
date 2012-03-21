@@ -186,7 +186,7 @@ if (mysql_num_rows($result) != 0) {
 
   $json['trips'] = array();
   $sql =
-    "SELECT tm.tripid, tm.isadmin, t.tripname ".
+    "SELECT tm.tripid AS id, tm.isadmin, t.tripname ".
     "FROM tripmembers AS tm ".
     "INNER JOIN trips AS t ".
     "ON tm.tripid=t.id ".
