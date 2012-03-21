@@ -617,79 +617,45 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
           ?>
         </div>
         <div id="show-trip-profile" style="display: none">
-          <div id="tripprofilecontent">
-            <div id="backtotrips" style="display: none">
-              <a href="#" onclick="CMC.getFutureTrips();">&lt;&lt; Go back to Upcoming Trips </a>
-            </div>      
+          <div id="tripprofilecontent">		
             <div id="trip-profile-left-column">
               <div id="tripprofileimage">
                 <div class="trip-owner-picture">
                   <img class="profile-picture" src="ajax-spinner.gif" />
                 </div>
               </div>
-              <div class="box2">Trip Owner: <div class="profile-trip-owner">Name</div></div>
-              <div class="box2">
-                <h3>Trip Description:</h3>
-                <div class="trip-profile-about">
-                  <h4>About</h4>
-                </div>
-              </div>
+              <h3>Trip Owner:</h3> 
+              <span id="profile-trip-owner">Name</span>
+              <h3>Trip Description:</h3>
+              <h4><span id="trip-profile-about">About</span></h4>
             </div>
             <div id="trip-profile-right-column" class="entity-right-content-section">
-              <div class="box1">
-                <h2>Trip Information:</h2>
-                <h5>Trip Name:</h5>
-                <div class="profile-trip-name">
-                  <h6>Trip Name</h6> 
+              <div id="trip-profile-title-section">
+                <span id="profile-trip-name" class="entity-title">Sample Trip Name</span>
+                <div id="trip-profile-controls" class="entity-controls">
+                  <div id="trip-profile-controls-spacer" class="entity-control-spacer"></div>
+                  <div id="trip-profile-controls-back-to-trips" class="entity-control cmc-square-button"></div>
                 </div>
-                <h5>Trip Website:</h5>
-                <div class="profile-trip-url"><a href="http://www.example.com/">http://www.example.com/</a></div>
-                <h5>Trip Destination:</h5>
-                <div class="profile-trip-dest">
-                  <h6>Trip Destination</h6>
-                </div>          
-                <h5>Email:</h5>
-                <div class="profile-trip-email">
-                  <h6>Email</h6>
-                </div>
-                <h5>Phone:</h5>
-                <div class="profile-trip-phone">
-                  <h6>Phone</h6>
-                </div>
-                <h5>Execution Stage:</h5>
-                <div class="profile-trip-stage">
-                  <h6>Trip Execution Stage</h6>
-                </div>  
-                <h5>Date of Departure:</h5>
-                <div class="profile-trip-depart">
-                  <h6>Departure Date</h6>
-                </div>  
-                <h5>Date of Return</h5>
-                <div class="profile-trip-return">
-                  <h6>Return</h6>
-                </div>  
-                <h5>Trip Religion:</h5>
-                <div class="profile-trip-religion">
-                  <h6>Trip religion</h6>
-                </div>
-                <h5>Trip Accommodation Level:</h5>
-                <div class="profile-trip-acco">
-                  <h6>Trip Accommodation Level</h6>
-                </div>  
-                <h5>Number of People involved in this Trip:</h5>
-                <div class="profile-trip-numpeople">
-                  <h6>Number of people</h6>
-                </div>  
-                <h5>People involved in this Trip:</h5>
-                <div id="profile-trip-people">
-                  <div id="cmc-trip-member-0" class="cmc-tripmember-results">
-                    <div id="profile-tripmember-image">
-                      <img class="profile-tripmember-picture" src="ajax-spinner.gif" />
-                    </div>
-                    <div class="profile-tripmember-name">Member Name</div>      
-                  </div>
-                </div>  
               </div>
+              <h5>Trip Website: <span id="profile-trip-url"><a href="http://www.example.com/">http://www.example.com/</a></span></h5>
+              <h5>Trip Destination: <span id="profile-trip-dest">Trip Destination</span></h5>
+              <h5>E-mail: <span id="profile-trip-email">Email</span></h5>
+              <h5>Phone: <span id="profile-trip-phone">Phone</span></h5>
+              <h5>Execution Stage: <span id="profile-trip-stage">Trip Execution Stage</span></h5>
+              <h5>Date of Departure: <span id="profile-trip-depart">Departure Date</span></h5>
+              <h5>Date of Return: <span id="profile-trip-return">Return</span></h5>
+              <h5>Trip Religion: <span id="profile-trip-religion">Trip religion</span><h5>
+              <h5>Trip Accommodation Level: <span id="profile-trip-acco">Trip Accommodation Level</span></h5>
+              <h5>Number of People involved in this Trip: <span id="profile-trip-numpeople">Number of people</span></h5>
+              <h5>People involved in this Trip:</h5>
+              <div id="profile-trip-people">
+                <div id="cmc-trip-member-0" class="cmc-tripmember-results">
+                  <div id="profile-tripmember-image">
+                    <img class="profile-tripmember-picture" src="ajax-spinner.gif">
+                  </div>
+                  <div id="profile-tripmember-name">Member Name</div>
+                </div>
+              </div>	
             </div>
           </div>
         </div>     
