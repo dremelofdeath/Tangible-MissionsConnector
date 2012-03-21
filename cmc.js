@@ -994,136 +994,129 @@ var CMC = {
       $("#no-trip").fadeIn();
     } else {
 
-        var id = "#tripprofilecontent";
-		var id2;
+      var id = "#tripprofilecontent";
 
-        this.ajaxNotifyStart();
-        this.assert(data.tripname !== undefined, "Trip name is missing from result set");
-    
-        $(id).children("#trip-profile-left-column").children(".box2").children(".profile-trip-owner").html();
+      this.ajaxNotifyStart();
+      this.assert(data.tripname !== undefined, "Trip name is missing from result set");
 
-        $(id).children("#trip-profile-left-column").children(".box2").children(".profile-trip-owner").html(data.tripowner ? data.tripowner : "");
-       
-        this.tripuserid = data.creatorid;
+      $("#profile-trip-owner").html(data.tripowner ? data.tripowner : "");
 
-        $(id).children("#trip-profile-left-column").children("#tripprofileimage").children(".trip-owner-picture").children("img").attr("src", "http://graph.facebook.com/"+data.creatorid+"/picture?type=large");
-      
-        $(id).children("#trip-profile-left-column").children(".box2").children(".trip-profile-about").html(data.tripdesc ? "<h4>" + data.tripdesc + "</h4>" : "");
-      
-    //display Trip profile information
+      this.tripuserid = data.creatorid;
+
+      $("#trip-owner-picture").children("img").attr("src", "http://graph.facebook.com/"+data.creatorid+"/picture?type=large");
+
+      $("#trip-profile-about").html(data.tripdesc ? "<h4>" + data.tripdesc + "</h4>" : "");
+
+      //display Trip profile information
       if (data.tripname === undefined) {
-      $(id).children("#trip-profile-right-column").children(".box1").children(".profile-trip-name").html("<h6></h6>");
+        $("#profile-trip-name").html("");
       }
       else {
-      $(id).children("#trip-profile-right-column").children(".box1").children(".profile-trip-name").html(data.tripname ? "<h6>" +data.tripname + "</h6>": "");
+        $("#profile-trip-name").html(data.tripname ? data.tripname : "");
       }
-   
+
       if (data.website === undefined) {
-      $(id).children("#trip-profile-right-column").children(".box1").children(".profile-trip-url").html("<h6></h6>");
+        $("#profile-trip-url").html("");
       }
       else {
-      $(id).children("#trip-profile-right-column").children(".box1").children(".profile-trip-url").html(data.website ? "<h6>" +data.website + "</h6>": "");
+        $("#profile-trip-url").html(data.website ? data.website : "");
       }  
     
       if ((data.destination === undefined) && (data.destinationcountry === undefined)) {
-      $(id).children("#trip-profile-right-column").children(".box1").children(".profile-trip-dest").html("<h6></h6>");
+        $("#profile-trip-dest").html("");
       }
       else if (data.destination === undefined) {
-    $(id).children("#trip-profile-right-column").children(".box1").children(".profile-trip-dest").html("<h6>" +data.destinationcountry+ "</h6>");
-    }
-    else if (data.destinationcountry === undefined) {
-    $(id).children("#trip-profile-right-column").children(".box1").children(".profile-trip-dest").html("<h6>" +data.destination+ "</h6>");
-    }
-    else {
-      $(id).children("#trip-profile-right-column").children(".box1").children(".profile-trip-dest").html("<h6>" +data.destination + "," +data.destinationcountry+ "</h6>");
+        $("#profile-trip-dest").html(data.destinationcountry);
+        $("#profile-trip-dest").html(data.destination);
+      }
+      else {
+        $("#profile-trip-dest").html(data.destination + "," +data.destinationcountry);
       }     
     
       if (data.email === undefined) {
-      $(id).children("#trip-profile-right-column").children(".box1").children(".profile-trip-email").html("<h6></h6>");
+        $("#profile-trip-email").html("");
       }
       else {
-      $(id).children("#trip-profile-right-column").children(".box1").children(".profile-trip-email").html(data.email ? "<h6>" + data.email+ "</h6>" : "");
+        $("#profile-trip-email").html(data.email ? data.email : "");
       }
 
       if (data.phone === undefined) {
-      $(id).children("#trip-profile-right-column").children(".box1").children(".profile-trip-phone").html("<h6></h6>");
+        $("#profile-trip-phone").html("");
       }
       else {
-      $(id).children("#trip-profile-right-column").children(".box1").children(".profile-trip-phone").html(data.phone ? "<h6>" + data.phone+ "</h6>" : "");
+        $("#profile-trip-phone").html(data.phone ? data.phone : "");
       }
     
       if (data.tripstage === undefined) {
-      $(id).children("#trip-profile-right-column").children(".box1").children(".profile-trip-stage").html("<h6></h6>");
+        $("#profile-trip-stage").html("");
       }
       else {
-      $(id).children("#trip-profile-right-column").children(".box1").children(".profile-trip-stage").html(data.tripstage ? "<h6>" + data.tripstage + "</h6>": "");
+        $("#profile-trip-stage").html(data.tripstage ? data.tripstage : "");
       }   
 
-    if (data.departyear === undefined) {
-      $(id).children("#trip-profile-right-column").children(".box1").children(".profile-trip-depart").html("<h6></h6>");
+      if (data.departyear === undefined) {
+        $("#profile-trip-depart").html("");
       }
       else {
-      $(id).children("#trip-profile-right-column").children(".box1").children(".profile-trip-depart").html("<h6>" +data.departyear ? data.departmonth +"/"+data.departday+"/"+data.departyear +"</h6>": "");
+        $("#profile-trip-depart").html(data.departyear ? data.departmonth +"/"+data.departday+"/"+data.departyear : "");
       } 
-    
-    if (data.returnyear === undefined) {
-      $(id).children("#trip-profile-right-column").children(".box1").children(".profile-trip-return").html("<h6></h6>");
+
+      if (data.returnyear === undefined) {
+        $("#profile-trip-return").html("");
       }
       else {
-      $(id).children("#trip-profile-right-column").children(".box1").children(".profile-trip-return").html("<h6>" + data.returnyear ? data.returnmonth +"/"+data.returnday+"/"+data.returnyear + "</h6>": "");
+        $("#profile-trip-return").html(data.returnyear ? data.returnmonth + "/" + data.returnday + "/" + data.returnyear : "");
       }   
 
       if (data.religion === undefined) {
-      $(id).children("#trip-profile-right-column").children(".box1").children(".profile-trip-religion").html("<h6></h6>");
+        $("#profile-trip-religion").html("");
       }
       else {
-      $(id).children("#trip-profile-right-column").children(".box1").children(".profile-trip-religion").html(data.religion ? "<h6>" + data.religion + "</h6>" : "");
+        $("#profile-trip-religion").html(data.religion ?  data.religion : "");
       }
-    
+
       if (data.numpeople === undefined) {
-      $(id).children("#trip-profile-right-column").children(".box1").children(".profile-trip-numpeople").html("<h6></h6>");
+        $("#profile-trip-numpeople").html("");
       }
       else {
-      $(id).children("#trip-profile-right-column").children(".box1").children(".profile-trip-numpeople").html(data.numpeople ? "<h6>" + data.numpeople + "</h6>" : "");
+        $("#profile-trip-numpeople").html(data.numpeople ? data.numpeople : "");
       }
-	  
+
       if (data.memberids === undefined) {
-   //$(id).children("#trip-profile-right-column").children(".box1").children(".profile-trip-people").html("<h6></h6>");
-	  $("#profile-trip-people").html("");
+        //$(id).children("#trip-profile-right-column").children(".box1").children(".profile-trip-people").html("<h6></h6>");
+        $("#profile-trip-people").html("");
       }
       else {
         //display trip member information
         if (data.memberids.length > 0) {
-		  //first update the html part
+          //first update the html part
           var eachstr = "";
           for (var each in data.memberids) {
-		  
-		  eachstr += "<div id=\"cmc-trip-member-"+each+"\" class=\"cmc-tripmember-results\">";
-		  eachstr += "<div id=\"profile-tripmember-image\">";
-     
-          eachstr += "<img class=\"profile-tripmember-picture\" src=\"ajax-spinner.gif\">";
-          eachstr += "</div>";
-		  eachstr += "<div class=\"profile-tripmember-name\">Member Name</div>";			
-		  eachstr += "</div>";
-		  }
-		  
-      $("#profile-trip-people").html(data.memberids ? eachstr : "");
-		  
-		  for (var each in data.memberids) {
-			id2 = "#profile-trip-people";
-		  FB.api(data.memberids[each], function(response) {
-		  $(id2).children("#cmc-trip-member-"+each).children(".profile-tripmember-name").html(response.name ? response.name : "");
-		$(id2).children("#cmc-trip-member-"+each).children("#profile-tripmember-image").children("img.profile-tripmember-picture").attr("src", "http://graph.facebook.com/"+data.memberids[each]+"/picture");	
-		  //$(id2).children("#cmc-trip-member-"+each).children("#profile-tripmember-image").children("img.profile-tripmember-picture").wrap('<a href="' + response.link + '" target="_blank"></a>');
-		  });
-		  
-		  $("#cmc-trip-member-"+each).attr("fbid", data.memberids[each]);
-	
-      $(".cmc-tripmember-results")
-      .click(function () { CMC.handleShowTripMemberProfile(this); });
 
-		  }
+            eachstr += "<div id=\"cmc-trip-member-"+each+"\" class=\"cmc-tripmember-results\">";
+            eachstr += "<div id=\"profile-tripmember-image\">";
 
+            eachstr += "<img class=\"profile-tripmember-picture\" src=\"ajax-spinner.gif\">";
+            eachstr += "</div>";
+            eachstr += "<div class=\"profile-tripmember-name\">Member Name</div>";			
+            eachstr += "</div>";
+          }
+
+          $("#profile-trip-people").html(data.memberids ? eachstr : "");
+
+          for (var each in data.memberids) {
+            id2 = "#profile-trip-people";
+            FB.api(data.memberids[each], function(response) {
+                $(id2).children("#cmc-trip-member-"+each).children(".profile-tripmember-name").html(response.name ? response.name : "");
+                $(id2).children("#cmc-trip-member-"+each).children("#profile-tripmember-image").children("img.profile-tripmember-picture").attr("src", "http://graph.facebook.com/"+data.memberids[each]+"/picture");	
+                //$(id2).children("#cmc-trip-member-"+each).children("#profile-tripmember-image").children("img.profile-tripmember-picture").wrap('<a href="' + response.link + '" target="_blank"></a>');
+                });
+
+            $("#cmc-trip-member-"+each).attr("fbid", data.memberids[each]);
+
+            $(".cmc-tripmember-results")
+              .click(function () { CMC.handleShowTripMemberProfile(this); });
+          }
         } else {
           $("#profile-trip-people").html("");
         }	  
@@ -1132,12 +1125,12 @@ var CMC = {
       // change to the Trips Tab
       $("#tabs").tabs('select', 2);
 
-        this.ajaxNotifyComplete();
+      this.ajaxNotifyComplete();
       $("#show-trips").hide();
       $("#backtotrips").fadeIn();
       $("#show-trip-profile").fadeIn();
     } // end else
-  
+
     this.endFunction();
   },
   
@@ -3078,6 +3071,15 @@ $(function() {
         CMC.getProfile(CMC.me.id, CMC.handleGetProfileCallbackSaveAndShow);
       //}
     });
+
+  $("#trip-profile-controls-back-to-trips")
+    .button( { text: false, icons: { primary: "ui-icon-arrowreturnthick-1-w" }})
+    .click(function () {
+        // FIXME: Same as #profile-controls-edit.
+        //if (!$(this).button("option, "disabled")) {
+          CMC.getFutureTrips();
+        //}
+    }); 
 
   CMC.log("configuring FCBKcomplete for search");
   $("#search-box-select").fcbkcomplete({
