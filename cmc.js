@@ -712,7 +712,7 @@ var CMC = {
           var button = $("<div></div>", {
             "class": "trip-item-control",
             text: buttons[eachButton]["text"],
-            tripid: data.trips[each].tripid
+            tripid: data.trips[each].id
           }).button({
             text: true,
             icons: { primary: buttons[eachButton]["icon"]}
