@@ -15,9 +15,9 @@ if (array_key_exists('fbid', $saferequest) && $saferequest['fbid'] != '') {
   $sql =
     'SELECT t.*, tm.isadmin '.
     'FROM trips AS t '.
-    'INNER JOIN tripmembers AS tm '.
-    'ON t.id=tm.tripid '.
-    'WHERE tm.userid = "'.$saferequest['fbid'].'" AND t.departure >= NOW()';
+    'LEFT JOIN tripmembers AS tm '.
+    'ON t.id=tm.tripid AND tm.userid = "'.$saferequest['fbid'].'" '.
+    'WHERE t.departure >= NOW()';
 } else {
   $sql = 'SELECT * FROM trips WHERE departure >= NOW()';
 }
