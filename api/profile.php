@@ -3,11 +3,6 @@
 // File: 'profile.php' 
 //   shows profile of given person
 //   requires input userid
-// 
-// Application: Christian Missions Connector
-// File: 'profileV.php' 
-//   profile creation- volunteer
-
 
 include_once 'common.php';
 
@@ -17,16 +12,13 @@ $saferequest = cmc_safe_request_strip();
 $has_error = FALSE;
 $err_msg = '';
 
+$fbid = $saferequest['fbid'];
 if (array_key_exists('userid', $saferequest) && array_key_exists('fbid', $saferequest)) {
   // invitation ids, userid and facebook userid should be provided
   $showuserid = $saferequest['userid'];
-  $fbid = $saferequest['fbid'];
-} 
-else if (array_key_exists('fbid', $saferequest)) {
-  $fbid = $saferequest['fbid'];
+} else if (array_key_exists('fbid', $saferequest)) {
   $showuserid = $fbid;
-}
-else {
+} else {
   // error case: all needed variables are not defined
   $has_error = TRUE;
   $err_msg = "Required parameters not defined.";
@@ -39,7 +31,7 @@ if (!$has_error) {
 $sql = 'select * from users where userid="'.$showuserid.'"';
 $result = mysql_query($sql,$con);
 
-if(!$result) {
+if (!$result) {
  	setjsonmysqlerror($has_error,$err_msg,$sql);
 }
 else {
@@ -87,29 +79,27 @@ function cmc_profile_render_skills($title, $type, $fbid,&$has_error,&$err_msg,&$
   $result = mysql_query($sql,$con);
   if (!$result) {
   	setjsonmysqlerror($has_error,$err_msg,$sql);
-  }
-  else {
+  } else {
     $i=0;
-    while($row= mysql_fetch_array($result)){
-      if ($i==0) {
-	  $json[str_replace (" ", "", $title)] = array();
-	  $json[str_replace (" ", "", $title)."id"] = array();
+    while($row = mysql_fetch_array($result)) {
+      if ($i == 0) {
+        $json[str_replace (" ", "", $title)] = array();
+        $json[str_replace (" ", "", $title)."id"] = array();
       }
       $i++;
-	  $json[str_replace (" ", "", $title)][] = $row['skilldesc'];
-	  $json[str_replace (" ", "", $title)."id"][] = $row['id'];
+      $json[str_replace (" ", "", $title)][] = $row['skilldesc'];
+      $json[str_replace (" ", "", $title)."id"][] = $row['id'];
     }
   }
 }
 
-if(mysql_num_rows($result) != 0) {
-
+if (mysql_num_rows($result) != 0) {
   $json['exists'] = 1;
   while($row = mysql_fetch_array($result,MYSQL_ASSOC)) {
     $name = $row['name'];
     $organization = $row['organization'];
     $isleader = $row['isreceiver'];
-	$json['isreceiver'] = $row['isreceiver'];
+    $json['isreceiver'] = $row['isreceiver'];
     $zip = $row['zipcode'];
     $email = $row['email'];
     $misexp = $row['missionsexperience'];
@@ -123,52 +113,56 @@ if(mysql_num_rows($result) != 0) {
   }
 
   if (empty($name)) {
-
-       // This call is no longer supported
-       //$info = $fb->api_client->users_getInfo($showuserid, 'name,email');
+    // This call is no longer supported
+    //$info = $fb->api_client->users_getInfo($showuserid, 'name,email');
 
     // Get the name information directly from the facebook profile pages
-    $name = get_name_from_fb_using_curl($showuserid);
+    $name = get_name_from_fb_using_curl($showuserid); // FIXME: really? really? --zack
 
-  $sql2 = 'update users set name="'.$name.'" where userid="'.$showuserid.'"';
-  $result2 = mysql_query($sql2,$con);
-  if (!$result2) {
-  		setjsonmysqlerror($has_error,$err_msg,$sql2);
-  }
-  
+    $sql2 = 'update users set name="'.$name.'" where userid="'.$showuserid.'"';
+    $result2 = mysql_query($sql2,$con);
+    if (!$result2) {
+      setjsonmysqlerror($has_error,$err_msg,$sql2);
+    }
   } 
 
   $json['id'] = $showuserid;
 
-  if (!empty($name))
-	$json['name'] = $name;
+  if (!empty($name)) {
+    $json['name'] = $name;
+  }
 
   if ($isleader == 1) {
-  if (!empty($organization))
-	$json['AgencyName'] = $organization;
-  if (!empty($website))
-	$json['AgencyWebsite'] = $website;
+    if (!empty($organization)) {
+      $json['AgencyName'] = $organization;
+    }
+    if (!empty($website)) {
+      $json['AgencyWebsite'] = $website;
+    }
   }
   
-  if (!empty($aboutme))
-	$json['about'] = $aboutme;
-
-  if (!empty($zip))
-	$json['zip'] = $zip;
-  if (!empty($email))
-	$json['email'] = $email;
-  if (!empty($phone))
-	$json['phone'] = $phone;
-
-  if (!empty($misexp))
-	$json['misexp'] = $misexp;
-  
-  if (!empty($relg))
-	$json['relg'] = $relg;
+  if (!empty($aboutme)) {
+    $json['about'] = $aboutme;
+  }
+  if (!empty($zip)) {
+    $json['zip'] = $zip;
+  }
+  if (!empty($email)) {
+    $json['email'] = $email;
+  }
+  if (!empty($phone)) {
+    $json['phone'] = $phone;
+  }
+  if (!empty($misexp)) {
+    $json['misexp'] = $misexp;
+  }
+  if (!empty($relg)) {
+    $json['relg'] = $relg;
+  }
 
   if ($isleader == 1) {
-  cmc_profile_render_skills("Facility Medical Offerings", '4', $showuserid,$has_error,$err_msg,$json,$con);
-  cmc_profile_render_skills("Facility Non_Medical Offerings", '5', $showuserid,$has_error,$err_msg,$json,$con);
+    cmc_profile_render_skills("Facility Medical Offerings", '4', $showuserid,$has_error,$err_msg,$json,$con);
+    cmc_profile_render_skills("Facility Non_Medical Offerings", '5', $showuserid,$has_error,$err_msg,$json,$con);
   }
   
   cmc_profile_render_skills("Medical Skills", '1', $showuserid,$has_error,$err_msg,$json,$con);
@@ -179,7 +173,7 @@ if(mysql_num_rows($result) != 0) {
   cmc_profile_render_id_join("States","State",'longname', 'usstates', 'usstatesselected', 'shortname', $showuserid, $message, $pp,$has_error,$err_msg,$json,$con);
 
   if (!empty($city)) {
-	$json['city'] = $city;
+    $json['city'] = $city;
   }
   
   $kk=0;
@@ -190,37 +184,26 @@ if(mysql_num_rows($result) != 0) {
   $pp=-1;
   cmc_profile_render_id_join("Durations","Preferred Duration of Mission Trips",'name', 'durations', 'durationsselected', false, $showuserid, $message, $pp,$has_error,$err_msg,$json,$con);
 
-  $json['tripids'] = array();
-  $json['tripnames'] = array();
-  $trips = array();
-  $sql = "select tripid from tripmembers where userid='".$showuserid."'";
-  $result = mysql_query($sql,$con);
+  $json['trips'] = array();
+  $sql =
+    "SELECT tm.tripid, tm.isadmin, t.tripname ".
+    "FROM tripmembers AS tm ".
+    "INNER JOIN trips AS t ".
+    "ON tm.tripid=t.id ".
+    "WHERE tm.userid='".$showuserid."' ".
+    "ORDER BY tm.datejoined";
+  $result = mysql_query($sql, $con);
   if($result) {
-    $ii=0;
-    while($row= mysql_fetch_array($result)) {
-      $tid = $row['tripid'];
-      $json['tripids'][] = $tid;
-      $sql2 = 'select tripname from trips where id="'.$tid.'"';
-      $result2 = mysql_query($sql2,$con);
-      if (!$result2) {
-        setjsonmysqlerror($has_error,$err_msg,$sql2);
-        continue 1;
-      } else {
-        $row2 = mysql_fetch_array($result2);
-        $tname = $row2['tripname'];
-        $trips[]=$tname;    
-        $json['tripnames'][] = $trips[$ii];
-        $ii++;
-      }
+    while($row = mysql_fetch_array($result)) {
+      $json['trips'][] = $row;
     }
   } else {
     setjsonmysqlerror($has_error,$err_msg,$sql);
   }
-  
 } else {
-		$json['exists'] = 0;		
-  		$has_error = TRUE;
-		$err_msg = "User does not have a CMC profile";
+  $json['exists'] = 0;		
+  $has_error = TRUE;
+  $err_msg = "User does not have a CMC profile";
 }
 
 }
