@@ -37,7 +37,12 @@ function db_check_user($fbid) {
 
 function setjsonmysqlerror(&$has_error,&$err_msg,$query) {
  	$has_error = TRUE;
-	$err_msg = "Can't query (query was '$query'): " . mysql_error();
+  $this_error = "Can't query (query was '$query'): " . mysql_error();
+  if (!$err_msg) {
+    $err_msg = $this_error;
+  } else {
+    $err_msg .= "<br/>" . $this_error;
+  }
 }
 
 // Removes every trace of a given user's information from the Tangible servers.
@@ -81,11 +86,20 @@ function db_purge_user_by_id($userid,$con,&$has_error,&$err_msg) {
     $result = mysql_query($query,$con);
     if (!$result)
 	setjsonmysqlerror($has_error,$err_msg,$query);
+    $query = "DELETE FROM languagesselected WHERE userid='".$userid."'";
+    $result = mysql_query($query,$con);
+    if (!$result)
+	setjsonmysqlerror($has_error,$err_msg);
     $query = "DELETE FROM notifications WHERE id='".$userid."'";
     $result = mysql_query($query,$con);
     if (!$result)
 	setjsonmysqlerror($has_error,$err_msg);
     $query = "DELETE FROM regionsselected WHERE userid='".$userid."'";
+    $result = mysql_query($query,$con);
+    if (!$result)
+	setjsonmysqlerror($has_error,$err_msg,$query);
+    $query = "DELETE searches, searchterms FROM searches JOIN searchterms ON searches.searchid=searchterms.searchid WHERE searches.userid='".$userid."'";
+    $query = "DELETE FROM searches WHERE userid='".$userid."'";
     $result = mysql_query($query,$con);
     if (!$result)
 	setjsonmysqlerror($has_error,$err_msg,$query);

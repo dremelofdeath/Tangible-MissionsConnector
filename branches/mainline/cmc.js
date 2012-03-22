@@ -408,6 +408,7 @@ var CMC = {
       if(data.has_error) {
         // first handle the no profile error - simply display a new profile creation form
         if (data.exists == 0) {
+          this.cmc.ajaxNotifyComplete();
           this.cmc.showProfile(null);
         } else {
           // we have a known error, handle it
