@@ -24,7 +24,7 @@ else {
 $json = array();
 
 if (!$has_error) {
-
+$json['tripid'] = $tid;
 $sql = 'select * from trips where id="'.$tid.'"';
 $result = mysql_query($sql,$con);
 if (!$result) {
@@ -58,26 +58,78 @@ else {
 		$phone=$row['phone'];
 		if (!empty($phone))
 			$json['phone'] = $phone;
+		$languages=$row['Languages'];
+		if (!empty($languages)) {
+			$json['languages'] = $languages;
+			$json['languageid'] = array();
+      $test = strpos($languages,',');
+      if ($test !== false) {
+			$languages = explode(",", $languages); 
+				foreach($languages as $lg) {
+					$sqll = 'select * from languages where englishname="'.$lg.'"';
+					$resultl = mysql_query($sqll,$con);	
+					if (!$resultl) {
+						setjsonmysqlerror($has_error,$err_msg);
+						continue 1;
+					}
+					else {
+						$rowl = mysql_fetch_array($resultl);
+						$json['languageid'][] = $rowl['id'];
+					}
+				}
+			}
+			else {
+				$sqll = 'select * from languages where englishname="'.$languages.'"';
+				$resultl = mysql_query($sqll,$con);	
+				if (!$resultl) {
+					setjsonmysqlerror($has_error,$err_msg);
+				}
+				else {
+					$rowl = mysql_fetch_array($resultl);
+					$json['languageid'][] = $rowl['id'];
+				}				
+			}
+		}
 		$email=$row['email'];
 		if (!empty($email))
 			$json['email'] = $email;
 		$web=$row['website'];		
+    if (!empty($web))
+      $json['website'] = $web;
+		$acco=$row['accommodationlevel'];		
+    if (!empty($acco))
+      $json['acco'] = $acco;
 		$dur=$row['durationid'];
 		if (!empty($dur))
 			$json['duration'] = $dur;
 		$stage=$row['isinexecutionstage'];
 		if (!empty($stage)) {
+      $json['tripstage'] = $stage;
+      /*
 		if ($stage==0)
 			$json['tripstage'] = "Planning Phase";  
 		else if ($stage==1)
-			$json['tripstage'] = "In Execution";  
+			$json['tripstage'] = "Execution";  
+      */
 		}
 		$destination=$row['destination'];
 		if (!empty($destination))
 			$json['destination'] = $destination;
 		$destinationcountry=$row['country'];
-		if (!empty($destinationcountry))
-			$json['destinationcountry'] = $destinationcountry;
+		if (!empty($destinationcountry)) {
+	     $json['countryid'] = array();
+			 $json['destinationcountry'] = $destinationcountry;
+				$sqlc = 'select * from countries where longname="'.$destinationcountry.'"';
+				$resultc = mysql_query($sqlc,$con);	
+				if (!$resultc) {
+					setjsonmysqlerror($has_error,$err_msg);
+				}
+				else {
+					$rowc = mysql_fetch_array($resultc);
+					$json['countryid'][] = $rowc['id'];
+				}				
+
+    }
 		$departn = explode(' ',$row['departure']);
 		$depart = explode('-',$departn[0]);
 		if (!empty($depart)) {
@@ -125,6 +177,28 @@ else {
 	$json['member'] = false;
 }
 }
+
+// now get all the tripmembers information to display on the trips page
+$sql = 'select * from tripmembers where tripid="'.$tid.'"';
+$result = mysql_query($sql,$con);
+
+if (!$result) {
+	setjsonmysqlerror($has_error,$err_msg,$sql);
+}
+else {
+
+$json['memberids'] = array();
+
+$numrows = mysql_num_rows($result);
+  if ($numrows > 0) {
+  while($row= mysql_fetch_array($result)) {
+    if ($creatorid != $row['userid']) {
+      $json['memberids'][] = $row['userid'];
+    }
+  }
+  }
+}
+
 }
 else {
   $has_error = TRUE;

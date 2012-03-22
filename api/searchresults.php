@@ -150,7 +150,6 @@ function getZipsWithin($zip, $miles, &$has_error, &$err_msg, $con) {
 
 function get_rest_of_string(&$sql3,&$sql1,&$sql2,$val,$searchkeys) {
 
-  $skills = 0;
   $sql2 = '';
   $sql1 = ' ';
   $sql3='';
@@ -199,40 +198,26 @@ function get_rest_of_string(&$sql3,&$sql1,&$sql2,$val,$searchkeys) {
   }
   if (isset($searchkeys->{'skills'})) {
     if ($searchkeys->{'skills'} != 0) {
-
       $skillsArray = $searchkeys->{'skills'};
       if (!is_array($searchkeys->{'skills'})) {
         $skillsArray = array(0 => $searchkeys->{'skills'});
       }
-
       $i = 0;
       foreach ($skillsArray as $value) {
         $joins .= "\nINNER JOIN skillsselected AS ss" . ++$i . " ON users.userid=ss" . $i . ".userid AND ss" . $i . ".id=\"" . $value . "\"";
       }
-
-      $skills = 1;
     }
   }
-  if (isset($searchkeys->{'country'})) {
-    if ($searchkeys->{'country'} != 0) {
-
-      if ($firstone==1) {
-        $sql3 = $sql3.' and countries.id="'.$searchkeys->{'country'}.'"';
-      } else {
-        $sql3 = $sql3.' countries.id="'.$searchkeys->{'country'}.'"';
-        $firstone=1;
+  if (isset($searchkeys->{'countries'})) {
+    if ($searchkeys->{'countries'} != 0) {
+      $countriesArray = $searchkeys->{'countries'};
+      if (!is_array($searchkeys->{'countries'})) {
+        $countriesArray = array(0 => $searchkeys->{'countries'});
       }
-
-      if ($val==1) {
-        if ($usersinc == 0) {
-          $sql1 = $sql1.',users,countries,countriesselected';
-          $usersinc = 1;
-        }
-      } else {
-        $sql1 = $sql1.',countries,countriesselected';
+      $i = 0;
+      foreach ($countriesArray as $value) {
+        $joins .= "\nINNER JOIN countriesselected AS cs" . ++$i . " ON users.userid=cs" . $i . ".userid AND cs" . $i . ".id=\"" . $value . "\"";
       }
-
-      $sql2 = $sql2.' and countries.id=countriesselected.id and users.userid=countriesselected.userid';
     }
   }
   if (isset($searchkeys->{'region'})) {

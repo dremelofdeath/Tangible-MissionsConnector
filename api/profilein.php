@@ -26,13 +26,6 @@ if (array_key_exists('fbid', $saferequest) && array_key_exists('profileinfo',$sa
 
   $fbid = $saferequest['fbid'];
 
-  /*if (get_magic_quotes_gpc())
-  {
-    $myobj = json_decode(htmlspecialchars_decode(array_map("stripslashes_deep",$saferequest['profileinfo'])));
-  } else {
-    $myobj = json_decode(htmlspecialchars_decode($saferequest['profileinfo']));
-  }*/
-
   $myobj = json_decode(base64_decode($saferequest['profileinfo']));
 
   switch(json_last_error()) {
@@ -59,7 +52,6 @@ else {
   $has_error = TRUE;
   $err_msg = "Required parameters not defined.";
 }
-
 
 if (!$has_error) {
 
@@ -88,6 +80,7 @@ if (!$has_error) {
     $isreceiver = 1;
   }
 
+  
   if ($myobj->{'profiletype'} != 2) {
 
     // Zip code is a required field for volunteer or missions - return an error if the country is USA
@@ -913,11 +906,21 @@ if ($month%2==0) {
             $mystr = "";
             $ii=0;
             foreach($languages as $ms) {
-              $mystr = $mystr.$ms;
+				// store characters, not values from input
+				$sqll = 'select * from languages where id="'.$ms.'"';
+				$resultl = mysql_query($sqll, $con);
+
+				if (!$resultl) {
+					setjsonmysqlerror($has_error, $err_msg, $sqll);
+				} else {			
+				$rowl = mysql_fetch_array($resultl);
+			
+              $mystr = $mystr.$rowl['englishname'];
               $ii++;
               if ((count($languages)>1)&&($ii<count($languages))) {
                 $mystr = $mystr.",";
               }
+			  }
             }
 
             if ($update) {
@@ -1021,9 +1024,9 @@ else {
           }
         }
 
-        if (isset($myobj->{'country'})) {
-          if (!empty($myobj->{'country'})) {
-            $tripcountry = $myobj->{'country'};
+        if (isset($myobj->{'mycountry'})) {
+          if (!empty($myobj->{'mycountry'})) {
+            $tripcountry = $myobj->{'mycountry'};
             $sql5 = 'select * from countries where id="'.$tripcountry[0].'"';
             $result5 = mysql_query($sql5);
             $row5 = mysql_fetch_array($result5);
@@ -1226,9 +1229,10 @@ else {
           }
         }
 
-      }
-    }
+      } //if no error
+    } //trip section ends
 
+    if (!$is_trip) {
     // clear out the old entries so that we start fresh
     $sql = "DELETE FROM skillsselected WHERE userid='".$fbid."'";
     $result = mysql_query($sql,$con);
@@ -1371,6 +1375,8 @@ else {
         }
       }
     }
+	
+	}
 
   }
 
