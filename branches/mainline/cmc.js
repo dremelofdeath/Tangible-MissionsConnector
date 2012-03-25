@@ -97,7 +97,10 @@ var CMC = {
       "profile-trip-depart" : "depart",
       "profile-trip-return" : "return",
 	    "profile-trip-number" : "numpeople",
-      "profile-trip-acco" : "acco"
+      "profile-trip-acco" : "acco",
+	  "profile-trip-medical-skills" : "medskills",
+      "profile-trip-nonmedical-skills" : "otherskills",
+      "profile-trip-spiritual-skills" : "spiritserv"	  
     }	
   },
 
@@ -400,7 +403,7 @@ var CMC = {
     }
     this.endFunction();
   },
- 
+  
   onGetProfileDataSuccess : function(data, textStatus, jqXHR) {
     this.cmc.beginFunction();
     this.cmc.assert(data != undefined, "data is undefined in onGetProfileDataSuccess");
@@ -452,7 +455,7 @@ var CMC = {
     $("#make-profile").fadeOut();
     this.endFunction();
   },
- 
+  
   showCreateNewProfileUI : function () {
     this.beginFunction();
     this.hideIntermediateNewProfileCreationSteps();
@@ -483,7 +486,7 @@ var CMC = {
       this.assert(data.name != undefined, "name is missing from result set");
 
       $("#profile-name").html(data.name ? data.name : "");
- 
+     
       if (!data.link) {
         FB.api(data.id, function(response) {
           __setProfileLinkInternal(response.link);
@@ -495,7 +498,7 @@ var CMC = {
       $("img.profile-picture").attr("src", "http://graph.facebook.com/"+data.id+"/picture?type=large");
 
       this.ajaxNotifyComplete();
-
+  
       $("#profile-section-about-me-content").html(data.about ? data.about : "");
       if (data.MedicalSkills == undefined) {
         $("#profile-medskills").html("");
@@ -655,7 +658,6 @@ var CMC = {
     }
     this.endFunction();
   },
-
   getFutureTrips : function() {
     this.beginFunction();
     this.log("Obtaining future trip information from the database");
@@ -672,7 +674,7 @@ var CMC = {
     });
     this.endFunction();
   },
-
+  
   onGetTripsDataSuccess : function(data, textStatus, jqXHR) {
     this.beginFunction();
     this.assert(data != undefined, "data is undefined in onGetTripsDataSuccess");
@@ -809,7 +811,7 @@ var CMC = {
     } // end else
     this.endFunction();
   },
-
+  
   handleGetTripsDataSuccessHasError : function(data) {
     this.beginFunction();
     this.assert(data != undefined, "data is undefined in handleGetTripsDataSuccessHasError");
@@ -870,6 +872,7 @@ var CMC = {
           CMC.isreceiver = 1;
           CMC.editProfile();
         }
+
       }
     } else {
       // an unknown error occurred? do something!
@@ -1007,7 +1010,7 @@ var CMC = {
       $("#trip-owner-picture").children("img").attr("src", "http://graph.facebook.com/"+data.creatorid+"/picture?type=large");
 
       $("#trip-profile-about").html(data.tripdesc ? "<h4>" + data.tripdesc + "</h4>" : "");
-
+      
       //display Trip profile information
       if (data.tripname === undefined) {
         $("#profile-trip-name").html("");
@@ -1015,7 +1018,7 @@ var CMC = {
       else {
         $("#profile-trip-name").html(data.tripname ? data.tripname : "");
       }
-
+   
       if (data.website === undefined) {
         $("#profile-trip-url").html("");
       }
@@ -1033,6 +1036,7 @@ var CMC = {
       else {
         $("#profile-trip-dest").html(data.destination + "," +data.destinationcountry);
       }     
+
     
       if (data.email === undefined) {
         $("#profile-trip-email").html("");
@@ -1061,7 +1065,7 @@ var CMC = {
       else {
         $("#profile-trip-depart").html(data.departyear ? data.departmonth +"/"+data.departday+"/"+data.departyear : "");
       } 
-
+    
       if (data.returnyear === undefined) {
         $("#profile-trip-return").html("");
       }
@@ -1083,6 +1087,56 @@ var CMC = {
         $("#profile-trip-numpeople").html(data.numpeople ? data.numpeople : "");
       }
 
+	  
+      if (data.MedicalSkills == undefined) {
+        $("#profile-trip-medskills").html("");
+      } else {
+        //display medical skills information
+        if (data.MedicalSkills.length > 0) {
+          var eachstr = "<ul>";
+          for (var each in data.MedicalSkills) {
+            eachstr += "<li> " + data.MedicalSkills[each] + "</li>";
+          }
+          eachstr += "</ul>";
+        $("#profile-trip-medskills").html(data.MedicalSkills ? eachstr : "");
+        } else {
+          $("#profile-trip-medskills").html("");
+        }
+      }	  
+	  
+      //display non-medical skills information
+      if (data.Non_MedicalSkills == undefined) {
+        $("#profile-trip-nonmedskills").html("");
+      } else {
+        if (data.Non_MedicalSkills.length > 0) {
+          var eachstr = "<ul>";
+          for (var each in data.Non_MedicalSkills) {
+            eachstr += "<li> " + data.Non_MedicalSkills[each] + "</li>";
+          }
+          eachstr += "</ul>";
+
+          $("#profile-trip-nonmedskills").html(data.Non_MedicalSkills ? eachstr : "");
+        } else {
+          $("#profile-trip-nonmedskills").html("");
+        }
+      }	 	  
+	  
+      if (data.SpiritualSkills == undefined) {
+        $("#profile-trip-spiritskills").html("");
+      } else {
+        //display medical skills information
+        if (data.SpiritualSkills.length > 0) {
+          var eachstr = "<ul>";
+          for (var each in data.SpiritualSkills) {
+            eachstr += "<li> " + data.SpiritualSkills[each] + "</li>";
+          }
+          eachstr += "</ul>";
+        $("#profile-trip-spiritskills").html(data.SpiritualSkills ? eachstr : "");
+        } else {
+          $("#profile-trip-spiritskills").html("");
+        }
+      }	
+	  
       if (data.memberids === undefined) {
         //$(id).children("#trip-profile-right-column").children(".box1").children(".profile-trip-people").html("<h6></h6>");
         $("#profile-trip-people").html("");
@@ -1090,7 +1144,7 @@ var CMC = {
       else {
         //display trip member information
         if (data.memberids.length > 0) {
-          //first update the html part
+		  //first update the html part
           var eachstr = "";
           for (var each in data.memberids) {
 
@@ -1131,7 +1185,7 @@ var CMC = {
       $("#backtotrips").fadeIn();
       $("#show-trip-profile").fadeIn();
     } // end else
-
+  
     this.endFunction();
   },
   
@@ -1962,7 +2016,14 @@ var CMC = {
   emptyTripForm : function () {
     this.beginFunction();
     $(':input', '#profile-trip-form').removeAttr('checked').removeAttr('selected');
-    $(':text, :password, :file, SELECT', '#profile-trip-form').val('');
+    $(':text, :password, :file, select', '#profile-trip-form').val('');
+    $("input#profile-trip-depart").val('select');
+    $("input#profile-trip-return").val('select');
+
+    $("#profile-trip-medical-skills").multiselect("uncheckAll");
+    $("#profile-trip-nonmedical-skills").multiselect("uncheckAll");
+    $("#profile-trip-spiritual-skills").multiselect("uncheckAll");
+
     this.endFunction();
   },
 
@@ -1978,12 +2039,11 @@ var CMC = {
           this.getProfile(this.me.id);
         }
           
-          this.emptyTripForm();
           var id = "#profile-trip-dialog";
 
           if (data.tripname !== undefined) {
             $("input#profile-trip-name").val(data.tripname);
-            $("input#profile-trip-name").attr('disabled','disabled');
+            //$("input#profile-trip-name").attr('disabled','disabled');
           }
           if (data.website !== undefined) {
             $("input#profile-trip-website").val(data.website);
@@ -1992,7 +2052,7 @@ var CMC = {
             $("input#profile-trip-about").val(data.tripdesc);
           }
           if (data.religion !== undefined) {
-            $('select#profile-trip-religion option[value="' + parseInt(data.religion,10) + '"]').attr('selected', 'selected');
+            $('select#profile-trip-religion option[value="' + data.religion + '"]').attr('selected', 'selected');
           }
           if (data.numpeople !== undefined) {
             $("input#profile-trip-number").val(data.numpeople);
@@ -2009,7 +2069,7 @@ var CMC = {
             $('select#profile-trip-duration option[value="' + parseInt(data.duration,10) + '"]').attr('selected', 'selected');
           }
           if (data.acco !== undefined) {
-            $('select#profile-trip-acco option[value="' + parseInt(data.acco,10) + '"]').attr('selected', 'selected');
+            $('select#profile-trip-acco option[value="' + data.acco + '"]').attr('selected', 'selected');
           }
           if (data.tripstage !== undefined) {
             $('select#profile-trip-stage option[value="' + parseInt(data.tripstage,10) + '"]').attr('selected', 'selected');
@@ -2039,6 +2099,35 @@ var CMC = {
             $("input#profile-trip-phone").val(data.phone);
           }
 
+          if (data.MedicalSkills !== undefined) {
+            if (data.MedicalSkills.length > 0) {
+              for (var each in data.MedicalSkills) {
+                $('select#profile-trip-medical-skills option[value="' + data.MedicalSkillsid[each] + '"]').attr('selected', 'selected');
+              }
+            }
+          }
+            $("#profile-trip-medical-skills").multiselect();
+            $("#profile-trip-medical-skills").multiselect("refresh");
+          if (data.Non_MedicalSkills !== undefined) {
+            if (data.Non_MedicalSkills.length > 0) {
+              for (var each in data.Non_MedicalSkills) {
+                $('select#profile-trip-nonmedical-skills option[value="' + data.Non_MedicalSkillsid[each] + '"]').attr('selected', 'selected');
+              }
+            }
+          }
+            $("#profile-trip-nonmedical-skills").multiselect();
+            $("#profile-trip-nonmedical-skills").multiselect("refresh");
+          if (data.SpiritualSkills !== undefined) {
+            if (data.SpiritualSkills.length > 0) {
+              for (var each in data.SpiritualSkills) {
+                $('select#profile-trip-spiritual-skills option[value="' + data.SpiritualSkillsid[each] + '"]').attr('selected', 'selected');
+              }
+            }
+          }
+            $("#profile-trip-spiritual-skills").multiselect();		  
+            $("#profile-trip-spiritual-skills").multiselect("refresh");		  
+		  
+		      this.tripdata = data;
           $("#profile-trip-dialog").dialog('open');
       } 
     }, this));
@@ -2092,18 +2181,18 @@ var CMC = {
           }
             $("#profile-spiritual-skills").multiselect();
           if (this.profiledata.relg !== undefined) {
-            $("input#profile-religion").val(this.profiledata.relg);
+            $('select#profile-religion option[value="' + this.profiledata.relg + '"]').attr('selected', 'selected');
           }
 
           if (this.profiledata.Durations !== undefined) {
             if (this.profiledata.Durations.PreferredDurationofMissionTrips !== undefined) {
-              $("input#profile-duration").val(this.profiledata.Durations.PreferredDurationofMissionTrips);
+              $('select#profile-duration option[value="' + parseInt(this.profiledata.Durations.PreferredDurationofMissionTrips,10) + '"]').attr('selected', 'selected');
             }
           }
 
           if (this.profiledata.States !== undefined) {
             if (this.profiledata.States.State !== undefined) {
-              $("input#profile-state").val(this.profiledata.States.State);
+              $('select#profile-state option[value="' + this.profiledata.States.Stateid + '"]').attr('selected', 'selected');
             }
           }
           if (this.profiledata.city !== undefined) {
@@ -2170,7 +2259,7 @@ var CMC = {
               }
             }
           }
-            $("#profile-org-offer").multiselect({selectedList: 11});
+            $("#profile-org-offer").multiselect();
           if (this.profiledata.FacilityNon_MedicalOfferings !== undefined) {
             if (this.profiledata.FacilityNon_MedicalOfferings.length > 0) {
               for (var each in this.profiledata.FacilityNon_MedicalOfferings) {
@@ -2209,7 +2298,7 @@ var CMC = {
 
           if (this.profiledata.Durations !== undefined) {
             if (this.profiledata.Durations.PreferredDurationofMissionTrips !== undefined) {
-              $('select#profile-org-duration option[value="' + this.profiledata.Durations.PreferredDurationofMissionTripsid + '"]').attr('selected', 'selected');
+              $('select#profile-org-duration option[value="' + parseInt(this.profiledata.Durations.PreferredDurationofMissionTripsid,10) + '"]').attr('selected', 'selected');
             }
           }
 
@@ -2424,6 +2513,7 @@ var CMC = {
        CMC.getProfile(CMC.me.id, this.handleGetProfileCallbackSaveAndShow);
        $("#profile-volunteer-dialog").dialog('close');
        alert('Thank you - your submission has been successfully entered into our database');
+
      } else {
        alert('We are sorry - there was an error: ' + data.err_msg);
      }
@@ -2637,6 +2727,22 @@ var CMC = {
 
       $.extend(profiletripformdata, this.applyTranslationMap(profileData, this.BackendTranslation.TripProfile));
 
+	  if (CMC.tripdata.hasOwnProperty("tripid")) {
+      $.ajax({
+        type: "POST",
+        url: "api/profilein.php",
+        data: {
+           tripid: CMC.tripdata.tripid ? CMC.tripdata.tripid : "",
+		       fbid: CMC.me.id ? CMC.me.id : "",
+           profileinfo: encode64(JSON.stringify(profiletripformdata))
+        },
+        context : this,
+        dataType: "json",
+        success: this.onSubmitTripSuccess,
+        error: this.onSubmitTripFailure
+      });	  
+	  }
+	  else {
       $.ajax({
         type: "POST",
         url: "api/profilein.php",
@@ -2649,6 +2755,7 @@ var CMC = {
         success: this.onSubmitTripSuccess,
         error: this.onSubmitTripFailure
       });
+	  }
    
       ret = true;
     }
@@ -2689,6 +2796,8 @@ var CMC = {
   },  
   
   createTrip : function () {
+    this.emptyTripForm();
+    this.tripdata = {};
     $("#profile-trip-dialog").dialog('open');
   },
 
@@ -3081,7 +3190,6 @@ $(function() {
           CMC.getFutureTrips();
         //}
     }); 
-
   CMC.log("configuring FCBKcomplete for search");
   $("#search-box-select").fcbkcomplete({
     addontab : true,

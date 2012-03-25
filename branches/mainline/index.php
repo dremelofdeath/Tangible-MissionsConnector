@@ -411,9 +411,10 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
     <script src="jquery.validate.js" type="text/javascript"></script>
     <script src="jquery.validation.functions.js" type="text/javascript"></script> 
     <script src="datepicker.js" type="text/javascript"></script>
+	
     <link rel="stylesheet" type="text/css" href="jquery.multiselect.css" />
     <script type="text/javascript" src="jquery.multiselect.js"></script>
-
+	  
     <!-- @/BEGIN/ADMINCODEBLOCK -->
     <!-- THIS IS THE ADMIN CODE BLOCK! Do NOT put code here for end users, they won't see it! -zack -->
     <script type="text/javascript">
@@ -617,7 +618,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
           ?>
         </div>
         <div id="show-trip-profile" style="display: none">
-          <div id="tripprofilecontent">		
+          <div id="tripprofilecontent">
             <div id="trip-profile-left-column">
               <div id="tripprofileimage">
                 <div class="trip-owner-picture">
@@ -647,6 +648,10 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
               <h5>Trip Religion: <span id="profile-trip-religion">Trip religion</span><h5>
               <h5>Trip Accommodation Level: <span id="profile-trip-acco">Trip Accommodation Level</span></h5>
               <h5>Number of People involved in this Trip: <span id="profile-trip-numpeople">Number of people</span></h5>
+              <h5>Trip Medical Skills: <span id="profile-trip-medskills">Medskills</span></h5>
+              <h5>Trip Non-Medical Skills:<span id="profile-trip-nonmedskills">Non-Medskills</span></h5>
+              <h5>Trip Spiritual Skills:<span id="profile-trip-spiritskills">Spiritual skills</span></h5>				  
+				
               <h5>People involved in this Trip:</h5>
               <div id="profile-trip-people">
                 <div id="cmc-trip-member-0" class="cmc-tripmember-results">
@@ -1310,7 +1315,66 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                           <?php cmc_echo_opt_languages(); ?>
                         </select>
                       </td>
+                    </tr>   
+                    <tr>
+                      <td style="width: 197px">
+                        <label>Trip Medical Skills</label></td>
+                      <td style="width: 197px">
+                        <select id="profile-trip-medical-skills" class="cmc-form-spec" name="profile-trip-medical-skills", multiple="multiple">
+                          <!--<option class="cmc-default-opt" value="0" selected="selected">Select Medical Skills</option>-->
+                          <option value="1">Advanced Practice Nursing</option>
+                          <option value="2">Dental Professional</option>
+                          <option value="3">Medical Educator</option>
+                          <option value="4">Mental Health Professional</option>
+                          <option value="5">Nurse</option>
+                          <option value="6">Optometrist or Opthalmologist</option>
+                          <option value="7">Pharmacist</option>
+                          <option value="8">Physician</option>
+                          <option value="9">Physician Assistant</option>
+                          <option value="10">Physical or Occupational Therapist</option>
+                          <option value="11">Public Health/Community Development Worker</option>
+                          <option value="12">Speech Therapist</option>
+                          <option value="13">Other</option>
+                          <!--<option class="cmc-default-opt" value="0" selected="selected">Select Medical Skills</option>-->
+                        </select>
+                      </td>
                     </tr>
+                    <tr>
+                      <td style="width: 197px">
+                        <label>Trip Non-Medical Skills</label></td>
+                      <td style="width: 197px">
+                        <select id="profile-trip-nonmedical-skills" class="cmc-form-spec" name="profile-trip-nonmedical-skills" multiple="multiple">
+                          <!--<option class="cmc-default-opt" value="0" selected="selected">Select Non-Medical Skills</option>-->
+                          <option value="14">General Help/Labor</option>
+                          <option value="15">Team Leader/Primary Organizer</option>
+                          <option value="16">Account and/or Business Management</option>
+                          <option value="17">Skilled Construction and/or Maintenance</option>
+                          <option value="18">Computer Science/Other Technical</option>
+                          <option value="19">Agriculture and/or Animal Husbandry</option>
+                          <option value="45">Mechanic</option>
+                          <option value="46">Office/Secretarial</option>
+                          <option value="47">Teaching</option>
+                          <option value="48">Veterinary</option>
+                          <option value="49">Water Supply Improvement</option>
+                          <option value="50">Writing and/or Translating</option>
+                          <option value="52">Engineering</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="width: 197px">
+                        <label>Trip Spiritual Service</label></td>
+                      <td style="width: 197px">
+                        <select id="profile-trip-spiritual-skills" class="cmc-form-spec" name="profile-trip-spiritual-skills" multiple="multiple">
+                          <!--<option class="cmc-default-opt" value="0" selected="selected">Select Spiritual Service</option>-->
+                          <option value="20">Team Spiritual Leader</option>
+                          <option value="21">Individual Outreach (Prayer and Counseling)</option>
+                          <option value="22">Evangelism</option>
+                          <option value="44">Worship Team</option>
+                          <option value="51">Public Speaking</option>
+                        </select>
+                      </td>
+                    </tr>						
                     <tr>
                       <td><label>Phone</label></td>
                       <td><input type="text" id="profile-trip-phone" class="cmc-form-spec" /></td>
@@ -1329,7 +1393,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
             </div>
           </div>
         </form>   
-      </div>    
+      </div>	  
       <div id="report-problem-dialog" title="What seems to be the matter?">
         <p>Tell us what's wrong, and we'll look into it right away.</p>
         <form id="report-problem-form">
