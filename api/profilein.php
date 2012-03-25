@@ -22,7 +22,32 @@ $json = array();
 
 // make sure all the required parameters are defined, else throw an error
 // profiletype, fbid
-if (array_key_exists('fbid', $saferequest) && array_key_exists('profileinfo',$saferequest)) {
+if (array_key_exists('fbid', $saferequest) && array_key_exists('tripid', $saferequest) && array_key_exists('profileinfo',$saferequest)) {
+
+  $fbid = $saferequest['fbid'];
+  $update = $saferequest['tripid'];
+  $myobj = json_decode(base64_decode($saferequest['profileinfo']));
+
+  switch(json_last_error()) {
+  case JSON_ERROR_DEPTH:
+    $has_error = TRUE;
+    $err_msg = "Maximum stack depth exceeded";
+    break;
+  case JSON_ERROR_CTRL_CHAR:
+    $has_error = TRUE;
+    $err_msg = "Unexpected control character found";
+    break;
+  case JSON_ERROR_SYNTAX:
+    $has_error = TRUE;
+    $err_msg = "Syntax error, malformed JSON";
+    break;
+  case JSON_ERROR_NONE:
+    break;
+  }
+
+  $myobj = cmc_safe_object_strip($myobj);
+}
+else if (array_key_exists('fbid', $saferequest) && array_key_exists('profileinfo',$saferequest)) {
 
   $fbid = $saferequest['fbid'];
 
@@ -123,15 +148,14 @@ if (!$has_error) {
 
   if (!$has_error) {
 
-    if (isset($myobj->{'update'})) {
-      $update = $myobj->{'update'};
-    }
-    else {
-      $update = 0;
-    }
-
-
     if (!$is_trip) {
+
+      if (isset($myobj->{'update'})) {
+        $update = $myobj->{'update'};
+      }
+      else {
+        $update = 0;
+      }
 
       if (!empty($myobj->{'toggle'})) {
 
@@ -354,36 +378,17 @@ if (!$has_error) {
 
     if ($is_trip) {
 
-      // check to see if any trip exists within the same creator, description or destination
-      // if so, set to update
-
-      if ($update==0) {
-        $changed=0;
-        $sql = 'select * from trips where creatorid="'.$fbid.'"';
-        if (!empty($myobj->{'name'})) {
-          $sql = $sql.' and tripname="'.$myobj->{'name'}.'"';
-        }
-
-        $result = mysql_query($sql,$con);
-        if (!$result) {
-          setjsonmysqlerror($has_error,$err_msg,$sql);
-        }
-        else {
-          $numrows = mysql_num_rows($result);
-          if ($numrows>0) {
-            $changed = 1;
-            $row = mysql_fetch_array($result,MYSQL_ASSOC);
-            $update = $row['id'];
-          }
-        }
+      if (!isset($update)) {
+        $update = 0;
       }
-
+	   
       if (!$has_error) {
 
         if ($update) {
           $sql = 'update trips set ';
           $sql2 = ' where id="'.$update.'"';
           $sql1 = '';
+
         }
         else {
           $sql = 'INSERT INTO trips (creatorid';
@@ -1230,8 +1235,53 @@ else {
         }
 
       } //if no error
+
+	if (!$has_error) {
+    $sql = "DELETE FROM skillsselectedtrips WHERE tripid='".$tripid."'";
+    $result = mysql_query($sql,$con);
+    if (!$result) {
+      setjsonmysqlerror($has_error,$err_msg,$sql);
+    }
+
+    if (isset($myobj->{'medskills'})) {
+      $medskills = $myobj->{'medskills'};
+      foreach($medskills as $ms) {
+        $sql = "INSERT INTO skillsselectedtrips VALUES ('".$tripid."','".$ms."')";
+        $result = mysql_query($sql,$con);
+        if(!$result){
+          setjsonmysqlerror($has_error,$err_msg,$sql);
+        }
+      }
+    }
+
+    if (isset($myobj->{'otherskills'})) {
+      $otherskills=$myobj->{'otherskills'};
+      foreach($otherskills as $ms) {
+        $sql = "INSERT INTO skillsselectedtrips VALUES ('".$tripid."','".$ms."')";
+        $result = mysql_query($sql,$con);
+        if(!$result) {
+          setjsonmysqlerror($has_error,$err_msg,$sql);
+        }
+      }
+    }
+
+    if (isset($myobj->{'spiritserv'})) {
+      $relgskills=$myobj->{'spiritserv'};
+      foreach($relgskills as $ms) {
+        $sql = "INSERT INTO skillsselectedtrips VALUES ('".$tripid."','".$ms."')";
+        $result = mysql_query($sql,$con);
+        if(!$result) {
+          setjsonmysqlerror($has_error,$err_msg,$sql);
+        }
+      }
+    }	
+	
+	} //no errors
+	  
     } //trip section ends
 
+	
+	
     if (!$is_trip) {
     // clear out the old entries so that we start fresh
     $sql = "DELETE FROM skillsselected WHERE userid='".$fbid."'";

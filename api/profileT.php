@@ -32,8 +32,34 @@ if (!$result) {
 }
 else {
 
+function cmc_profile_render_skills($title, $type, $tid,&$has_error,&$err_msg,&$json,$con) {
+  $sql = "SELECT * FROM skills".
+       " JOIN skillsselectedtrips ON skills.id = skillsselectedtrips.id".
+       " WHERE skills.type=".$type." AND skillsselectedtrips.tripid='".$tid."'";
+  $result = mysql_query($sql,$con);
+  if (!$result) {
+  	setjsonmysqlerror($has_error,$err_msg,$sql);
+  }
+  else {
+    $i=0;
+    while($row= mysql_fetch_array($result)){
+      if ($i==0) {
+	  $json[str_replace (" ", "", $title)] = array();
+	  $json[str_replace (" ", "", $title)."id"] = array();
+      }
+      $i++;
+	  $json[str_replace (" ", "", $title)][] = $row['skilldesc'];
+	  $json[str_replace (" ", "", $title)."id"][] = $row['id'];
+    }
+  }
+}
+
   $num_rows = mysql_num_rows($result);
 
+  cmc_profile_render_skills("Medical Skills", '1', $tid,$has_error,$err_msg,$json,$con);
+  cmc_profile_render_skills("Non_Medical Skills", '2', $tid,$has_error,$err_msg,$json,$con);
+  cmc_profile_render_skills("Spiritual Skills", '3', $tid,$has_error,$err_msg,$json,$con);  
+  
   if ($num_rows > 0) {
   while($row= mysql_fetch_array($result)) {
     $name = $row['tripname'];
