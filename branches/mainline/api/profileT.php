@@ -130,20 +130,20 @@ function cmc_profile_render_skills($title, $type, $tid,&$has_error,&$err_msg,&$j
 			$json['duration'] = $dur;
 		$stage=$row['isinexecutionstage'];
 		if (!empty($stage)) {
-      $json['tripstage'] = $stage;
-      /*
-		if ($stage==0)
+      //$json['tripstage'] = $stage;
+      
+		if ($stage==1)
 			$json['tripstage'] = "Planning Phase";  
-		else if ($stage==1)
-			$json['tripstage'] = "Execution";  
-      */
+		else if ($stage==2)
+			$json['tripstage'] = "Execution Phase";  
+      
 		}
 		$destination=$row['destination'];
 		if (!empty($destination))
 			$json['destination'] = $destination;
 		$destinationcountry=$row['country'];
 		if (!empty($destinationcountry)) {
-	     $json['countryid'] = array();
+	     //$json['countryid'] = array();
 			 $json['destinationcountry'] = $destinationcountry;
 				$sqlc = 'select * from countries where longname="'.$destinationcountry.'"';
 				$resultc = mysql_query($sqlc,$con);	
@@ -152,7 +152,7 @@ function cmc_profile_render_skills($title, $type, $tid,&$has_error,&$err_msg,&$j
 				}
 				else {
 					$rowc = mysql_fetch_array($resultc);
-					$json['countryid'][] = $rowc['id'];
+					$json['countryid'] = $rowc['id'];
 				}				
 
     }
