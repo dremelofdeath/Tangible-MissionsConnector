@@ -1032,7 +1032,7 @@ else {
         if (isset($myobj->{'mycountry'})) {
           if (!empty($myobj->{'mycountry'})) {
             $tripcountry = $myobj->{'mycountry'};
-            $sql5 = 'select * from countries where id="'.$tripcountry[0].'"';
+            $sql5 = 'select * from countries where id="'.$tripcountry.'"';
             $result5 = mysql_query($sql5);
             $row5 = mysql_fetch_array($result5);
             if ($update) {

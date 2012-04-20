@@ -1080,6 +1080,13 @@ var CMC = {
         $("#profile-trip-religion").html(data.religion ?  data.religion : "");
       }
 
+      if (data.acco === undefined) {
+        $("#profile-trip-acco").html("");
+      }
+      else {
+        $("#profile-trip-acco").html(data.acco ?  data.acco : "");
+      }
+
       if (data.numpeople === undefined) {
         $("#profile-trip-numpeople").html("");
       }
@@ -2078,7 +2085,7 @@ var CMC = {
             $("input#profile-trip-city").val(data.destination);
           }
           if (data.destinationcountry !== undefined) {
-            $('select#profile-trip-country option[value="' + parseInt(data.countryid[0],10) + '"]').attr('selected', 'selected');
+            $('select#profile-trip-country option[value="' + parseInt(data.countryid,10) + '"]').attr('selected', 'selected');
           }
           if (data.zip !== undefined) {
             $("input#profile-trip-zipcode").val(data.zip);
