@@ -183,6 +183,24 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
         margin-right: 0.3em;
       }
 
+      .tab-loading-screen {
+        margin-top: 80px;
+        margin-left: 194px;
+      }
+
+      .tab-loading-text {
+        display: block;
+        font-size: 2em;
+        font-weight: bold;
+      }
+
+      .tab-loading-subtext {
+        display: block;
+        font-size: 1.5em;
+        font-weight: bold;
+        margin-top: 15px;
+      }
+
       .cmc-big-button {
         height: 75px;
         padding-top: 7px;
@@ -411,10 +429,10 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
     <script src="jquery.validate.js" type="text/javascript"></script>
     <script src="jquery.validation.functions.js" type="text/javascript"></script> 
     <script src="datepicker.js" type="text/javascript"></script>
-	
+
     <link rel="stylesheet" type="text/css" href="jquery.multiselect.css" />
     <script type="text/javascript" src="jquery.multiselect.js"></script>
-	  
+
     <!-- @/BEGIN/ADMINCODEBLOCK -->
     <!-- THIS IS THE ADMIN CODE BLOCK! Do NOT put code here for end users, they won't see it! -zack -->
     <script type="text/javascript">
@@ -441,12 +459,13 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
 
         $("#debug-detach-handlers").button().click(function() { CMC.detachDebugHandlers(); });
         $("#debug-force-login").button().click(function() { CMC.login(); });
+        $("#debug-hide-profile-loading").button().click(function() { CMC.hideTabLoading('profile'); });
 
         CMC.log("admin load complete");
       });
     </script>
     <!-- @/END/ADMINCODEBLOCK -->
-  
+
     <script type="text/JavaScript">
       function tripzipdisplay() {
         if ($('select#profile-trip-country').val() == 1) {
@@ -501,6 +520,10 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
         <p>Are you interested in missions work? Do you want to connect with people and organizations who share your passion for missions? Whether you want to find a missions organization, start a mission team, join a mission team or just connect with others who have a passion for missions, Christian Missions Connector can help.</p>
       </div>
       <div id="profile-tab">
+        <div id="profile-tab-loading" class="tab-loading-screen">
+          <span id="profile-tab-loading-text" class="tab-loading-text">Loading...</span>
+          <span id="profile-tab-loading-subtext" class="tab-loading-subtext">Hold on, we're getting that for you...</span>
+        </div>
         <div id="make-volunteer">
           <h1>Cool! You're a volunteer.</h1>
           <p>We're excited you're here! Now we'd like to sync with your Facebook profile so we can connect you with mission trips all over the world. We'll also let you know if anyone invites you to join their trip!</p>
@@ -607,6 +630,10 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
         </div>
       </div>
       <div id="trips-tab">
+        <div id="trips-tab-loading" class="tab-loading-screen" style="display: none"><!-- this isn't done yet... -zack -->
+          <span id="trips-tab-loading-text" class="tab-loading-text">Loading...</span>
+          <span id="trips-tab-loading-subtext" class="tab-loading-subtext">Hold on, we're getting that for you...</span>
+        </div>
         <div id="make-trip">
           <?php
             cmc_big_button(
@@ -649,9 +676,8 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
               <h5>Trip Accommodation Level: <span id="profile-trip-acco">Trip Accommodation Level</span></h5>
               <h5>Number of People involved in this Trip: <span id="profile-trip-numpeople">Number of people</span></h5>
               <h5>Trip Medical Skills: <span id="profile-trip-medskills">Medskills</span></h5>
-              <h5>Trip Non-Medical Skills:<span id="profile-trip-nonmedskills">Non-Medskills</span></h5>
-              <h5>Trip Spiritual Skills:<span id="profile-trip-spiritskills">Spiritual skills</span></h5>				  
-				
+              <h5>Trip Non-Medical Skills: <span id="profile-trip-nonmedskills">Non-Medskills</span></h5>
+              <h5>Trip Spiritual Skills: <span id="profile-trip-spiritskills">Spiritual skills</span></h5>
               <h5>People involved in this Trip:</h5>
               <div id="profile-trip-people">
                 <div id="cmc-trip-member-0" class="cmc-tripmember-results">
@@ -660,7 +686,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                   </div>
                   <div id="profile-tripmember-name">Member Name</div>
                 </div>
-              </div>	
+              </div>
             </div>
           </div>
         </div>     
@@ -1374,7 +1400,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                           <option value="51">Public Speaking</option>
                         </select>
                       </td>
-                    </tr>						
+                    </tr>
                     <tr>
                       <td><label>Phone</label></td>
                       <td><input type="text" id="profile-trip-phone" class="cmc-form-spec" /></td>
@@ -1393,7 +1419,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
             </div>
           </div>
         </form>   
-      </div>	  
+      </div>
       <div id="report-problem-dialog" title="What seems to be the matter?">
         <p>Tell us what's wrong, and we'll look into it right away.</p>
         <form id="report-problem-form">
@@ -1431,6 +1457,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
       <div id="debug-controls">
         <button id="debug-detach-handlers">detach debug handlers</button>
         <button id="debug-force-login">force login</button>
+        <button id="debug-hide-profile-loading">hide loading text</button>
       </div>
     </div>
     <!-- Do not place HTML markup below this line -->
