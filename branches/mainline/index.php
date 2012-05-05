@@ -704,6 +704,18 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
           <h1>There aren't any trips coming up soon.</h1>
           <h1>Why don't you <a href="#" onclick="CMC.page('#no-trip', '#make-trip');">create one</a>?</h1>
         </div>
+        <div id="no-profile-trip" style="display: none">
+          <div class="ui-state-highlight ui-corner-all ui-widget cmc-infobar">
+            <p class="cmc-infobar-text">
+             <span class="ui-icon ui-icon-info cmc-infobar-icon"></span>
+             <strong>Oops!</strong>
+             You haven't created a profile yet! Create one now and get involved.
+            </p>
+          </div>
+          <h1>
+            <a href="#" onclick="CMC.page('#no-profile-trip', '#make-profile');">Create a Profile Now &gt;&gt;</a>
+          </h1>
+        </div>
       </div>
       <div id="search-tab">
         <div id="search-box">

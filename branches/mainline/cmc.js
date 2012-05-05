@@ -2944,6 +2944,7 @@ var CMC = {
   handleUserUnauthorized : function () {
     this.beginFunction();
     $("#no-profile").fadeIn();
+    $("#no-profile-trip").fadeIn();
     this.endFunction();
   },
 
