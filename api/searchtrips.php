@@ -9,8 +9,27 @@ $err_msg = '';
 
 $json = array();
 
+//first make sure that the user has a CMC profile, if not throw an error
+
 // get all trips that are in the future
 $sql = null;
+if (array_key_exists('fbid', $saferequest) && $saferequest['fbid'] != '') {
+  // first check that the user has a CMC profile - otherwise redirect user to create a profile
+  $sql2 = 'select * from users where userid="'.$fbid.'"';
+  $result2 = mysql_query($sql2,$con);
+  if (!$result2) {
+     setjsonmysqlerror($has_error,$err_msg,$sql);
+  } else {
+    $numrows = mysql_num_rows($result2);
+
+    if ($numrows==0) {
+        // This means user does not have a CMC profile
+            $has_error = TRUE;
+            $err_msg = "No CMC Profile";
+    }
+
+      else {
+  
 if (array_key_exists('fbid', $saferequest) && $saferequest['fbid'] != '') {
   $sql =
     'SELECT t.*, tm.isadmin '.
@@ -38,8 +57,9 @@ if ($result) {
 else {
  	setjsonmysqlerror($has_error,$err_msg,$sql);
 }
-
-
+}
+}
+}
 $json['has_error'] = $has_error;
 
 if ($has_error) {
