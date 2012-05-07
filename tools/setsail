@@ -3,11 +3,19 @@
 NO_ARGS=0 
 E_OPTERROR=85
 
+error() {
+  echo "error: $1"
+  echo ""
+  usage
+}
+
 usage() {
   echo "Usage:"
   echo "  `basename $0` [-b branch]"
+  echo "  `basename $0` [-t tag]"
   echo "  `basename $0` -h"
-  echo "    -b: The branch to ship. (Defaults to mainline.)"
+  echo "    -b: The branch to ship. Creates a new tag. (Defaults to mainline.)"
+  echo "    -t: Move or rollback production to the specified tag."
   echo "    -h: Prints this help message."
   exit $E_OPTERROR
 }
@@ -18,18 +26,44 @@ then
 fi
 
 BRANCH=mainline
+TAG=NOTAG
 PRODUCTIONHOST=chrome
 
-while getopts "hb:" OPTION
+BRANCHSET=no
+TAGSET=no
+
+while getopts "hbt:" OPTION
 do
   case $OPTION in
     b)
       BRANCH=$OPTARG
+      if [ "$BRANCHSET" == "yes" ]
+      then
+        error "multiple branches specified, select only one"
+      fi
+      if [ "$TAGSET" == "yes" ]
+      then
+        error "can't specify a branch after specifying a tag"
+      fi
+      BRANCHSET=yes
+      ;;
+    t)
+      TAG=$OPTARG
+      if [ "$BRANCHSET" == "yes" ]
+      then
+        error "can't specify a tag after specifying a branch"
+      fi
+      if [ "$TAGSET" == "yes" ]
+      then
+        error "multiple tags specified, select only one"
+      fi
+      TAGSET=yes
       ;;
     h)
       usage
       ;;
     ?)
+      echo ""
       usage
       ;;
   esac
@@ -39,18 +73,26 @@ pushd `dirname $0` > /dev/null
 SCRIPTPATH=`pwd`
 popd > /dev/null
 
-pushd $SCRIPTPATH/../branches/$BRANCH
-BUILDNUMBER=`make buildnumber`
-NEWTAG=2.0-build-$BUILDNUMBER
-popd
-
 pushd $SCRIPTPATH/..
 svn up
-svn cp branches/$BRANCH tags/$NEWTAG
-pushd tags/$NEWTAG
-make buildfinalize
-svn ci -m "setsail production upgrade: 2.0 Build $BUILDNUMBER"
+
+pushd $SCRIPTPATH/../branches/$BRANCH
+BUILDNUMBER=`make buildnumber`
+if [ "$TAGSET" == "no" ]
+then
+  NEWTAG=2.0-build-$BUILDNUMBER
+else
+  NEWTAG=$TAG
+fi
 popd
+
+if [ "$TAGSET" == "no" ]
+then
+  svn cp branches/$BRANCH tags/$NEWTAG
+  pushd tags/$NEWTAG
+  make buildfinalize
+  svn ci -m "setsail production upgrade: 2.0 Build $BUILDNUMBER"
+fi
 popd
 
 echo ""
@@ -58,8 +100,10 @@ echo "Please enter the production password."
 ssh -tt root@$PRODUCTIONHOST <<END
 pushd /var/www/localhost/htdocs/missionsconnector/
 rm -rf *
-svn export http://$PRODUCTIONHOST/svn/missionsconnector/tags/$NEWTAG
+svn export http://$PRODUCTIONHOST/svn/missionsconnector/tags/$NEWTAG --username system --force .
 rm -f Makefile
 popd
+exit
 END
 
+# vim: tw=0
