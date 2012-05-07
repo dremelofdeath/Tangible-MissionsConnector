@@ -45,6 +45,13 @@ function setjsonmysqlerror(&$has_error,&$err_msg,$query) {
   }
 }
 
+function db_purge_all_searches($con) {
+  $query = "DELETE FROM searchterms";
+  $result = mysql_query($query,$con);
+  $query = "DELETE FROM searches";
+  $result = mysql_query($query,$con);
+}
+
 // Removes every trace of a given user's information from the Tangible servers.
 // param $userid: the Facebook user ID of the user to purge.
 // Returns the number of users that were found. Only deletes user information if 
@@ -99,7 +106,6 @@ function db_purge_user_by_id($userid,$con,&$has_error,&$err_msg) {
     if (!$result)
 	setjsonmysqlerror($has_error,$err_msg,$query);
     $query = "DELETE searches, searchterms FROM searches JOIN searchterms ON searches.searchid=searchterms.searchid WHERE searches.userid='".$userid."'";
-    $query = "DELETE FROM searches WHERE userid='".$userid."'";
     $result = mysql_query($query,$con);
     if (!$result)
 	setjsonmysqlerror($has_error,$err_msg,$query);
