@@ -1,0 +1,65 @@
+#!/bin/bash
+
+NO_ARGS=0 
+E_OPTERROR=85
+
+usage() {
+  echo "Usage:"
+  echo "  `basename $0` [-b branch]"
+  echo "  `basename $0` -h"
+  echo "    -b: The branch to ship. (Defaults to mainline.)"
+  echo "    -h: Prints this help message."
+  exit $E_OPTERROR
+}
+
+if [ $# -eq "$NO_ARGS" ]    # Script invoked with no command-line args?
+then
+  usage
+fi
+
+BRANCH=mainline
+PRODUCTIONHOST=chrome
+
+while getopts "hb:" OPTION
+do
+  case $OPTION in
+    b)
+      BRANCH=$OPTARG
+      ;;
+    h)
+      usage
+      ;;
+    ?)
+      usage
+      ;;
+  esac
+done
+
+pushd `dirname $0` > /dev/null
+SCRIPTPATH=`pwd`
+popd > /dev/null
+
+pushd $SCRIPTPATH/../branches/$BRANCH
+BUILDNUMBER=`make buildnumber`
+NEWTAG=2.0-build-$BUILDNUMBER
+popd
+
+pushd $SCRIPTPATH/..
+svn up
+svn cp branches/$BRANCH tags/$NEWTAG
+pushd tags/$NEWTAG
+make buildfinalize
+svn ci --editor-cmd vim
+popd
+popd
+
+echo ""
+echo "Please enter the production password."
+ssh -tt root@$PRODUCTIONHOST <<END
+pushd /var/www/localhost/htdocs/missionsconnector/
+rm -rf *
+svn export http://$PRODUCTIONHOST/svn/missionsconnector/tags/$NEWTAG
+rm -f Makefile
+popd
+END
+
