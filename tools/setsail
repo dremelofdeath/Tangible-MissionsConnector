@@ -49,7 +49,7 @@ svn up
 svn cp branches/$BRANCH tags/$NEWTAG
 pushd tags/$NEWTAG
 make buildfinalize
-svn ci --editor-cmd vim
+svn ci -m "setsail production upgrade: 2.0 Build $BUILDNUMBER"
 popd
 popd
 
