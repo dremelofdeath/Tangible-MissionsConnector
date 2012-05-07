@@ -1,3 +1,4 @@
+FOURTHDIR = $(shell pwd | perl -pe 's|^(/?)(.*?/){3}||' | perl -pe 's|(/.*)||')
 SVNDIR = $(shell pwd | sed -E -e 's/\/(\w?\.?\_?\/?)+\///g')
 JSFILES = $(shell ls *.js | grep -v -E '\.yui\.' | grep -v -E '\.ship\.')
 BUILDNUMBER = $(shell echo "ibase=10;obase=16;`svnversion | sed -E -e 's/.*://' -e 's/[^0-9]//g'`" | bc)
@@ -22,7 +23,7 @@ cmc.ship.js: cmc.js
 		$? > $@
 
 %.yui.js: %.js
-	if [ "$(SVNDIR)" == "trunk" ]; then \
+	if [ "$(SVNDIR)" == "trunk" -o "$(FOURTHDIR)" == "htdocs" ]; then \
 	  java -jar ../tools/yuicompressor-2.4.7.jar -o $@ $?; \
 	else \
 		java -jar ../../tools/yuicompressor-2.4.7.jar -o $@ $?; \
