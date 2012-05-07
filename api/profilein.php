@@ -22,16 +22,34 @@ $json = array();
 
 // make sure all the required parameters are defined, else throw an error
 // profiletype, fbid
-if (array_key_exists('fbid', $saferequest) && array_key_exists('profileinfo',$saferequest)) {
+if (array_key_exists('fbid', $saferequest) && array_key_exists('tripid', $saferequest) && array_key_exists('profileinfo',$saferequest)) {
 
   $fbid = $saferequest['fbid'];
+  $update = $saferequest['tripid'];
+  $myobj = json_decode(base64_decode($saferequest['profileinfo']));
 
-  /*if (get_magic_quotes_gpc())
-  {
-    $myobj = json_decode(htmlspecialchars_decode(array_map("stripslashes_deep",$saferequest['profileinfo'])));
-  } else {
-    $myobj = json_decode(htmlspecialchars_decode($saferequest['profileinfo']));
-  }*/
+  switch(json_last_error()) {
+  case JSON_ERROR_DEPTH:
+    $has_error = TRUE;
+    $err_msg = "Maximum stack depth exceeded";
+    break;
+  case JSON_ERROR_CTRL_CHAR:
+    $has_error = TRUE;
+    $err_msg = "Unexpected control character found";
+    break;
+  case JSON_ERROR_SYNTAX:
+    $has_error = TRUE;
+    $err_msg = "Syntax error, malformed JSON";
+    break;
+  case JSON_ERROR_NONE:
+    break;
+  }
+
+  $myobj = cmc_safe_object_strip($myobj);
+}
+else if (array_key_exists('fbid', $saferequest) && array_key_exists('profileinfo',$saferequest)) {
+
+  $fbid = $saferequest['fbid'];
 
   $myobj = json_decode(base64_decode($saferequest['profileinfo']));
 
@@ -60,7 +78,6 @@ else {
   $err_msg = "Required parameters not defined.";
 }
 
-
 if (!$has_error) {
 
   // If profiletype == 1, then it is a volunteer profile, if profiletype==2, then it is a trip profile
@@ -88,6 +105,7 @@ if (!$has_error) {
     $isreceiver = 1;
   }
 
+  
   if ($myobj->{'profiletype'} != 2) {
 
     // Zip code is a required field for volunteer or missions - return an error if the country is USA
@@ -130,15 +148,14 @@ if (!$has_error) {
 
   if (!$has_error) {
 
-    if (isset($myobj->{'update'})) {
-      $update = $myobj->{'update'};
-    }
-    else {
-      $update = 0;
-    }
-
-
     if (!$is_trip) {
+
+      if (isset($myobj->{'update'})) {
+        $update = $myobj->{'update'};
+      }
+      else {
+        $update = 0;
+      }
 
       if (!empty($myobj->{'toggle'})) {
 
@@ -361,36 +378,17 @@ if (!$has_error) {
 
     if ($is_trip) {
 
-      // check to see if any trip exists within the same creator, description or destination
-      // if so, set to update
-
-      if ($update==0) {
-        $changed=0;
-        $sql = 'select * from trips where creatorid="'.$fbid.'"';
-        if (!empty($myobj->{'name'})) {
-          $sql = $sql.' and tripname="'.$myobj->{'name'}.'"';
-        }
-
-        $result = mysql_query($sql,$con);
-        if (!$result) {
-          setjsonmysqlerror($has_error,$err_msg,$sql);
-        }
-        else {
-          $numrows = mysql_num_rows($result);
-          if ($numrows>0) {
-            $changed = 1;
-            $row = mysql_fetch_array($result,MYSQL_ASSOC);
-            $update = $row['id'];
-          }
-        }
+      if (!isset($update)) {
+        $update = 0;
       }
-
+	   
       if (!$has_error) {
 
         if ($update) {
           $sql = 'update trips set ';
           $sql2 = ' where id="'.$update.'"';
           $sql1 = '';
+
         }
         else {
           $sql = 'INSERT INTO trips (creatorid';
@@ -913,11 +911,21 @@ if ($month%2==0) {
             $mystr = "";
             $ii=0;
             foreach($languages as $ms) {
-              $mystr = $mystr.$ms;
+				// store characters, not values from input
+				$sqll = 'select * from languages where id="'.$ms.'"';
+				$resultl = mysql_query($sqll, $con);
+
+				if (!$resultl) {
+					setjsonmysqlerror($has_error, $err_msg, $sqll);
+				} else {			
+				$rowl = mysql_fetch_array($resultl);
+			
+              $mystr = $mystr.$rowl['englishname'];
               $ii++;
               if ((count($languages)>1)&&($ii<count($languages))) {
                 $mystr = $mystr.",";
               }
+			  }
             }
 
             if ($update) {
@@ -1021,10 +1029,10 @@ else {
           }
         }
 
-        if (isset($myobj->{'country'})) {
-          if (!empty($myobj->{'country'})) {
-            $tripcountry = $myobj->{'country'};
-            $sql5 = 'select * from countries where id="'.$tripcountry[0].'"';
+        if (isset($myobj->{'mycountry'})) {
+          if (!empty($myobj->{'mycountry'})) {
+            $tripcountry = $myobj->{'mycountry'};
+            $sql5 = 'select * from countries where id="'.$tripcountry.'"';
             $result5 = mysql_query($sql5);
             $row5 = mysql_fetch_array($result5);
             if ($update) {
@@ -1226,9 +1234,55 @@ else {
           }
         }
 
+      } //if no error
+
+	if (!$has_error) {
+    $sql = "DELETE FROM skillsselectedtrips WHERE tripid='".$tripid."'";
+    $result = mysql_query($sql,$con);
+    if (!$result) {
+      setjsonmysqlerror($has_error,$err_msg,$sql);
+    }
+
+    if (isset($myobj->{'medskills'})) {
+      $medskills = $myobj->{'medskills'};
+      foreach($medskills as $ms) {
+        $sql = "INSERT INTO skillsselectedtrips VALUES ('".$tripid."','".$ms."')";
+        $result = mysql_query($sql,$con);
+        if(!$result){
+          setjsonmysqlerror($has_error,$err_msg,$sql);
+        }
       }
     }
 
+    if (isset($myobj->{'otherskills'})) {
+      $otherskills=$myobj->{'otherskills'};
+      foreach($otherskills as $ms) {
+        $sql = "INSERT INTO skillsselectedtrips VALUES ('".$tripid."','".$ms."')";
+        $result = mysql_query($sql,$con);
+        if(!$result) {
+          setjsonmysqlerror($has_error,$err_msg,$sql);
+        }
+      }
+    }
+
+    if (isset($myobj->{'spiritserv'})) {
+      $relgskills=$myobj->{'spiritserv'};
+      foreach($relgskills as $ms) {
+        $sql = "INSERT INTO skillsselectedtrips VALUES ('".$tripid."','".$ms."')";
+        $result = mysql_query($sql,$con);
+        if(!$result) {
+          setjsonmysqlerror($has_error,$err_msg,$sql);
+        }
+      }
+    }	
+	
+	} //no errors
+	  
+    } //trip section ends
+
+	
+	
+    if (!$is_trip) {
     // clear out the old entries so that we start fresh
     $sql = "DELETE FROM skillsselected WHERE userid='".$fbid."'";
     $result = mysql_query($sql,$con);
@@ -1371,6 +1425,8 @@ else {
         }
       }
     }
+	
+	}
 
   }
 

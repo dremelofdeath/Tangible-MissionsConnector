@@ -49,20 +49,20 @@ function cmc_js_load($src) {
 }
 
 function cmc_library_load_jquery($ver) {
-  cmc_js_load('http://code.jquery.com/jquery-'.$ver.'.min.js');
+  cmc_js_load('http://code.jquery.com/jquery-'.$ver.'.js');
 }
 
 function cmc_library_load_jquery_ui($ver) {
-  $src = 'https://ajax.googleapis.com/ajax/libs/jqueryui/'.$ver.'/jquery-ui.min.js';
+  $src = 'https://ajax.googleapis.com/ajax/libs/jqueryui/'.$ver.'/jquery-ui.js';
   cmc_js_load($src);
 }
 
-function cmc_library_load_jquery_ui_theme($ver, $theme, $custom=false) {
+function cmc_library_load_jquery_ui_theme($theme, $custom=false) {
   $href = '';
   if($custom) {
     // NOTE: $theme is ignored for custom themes -- perhaps allow multiple 
     // custom themes in the future? -zack
-    $href .= 'css/custom-theme/jquery-ui-' . $ver . '.custom.css';
+    $href .= 'css/custom-theme/jquery-ui-.custom.css';
   } else {
     $href .= 'http://ajax.googleapis.com/ajax/libs/jqueryui/';
     $href .= $ver;
@@ -75,9 +75,9 @@ function cmc_library_load_jquery_ui_theme($ver, $theme, $custom=false) {
 
 function cmc_jquery_startup($jquery_version, $jquery_ui_version, $theme) {
   if($theme == 'custom' || $theme == 'custom-theme') {
-    cmc_library_load_jquery_ui_theme($jquery_ui_version, $theme, true);
+    cmc_library_load_jquery_ui_theme($theme, true);
   } else {
-    cmc_library_load_jquery_ui_theme($jquery_ui_version, $theme);
+    cmc_library_load_jquery_ui_theme($theme);
   }
   cmc_library_load_jquery($jquery_version);
   cmc_library_load_jquery_ui($jquery_ui_version);
@@ -132,7 +132,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
     <link rel="stylesheet" href="tipTip.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="jquery.validate.css" />
     <link rel="stylesheet" type="text/css" href="style.css" />
-	  <link href="datepicker.css" rel="stylesheet" type="text/css" />
+    <link href="datepicker.css" rel="stylesheet" type="text/css" />
     <title>Christian Missions Connector</title>
     <!-- Custom CSS markup goes here -->
     <style type="text/css">
@@ -183,6 +183,24 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
         margin-right: 0.3em;
       }
 
+      .tab-loading-screen {
+        margin-top: 80px;
+        margin-left: 194px;
+      }
+
+      .tab-loading-text {
+        display: block;
+        font-size: 2em;
+        font-weight: bold;
+      }
+
+      .tab-loading-subtext {
+        display: block;
+        font-size: 1.5em;
+        font-weight: bold;
+        margin-top: 15px;
+      }
+
       .cmc-big-button {
         height: 75px;
         padding-top: 7px;
@@ -229,7 +247,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
 
       .inner-tipbar-content li {
         margin: 15px;
-        line-height: 0px;
+        line-height: 1px; /* must not be zero due to a webkit bug */
       }
       
       h1.cmc-big-button-text {
@@ -342,14 +360,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
         width: 180px;
       }
 
-      #profile-right-content-section {
-        height: 410px;
-        width: 72%;
-        display: inline-block;
-        overflow: auto;
-      }
-
-      #trip-profile-right-content-section {
+      .entity-right-content-section {
         height: 410px;
         width: 72%;
         display: inline-block;
@@ -359,6 +370,10 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
       .entity-title {
         font-size: 2em;
         float: left;
+      }
+
+      .entity-link {
+        text-decoration: none;
       }
 
       .entity-control {
@@ -389,64 +404,19 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
         font-size: 1em;
         font-weight: bold;
         padding-top: 6px;
-        position: absolute;
+        position: relative;
       }
 
       li.trip-list-item {
         margin-bottom: 12px;
-        height: 16px;
+        height: 18px;
       }
-
-      /* the stuff below here appears to be stylization for edit profile dialogs 
-       * --zack
-       */
-      
-        #menu-bar ul
-        {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            margin-left: 4px;
-        }
-        #menu-bar ul li
-        {
-            float: left;
-            display: inline-block;
-            padding: 4px;
-        }
-        #menu-bar ul li a, #menu-bar ul li a:active, #menu-bar ul li a:visited
-        {
-            text-decoration: none;
-            color: #747577;
-        }
-        #menu-bar ul li a:hover
-        {
-            text-decoration: underline;
-            color: #747577;
-        }
-        #footer div
-        {
-            padding-top: 14px;
-            width: 180px;
-            margin: auto;
-            color: White;
-        }
-        #footer div a, #footer div a:active, #footer div a:visited
-        {
-            text-decoration: none;
-            color: white;
-        }
-        #footer div a:hover
-        {
-            text-decoration: underline;
-            color: white;
-        }   
     </style>
   </head>
   <body>
     <!-- Include jQuery stuff and link stylesheet to the specified theme -->
     <!-- FIXME: don't use PHP here, put stylesheet links in the right place -zack -->
-    <?php cmc_jquery_startup("1.6.1", "1.8.11", "custom-theme"); ?>
+    <?php cmc_jquery_startup("1.7.1", "1.8.18", "custom-theme"); ?>
     <script src="jquery.fcbkcomplete.js" type="text/javascript"></script>
     <script src="jquery.tipTip.js" type="text/javascript"></script>
     <!-- imagesLoaded plugin obtained from https://gist.github.com/268257 -->
@@ -458,41 +428,41 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
     <script type="text/javascript" src="cmc.js"></script>
     <script src="jquery.validate.js" type="text/javascript"></script>
     <script src="jquery.validation.functions.js" type="text/javascript"></script> 
-	  <script src="datepicker.js" type="text/javascript"></script>
-	
+    <script src="datepicker.js" type="text/javascript"></script>
+
     <link rel="stylesheet" type="text/css" href="jquery.multiselect.css" />
     <script type="text/javascript" src="jquery.multiselect.js"></script>
-  <script type="text/JavaScript">
-  
- function tripzipdisplay() {
-  if ($('select#profile-trip-country').val() == 1) {
-    $('#profile-trip-dialog').find('#tripzip').show();
-  }
-  else {
-    $('#profile-trip-dialog').find('#tripzip').hide();
-  }
- }
 
- function orgzipdisplay() {
-  if ($('select#profile-org-country').val() == 1) {
-    //$('#profile-organizer-dialog').find('#orgzip').attr("style","display:block;");
-    $('#profile-organizer-dialog').find('#orgzip').show();
-  }
-  else {
-    $('#profile-organizer-dialog').find('#orgzip').hide();
-  }
- }
 
- function volzipdisplay() {
-  if ($('select#profile-country').val() == 1) {
-    //$('#profile-volunteer-dialog').find('#volzip').attr("style","display:block;");
-    $('#profile-volunteer-dialog').find('#volzip').show();
-  }
-  else {
-    $('#profile-volunteer-dialog').find('#volzip').hide();
-  }
- }
-  </script> 
+    <script type="text/JavaScript">
+      function tripzipdisplay() {
+        if ($('select#profile-trip-country').val() == 1) {
+          $('#profile-trip-dialog').find('#tripzip').show();
+        } else {
+          $('#profile-trip-dialog').find('#tripzip').hide();
+        }
+      }
+
+      function orgzipdisplay() {
+        if ($('select#profile-org-country').val() == 1) {
+          //$('#profile-organizer-dialog').find('#orgzip').attr("style","display:block;");
+          $('#profile-organizer-dialog').find('#orgzip').show();
+        }
+        else {
+          $('#profile-organizer-dialog').find('#orgzip').hide();
+        }
+      }
+
+      function volzipdisplay() {
+        if ($('select#profile-country').val() == 1) {
+          //$('#profile-volunteer-dialog').find('#volzip').attr("style","display:block;");
+          $('#profile-volunteer-dialog').find('#volzip').show();
+        }
+        else {
+          $('#profile-volunteer-dialog').find('#volzip').hide();
+        }
+      }
+    </script> 
     <!-- HTML markup goes here -->
     <div id="loading">
       <div style="vertical-align: middle; text-align: center; display: block">
@@ -516,19 +486,23 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
         <p>Are you interested in missions work? Do you want to connect with people and organizations who share your passion for missions? Whether you want to find a missions organization, start a mission team, join a mission team or just connect with others who have a passion for missions, Christian Missions Connector can help.</p>
       </div>
       <div id="profile-tab">
+        <div id="profile-tab-loading" class="tab-loading-screen">
+          <span id="profile-tab-loading-text" class="tab-loading-text">Loading...</span>
+          <span id="profile-tab-loading-subtext" class="tab-loading-subtext">Hold on, we're getting that for you...</span>
+        </div>
         <div id="make-volunteer">
           <h1>Cool! You're a volunteer.</h1>
           <p>We're excited you're here! Now we'd like to sync with your Facebook profile so we can connect you with mission trips all over the world. We'll also let you know if anyone invites you to join their trip!</p>
           <h1>
-            <a href="#" onclick="CMC.page('#make-volunteer', '#make-volunteer-profile');">Make your Profile &gt;&gt;</a>
+            <a href="#" id="make-volunteer-link">Make your Profile &gt;&gt;</a>
           </h1>
         </div>
         <div id="make-organizer">
           <h1>Awesome! You're an organizer.</h1>
           <p>It's great to have you onboard! We'd like to take a chance to sync with your Facebook profile so we can connect you to volunteers all over the world. If you have a Facebook page, you can link that too. We'll be sure to let you know when people join your trips!</p>
           <h1>
-            <a href="#" onclick="CMC.page('#make-organizer', '#make-org-profile');">Make your Profile &gt;&gt;</a>
-          </h1>		  
+            <a href="#" id="make-organizer-link">Make your Profile &gt;&gt;</a>
+          </h1>     
         </div>
         <div id="make-profile">
           <h1>Create a Profile: Who Are You?</h1>
@@ -553,8 +527,10 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
         <div id="show-profile" style="display: none">
           <div id="profilecontent">
             <div id="profile-left-column">
-              <div id="profile-image">
-                <img class="profile-picture" src="ajax-spinner.gif" />
+              <div id="profile-picture-section">
+                <a id="profile-picture-link" class="entity-link" href="#" target="_blank">
+                  <img class="profile-picture" src="ajax-spinner.gif">
+                </a>
               </div>
               <div id="profile-section-about-me">
                 <h3>About Me:</h3>
@@ -565,7 +541,9 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
             </div>
             <div id="profile-right-column">
               <div id="profile-title-section">
-                <span id="profile-name" class="entity-title">Sample Long Name</span>
+                <a id="profile-name-link" class="entity-link" href="#" target="_blank">
+                  <span id="profile-name" class="entity-title">Sample Long Name</span>
+                </a>
                 <div id="profile-controls" class="entity-controls">
                   <div id="profile-controls-spacer" class="entity-control-spacer"></div>
                   <div id="profile-controls-edit" class="entity-control cmc-square-button"></div>
@@ -573,7 +551,8 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                   <div id="profile-controls-back-to-my-profile" class="entity-control cmc-square-button"></div>
                 </div>
               </div>
-              <div id="profile-right-content-section">
+              <div id="profile-right-content-section" class="entity-right-content-section">
+                <span id="profile-website">www.example.com</span>
                 <div id="profile-section-skills">
                   <h3>Medical Skills:</h3>
                   <div id="profile-medskills">Medskills
@@ -617,6 +596,10 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
         </div>
       </div>
       <div id="trips-tab">
+        <div id="trips-tab-loading" class="tab-loading-screen" style="display: none"><!-- this isn't done yet... -zack -->
+          <span id="trips-tab-loading-text" class="tab-loading-text">Loading...</span>
+          <span id="trips-tab-loading-subtext" class="tab-loading-subtext">Hold on, we're getting that for you...</span>
+        </div>
         <div id="make-trip">
           <?php
             cmc_big_button(
@@ -629,72 +612,50 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
         </div>
         <div id="show-trip-profile" style="display: none">
           <div id="tripprofilecontent">
-            <div id="backtotrips" style="display: none">
-              <a href="#" onclick="CMC.getFutureTrips();">&lt;&lt; Go back to Upcoming Trips </a>
-            </div>			
             <div id="trip-profile-left-column">
               <div id="tripprofileimage">
                 <div class="trip-owner-picture">
-                  <img src="ajax-spinner.gif" width="190" />
+                  <img class="profile-picture" src="ajax-spinner.gif" />
                 </div>
               </div>
-              <div class="box2">Trip Owner: <div class="profile-trip-owner">Name</div></div>
-              <div class="box2">
-                <h3>Trip Description:</h3>
-                <div class="trip-profile-about">
-                  <h4>About</h4>
-                </div>
-              </div>
+              <h3>Trip Owner:</h3> 
+              <span id="profile-trip-owner">Name</span>
+              <h3>Trip Description:</h3>
+              <h4><span id="trip-profile-about">About</span></h4>
             </div>
-            <div id="trip-profile-right-column">
-              <div class="box1">
-                <h2>Trip Information:</h2>
-                <h5>Trip Name:</h5>
-                <div class="profile-trip-name">
-                  <h6>Trip Name</h6> 
+            <div id="trip-profile-right-column" class="entity-right-content-section">
+              <div id="trip-profile-title-section">
+                <span id="profile-trip-name" class="entity-title">Sample Trip Name</span>
+                <div id="trip-profile-controls" class="entity-controls">
+                  <div id="trip-profile-controls-spacer" class="entity-control-spacer"></div>
+                  <div id="trip-profile-controls-back-to-trips" class="entity-control cmc-square-button"></div>
                 </div>
-                <h5>Trip Website:</h5>
-                <div class="profile-trip-url"><a href="http://www.example.com/">http://www.example.com/</a></div>
-                <h5>Trip Destination:</h5>
-                <div class="profile-trip-dest">
-                  <h6>Trip Destination</h6>
-                </div>					
-                <h5>Email:</h5>
-                <div class="profile-trip-email">
-                  <h6>Email</h6>
+              </div>
+              <h5>Trip Website: <span id="profile-trip-url"><a href="http://www.example.com/">http://www.example.com/</a></span></h5>
+              <h5>Trip Destination: <span id="profile-trip-dest">Trip Destination</span></h5>
+              <h5>E-mail: <span id="profile-trip-email">Email</span></h5>
+              <h5>Phone: <span id="profile-trip-phone">Phone</span></h5>
+              <h5>Execution Stage: <span id="profile-trip-stage">Trip Execution Stage</span></h5>
+              <h5>Date of Departure: <span id="profile-trip-depart">Departure Date</span></h5>
+              <h5>Date of Return: <span id="profile-trip-return">Return</span></h5>
+              <h5>Trip Religion: <span id="profile-trip-religion">Trip religion</span><h5>
+              <h5>Trip Accommodation Level: <span id="profile-trip-acco">Trip Accommodation Level</span></h5>
+              <h5>Number of People involved in this Trip: <span id="profile-trip-numpeople">Number of people</span></h5>
+              <h5>Trip Medical Skills: <span id="profile-trip-medskills">Medskills</span></h5>
+              <h5>Trip Non-Medical Skills: <span id="profile-trip-nonmedskills">Non-Medskills</span></h5>
+              <h5>Trip Spiritual Skills: <span id="profile-trip-spiritskills">Spiritual skills</span></h5>
+              <h5>People involved in this Trip:</h5>
+              <div id="profile-trip-people">
+                <div id="cmc-trip-member-0" class="cmc-tripmember-results">
+                  <div id="profile-tripmember-image">
+                    <img class="profile-tripmember-picture" src="ajax-spinner.gif">
+                  </div>
+                  <div id="profile-tripmember-name">Member Name</div>
                 </div>
-                <h5>Phone:</h5>
-                <div class="profile-trip-phone">
-                  <h6>Phone</h6>
-                </div>
-                <h5>Execution Stage:</h5>
-                <div class="profile-trip-stage">
-                  <h6>Trip Execution Stage</h6>
-                </div>	
-                <h5>Date of Departure:</h5>
-                <div class="profile-trip-depart">
-                  <h6>Departure Date</h6>
-                </div>	
-                <h5>Date of Return</h5>
-                <div class="profile-trip-return">
-                  <h6>Return</h6>
-                </div>	
-                <h5>Trip Religion:</h5>
-                <div class="profile-trip-religion">
-                  <h6>Trip religion</h6>
-                </div>
-                <h5>Trip Accommodation Level:</h5>
-                <div class="profile-trip-acco">
-                  <h6>Trip Accommodation Level</h6>
-                </div>	
-                <h5>Number of People involved in this Trip:</h5>
-                <div class="profile-trip-numpeople">
-                  <h6>Number of people</h6>
-                </div>						
               </div>
             </div>
           </div>
-        </div>		 
+        </div>     
         <div id="show-trips" style="display: none">
           <h2>Upcoming Trips:</h2>
           <div id="upcoming-trips-list-section">
@@ -704,17 +665,28 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
               </li>
             </ul>
           </div>
-        </div>		 
+        </div>     
         <div id="no-trip" style="display: none">
           <h1>There aren't any trips coming up soon.</h1>
           <h1>Why don't you <a href="#" onclick="CMC.page('#no-trip', '#make-trip');">create one</a>?</h1>
         </div>
+        <div id="no-profile-trip" style="display: none">
+          <div class="ui-state-highlight ui-corner-all ui-widget cmc-infobar">
+            <p class="cmc-infobar-text">
+             <span class="ui-icon ui-icon-info cmc-infobar-icon"></span>
+             <strong>Oops!</strong>
+             You haven't created a profile yet! Create one now and get involved.
+            </p>
+          </div>
+          <h1>
+            <a href="#" onclick="CMC.page('#no-profile-trip', '#make-profile');">Create a Profile Now &gt;&gt;</a>
+          </h1>
+        </div>
       </div>
       <div id="search-tab">
         <div id="search-box">
-          <div id="search-tipbar" style="display: none; position: relative; height: 16px">
+          <div id="search-tipbar" style="position: relative; height: 16px">
             <div id="search-tipbar-left" style="position: absolute; left: 2px;">
-              <a class="tipbar-link" href="#">Search history...</a>
               <div class="tipbar-content" style="display: none">
                 <div id="recent-searches">
                   <h4>Recent Searches</h4>
@@ -843,13 +815,11 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
       </div>
       <div class="rightside">
         <a href="#" id="copyrights">Copyrights</a> :
-        <a href="http://www.tangiblesoft.net/" target="_blank" id="tangible-link">Tangible, LLC</a>
       </div>
     </div>
     <!-- Dialogs and such should go here -->
     <div id="dialogs" style="display: none">
       <div id="copyrights-dialog" title="Copyrights">
-        <p>Christian Missions Connector is Copyright 2009-2011 Tangible, LLC. All rights reserved.</p>
         <p>Christian Missions Connector uses the jQuery and jQuery UI libraries. For more information, visit <a href="http://www.jquery.com" target="_blank">www.jquery.com</a>.</p>
         <p>Portions adapted from FCBKcomplete 2.7.5 and TipTip 1.3. FCBKcomplete is Copyright 2010 Emposha (<a href="http://www.emposha.com" target="_blank">www.emposha.com</a>). TipTip is Copyright 2011 Drew Wilson (<a href="http://code.drewwilson.com/entry/tiptip-jquery-plugin" target="_blank">code.drewwilson.com</a>). Both are used and modified with permission under the <a href="http://www.opensource.org/licenses/mit-license.php" target="_blank">MIT license.</a></p>
         <p>Contains content obtained from The Noun Project (<a href="http://www.thenounproject.com" target="_blank">www.thenounproject.com</a>). "Community" reproduced under the Creative Commons Attribution 3.0 Unported license. For licensing information, please visit <a href="http://creativecommons.org/licenses/by/3.0/" target="_blank">http://creativecommons.org/licenses/by/3.0/</a>.</p>
@@ -858,9 +828,9 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
       <div id="profile-volunteer-dialog" title="Please enter your profile information">
         <form id="profile-volunteer-form">
           <div id="wrapper">
-	  	<div id="toggle-profile-volunteer">
-			<a href="#" onclick="CMC.ToggleProfile();">I'd like my profile to be for an agency instead of a volunteer. </a>
-		 </div>		  
+            <div id="toggle-profile-volunteer">
+              <a href="#" onclick="CMC.ToggleProfile();">I'd like my profile to be for an agency instead of a volunteer. </a>
+            </div>     
             <div id="contents">
               <div class="profile-container">
                 <div class="profile-contents">
@@ -1031,478 +1001,389 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
       </div>    
       <div id="profile-organizer-dialog" title="Please enter your profile information">
         <form id="profile-organizer-form">
-      <div id="wrapper">
-	  	<div id="toggle-profile-agency">
-			<a href="#" onclick="CMC.ToggleProfile();">I'd like my profile to be for a volunteer instead of an agency. </a>
-		 </div>
-        <div id="contents">
-            <div class="profile-container">
-                <div class="profile-contents">
-                    <table id="orgtable" cellpadding="4" cellspacing="0">
-                        <tr>
-                            <td>
-                                <label>
-                                    Agency/Mission Name</label>
-                            </td>
-                            <td>
-                                <input type="text" id="profile-org-name" class="cmc-form-spec" />
-                            </td>
-                        </tr>  
-                        <tr>
-                            <td>
-                                <label>
-                                    Agency/Mission Website</label>
-                            </td>
-                            <td>
-                                <input type="text" id="profile-org-website" class="cmc-form-spec" />
-                            </td>
-                        </tr>  
-                        <tr>
-                            <td>
-                                <label>
-                                    About My Agency</label>
-                            </td>
-                            <td>
-                                <input type="text" id="profile-org-about" class="cmc-form-spec" />
-                            </td>
-                        </tr>  						
-                        <tr>
-                            <td style="width: 97px">
-                                <label>
-                                    Medical Facility Offerings</label>
-                            </td>
-                            <td style="width: 97px">
-                                        <select id="profile-org-offer" class="cmc-form-spec" name="profile-org-offer" multiple="multiple">
-                                            <!--<option class="cmc-default-opt" value="0" selected="selected">Select Medical Skills</option>-->
-                                          <?php cmc_echo_opt_skills(4); ?>
-                                        </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="width: 97px">
-                                <label>
-                                    Non-Medical Facility Offerings</label>
-                            </td>
-                            <td style="width: 97px">
-                                        <select id="profile-org-offern" class="cmc-form-spec" name="profile-org-offern" multiple="multiple">
-                                            <!--<option class="cmc-default-opt" value="0" selected="selected">Select Medical Skills</option>-->
-                                          <?php cmc_echo_opt_skills(5); ?>
-                                        </select>
-                            </td>
-                        </tr>												
-                        <tr>
-                            <td style="width: 97px">
-                                <label>
-                                    Medical Skills</label>
-                            </td>
-                            <td style="width: 97px">
-                                        <select id="profile-org-medical" class="cmc-form-spec" name="profile-org-medical" multiple="multiple">
-                                            <!--<option class="cmc-default-opt" value="0" selected="selected">Select Medical Skills</option>-->
-                                            <option value="1">Advanced Practice Nursing</option>
-                                            <option value="2">Dental Professional</option>
-                                            <option value="3">Medical Educator</option>
-                                            <option value="4">Mental Health Professional</option>
-                                            <option value="5">Nurse</option>
-                                            <option value="6">Optometrist or Opthalmologist</option>
-                                            <option value="7">Pharmacist</option>
-                                            <option value="8">Physician</option>
-                                            <option value="9">Physician Assistant</option>
-                                            <option value="10">Physical or Occupational Therapist</option>
-                                            <option value="11">Public Health/Community Development Worker</option>
-                                            <option value="12">Speech Therapist</option>
-                                            <option value="13">Other</option>
-                                        </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="width: 97px">
-                                <label>
-                                    Non-Medical Skills</label>
-                            </td>
-                            <td style="width: 197px">
-                                        <select id="profile-org-nonmedical" class="cmc-form-spec" name="profile-org-nonmedical" multiple="multiple">
-                                            <!--<option class="cmc-default-opt" value="0" selected="selected">Select Non-Medical Skills</option>-->
-                                            <option value="14">General Help/Labor</option>
-                                            <option value="15">Team Leader/Primary Organizer</option>
-                                            <option value="16">Account and/or Business Management</option>
-                                            <option value="17">Skilled Construction and/or Maintenance</option>
-                                            <option value="18">Computer Science/Other Technical</option>
-                                            <option value="19">Agriculture and/or Animal Husbandry</option>
-                                            <option value="45">Mechanic</option>
-                                            <option value="46">Office/Secretarial</option>
-                                            <option value="47">Teaching</option>
-                                            <option value="48">Veterinary</option>
-                                            <option value="49">Water Supply Improvement</option>
-                                            <option value="50">Writing and/or Translating</option>
-                                            <option value="52">Engineering</option>
-                                        </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="width: 97px">
-                                <label>
-                                    Spiritual Service</label>
-                            </td>
-                            <td style="width: 197px">
-                                        <select id="profile-org-spiritual" class="cmc-form-spec" name="profile-org-spiritual" multiple="multiple">
-                                            <!--<option class="cmc-default-opt" value="Select Spiritual Serivice" selected="selected">Select Spiritual Service</option>-->
-                                            <option value="20">Team Spiritual Leader</option>
-                                            <option value="21">Individual Outreach (Prayer and Counseling)</option>
-                                            <option value="22">Evangelism</option>
-                                            <option value="44">Worship Team</option>
-                                            <option value="51">Public Speaking</option>
-                                        </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="width: 97px">
-                                <label>
-                                    Religious Affiliation</label>
-                            </td>
-                            <td style="width: 197px">
-                                        <select id="profile-org-religion" class="cmc-form-spec">
-                                            <option class="cmc-default-opt" value="Select Religious Affiliation", selected="selected">Select Religious Affiliation</option>
-                                            <option value="Secular">Secular</option>
-                                            <option value="Christian: Protestant">Christian: Protestant</option>
-                                            <option value="Christian: Catholic">Christian: Catholic</option>
-                                            <option value="Nondenominational">Nondenominational</option>
-                                        </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="width: 97px">
-                                <label>
-                                    Duration of Missions</label>
-                            </td>
-                            <td style="width: 197px">
-                                        <select id="profile-org-duration" class="cmc-form-spec">
-                                            <option class="cmc-default-opt" value="Select Duration of Missions" selected="selected">Select Duration of Missions</option>
-                                            <option value="1">Short Term: 1-2 weeks</option>
-                                            <option value="2">Medium Term: 1 Month-2 Years</option>
-                                            <option value="3">Long Term: 2+ Years</option>
-                                        </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="width: 197px">
-                                <label>
-                                    State</label>
-                            </td>
-                            <td style="width: 197px">
-                                        <select id="profile-org-state" class="cmc-form-spec">
-                                          <option class="cmc-default-opt" value="Select your State" selected="selected">Select your State</option>
-                                          <?php cmc_echo_opt_usstates(); ?>
-                                        </select>
-                            </td>
-                        </tr>           
-                        <tr>
-                            <td>
-                                <label>
-                                    City</label>
-                            </td>
-                            <td>
-                                <input type="text" id="profile-org-city" class="cmc-form-spec"/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="width: 197px">
-                                <label>
-                                    Country</label>
-                            </td>
-                            <td style="width: 197px">
-                                        <select id="profile-org-country" class="cmc-form-spec" onchange="orgzipdisplay();">
-                                          <?php cmc_echo_opt_countries(); ?>
-                                        </select>
-                            </td>
-                        </tr>             
-                        <tbody id="orgzip" style="display: none;">
-                        <tr>
-                            <td>
-                                <label>
-                                    Zipcode</label>
-                            </td>
-                            <td>
-                                <input type="text" id="profile-org-zipcode" class="cmc-form-spec"/>
-                            </td>
-                        </tr>
-                        </tbody>
-                        <tr>
-                            <td style="width: 197px">
-                                <label>
-                                    Regions of Interest</label>
-                            </td>
-                            <td style="width: 197px">
-                                        <select id="profile-org-region" class="cmc-form-spec" name="profile-org-region" multiple="multiple">
-                                            <!--<option class="cmc-default-opt" value="0" selected="selected">Select Regions of Interest</option>-->
-                                            <option value="1">Africa</option>
-                                            <option value="2">Asia and Oceana</option>
-                                            <option value="3">Europe and Russia</option>
-                                            <option value="4">Latin America</option>
-                                            <option value="5">Middle East</option>
-                                            <option value="6">North America</option>
-                                            <option value="7">Caribbean</option>
-                                        </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="width: 197px">
-                                <label>
-                                    Countries Served</label>
-                            </td>
-                            <td style="width: 197px">
-                                        <select id="profile-org-countryserved" class="cmc-form-spec" name="profile-org-countryserved" multiple="multiple">
-                      <!-- <option class="cmc-default-opt" selected="selected" value="Select Countries Served">Select Countries Served</option> -->
-                                          <?php cmc_echo_opt_countries(); ?>
-                                        </select>
-                            </td>
-                        </tr>           
-                        <tr>
-                            <td>
-                                <label>
-                                    Phone</label>
-                            </td>
-                            <td>
-                                <input type="text" id="profile-org-phone" class="cmc-form-spec" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label>
-                                    Email Id</label>
-                            </td>
-                            <td>
-                                <input type="text" id="profile-org-email" class="cmc-form-spec" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label>
-                                    My Missions Experience</label>
-                            </td>
-                            <td>
-                                <input type="text" id="profile-org-experience" class="cmc-form-spec" />
-                            </td>
-                        </tr>             
-                        <tr>
-                            <td>&nbsp;
-                                
-                            </td>
-                            <td>
-                                <input type="button" value="Submit" class="profile-org-submit" id="profile-org-submit" />
-                            </td>
-                        </tr>
-                    </table>
-                </div>
+          <div id="wrapper">
+            <div id="toggle-profile-agency">
+              <a href="#" onclick="CMC.ToggleProfile();">I'd like my profile to be for a volunteer instead of an agency. </a>
             </div>
-        </div>
-    </div>
-    </form>   
+            <div id="contents">
+              <div class="profile-container">
+                <div class="profile-contents">
+                  <table id="orgtable" cellpadding="4" cellspacing="0">
+                    <tr>
+                      <td><label>Agency/Mission Name</label></td>
+                      <td><input type="text" id="profile-org-name" class="cmc-form-spec" /></td>
+                    </tr>
+                    <tr>
+                      <td><label>Agency/Mission Website</label></td>
+                      <td><input type="text" id="profile-org-website" class="cmc-form-spec" /></td>
+                    </tr>
+                    <tr>
+                      <td><label>About My Agency</label></td>
+                      <td><input type="text" id="profile-org-about" class="cmc-form-spec" /></td>
+                    </tr>
+                    <tr>
+                      <td style="width: 97px"><label>Medical Facility Offerings</label></td>
+                      <td style="width: 97px">
+                        <select id="profile-org-offer" class="cmc-form-spec" name="profile-org-offer" multiple="multiple">
+                          <!--<option class="cmc-default-opt" value="0" selected="selected">Select Medical Skills</option>-->
+                          <?php cmc_echo_opt_skills(4); ?>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="width: 97px"><label>Non-Medical Facility Offerings</label></td>
+                      <td style="width: 97px">
+                        <select id="profile-org-offern" class="cmc-form-spec" name="profile-org-offern" multiple="multiple">
+                        <!--<option class="cmc-default-opt" value="0" selected="selected">Select Medical Skills</option>-->
+                        <?php cmc_echo_opt_skills(5); ?>
+                        </select>
+                      </td>
+                    </tr>                       
+                    <tr>
+                      <td style="width: 97px"><label>Medical Skills</label></td>
+                      <td style="width: 97px">
+                        <select id="profile-org-medical" class="cmc-form-spec" name="profile-org-medical" multiple="multiple">
+                          <!--<option class="cmc-default-opt" value="0" selected="selected">Select Medical Skills</option>-->
+                          <option value="1">Advanced Practice Nursing</option>
+                          <option value="2">Dental Professional</option>
+                          <option value="3">Medical Educator</option>
+                          <option value="4">Mental Health Professional</option>
+                          <option value="5">Nurse</option>
+                          <option value="6">Optometrist or Opthalmologist</option>
+                          <option value="7">Pharmacist</option>
+                          <option value="8">Physician</option>
+                          <option value="9">Physician Assistant</option>
+                          <option value="10">Physical or Occupational Therapist</option>
+                          <option value="11">Public Health/Community Development Worker</option>
+                          <option value="12">Speech Therapist</option>
+                          <option value="13">Other</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="width: 97px"><label>Non-Medical Skills</label></td>
+                      <td style="width: 197px">
+                        <select id="profile-org-nonmedical" class="cmc-form-spec" name="profile-org-nonmedical" multiple="multiple">
+                          <!--<option class="cmc-default-opt" value="0" selected="selected">Select Non-Medical Skills</option>-->
+                          <option value="14">General Help/Labor</option>
+                          <option value="15">Team Leader/Primary Organizer</option>
+                          <option value="16">Account and/or Business Management</option>
+                          <option value="17">Skilled Construction and/or Maintenance</option>
+                          <option value="18">Computer Science/Other Technical</option>
+                          <option value="19">Agriculture and/or Animal Husbandry</option>
+                          <option value="45">Mechanic</option>
+                          <option value="46">Office/Secretarial</option>
+                          <option value="47">Teaching</option>
+                          <option value="48">Veterinary</option>
+                          <option value="49">Water Supply Improvement</option>
+                          <option value="50">Writing and/or Translating</option>
+                          <option value="52">Engineering</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="width: 97px"><label>Spiritual Service</label></td>
+                      <td style="width: 197px">
+                        <select id="profile-org-spiritual" class="cmc-form-spec" name="profile-org-spiritual" multiple="multiple">
+                          <!--<option class="cmc-default-opt" value="Select Spiritual Serivice" selected="selected">Select Spiritual Service</option>-->
+                          <option value="20">Team Spiritual Leader</option>
+                          <option value="21">Individual Outreach (Prayer and Counseling)</option>
+                          <option value="22">Evangelism</option>
+                          <option value="44">Worship Team</option>
+                          <option value="51">Public Speaking</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="width: 97px"><label></label></td>
+                      <td style="width: 197px">
+                        <select id="profile-org-religion" class="cmc-form-spec">
+                          <option class="cmc-default-opt" value="Select Religious Affiliation", selected="selected">Select Religious Affiliation</option>
+                          <option value="Secular">Secular</option>
+                          <option value="Christian: Protestant">Christian: Protestant</option>
+                          <option value="Christian: Catholic">Christian: Catholic</option>
+                          <option value="Nondenominational">Nondenominational</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="width: 97px"><label>Duration of Missions</label></td>
+                      <td style="width: 197px">
+                        <select id="profile-org-duration" class="cmc-form-spec">
+                          <option class="cmc-default-opt" value="Select Duration of Missions" selected="selected">Select Duration of Missions</option>
+                          <option value="1">Short Term: 1-2 weeks</option>
+                          <option value="2">Medium Term: 1 Month-2 Years</option>
+                          <option value="3">Long Term: 2+ Years</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="width: 197px"><label>State</label></td>
+                      <td style="width: 197px">
+                        <select id="profile-org-state" class="cmc-form-spec">
+                          <option class="cmc-default-opt" value="Select your State" selected="selected">Select your State</option>
+                          <?php cmc_echo_opt_usstates(); ?>
+                        </select>
+                      </td>
+                    </tr>           
+                    <tr>
+                      <td><label>City</label></td>
+                      <td><input type="text" id="profile-org-city" class="cmc-form-spec"/></td>
+                    </tr>
+                    <tr>
+                      <td style="width: 197px"><label>Country</label></td>
+                      <td style="width: 197px">
+                        <select id="profile-org-country" class="cmc-form-spec" onchange="orgzipdisplay();">
+                          <?php cmc_echo_opt_countries(); ?>
+                        </select>
+                      </td>
+                    </tr>             
+                    <tbody id="orgzip" style="display: none;">
+                      <tr>
+                        <td><label>Zipcode</label></td>
+                        <td><input type="text" id="profile-org-zipcode" class="cmc-form-spec"/></td>
+                      </tr>
+                    </tbody>
+                    <tr>
+                      <td style="width: 197px"><label>Regions of Interest</label></td>
+                      <td style="width: 197px">
+                        <select id="profile-org-region" class="cmc-form-spec" name="profile-org-region" multiple="multiple">
+                          <!--<option class="cmc-default-opt" value="0" selected="selected">Select Regions of Interest</option>-->
+                          <option value="1">Africa</option>
+                          <option value="2">Asia and Oceana</option>
+                          <option value="3">Europe and Russia</option>
+                          <option value="4">Latin America</option>
+                          <option value="5">Middle East</option>
+                          <option value="6">North America</option>
+                          <option value="7">Caribbean</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="width: 197px"><label>Countries Served</label></td>
+                      <td style="width: 197px">
+                        <select id="profile-org-countryserved" class="cmc-form-spec" name="profile-org-countryserved" multiple="multiple">
+                          <!-- <option class="cmc-default-opt" selected="selected" value="Select Countries Served">Select Countries Served</option> -->
+                          <?php cmc_echo_opt_countries(); ?>
+                        </select>
+                      </td>
+                    </tr>           
+                    <tr>
+                      <td><label>Phone</label></td>
+                      <td><input type="text" id="profile-org-phone" class="cmc-form-spec" /></td>
+                    </tr>
+                    <tr>
+                      <td><label>Email Id</label></td>
+                      <td><input type="text" id="profile-org-email" class="cmc-form-spec" /></td>
+                    </tr>
+                    <tr>
+                      <td><label>My Missions Experience</label></td>
+                      <td><input type="text" id="profile-org-experience" class="cmc-form-spec" /></td>
+                    </tr>
+                    <tr>
+                      <td>&nbsp;</td>
+                      <td><input type="button" value="Submit" class="profile-org-submit" id="profile-org-submit" /></td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>   
       </div>
       <div id="profile-toggle-dialog" title="Please wait...">
         <div id="toggle-image">
-            <img class="toggle-wait-image" src="ajax-spinner.gif" />
+          <img class="toggle-wait-image" src="ajax-spinner.gif" />
         </div>
-	  </div>	  
+      </div>    
       <div id="profile-trip-dialog" title="Please enter your trip profile information">
         <form id="profile-trip-form">
-      <div id="wrapper">
-        <div id="contents">
-            <div class="profile-container">
+          <div id="wrapper">
+            <div id="contents">
+              <div class="profile-container">
                 <div class="profile-contents">
-                    <table cellpadding="4" cellspacing="0">
-                        <tr>
-                            <td>
-                                <label>
-                                    Trip Name</label>
-                            </td>
-                            <td>
-                                <input type="text" id="profile-trip-name" class="profile-trip-name" />
-                            </td>
-                        </tr>  
-                        <tr>
-                            <td>
-                                <label>
-                                    Organization Website</label>
-                            </td>
-                            <td>
-                                <input type="text" id="profile-trip-website" class="profile-trip-website" />
-                            </td>
-                        </tr>  
-                        <tr>
-                            <td>
-                                <label>
-                                    Trip Description</label>
-                            </td>
-                            <td>
-                                <input type="text" id="profile-trip-about" class="profile-trip-about" />
-                            </td>
-                        </tr>  						
-                        <tr>
-                            <td style="width: 97px">
-                                <label>
-                                    Religious Affiliation</label>
-                            </td>
-                            <td style="width: 197px">
-                                        <select id="profile-trip-religion" class="profile-trip-religion">
-                                            <option class="cmc-default-opt" value="Select Religious Affiliation", selected="selected">Select Religious Affiliation</option>
-                                            <option value="Secular">Secular</option>
-                                            <option value="Christian: Protestant">Christian: Protestant</option>
-                                            <option value="Christian: Catholic">Christian: Catholic</option>
-                                            <option value="Nondenominational">Nondenominational</option>
-                                        </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label>
-                                    Anticipated Number of Team Members</label>
-                            </td>
-                            <td>
-                                <input type="text" id="profile-trip-number" class="profile-trip-number" />
-                            </td>
-                        </tr>  	
-                        <tr>
-                            <td style="width: 97px">
-                                <label>
-                                    Approximate Departure Date</label>
-                            </td>
-                            <td style="width: 197px">
-							<input name="profile-trip-depart" id="profile-trip-depart" class="profile-trip-depart" type=button value="select" onclick="displayDatePicker('profile-trip-depart', false, 'mdy', '.');">
-
-                            </td>
-                        </tr>						
-                        <tr>
-                            <td style="width: 97px">
-                                <label>
-                                    Approximate Return Date</label>
-                            </td>
-                            <td style="width: 197px">
-							<input name="profile-trip-return" id="profile-trip-return" class="profile-trip-return" type=button value="select" onclick="displayDatePicker('profile-trip-return', false, 'mdy', '.');">
-                            </td>
-                        </tr>							
-                        <tr>
-                            <td style="width: 97px">
-                                <label>
-                                    Duration of Missions</label>
-                            </td>
-                            <td style="width: 197px">
-                                        <select id="profile-trip-duration" class="profile-trip-duration">
-                                            <option class="cmc-default-opt" value="Select Duration of Missions" selected="selected">Select Duration of Missions</option>
-                                            <option value="1">Short Term: 1-2 weeks</option>
-                                            <option value="2">Medium Term: 1 Month-2 Years</option>
-                                            <option value="3">Long Term: 2+ Years</option>
-                                        </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="width: 97px">
-                                <label>
-                                    Trip Accommodation Level</label>
-                            </td>
-                            <td style="width: 197px">
-                                        <select id="profile-trip-acco" class="profile-trip-acco">
-                                            <option class="cmc-default-opt" value="Select Accommodation Level" selected="selected">Select Accommodation Level</option>
-                                            <option value="Basic shelter without indoor plumbing">Basic shelter without indoor plumbing</option>
-                                            <option value="Basic shelter with indoor plumbing">Basic shelter with indoor plumbing</option>
-                                            <option value="Modest accomodations without hot water">Modest accomodations without hot water</option>
-                                            <option value="Modest accomodations with hot water">Modest accomodations with hot water</option>
-                                            <option value="Very comfortable accomodations">Very comfortable accomodations</option>
-                                        </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="width: 97px">
-                                <label>
-                                    Mission Stage</label>
-                            </td>
-                            <td style="width: 197px">
-                                        <select id="profile-trip-stage" class="profile-trip-stage">
-                                            <option class="cmc-default-opt" value="Select Mission Stage" selected="selected">Select Mission Stage</option>
-                                            <option value="1">Planning</option>
-                                            <option value="2">Execution</option>
-                                        </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label>
-                                    Destination City</label>
-                            </td>
-                            <td>
-                                <input type="text" id="profile-trip-city" class="profile-trip-city"/>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td style="width: 197px">
-                                <label>
-                                    Destination Country</label>
-                            </td>
-                            <td style="width: 197px">
-                                        <select id="profile-trip-country" class="profile-trip-country" onchange="tripzipdisplay();">
-                                        <?php
-                                        echo '<option class="cmc-default-opt" value="Select your Destination Country" selected="selected">Select your Destination Country</option>';
-                                        cmc_echo_opt_countries();
-                                        ?>
-                                        </select>
-                            </td>
-                        </tr>  
-                        <tbody id="tripzip" style="display: none;">
-                        <tr>
-                            <td>
-                                <label>
-                                    Destination Zipcode</label>
-                            </td>
-                            <td>
-                                <input type="text" id="profile-trip-zipcode" class="profile-trip-zipcode"/>
-                            </td>
-                        </tr>
-                        </tbody>
-                        <tr>
-                            <td style="width: 197px">
-                                <label>
-                                    Languages</label>
-                            </td>
-                            <td style="width: 197px">
-                                        <select id="profile-trip-languages" name="profile-trip-languages" multiple="multiple">
-                      <!-- <option class="cmc-default-opt" selected="selected" value="Select Countries Served">Select Countries Served</option> -->
-                                        <?php cmc_echo_opt_languages(); ?>
-                                        </select>
-                            </td>
-                        </tr>           
-                        <tr>
-                            <td>
-                                <label>
-                                    Phone</label>
-                            </td>
-                            <td>
-                                <input type="text" id="profile-trip-phone" class="profile-trip-phone" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label>
-                                    Email Id</label>
-                            </td>
-                            <td>
-                                <input type="text" id="profile-trip-email" class="profile-trip-email" />
-                            </td>
-                        </tr>           
-                        <tr>
-                            <td>&nbsp;
-                                
-                            </td>
-                            <td>
-                                <input type="button" value="Submit" class="profile-trip-submit" id="profile-trip-submit" />
-                            </td>
-                        </tr>
-                    </table>
+                  <table cellpadding="4" cellspacing="0">
+                    <tr>
+                      <td><label>Trip Name</label></td>
+                      <td><input type="text" id="profile-trip-name" class="cmc-form-spec" /></td>
+                    </tr>  
+                    <tr>
+                      <td><label>Organization Website</label></td>
+                      <td><input type="text" id="profile-trip-website" class="cmc-form-spec" /></td>
+                    </tr>
+                    <tr>
+                      <td><label>Trip Description</label></td>
+                      <td><input type="text" id="profile-trip-about" class="cmc-form-spec" /></td>
+                    </tr>       
+                    <tr>
+                      <td style="width: 97px"><label>Religious Affiliation</label></td>
+                      <td style="width: 197px">
+                        <select id="profile-trip-religion" class="cmc-form-spec">
+                          <option class="cmc-default-opt" value="Select Religious Affiliation", selected="selected">Select Religious Affiliation</option>
+                          <option value="Secular">Secular</option>
+                          <option value="Christian: Protestant">Christian: Protestant</option>
+                          <option value="Christian: Catholic">Christian: Catholic</option>
+                          <option value="Nondenominational">Nondenominational</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><label>Anticipated Number of Team Members</label></td>
+                      <td><input type="text" id="profile-trip-number" class="cmc-form-spec" /></td>
+                    </tr>
+                    <tr>
+                      <td style="width: 97px"><label>Approximate Departure Date</label></td>
+                      <td style="width: 197px">
+                        <input name="profile-trip-depart" id="profile-trip-depart" class="cmc-form-spec" type=button value="select" onclick="displayDatePicker('profile-trip-depart', false, 'mdy', '.');">
+                      </td>
+                    </tr>       
+                    <tr>
+                      <td style="width: 97px"><label>Approximate Return Date</label></td>
+                      <td style="width: 197px">
+                        <input name="profile-trip-return" id="profile-trip-return" class="cmc-form-spec" type=button value="select" onclick="displayDatePicker('profile-trip-return', false, 'mdy', '.');">
+                      </td>
+                    </tr>       
+                    <tr>
+                      <td style="width: 97px"><label>Duration of Missions</label></td>
+                      <td style="width: 197px">
+                        <select id="profile-trip-duration" class="cmc-form-spec">
+                          <option class="cmc-default-opt" value="Select Duration of Missions" selected="selected">Select Duration of Missions</option>
+                          <option value="1">Short Term: 1-2 weeks</option>
+                          <option value="2">Medium Term: 1 Month-2 Years</option>
+                          <option value="3">Long Term: 2+ Years</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="width: 97px"><label>Trip Accommodation Level</label></td>
+                      <td style="width: 197px">
+                        <select id="profile-trip-acco" class="cmc-form-spec">
+                          <option class="cmc-default-opt" value="Select Accommodation Level" selected="selected">Select Accommodation Level</option>
+                          <option value="Basic shelter without indoor plumbing">Basic shelter without indoor plumbing</option>
+                          <option value="Basic shelter with indoor plumbing">Basic shelter with indoor plumbing</option>
+                          <option value="Modest accomodations without hot water">Modest accomodations without hot water</option>
+                          <option value="Modest accomodations with hot water">Modest accomodations with hot water</option>
+                          <option value="Very comfortable accomodations">Very comfortable accomodations</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="width: 97px"><label>Mission Stage</label></td>
+                      <td style="width: 197px">
+                        <select id="profile-trip-stage" class="cmc-form-spec">
+                          <option class="cmc-default-opt" value="Select Mission Stage" selected="selected">Select Mission Stage</option>
+                          <option value="1">Planning</option>
+                          <option value="2">Execution</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><label>Destination City</label></td>
+                      <td><input type="text" id="profile-trip-city" class="cmc-form-spec"/></td>
+                    </tr>
+                    <tr>
+                      <td style="width: 197px"><label>Destination Country</label></td>
+                      <td style="width: 197px">
+                        <select id="profile-trip-country" class="cmc-form-spec" onchange="tripzipdisplay();">
+                          <option class="cmc-default-opt" value="Select your Destination Country" selected="selected">Select your Destination Country</option>
+                          <?php cmc_echo_opt_countries(); ?>
+                        </select>
+                      </td>
+                    </tr>
+                    <tbody id="tripzip" style="display: none;">
+                      <tr>
+                        <td><label>Destination Zipcode</label></td>
+                        <td><input type="text" id="profile-trip-zipcode" class="cmc-form-spec"/></td>
+                      </tr>
+                    </tbody>
+                    <tr>
+                      <td style="width: 197px">
+                        <label>Languages</label></td>
+                        <td style="width: 197px">
+                          <select id="profile-trip-languages" class="cmc-form-spec" name="profile-trip-languages" multiple="multiple">
+                          <!-- <option class="cmc-default-opt" selected="selected" value="Select Countries Served">Select Countries Served</option> -->
+                          <?php cmc_echo_opt_languages(); ?>
+                        </select>
+                      </td>
+                    </tr>   
+                    <tr>
+                      <td style="width: 197px">
+                        <label>Trip Medical Skills</label></td>
+                      <td style="width: 197px">
+                        <select id="profile-trip-medical-skills" class="cmc-form-spec" name="profile-trip-medical-skills", multiple="multiple">
+                          <!--<option class="cmc-default-opt" value="0" selected="selected">Select Medical Skills</option>-->
+                          <option value="1">Advanced Practice Nursing</option>
+                          <option value="2">Dental Professional</option>
+                          <option value="3">Medical Educator</option>
+                          <option value="4">Mental Health Professional</option>
+                          <option value="5">Nurse</option>
+                          <option value="6">Optometrist or Opthalmologist</option>
+                          <option value="7">Pharmacist</option>
+                          <option value="8">Physician</option>
+                          <option value="9">Physician Assistant</option>
+                          <option value="10">Physical or Occupational Therapist</option>
+                          <option value="11">Public Health/Community Development Worker</option>
+                          <option value="12">Speech Therapist</option>
+                          <option value="13">Other</option>
+                          <!--<option class="cmc-default-opt" value="0" selected="selected">Select Medical Skills</option>-->
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="width: 197px">
+                        <label>Trip Non-Medical Skills</label></td>
+                      <td style="width: 197px">
+                        <select id="profile-trip-nonmedical-skills" class="cmc-form-spec" name="profile-trip-nonmedical-skills" multiple="multiple">
+                          <!--<option class="cmc-default-opt" value="0" selected="selected">Select Non-Medical Skills</option>-->
+                          <option value="14">General Help/Labor</option>
+                          <option value="15">Team Leader/Primary Organizer</option>
+                          <option value="16">Account and/or Business Management</option>
+                          <option value="17">Skilled Construction and/or Maintenance</option>
+                          <option value="18">Computer Science/Other Technical</option>
+                          <option value="19">Agriculture and/or Animal Husbandry</option>
+                          <option value="45">Mechanic</option>
+                          <option value="46">Office/Secretarial</option>
+                          <option value="47">Teaching</option>
+                          <option value="48">Veterinary</option>
+                          <option value="49">Water Supply Improvement</option>
+                          <option value="50">Writing and/or Translating</option>
+                          <option value="52">Engineering</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="width: 197px">
+                        <label>Trip Spiritual Service</label></td>
+                      <td style="width: 197px">
+                        <select id="profile-trip-spiritual-skills" class="cmc-form-spec" name="profile-trip-spiritual-skills" multiple="multiple">
+                          <!--<option class="cmc-default-opt" value="0" selected="selected">Select Spiritual Service</option>-->
+                          <option value="20">Team Spiritual Leader</option>
+                          <option value="21">Individual Outreach (Prayer and Counseling)</option>
+                          <option value="22">Evangelism</option>
+                          <option value="44">Worship Team</option>
+                          <option value="51">Public Speaking</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><label>Phone</label></td>
+                      <td><input type="text" id="profile-trip-phone" class="cmc-form-spec" /></td>
+                    </tr>
+                    <tr>
+                      <td><label>Email Id</label></td>
+                      <td><input type="text" id="profile-trip-email"class="cmc-form-spec" /></td>
+                    </tr>
+                    <tr>
+                      <td>&nbsp;</td>
+                      <td><input type="button" value="Submit" class="profile-trip-submit" id="profile-trip-submit" /></td>
+                    </tr>
+                  </table>
                 </div>
+              </div>
             </div>
-        </div>
-    </div>
-    </form>   
-      </div>	  
+          </div>
+        </form>   
+      </div>
       <div id="report-problem-dialog" title="What seems to be the matter?">
         <p>Tell us what's wrong, and we'll look into it right away.</p>
         <form id="report-problem-form">
@@ -1513,33 +1394,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
           </div>
         </form>
       </div>
-      <!-- debug only dialogs! remove these before shipping!! -zack -->
-      <div id="assert-dialog" title="Assertion failure!">
-        <h2>You hit an assert!</h2>
-        <p id="assert-message"></p>
-      </div>
-      <div id="secret-hideout-dialog" title="Administration">
-        <p>This is an area for magical unicorns and rainbows.</p>
-      </div>
     </div>
-    <!-- The debug log. Should not be displayed by default. Enable via the admin panel. -->
-    <div id="debug-section" style="display: none">
-      <textarea id="debug-log" rows="10" cols="80" spellcheck="false">
-        Please wait, loading debug console...
-      </textarea>
-      <div id="debug-info-section">
-        <div id="requests-outstanding" style="display: inline; margin-right: 13px;">
-          requests outstanding: <span id="requests-outstanding-value">0</span>
-        </div>
-        <div id="logged-in-user" style="display: inline; margin-right: 13px;">
-          user: <span id="logged-in-user-value">(not in sync)</span>
-        </div>
-      <div id="debug-controls">
-        <button id="debug-detach-handlers">detach debug handlers</button>
-        <button id="debug-force-login">force login</button>
-      </div>
-    </div>
-    <!-- Do not place HTML markup below this line -->
   </body>
 </html>
 <!-- vim: ai:et:ts=2:sw=2
