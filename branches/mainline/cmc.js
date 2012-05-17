@@ -3095,7 +3095,7 @@ var CMC = {
 };
 
 FB.init({
-  appId  : '207688579246956',
+  appId  : /* @/FBAPPIDMARKER */ '207688579246956',
   status : true,
   cookie : true,
   fbml   : true,
