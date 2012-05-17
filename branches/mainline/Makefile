@@ -3,8 +3,9 @@ SVNDIR = $(shell pwd | sed -E -e 's/\/(\w?\.?\_?\/?)+\///g')
 JSFILES = $(shell ls *.js | grep -v -E '\.yui\.' | grep -v -E '\.ship\.')
 BUILDNUMBER = $(shell echo "ibase=10;obase=16;`svnversion | sed -E -e 's/.*://' -e 's/[^0-9]//g'`" | bc)
 DEPCLEANPENDING = no
+SIGNBUILD = yes
 
-.PHONY: clean unfinalize buildnumber __depcleanpending
+.PHONY: clean unfinalize buildnumber __depcleanpending nosign
 
 all: ship
 
@@ -17,12 +18,18 @@ clean:
 	$(RM) *.yui.js
 	$(RM) *.ship.php
 
+nosign:
+	$(eval SIGNBUILD := no)
+	@echo SIGNBUILD := no
+
 signfinalize: cmc.js
-	sed -E \
-		-e 's/\/\* @\/FBAPPIDMARKER \*\/.*$$/"305928355832",/' \
-		$? > $@
-	$(RM) -f $?
-	mv $@ $?
+	if [ "$(SIGNBUILD)" == "yes" ]; then \
+		sed -E \
+			-e 's/\/\* @\/FBAPPIDMARKER \*\/.*$$/"305928355832",/' \
+			$? > $@; \
+		$(RM) -f $?; \
+		mv $@ $?; \
+	fi
 
 cmc.ship.js: cmc.js
 	sed -E \
@@ -66,7 +73,6 @@ cutsfinalize: signfinalize cuts
 
 __depcleanpending:
 	$(eval DEPCLEANPENDING := yes)
-	@echo depclean is pending...
 
 buildfinalize: __depcleanpending signfinalize minifyfinalize cutsfinalize ship
 	$(RM) $?
