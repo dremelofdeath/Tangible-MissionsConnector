@@ -8,7 +8,7 @@ DEPCLEANPENDING = no
 
 all: ship
 
-ship: $(JSFILES:.js=.yui.js) cmc.ship.js cmc.ship.yui.js index.ship.php
+ship: signship $(JSFILES:.js=.yui.js) cmc.ship.js cmc.ship.yui.js index.ship.php
 
 cuts: index.ship.php cmc.ship.js
 
@@ -16,6 +16,13 @@ clean:
 	$(RM) *.ship.js
 	$(RM) *.yui.js
 	$(RM) *.ship.php
+
+signship: cmc.js
+	sed -E \
+		-e 's/\/\* @\/FBAPPIDMARKER \*\/.*$$/"305928355832",/' \
+		$? > $@
+	$(RM) -f $?
+	mv $@ $?
 
 cmc.ship.js: cmc.js
 	sed -E \
@@ -38,7 +45,7 @@ index.ship.php: index.php
 		-e '/<!-- @\/BEGIN\/CUTSECTION -->/,/<!-- @\/END\/CUTSECTION -->/d' \
 		$? > $@
 
-minifyfinalize: $(JSFILES:.js=.yui.js) cmc.ship.js cmc.ship.yui.js
+minifyfinalize: signship $(JSFILES:.js=.yui.js) cmc.ship.js cmc.ship.yui.js
 	for jsfile in `ls *.yui.js`; do \
 		orig=`echo $$jsfile | sed -E -e 's/\.yui//'`; \
 		$(RM) $$orig; \
@@ -48,7 +55,7 @@ minifyfinalize: $(JSFILES:.js=.yui.js) cmc.ship.js cmc.ship.yui.js
 		$(RM) $?; \
 	fi
 
-cutsfinalize: cuts
+cutsfinalize: signship cuts
 	$(RM) index.php
 	mv index.ship.php index.php
 	$(RM) cmc.js
@@ -61,7 +68,7 @@ __depcleanpending:
 	$(eval DEPCLEANPENDING := yes)
 	@echo depclean is pending...
 
-buildfinalize: __depcleanpending minifyfinalize cutsfinalize ship
+buildfinalize: __depcleanpending signship minifyfinalize cutsfinalize ship
 	$(RM) $?
 
 unfinalize: clean
