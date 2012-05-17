@@ -11,11 +11,14 @@ error() {
 
 usage() {
   echo "Usage:"
-  echo "  `basename $0` [-b branch]"
-  echo "  `basename $0` [-t tag]"
-  echo "  `basename $0` -h"
-  echo "    -b: The branch to ship. Creates a new tag. (Defaults to mainline.)"
+  echo "  `basename $0` -b branch [-n [-c] [-m]]"
+  echo "    -b: The branch to ship. Creates a new tag."
+  echo "    -n: Do not create a tag. Move production to specified branch only."
+  echo "    -c: Apply cuts in -n mode."
+  echo "    -m: Minify code in -n mode."
+  echo "  `basename $0` -t tag"
   echo "    -t: Move or rollback production to the specified tag."
+  echo "  `basename $0` -h"
   echo "    -h: Prints this help message."
   exit $E_OPTERROR
 }
@@ -27,12 +30,19 @@ fi
 
 BRANCH=mainline
 TAG=NOTAG
+ROOTDIR=tags
 PRODUCTIONHOST=chrome
 
+# used for running a make command on the remote host for -c and -m options
+MAKEFILECMD=echo
+
 BRANCHSET=no
+NMODE=no
+APPLYCUTS=no
+MINIFY=no
 TAGSET=no
 
-while getopts "hbt:" OPTION
+while getopts "hb:ncmt:" OPTION
 do
   case $OPTION in
     b)
@@ -46,6 +56,15 @@ do
         error "can't specify a branch after specifying a tag"
       fi
       BRANCHSET=yes
+      ;;
+    n)
+      NMODE=yes
+      ;;
+    c)
+      APPLYCUTS=yes
+      ;;
+    m)
+      MINIFY=yes
       ;;
     t)
       TAG=$OPTARG
@@ -69,6 +88,26 @@ do
   esac
 done
 
+# error checking
+if [ "$NMODE" == "no" ]
+then
+  if [ "$APPLYCUTS" == "yes" ]
+  then
+    error "can't specify -c without -n"
+  fi
+  if [ "$MINIFY" == "yes" ]
+  then
+    error "can't specify -m without -n"
+  fi
+fi
+if [ "$NMODE" == "yes" ]
+then
+  if [ "$TAGSET" == "yes" ]
+  then
+    error "can't specify a tag in -n mode"
+  fi
+fi
+
 pushd `dirname $0` > /dev/null
 SCRIPTPATH=`pwd`
 popd > /dev/null
@@ -78,15 +117,38 @@ svn up
 
 pushd $SCRIPTPATH/../branches/$BRANCH
 BUILDNUMBER=`make buildnumber`
-if [ "$TAGSET" == "no" ]
+if [ "$TAGSET" == "no" -a "$NMODE" == "no" ]
 then
   NEWTAG=2.0-build-$BUILDNUMBER
 else
   NEWTAG=$TAG
 fi
+if [ "$NMODE" == "yes" ]
+then
+  NEWTAG=$BRANCH
+  ROOTDIR=branches
+  MAKERULE=buildfinalize
+  if [ "$APPLYCUTS" == "yes" ]
+  then
+    if [ "$MINIFY" == "yes" ]
+    then
+      MAKERULE=buildfinalize
+    else
+      MAKERULE=cutsfinalize
+    fi
+  else
+    if [ "$MINIFY" == "yes" ]
+    then
+      MAKERULE=minifyfinalize
+    else
+      MAKERULE=signfinalize
+    fi
+  fi
+  MAKEFILECMD="make $MAKERULE"
+fi
 popd
 
-if [ "$TAGSET" == "no" ]
+if [ "$TAGSET" == "no" -a "$NMODE" == "no" ]
 then
   svn cp branches/$BRANCH tags/$NEWTAG
   pushd tags/$NEWTAG
@@ -100,7 +162,8 @@ echo "Please enter the production password."
 ssh -tt root@$PRODUCTIONHOST <<END
 pushd /var/www/localhost/htdocs/missionsconnector/
 rm -rf *
-svn export http://$PRODUCTIONHOST/svn/missionsconnector/tags/$NEWTAG --username system --force .
+svn export http://$PRODUCTIONHOST/svn/missionsconnector/$ROOTDIR/$NEWTAG --username system --force .
+$MAKEFILECMD
 rm -f Makefile
 popd
 exit
