@@ -26,8 +26,10 @@ function db_check_user($fbid) {
     $sql = "UPDATE users SET lastviewed=NOW() WHERE userid =".$fbid;
     $has_used_before = true;
   } else if($num_userids == 0) {
-    $sql = "INSERT INTO users (userid, dateadded, lastviewed) ".
-      "VALUES ('".$fbid."',NOW(),NOW())";
+    // I'm not sure that we want to do this anymore. If we do decide we want to 
+    // track users, we could make a tracking table and use that instead.
+    //$sql = "INSERT INTO users (userid, dateadded, lastviewed) ".
+      //"VALUES ('".$fbid."',NOW(),NOW())";
   } else {
     die("Negative number of results, run for the hills! " . mysql_error());
   }
@@ -102,6 +104,10 @@ function db_purge_user_by_id($userid,$con,&$has_error,&$err_msg) {
     if (!$result)
 	setjsonmysqlerror($has_error,$err_msg);
     $query = "DELETE FROM regionsselected WHERE userid='".$userid."'";
+    $result = mysql_query($query,$con);
+    if (!$result)
+	setjsonmysqlerror($has_error,$err_msg,$query);
+    $query = "DELETE skillsselectedtrips FROM skillsselectedtrips JOIN trips ON trips.id=skillsselectedtrips.tripid INNER JOIN users ON users.userid='".$userid."' AND users.userid=trips.creatorid";
     $result = mysql_query($query,$con);
     if (!$result)
 	setjsonmysqlerror($has_error,$err_msg,$query);

@@ -15,51 +15,39 @@ $json = array();
 $sql = null;
 if (array_key_exists('fbid', $saferequest) && $saferequest['fbid'] != '') {
   // first check that the user has a CMC profile - otherwise redirect user to create a profile
-  $sql2 = 'select * from users where userid="'.$fbid.'"';
-  $result2 = mysql_query($sql2,$con);
-  if (!$result2) {
-     setjsonmysqlerror($has_error,$err_msg,$sql);
+  if (!db_check_user($saferequest['fbid'])) {
+    // This means user does not have a CMC profile
+    $has_error = TRUE;
+    $err_msg = "No CMC Profile";
   } else {
-    $numrows = mysql_num_rows($result2);
-
-    if ($numrows==0) {
-        // This means user does not have a CMC profile
-            $has_error = TRUE;
-            $err_msg = "No CMC Profile";
+    if (array_key_exists('fbid', $saferequest) && $saferequest['fbid'] != '') {
+      $sql =
+        'SELECT t.*, tm.isadmin '.
+        'FROM trips AS t '.
+        'LEFT JOIN tripmembers AS tm '.
+        'ON t.id=tm.tripid AND tm.userid = "'.$saferequest['fbid'].'" '.
+        'WHERE t.departure >= NOW()';
+    } else {
+      $sql = 'SELECT * FROM trips WHERE departure >= NOW()';
     }
 
-      else {
-  
-if (array_key_exists('fbid', $saferequest) && $saferequest['fbid'] != '') {
-  $sql =
-    'SELECT t.*, tm.isadmin '.
-    'FROM trips AS t '.
-    'LEFT JOIN tripmembers AS tm '.
-    'ON t.id=tm.tripid AND tm.userid = "'.$saferequest['fbid'].'" '.
-    'WHERE t.departure >= NOW()';
-} else {
-  $sql = 'SELECT * FROM trips WHERE departure >= NOW()';
-}
-$result = mysql_query($sql,$con);
+    $result = mysql_query($sql,$con);
 
-if ($result) {
+    if ($result) {
+      $numrows = mysql_num_rows($result);
+      $json['trips'] = array();
 
-   $numrows = mysql_num_rows($result);
-	$json['trips'] = array();
+      if ($numrows!=0) {
+        while ($row = mysql_fetch_array($result)) {
+          $json['trips'][] = $row;
+        }
+      }
+    } else {
+      setjsonmysqlerror($has_error,$err_msg,$sql);
+    }
+  }
+}
 
-   if ($numrows!=0) {
-  	while ($row = mysql_fetch_array($result)) {
-		$json['trips'][] = $row;
-  	}
-   }
- 
-}
-else {
- 	setjsonmysqlerror($has_error,$err_msg,$sql);
-}
-}
-}
-}
 $json['has_error'] = $has_error;
 
 if ($has_error) {

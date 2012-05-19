@@ -520,6 +520,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
       <div id="welcome-tab">
         <h1>Welcome to Christian Missions Connector.</h1>
         <p>Are you interested in missions work? Do you want to connect with people and organizations who share your passion for missions? Whether you want to find a missions organization, start a mission team, join a mission team or just connect with others who have a passion for missions, Christian Missions Connector can help.</p>
+        <p>The steps are simple. First, click on the Profile tab and fill out a profile explaining who you are and what you want in missions. Once you have filled out a profile you can use the Trips page. If you are a volunteer you can use the Trips page to find trips or other volunteer opportunities, or if you are a missions organization you can post trips to the Trips page (via your Profile) to find volunteers for your trips or other personnel needs you may have. You can also use the Search page to find organizations or individuals who have opportunities and talents you are looking for.</p>
       </div>
       <div id="profile-tab">
         <div id="profile-tab-loading" class="tab-loading-screen">
@@ -868,9 +869,9 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
         <!-- @/END/CUTSECTION -->
       </div>
       <div class="rightside">
-        <a href="#" id="copyrights">Copyrights</a> :
+        <a href="#" id="copyrights">Copyrights</a>
         <!-- @/BEGIN/CUTSECTION -->
-        <a href="http://www.tangiblesoft.net/" target="_blank" id="tangible-link">Tangible, LLC</a>
+        : <a href="http://www.tangiblesoft.net/" target="_blank" id="tangible-link">Tangible, LLC</a>
         <!-- @/END/CUTSECTION -->
       </div>
     </div>
