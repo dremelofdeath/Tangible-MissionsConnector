@@ -355,13 +355,64 @@ if (!$has_error) {
 
             $sql = $sql.', partnersite = "0" WHERE userid ='.$fbid;
           } else if($num_userids == 0) {
-
-            $sql = 'INSERT INTO users '.
-              '(userid, name, organization, isreceiver, state, city,country, zipcode, phone, email, missionsexperience,'.
-              ' religion, aboutme, Languages, website, partnersite) '.
-              'VALUES ("'.$fbid.'","'.$name.'","'.$myobj->{'name'}.'","'.$isreceiver.'","'.$myobj->{'state'}.'","'.strip_tags($myobj->{'city'}).'","'.strip_tags($myobj->{'mycountry'}).'","'.strip_tags($myobj->{'zip'}).'","'.
-              strip_tags($myobj->{'phone'}).'","'.strip_tags($myobj->{'email'}).'","'.strip_tags($myobj->{'misexp'}).'","'.
-              $myobj->{'relg'}.'","'.$myobj->{'about'}.'","'.$myobj->{'languages'}.'","'.$myobj->{'url'}.'","0")';
+            $name = get_name_from_fb_using_curl($fbid); // FIXME: really? really? --zack
+            // zack: yeah... I guess so... we need to fix the curl thing though...
+            $sql = 'INSERT INTO users ';
+            $fields = 'userid, name, partnersite';
+            $values = '"' . $fbid . '", "' . $name . '", "0"';
+            if (isset($myobj->{'name'})) {
+              $fields .= ', organization';
+              $values .= ', "' . $myobj->{'name'} . '"';
+            }
+            if (isset($isreceiver)) {
+              $fields .= ', isreceiver';
+              $values .= ', "' . $isreceiver . '"';
+            }
+            if (isset($myobj->{'state'})) {
+              $fields .= ', state';
+              $values .= ', "' . $myobj->{'state'} . '"';
+            }
+            if (isset($myobj->{'city'})) {
+              $fields .= ', city';
+              $values .= ', "' . strip_tags($myobj->{'city'}) . '"';
+            }
+            if (isset($myobj->{'mycountry'})) {
+              $fields .= ', country';
+              $values .= ', "' . strip_tags($myobj->{'mycountry'}) . '"';
+            }
+            if (isset($myobj->{'zip'})) {
+              $fields .= ', zipcode';
+              $values .= ', "' . strip_tags($myobj->{'zip'}) . '"';
+            }
+            if (isset($myobj->{'phone'})) {
+              $fields .= ', phone';
+              $values .= ', "' . strip_tags($myobj->{'phone'}) . '"';
+            }
+            if (isset($myobj->{'email'})) {
+              $fields .= ', email';
+              $values .= ', "' . strip_tags($myobj->{'email'}) . '"';
+            }
+            if (isset($myobj->{'misexp'})) {
+              $fields .= ', missionsexperience';
+              $values .= ', "' . strip_tags($myobj->{'misexp'}) . '"';
+            }
+            if (isset($myobj->{'relg'})) {
+              $fields .= ', religion';
+              $values .= ', "' . $myobj->{'relg'} . '"';
+            }
+            if (isset($myobj->{'about'})) {
+              $fields .= ', aboutme';
+              $values .= ', "' . $myobj->{'about'} . '"';
+            }
+            if (isset($myobj->{'languages'})) {
+              $fields .= ', Languages';
+              $values .= ', "' . $myobj->{'languages'} . '"';
+            }
+            if (isset($myobj->{'url'})) {
+              $fields .= ', website';
+              $values .= ', "' . $myobj->{'url'} . '"';
+            }
+            $sql .= "(" . $fields . ") VALUES (" . $values . ")";
           }
 
           if (!$has_error) {
@@ -519,7 +570,7 @@ if (!$has_error) {
         function check_email_address($email) {
           // First, we check that there's one @ symbol, 
           // and that the lengths are right.
-          if (!ereg("^[^@]{1,64}@[^@]{1,255}$", $email)) {
+          if (!preg_match("/^[^@]{1,64}@[^@]{1,255}$/", $email)) {
             // Email invalid because wrong number of characters 
             // in one section or wrong number of @ symbols.
             return false;
@@ -528,19 +579,18 @@ if (!$has_error) {
           $email_array = explode("@", $email);
           $local_array = explode(".", $email_array[0]);
           for ($i = 0; $i < sizeof($local_array); $i++) {
-            if (!ereg("^(([A-Za-z0-9!#$%&'*+/=?^_`{|}~-][A-Za-z0-9!#$%&.'*+/=?^_`{|}~\.-]{0,63})|(\"[^(\\|\")]{0,62}\"))$",$local_array[$i])) {
+            if (!preg_match("#^(([A-Za-z0-9!\#$%&'*+/=?^_`{|}~-][A-Za-z0-9!\#$%&.'*+/=?^_`{|}~\.-]{0,63})|(\"[^(\\|\")]{0,62}\"))$#",$local_array[$i])) {
               return false;
             }
           }
-          // Check if domain is IP. If not, 
-          // it should be valid domain name
-          if (!ereg("^\[?[0-9\.]+\]?$", $email_array[1])) {
+          // Check if domain is IP. If not, it should be valid domain name
+          if (!preg_match("/^\[?[0-9\.]+\]?$/", $email_array[1])) {
             $domain_array = explode(".", $email_array[1]);
             if (sizeof($domain_array) < 2) {
               return false; // Not enough parts to domain
             }
             for ($i = 0; $i < sizeof($domain_array); $i++) {
-              if (!ereg("^(([A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9])|.([A-Za-z0-9]+))$",$domain_array[$i])) {
+              if (!preg_match("/^(([A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9])|.([A-Za-z0-9]+))$/",$domain_array[$i])) {
                 return false;
               }
             }
@@ -596,7 +646,7 @@ if (!$has_error) {
         // function to validate a url
         function isValidURL($url)
         {
-          return preg_match('|^http(s)?://[a-z0-9-]+(.[a-z0-9-]+)*(:[0-9]+)?(/.*)?$|i', $url);
+          return preg_match('|^(http(s)?://)?[a-z0-9-]+(.[a-z0-9-]+)*(:[0-9]+)?(/.*)?$|i', $url);
         }
 
         if (isset($myobj->{'url'})) {
