@@ -17,6 +17,7 @@ function $_GET(key,s) {
 var CMC = {
   // variables
   loggedInUser : false,
+  isFirstRun : false,
   accessToken : false,
   me : false,
   friends : false,
@@ -542,6 +543,8 @@ var CMC = {
     this.beginFunction();
     this.hideIntermediateNewProfileCreationSteps();
     $("#no-profile").fadeIn();
+    $("#no-profile-trip").fadeIn();
+    this.isFirstRun = true;
     this.endFunction();
   },
 
@@ -2609,7 +2612,11 @@ var CMC = {
        CMC.getProfile(CMC.me.id, false, this.handleGetProfileCallbackSaveAndShow);
        $("#profile-volunteer-dialog").dialog('close');
        alert('Thank you - your submission has been successfully entered into our database');
-
+       if (this.isFirstRun) {
+         this.isFirstRun = false;
+         $("#no-profile-trip").hide();
+         this.getFutureTrips();
+       }
      } else {
        alert('We are sorry - there was an error: ' + data.err_msg);
      }
@@ -2940,6 +2947,7 @@ var CMC = {
     this.beginFunction();
     $("#no-profile").fadeIn();
     $("#no-profile-trip").fadeIn();
+    this.isFirstRun = true;
     this.endFunction();
   },
 
