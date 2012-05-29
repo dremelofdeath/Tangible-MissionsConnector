@@ -578,7 +578,7 @@ var CMC = {
         __setProfileLinkInternal(data.link);
       }
 
-      $("img.profile-picture").attr("src", "http://graph.facebook.com/"+data.id+"/picture?type=large");
+      $("img.profile-picture").attr("src", "https://graph.facebook.com/"+data.id+"/picture?type=large");
   
       $("#profile-section-about-me-content").html(data.about ? data.about : "");
       if (data.MedicalSkills == undefined) {
@@ -1094,7 +1094,7 @@ var CMC = {
 
       this.tripuserid = data.creatorid;
 
-      $("#trip-owner-picture").children("img").attr("src", "http://graph.facebook.com/"+data.creatorid+"/picture?type=large");
+      $("#trip-owner-picture").children("img").attr("src", "https://graph.facebook.com/"+data.creatorid+"/picture?type=large");
 
       $("#trip-profile-about").html(data.tripdesc ? "<h4>" + data.tripdesc + "</h4>" : "");
       
@@ -1254,7 +1254,7 @@ var CMC = {
             id2 = "#profile-trip-people";
             FB.api(data.memberids[each], function(response) {
                 $(id2).children("#cmc-trip-member-"+each).children(".profile-tripmember-name").html(response.name ? response.name : "");
-                $(id2).children("#cmc-trip-member-"+each).children("#profile-tripmember-image").children("img.profile-tripmember-picture").attr("src", "http://graph.facebook.com/"+data.memberids[each]+"/picture");
+                $(id2).children("#cmc-trip-member-"+each).children("#profile-tripmember-image").children("img.profile-tripmember-picture").attr("src", "https://graph.facebook.com/"+data.memberids[each]+"/picture");
                 //$(id2).children("#cmc-trip-member-"+each).children("#profile-tripmember-image").children("img.profile-tripmember-picture").wrap('<a href="' + response.link + '" target="_blank"></a>');
                 });
 
@@ -1761,7 +1761,7 @@ var CMC = {
         $(id).children("div.result-picture").children("img").remove();
         if (results[each].id) {
           $("<img />")
-            .attr("src", "http://graph.facebook.com/"+results[each].id+"/picture")
+            .attr("src", "https://graph.facebook.com/"+results[each].id+"/picture")
             .attr("cmcid", id) // this is the id from above! not results[each].id!
             .addClass("srpic")
             .one('load', $.proxy(function(event) {

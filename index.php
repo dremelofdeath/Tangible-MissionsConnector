@@ -49,11 +49,26 @@ function cmc_js_load($src) {
 }
 
 function cmc_library_load_jquery($ver) {
-  cmc_js_load('http://code.jquery.com/jquery-'.$ver.'.js');
+  //@/BEGIN/DEBUGONLYSECTION
+  $src = 'https://ajax.googleapis.com/ajax/libs/jquery/'.$ver.'/jquery.js';
+  /*
+  //@/END/DEBUGONLYSECTION
+  $src = 'https://ajax.googleapis.com/ajax/libs/jquery/'.$ver.'/jquery.min.js';
+  //@/BEGIN/DEBUGONLYSECTION
+   */
+  //@/END/DEBUGONLYSECTION
+  cmc_js_load($src);
 }
 
 function cmc_library_load_jquery_ui($ver) {
+  //@/BEGIN/DEBUGONLYSECTION
   $src = 'https://ajax.googleapis.com/ajax/libs/jqueryui/'.$ver.'/jquery-ui.js';
+  /*
+  //@/END/DEBUGONLYSECTION
+  $src = 'https://ajax.googleapis.com/ajax/libs/jqueryui/'.$ver.'/jquery-ui.min.js';
+  //@/BEGIN/DEBUGONLYSECTION
+   */
+  //@/END/DEBUGONLYSECTION
   cmc_js_load($src);
 }
 
@@ -64,7 +79,7 @@ function cmc_library_load_jquery_ui_theme($theme, $custom=false) {
     // custom themes in the future? -zack
     $href .= 'css/custom-theme/jquery-ui-.custom.css';
   } else {
-    $href .= 'http://ajax.googleapis.com/ajax/libs/jqueryui/';
+    $href .= 'https://ajax.googleapis.com/ajax/libs/jqueryui/';
     $href .= $ver;
     $href .= '/themes/';
     $href .= $theme;
