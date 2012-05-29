@@ -100,6 +100,10 @@ if ($myobj->{'toggle'} == 1) {
    }
 
    }
+   else {
+         $has_error = TRUE;
+         $err_msg = "No CMC Profile - Please create a profile first";
+   }
    }
 }
 }
