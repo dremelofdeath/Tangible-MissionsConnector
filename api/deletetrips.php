@@ -51,16 +51,26 @@ else {
 	$result = mysql_query($sql,$con);
 
 	if ($result) {
-  
-  		// Then delete the row from trips table
-  		$sql = 'delete from trips where id="'.$tripid.'"';
-  		$result = mysql_query($sql,$con);
-  		if ($result) {
-			$json['tripname'] = $tripname;
-  		}
-  		else {
+      // Then delete skills associated with the trip
+      $sql1 = 'delete from skillsselectedtrips where tripid="'.$tripid.'"';
+      $result1 = mysql_query($sql1,$con);
+
+      if ($result1) {
+
+  		  // Then delete the row from trips table
+  		  $sql = 'delete from trips where id="'.$tripid.'"';
+  		  $result = mysql_query($sql,$con);
+  		  if ($result) {
+			    $json['tripname'] = $tripname;
+  		  }
+  		  else {
     			setjsonmysqlerror($has_error,$err_msg,$sql);
-  		}
+  		  }
+      }
+      else {
+    			setjsonmysqlerror($has_error,$err_msg,$sql);
+
+      }
 	}
 	else {
     		setjsonmysqlerror($has_error,$err_msg,$sql);
