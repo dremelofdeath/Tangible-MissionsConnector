@@ -3050,6 +3050,7 @@ var CMC = {
         $("#logged-in-user-value").html(response.authResponse.userID);
       } else {
         $("#logged-in-user-value").html("(not authorized)");
+        CMC.hideTabLoading('profile');
       }
       //@/END/DEBUGONLYSECTION
       if (callback) {
@@ -3079,6 +3080,7 @@ var CMC = {
         CMC.log("authResponse is null; user cancelled login or did not authorize");
         //@/BEGIN/DEBUGONLYSECTION
         $("#logged-in-user-value").html("(not authorized)");
+        CMC.hideTabLoading('profile');
         //@/END/DEBUGONLYSECTION
       }
       if (callback) {
