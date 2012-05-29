@@ -50,6 +50,8 @@ index.ship.php: index.php
 	sed -E \
 		-e '/<!-- @\/BEGIN\/ADMINCODEBLOCK -->/,/<!-- @\/END\/ADMINCODEBLOCK -->/d' \
 		-e '/<!-- @\/BEGIN\/CUTSECTION -->/,/<!-- @\/END\/CUTSECTION -->/d' \
+		-e '/\/\/@\/BEGIN\/DEBUGONLYSECTION/,/\/\/@\/END\/DEBUGONLYSECTION/d' \
+		-e '/\/\/@\/BEGIN\/CUTSECTION/,/\/\/@\/END\/CUTSECTION/d' \
 		$? > $@
 
 minifyfinalize: signfinalize $(JSFILES:.js=.yui.js) cmc.ship.js cmc.ship.yui.js
