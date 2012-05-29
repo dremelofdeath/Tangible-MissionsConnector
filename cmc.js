@@ -3045,14 +3045,16 @@ var CMC = {
       CMC.assert(!userLoggedIn, "user already logged in when the handshake callback fired");
       __notifyLoginComplete();
       CMC.cacheFacebookResponseProperties(response);
-      //@/BEGIN/DEBUGONLYSECTION
       if (response.authResponse) {
+        //@/BEGIN/DEBUGONLYSECTION
         $("#logged-in-user-value").html(response.authResponse.userID);
+        //@/END/DEBUGONLYSECTION
       } else {
+        //@/BEGIN/DEBUGONLYSECTION
         $("#logged-in-user-value").html("(not authorized)");
+        //@/END/DEBUGONLYSECTION
         CMC.hideTabLoading('profile');
       }
-      //@/END/DEBUGONLYSECTION
       if (callback) {
         callback(response);
       }
@@ -3080,8 +3082,8 @@ var CMC = {
         CMC.log("authResponse is null; user cancelled login or did not authorize");
         //@/BEGIN/DEBUGONLYSECTION
         $("#logged-in-user-value").html("(not authorized)");
-        CMC.hideTabLoading('profile');
         //@/END/DEBUGONLYSECTION
+        CMC.hideTabLoading('profile');
       }
       if (callback) {
         callback(response);
