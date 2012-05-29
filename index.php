@@ -731,7 +731,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
             </p>
           </div>
           <h1>
-            <a href="#" onclick="CMC.page('#no-profile-trip', '#make-profile');">Create a Profile Now &gt;&gt;</a>
+            <a href="#" onclick="$('#make-profile, #make-volunteer, #make-organizer').hide(); $('#no-profile').show(); CMC.page('#no-profile', '#make-profile'); $('#tabs').tabs('select', 1);">Create a Profile Now &gt;&gt;</a>
           </h1>
         </div>
       </div>
