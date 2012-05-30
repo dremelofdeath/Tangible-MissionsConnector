@@ -1097,7 +1097,7 @@ var CMC = {
 
       this.tripuserid = data.creatorid;
 
-      $("#trip-owner-picture").children("img").attr("src", "https://graph.facebook.com/"+data.creatorid+"/picture?type=large");
+      $("#trip-owner-picture").children("img").attr("src", "https://graph.facebook.com/"+CMC.tripuserid+"/picture?type=large");
 
       $("#trip-profile-about").html(data.tripdesc ? "<h4>" + data.tripdesc + "</h4>" : "");
       
