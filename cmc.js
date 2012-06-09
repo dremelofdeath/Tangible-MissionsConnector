@@ -3475,6 +3475,22 @@ $(function() {
     CMC.submitTripProfile(CMC.getFormData("#profile-trip-form"));
   });
 
+  $("#profile-trip-medical-skills").multiselect();
+  $("#profile-trip-nonmedical-skills").multiselect();
+  $("#profile-trip-spiritual-skills").multiselect();
+  $("#profile-medical-skills").multiselect();
+  $("#profile-nonmedical-skills").multiselect();
+  $("#profile-spiritual-skills").multiselect();
+  $("#profile-region").multiselect();
+  $("#profile-country-served").multiselect();
+  $("#profile-org-offer").multiselect();
+  $("#profile-org-offern").multiselect();
+  $("#profile-org-medical").multiselect();
+  $("#profile-org-nonmedical").multiselect();
+  $("#profile-org-spiritual").multiselect();
+  $("#profile-org-region").multiselect();
+  $("#profile-org-countryserved").multiselect();
+
   // Handles the live form validation
   $("#profile-trip-name").validate({
     expression: "if (VAL) return true; else return false;",
