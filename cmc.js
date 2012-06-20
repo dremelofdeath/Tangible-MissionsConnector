@@ -1794,21 +1794,30 @@ var CMC = {
     this.beginFunction();
     var maxSearchResults = $(".cmc-search-result").length, i = 0;
     this.log("animating resultset starting with " + results[0].name);
-    $("#cmc-search-results").clearQueue("custom-SearchResultsQueue");
+    this.swooshy(results, "#cmc-search-results", "#cmc-search-result-", maxSearchResults);
+    this.endFunction();
+  },
+
+  swooshy : function (results, containerId, idPrefix, maxPageSize) {
+    this.beginFunction();
+    this.assert(typeof containerId == "string", "swooshy's containerId is not a string");
+    this.assert(typeof idPrefix == "string", "swooshy's idPrefix is not a string");
+    this.assert(typeof maxPageSize == "number", "swooshy's maxPageSize is not a number");
+    $(containerId).clearQueue("custom-SearchResultsQueue");
     var _doOneResultPageAnimation = function () {
       CMC.assert(this.hasOwnProperty("results"), "search results not correctly assigned to animation delegate");
       for(var each in this.results) {
-        var id = "#cmc-search-result-" + each, showsCompleted = 0, _onShowComplete = $.proxy(function () {
+        var id = idPrefix + each, showsCompleted = 0, _onShowComplete = $.proxy(function () {
               // this sure ain't the prettiest way to fix the incomplete
               // page quick click render bug, but it works --zack
               ++showsCompleted;
               if (showsCompleted == this.results.length) {
-                if (this.results.length < maxSearchResults) {
+                if (this.results.length < maxPageSize) {
                   CMC.log("incomplete page, hiding the the results that need cleanup");
-                  for (var point = maxSearchResults - this.results.length; point > 0; point--) {
+                  for (var point = maxPageSize - this.results.length; point > 0; point--) {
                     // clean up the slots that weren't being shown
-                    var tempId = "#cmc-search-result-" + (maxSearchResults - point);
-                    $(tempId).delay(4 * (maxSearchResults - point)).fadeOut('fast'); // at least fade out
+                    var tempId = idPrefix + (maxPageSize - point);
+                    $(tempId).delay(4 * (maxPageSize - point)).fadeOut('fast'); // at least fade out
                   }
                 }
               }
@@ -1827,11 +1836,11 @@ var CMC = {
           .delay(25 * each)
           .show("drop", {direction: "right", distance: 50}, 250, _onShowComplete);
       }
-      $("#cmc-search-results").dequeue("custom-SearchResultsQueue");
+      $(containerId).dequeue("custom-SearchResultsQueue");
     }
     _doOneResultPageAnimation.results = results;
     _doOneResultPageAnimation = $.proxy(_doOneResultPageAnimation, _doOneResultPageAnimation); // I've seen worse hacks, I promise --zack
-    $("#cmc-search-results").filter(":first").queue("custom-SearchResultsQueue", _doOneResultPageAnimation).dequeue("custom-SearchResultsQueue");
+    $(containerId).filter(":first").queue("custom-SearchResultsQueue", _doOneResultPageAnimation).dequeue("custom-SearchResultsQueue");
     this.endFunction();
   },
 
