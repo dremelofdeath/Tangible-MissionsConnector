@@ -28,6 +28,8 @@ then
   usage
 fi
 
+which java > /dev/null 2>&1 || error "java is not installed (required for yui)"
+
 BRANCH=mainline
 TAG=NOTAG
 ROOTDIR=tags
