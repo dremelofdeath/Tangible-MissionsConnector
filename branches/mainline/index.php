@@ -233,6 +233,11 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
         width: 75px;
       }
 
+      #welcome-video {
+        text-align: center;
+        margin-top: 2.75em;
+      }
+
       #search-box {
         position: relative;
         left: -0.7em;
@@ -538,7 +543,10 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
       <div id="welcome-tab">
         <h1>Welcome to Christian Missions Connector.</h1>
         <p>Are you interested in missions work? Do you want to connect with people and organizations who share your passion for missions? Whether you want to find a missions organization, start a mission team, join a mission team or just connect with others who have a passion for missions, Christian Missions Connector can help.</p>
-        <p>The steps are simple. First, click on the Profile tab and fill out a profile explaining who you are and what you want in missions. Once you have filled out a profile you can use the Trips page. If you are a volunteer you can use the Trips page to find trips or other volunteer opportunities, or if you are a missions organization you can post trips to the Trips page (via your Profile) to find volunteers for your trips or other personnel needs you may have. You can also use the Search page to find organizations or individuals who have opportunities and talents you are looking for.</p>
+        <p>You can get started by either exploring with the tabs above or watching the instructional video below.</p>
+        <div id="welcome-video">
+          <iframe width="480" height="270" src="http://www.youtube.com/embed/7qfBm53lp64" frameborder="0" allowfullscreen></iframe>
+        </div>
       </div>
       <div id="profile-tab">
         <div id="profile-tab-loading" class="tab-loading-screen">
