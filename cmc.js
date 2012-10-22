@@ -1954,13 +1954,13 @@ var CMC = {
       fadesCompleted++;
       if (fadesCompleted == $(".cmc-search-result").length) {
         this.log("now killing pictures in _processFadeComplete");
-        $(".result-name").each(function () {
+        $(".cmc-search-result").children(".result-name").each(function () {
           $(this).html("");
         });
-        $(".result-picture").each($.proxy(function (index, element) {
+        $(".cmc-search-result").children(".result-picture").each($.proxy(function (index, element) {
           imagesDeleted++;
           $(element).children("img").remove();
-          if (imagesDeleted == $(".result-picture").length) {
+          if (imagesDeleted == $(".cmc-search-result").children(".result-picture").length) {
             if (callback != undefined) {
               this.assert(typeof callback == "function", "type of callback is not a function");
               callback();
@@ -2164,13 +2164,13 @@ var CMC = {
       ++fadesCompleted;
       if (fadesCompleted == $(".cmc-invite-result").length) {
         this.log("now killing pictures in _processFadeComplete");
-        $(".result-name").each(function () {
+        $(".cmc-invite-result").children(".result-name").each(function () {
           $(this).html("");
         });
-        $(".result-picture").each($.proxy(function (index, element) {
+        $(".cmc-invite-result").children(".result-picture").each($.proxy(function (index, element) {
           ++imagesDeleted;
           $(element).children("img").remove();
-          if (imagesDeleted == $(".result-picture").length) {
+          if (imagesDeleted == $(".cmc-invite-result").children(".result-picture").length) {
             if (callback != undefined) {
               this.assert(typeof callback == "function", "type of callback is not a function");
               callback();
@@ -2189,7 +2189,7 @@ var CMC = {
 
   navigateToNextInvitePage : function () {
     this.beginFunction();
-    var inviteIndex = ++this.currentDisplayedInvitePage, interval;
+    var inviteIndex = ++this.currentDisplayedInvitePage;
     this.updateInvitePagingControls();
     this.animateHideInviteResults($.proxy(function () {
       if (this.invitePageCache[inviteIndex] !== undefined) {
@@ -2254,10 +2254,12 @@ var CMC = {
         CMC.invitePageCache = [[]];
           
         if (filteredFriends != undefined) {
-            var maxBlockSize = $(".cmc-invite-result").length;
-            for (var beginBlock = 0; beginBlock < filteredFriends.length; beginBlock += maxBlockSize) {
-                CMC.invitePageCache[beginBlock / maxBlockSize] = filteredFriends.slice(beginBlock, beginBlock + maxBlockSize);
-            }
+          var maxBlockSize = $(".cmc-invite-result").length;
+          for (var beginBlock = 0; beginBlock < filteredFriends.length; beginBlock += maxBlockSize) {
+            CMC.invitePageCache[beginBlock / maxBlockSize] = filteredFriends.slice(beginBlock, beginBlock + maxBlockSize);
+          }
+        } else {
+          this.log("caught undefined for filteredFriends... ignoring");
         }
 
         this.currentDisplayedInvitePage = 0;
@@ -2270,8 +2272,7 @@ var CMC = {
         CMC.updateInvitePagingControls();
         $("#cmc-invite-results-title").stop(true, true).fadeIn();
         CMC.inviteFilterText = filterText;
-      }
-      else {
+      } else {
         CMC.log("Invite filter text did not change. Not updating results.");
       }
       this.endFunction();
