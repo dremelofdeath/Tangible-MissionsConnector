@@ -340,6 +340,84 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
         margin-left: 50%;
       }
 
+      /* 
+      The original incarnation of the invite tab is very 
+      similar to that of the search tab.
+      */
+
+
+      #cmc-invite-results-title {
+        margin-bottom: 24px;
+      }
+
+      #cmc-invite-results-pagingctl {
+        position: absolute;
+        right: 18px;
+        margin-top: -1px;
+      }
+
+      #cmc-invite-results-pagingctl-text {
+        position: relative;
+        display: inline-block;
+        top: -8px;
+        margin-right: 0.1em;
+        text-align: center;
+        vertical-align: middle;
+        height: 20px;
+        width: 75px !important;
+      }
+
+      .cmc-invite-result-container {
+        height: 60px;
+        width: 200px;
+        position: relative;
+      }
+
+      .cmc-invite-result {
+        height: 50px;
+        width: 200px;
+        position: relative;
+      }
+
+      .cmc-invite-result .result-picture {
+        display: inline;
+        float: left;
+        margin-right: 7px;
+        width: 50px;
+        height: 50px;
+      }
+
+      .cmc-invite-result .result-name {
+        font-weight: bold;
+      }
+
+      .cmc-invite-result-col {
+        display: block;
+        position: absolute;
+      }
+
+      #cmc-invite-result-col-0 {
+        margin-left: 0px;
+      }
+
+      #cmc-invite-result-col-1 {
+        left: 0px;
+        margin-left: 50%;
+      }
+
+      #cmc-invite-tab-selection-reporting {
+        position: absolute;
+        right: 18px;
+        bottom: 18px;
+      }
+
+      #cmc-invite-results-total-selected-text {
+        position: relative;
+        display: inline-block;
+        height: 20px;
+        width: 150px !important;
+      }
+      
       img.srloading {
         z-index: -1;
         display: none;
@@ -534,8 +612,8 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
         <li><a href="#search-tab">Search</a></li>
         <!-- @/BEGIN/CUTSECTION -->
         <li><a href="#network-tab">My Network</a></li>
-        <li><a href="#invite-tab">Invite</a></li>
         <!-- @/END/CUTSECTION -->
+        <li><a href="#invite-tab">Invite</a></li>
       </ul>
       <div id="ajax-spinner">
         <img src="ajax-spinner.gif" />
@@ -565,7 +643,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
           <p>It's great to have you onboard! We'd like to take a chance to sync with your Facebook profile so we can connect you to volunteers all over the world. If you have a Facebook page, you can link that too. We'll be sure to let you know when people join your trips!</p>
           <h1>
             <a href="#" id="make-organizer-link">Make your Profile &gt;&gt;</a>
-          </h1>     
+          </h1>
         </div>
         <div id="make-profile">
           <h1>Create a Profile: Who Are You?</h1>
@@ -718,7 +796,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
               </div>
             </div>
           </div>
-        </div>     
+        </div>
         <div id="show-trips" style="display: none">
           <h2>Upcoming Trips:</h2>
           <div id="upcoming-trips-list-section">
@@ -728,7 +806,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
               </li>
             </ul>
           </div>
-        </div>     
+        </div>
         <div id="no-trip" style="display: none">
           <h1>There aren't any trips coming up soon.</h1>
           <h1>Why don't you <a href="#" onclick="CMC.page('#no-trip', '#make-trip');">create one</a>?</h1>
@@ -879,11 +957,119 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
       <div id="network-tab">
         <p>Morbi tincidunt, dui sit amet facilisis feugiat, odio metus gravida ante, ut pharetra massa metus id nunc. Duis scelerisque molestie turpis. Sed fringilla, massa eget luctus malesuada, metus eros molestie lectus, ut tempus eros massa ut dolor. Aenean aliquet fringilla sem. Suspendisse sed ligula in ligula suscipit aliquam. Praesent in eros vestibulum mi adipiscing adipiscing. Morbi facilisis. Curabitur ornare consequat nunc. Aenean vel metus. Ut posuere viverra nulla. Aliquam erat volutpat. Pellentesque convallis. Maecenas feugiat, tellus pellentesque pretium posuere, felis lorem euismod felis, eu ornare leo nisi vel felis. Mauris consectetur tortor et purus.</p>
       </div>
-      <div id="invite-tab">
-        <p>Mauris eleifend est et turpis. Duis id erat. Suspendisse potenti. Aliquam vulputate, pede vel vehicula accumsan, mi neque rutrum erat, eu congue orci lorem eget lorem. Vestibulum non ante. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Fusce sodales. Quisque eu urna vel enim commodo pellentesque. Praesent eu risus hendrerit ligula tempus pretium. Curabitur lorem enim, pretium nec, feugiat nec, luctus a, lacus.</p>
-        <p>Duis cursus. Maecenas ligula eros, blandit nec, pharetra at, semper at, magna. Nullam ac lacus. Nulla facilisi. Praesent viverra justo vitae neque. Praesent blandit adipiscing velit. Suspendisse potenti. Donec mattis, pede vel pharetra blandit, magna ligula faucibus eros, id euismod lacus dolor eget odio. Nam scelerisque. Donec non libero sed nulla mattis commodo. Ut sagittis. Donec nisi lectus, feugiat porttitor, tempor ac, tempor vitae, pede. Aenean vehicula velit eu tellus interdum rutrum. Maecenas commodo. Pellentesque nec elit. Fusce in lacus. Vivamus a libero vitae lectus hendrerit hendrerit.</p>
-      </div>
       <!-- @/END/CUTSECTION -->
+      <div id="invite-tab">
+        <div id="invite-box">
+          <div id="invite-box-box">
+            <div id="cmc-invite-box">
+              <input type="text" name="invite-search-box-text" style="width:100%"></input>
+            </div>
+          </div>
+        </div>
+        <div id="cmc-invite-results-spacer" style="display: block; height: 16px"></div>
+        <div id="cmc-invite-results">
+          <div id="cmc-invite-results-title" style="display: none">
+            <div id="cmc-invite-results-pagingctl">
+              <div id="cmc-invite-results-pagingctl-prev" class="cmc-square-button"></div>
+              <div id="cmc-invite-results-pagingctl-text" class="ui-state-default ui-corner-all">
+                <!-- placeholder text, should be localized elsewhere -->
+                <span class="ui-button-text">page 0</span>
+              </div>
+              <div id="cmc-invite-results-pagingctl-next" class="cmc-square-button"></div>
+            </div>
+            <h1 id="cmc-invite-results-title-text">Friends:</h1>
+          </div>
+          <div id="cmc-invite-result-list">
+            <div id="cmc-invite-result-col-0" class="cmc-search-result-col">
+              <div id="cmc-invite-result-container-0" class="cmc-invite-result-container">
+                <div id="cmc-invite-result-0" class="cmc-invite-result ui-corner-all">
+                  <div class="result-picture">
+                    <img src="ajax-spinner.gif" class="srpic srloading"/>
+                  </div>
+                  <div class="result-name">Invite Result</div>
+                </div>
+              </div>
+              <div id="cmc-invite-result-container-1" class="cmc-invite-result-container">
+                <div id="cmc-invite-result-1" class="cmc-invite-result ui-corner-all">
+                 <div class="result-picture">
+                   <img src="ajax-spinner.gif" class="srpic srloading"/>
+                  </div>
+                  <div class="result-name">Invite Result</div>
+                </div>
+              </div>
+              <div id="cmc-invite-result-container-2" class="cmc-invite-result-container">
+                <div id="cmc-invite-result-2" class="cmc-invite-result ui-corner-all">
+                  <div class="result-picture">
+                    <img src="ajax-spinner.gif" class="srpic srloading"/>
+                  </div>
+                  <div class="result-name">Invite Result</div>
+                </div>
+              </div>
+              <div id="cmc-invite-result-container-3" class="cmc-invite-result-container">
+                <div id="cmc-invite-result-3" class="cmc-invite-result ui-corner-all">
+                  <div class="result-picture">
+                    <img src="ajax-spinner.gif" class="srpic srloading"/>
+                  </div>
+                  <div class="result-name">Invite Result</div>
+                </div>
+              </div>
+              <div id="cmc-invite-result-container-4" class="cmc-invite-result-container">
+                <div id="cmc-invite-result-4" class="cmc-invite-result ui-corner-all">
+                  <div class="result-picture">
+                    <img src="ajax-spinner.gif" class="srpic srloading"/>
+                  </div>
+                  <div class="result-name">Invite Result</div>
+                </div>
+              </div>
+            </div>
+            <div id="cmc-invite-result-col-1" class="cmc-invite-result-col">
+              <div id="cmc-invite-result-container-5" class="cmc-invite-result-container">
+                <div id="cmc-invite-result-5" class="cmc-invite-result ui-corner-all">
+                  <div class="result-picture">
+                    <img src="ajax-spinner.gif" class="srpic srloading"/>
+                  </div>
+                  <div class="result-name">Invite Result</div>
+                </div>
+              </div>
+              <div id="cmc-invite-result-container-6" class="cmc-invite-result-container">
+                <div id="cmc-invite-result-6" class="cmc-invite-result ui-corner-all">
+                  <div class="result-picture">
+                    <img src="ajax-spinner.gif" class="srpic srloading"/>
+                  </div>
+                  <div class="result-name">Invite Result</div>
+                </div>
+              </div>
+              <div id="cmc-invite-result-container-7" class="cmc-invite-result-container">
+                <div id="cmc-invite-result-7" class="cmc-invite-result ui-corner-all">
+                  <div class="result-picture">
+                    <img src="ajax-spinner.gif" class="srpic srloading"/>
+                  </div>
+                  <div class="result-name">Invite Result</div>
+                </div>
+              </div>
+              <div id="cmc-invite-result-container-8" class="cmc-invite-result-container">
+                <div id="cmc-invite-result-8" class="cmc-invite-result ui-corner-all">
+                  <div class="result-picture">
+                    <img src="ajax-spinner.gif" class="srpic srloading"/>
+                  </div>
+                  <div class="result-name">Invite Result</div>
+                </div>
+              </div>
+              <div id="cmc-invite-result-container-7" class="cmc-invite-result-container">
+                <div id="cmc-invite-result-9" class="cmc-invite-result ui-corner-all">
+                  <div class="result-picture">
+                    <img src="ajax-spinner.gif" class="srpic srloading"/>
+                  </div>
+                  <div class="result-name">Invite Result</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="cmc-invite-tab-selection-reporting">
+              <div id="cmc-invite-results-total-selected-text"></div>
+          </div>
+        </div>
+      </div>
     </div>
     <div id="cmc-footer" style="display: none">
       <div class="leftside">
@@ -917,7 +1103,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
           <div id="wrapper">
             <div id="toggle-profile-volunteer">
               <a href="#" onclick="CMC.ToggleProfile();">I'd like my profile to be for an agency instead of a volunteer. </a>
-            </div>     
+            </div>
             <div id="contents">
               <div class="profile-container">
                 <div class="profile-contents">
@@ -993,7 +1179,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                           <?php cmc_echo_opt_usstates(); ?>
                         </select>
                       </td>
-                    </tr>           
+                    </tr>
                     <tr>
                       <td>
                         <label>City</label>
@@ -1012,7 +1198,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                           <?php cmc_echo_opt_countries(); ?>
                         </select>
                       </td>
-                    </tr>             
+                    </tr>
                     <tr>
                       <td>
                         <label>Zipcode</label>
@@ -1048,7 +1234,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                           <?php cmc_echo_opt_countries(); ?>
                         </select>
                       </td>
-                    </tr>           
+                    </tr>
                     <tr>
                       <td>
                         <label>Phone</label>
@@ -1072,7 +1258,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                       <td>
                         <input type="text" id="profile-experience" class="cmc-form-spec" />
                       </td>
-                    </tr>             
+                    </tr>
                     <tr>
                       <td>&nbsp;</td>
                       <td>
@@ -1084,8 +1270,8 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
               </div>
             </div>
           </div>
-        </form>      
-      </div>    
+        </form>
+      </div>
       <div id="profile-organizer-dialog" title="Please enter your profile information">
         <form id="profile-organizer-form">
           <div id="wrapper">
@@ -1125,7 +1311,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                         <?php cmc_echo_opt_skills(5); ?>
                         </select>
                       </td>
-                    </tr>                       
+                    </tr>
                     <tr>
                       <td style="width: 97px"><label>Medical Skills</label></td>
                       <td style="width: 97px">
@@ -1212,7 +1398,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                           <?php cmc_echo_opt_usstates(); ?>
                         </select>
                       </td>
-                    </tr>           
+                    </tr>
                     <tr>
                       <td><label>City</label></td>
                       <td><input type="text" id="profile-org-city" class="cmc-form-spec"/></td>
@@ -1224,7 +1410,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                           <?php cmc_echo_opt_countries(); ?>
                         </select>
                       </td>
-                    </tr>             
+                    </tr>
                     <tbody id="orgzip" style="display: none;">
                       <tr>
                         <td><label>Zipcode</label></td>
@@ -1254,7 +1440,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                           <?php cmc_echo_opt_countries(); ?>
                         </select>
                       </td>
-                    </tr>           
+                    </tr>
                     <tr>
                       <td><label>Phone</label></td>
                       <td><input type="text" id="profile-org-phone" class="cmc-form-spec" /></td>
@@ -1276,13 +1462,13 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
               </div>
             </div>
           </div>
-        </form>   
+        </form>
       </div>
       <div id="profile-toggle-dialog" title="Please wait...">
         <div id="toggle-image">
           <img class="toggle-wait-image" src="ajax-spinner.gif" />
         </div>
-      </div>    
+      </div>
       <div id="profile-trip-dialog" title="Please enter your trip profile information">
         <form id="profile-trip-form">
           <div id="wrapper">
@@ -1293,7 +1479,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                     <tr>
                       <td><label>Trip Name</label></td>
                       <td><input type="text" id="profile-trip-name" class="cmc-form-spec" /></td>
-                    </tr>  
+                    </tr>
                     <tr>
                       <td><label>Organization Website</label></td>
                       <td><input type="text" id="profile-trip-website" class="cmc-form-spec" /></td>
@@ -1301,7 +1487,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                     <tr>
                       <td><label>Trip Description</label></td>
                       <td><input type="text" id="profile-trip-about" class="cmc-form-spec" /></td>
-                    </tr>       
+                    </tr>
                     <tr>
                       <td style="width: 97px"><label>Religious Affiliation</label></td>
                       <td style="width: 197px">
@@ -1323,13 +1509,13 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                       <td style="width: 197px">
                         <input name="profile-trip-depart" id="profile-trip-depart" class="cmc-form-spec" type=button value="select" onclick="displayDatePicker('profile-trip-depart', false, 'mdy', '.');">
                       </td>
-                    </tr>       
+                    </tr>
                     <tr>
                       <td style="width: 97px"><label>Approximate Return Date</label></td>
                       <td style="width: 197px">
                         <input name="profile-trip-return" id="profile-trip-return" class="cmc-form-spec" type=button value="select" onclick="displayDatePicker('profile-trip-return', false, 'mdy', '.');">
                       </td>
-                    </tr>       
+                    </tr>
                     <tr>
                       <td style="width: 97px"><label>Duration of Missions</label></td>
                       <td style="width: 197px">
@@ -1392,7 +1578,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                           <?php cmc_echo_opt_languages(); ?>
                         </select>
                       </td>
-                    </tr>   
+                    </tr>
                     <tr>
                       <td style="width: 197px">
                         <label>Trip Medical Skills</label></td>
@@ -1469,7 +1655,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
               </div>
             </div>
           </div>
-        </form>   
+        </form>
       </div>
       <div id="report-problem-dialog" title="What seems to be the matter?">
         <p>Tell us what's wrong, and we'll look into it right away.</p>

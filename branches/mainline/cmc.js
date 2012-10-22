@@ -39,8 +39,14 @@ var CMC = {
   _lastSearchLockKeyGenerated : 0,
   isSearchLocked : false,
   searchPageCache : [],
+  invitePageCache : [],
+  inviteFilterText : null,
+  invitePageSelected : [],
   currentDisplayedSearchPage : 0,
+  currentDisplayedInvitePage : 0,
   searchPageImageClearJobQueue : [],
+  invitePageImageClearJobQueue : [],
+  inviteTimeout : null,
   SearchState : {},
 
   // startup configuration settings
@@ -708,7 +714,7 @@ var CMC = {
       $("#show-profile").fadeIn();
     } // end else
     this.endFunction();
-  },  
+  },
   
   onGetProfileDataError : function(jqXHR, textStatus, errorThrown) {
     // we might also want to log this or surface an error message or something
@@ -765,10 +771,10 @@ var CMC = {
     this.assert(data != undefined, "data is undefined in onGetTripsDataSuccess");
     if(data.has_error !== undefined && data.has_error !== null) {
       if(data.has_error) {
-          // we have a known error, handle it
-          this.handleGetTripsDataSuccessHasError(data);
+        // we have a known error, handle it
+        this.handleGetTripsDataSuccessHasError(data);
       } else {
-          this.updateFutureTrips(data);
+        this.updateFutureTrips(data);
       }
     } else {
       // an unknown error occurred? do something!
@@ -956,9 +962,9 @@ var CMC = {
           CMC.isreceiver = 0;
           CMC.editProfile();
         } else if (CMC.isreceiver == 0) {
-          $("#profile-volunteer-dialog").dialog('close');   
+          $("#profile-volunteer-dialog").dialog('close');
           $("#profile-toggle-dialog").dialog('open');
-          $("#profile-toggle-dialog").dialog().dialog("widget").find(".ui-dialog-titlebar-close").hide();     
+          $("#profile-toggle-dialog").dialog().dialog("widget").find(".ui-dialog-titlebar-close").hide();
           CMC.isreceiver = 1;
           CMC.editProfile();
         }
@@ -1167,14 +1173,14 @@ var CMC = {
         $("#profile-trip-religion").html("");
       }
       else {
-        $("#profile-trip-religion").html(data.religion ?  data.religion : "");
+        $("#profile-trip-religion").html(data.religion ? data.religion : "");
       }
 
       if (data.acco === undefined) {
         $("#profile-trip-acco").html("");
       }
       else {
-        $("#profile-trip-acco").html(data.acco ?  data.acco : "");
+        $("#profile-trip-acco").html(data.acco ? data.acco : "");
       }
 
       if (data.numpeople === undefined) {
@@ -1717,6 +1723,104 @@ var CMC = {
     this.endFunction();
   },
 
+  filterInviteResults : function (results, filter) {
+    this.beginFunction();
+    if (filter == "") {
+      return results;
+    }
+    var filterFunction = function (value) {
+      var lowerCaseFilter = filter.toLowerCase();
+      return value.name.toLowerCase().indexOf(lowerCaseFilter) != -1;
+    }
+    var finalResults = results.filter(filterFunction);
+    this.endFunction();
+    return finalResults;
+  },
+
+  showInviteResults : function (results, isRetryCall) {
+    this.beginFunction();
+    isRetryCall = isRetryCall || false; // optional parameter
+    if (isRetryCall) {
+      $("#cmc-invite-results").show();
+    }
+    if (results === undefined) {
+      // this is a bug! do NOT pass this function undefined! say null to inform it that you have no results!
+      this.assert(results === undefined, "undefined passed as results for showInviteResults");
+    } else if (results == null || results.length == 0) {
+      // no results
+      $("#cmc-search-results-noresultmsg").stop(true, true).fadeIn();
+    } else {
+      var imageLoadsCompleted = 0, __notifyImageLoadCompleted = $.proxy(function() {
+        imageLoadsCompleted++;
+        this.assert(imageLoadsCompleted <= results.length, "loading more images than we have results for (" + imageLoadsCompleted + ")");
+        if(imageLoadsCompleted == results.length) {
+          this.animateShowInviteResults(results);
+        }
+      }, this);
+
+      this.assert(results.length <= 10, "more than 10 results passed to showInviteResults");
+
+      for(var each in results) {
+        this.assert(results[each] !== undefined, "result[each] is missing at each=" + each);
+        //this.assert(results[each].id !== undefined, "id is missing from result at each=" + each);
+        var id = "#cmc-invite-result-" + each;
+        this.ajaxNotifyStart();
+        //this.assert(results[each].name !== undefined, "name is missing from result at each=" + each);
+        $(id).children(".result-name").html(results[each].name ? results[each].name : "");
+
+        var facebookID = results[each].id;
+        $(id).attr("fbid", facebookID);
+
+        if ($(id).hasClass('ui-state-default')) {
+          $(id).removeClass('ui-state-default');
+        }
+
+        if (CMC.invitePageSelected.indexOf(facebookID) != -1) {
+            if (!$(id).hasClass('ui-state-hover')) {
+                $(id).addClass('ui-state-hover');
+            }
+        }
+        else {
+           if ($(id).hasClass('ui-state-hover')) {
+             $(id).removeClass('ui-state-hover');
+           }
+        }
+        $(id).children("div.result-picture").children("img").remove();
+        if (results[each].id) {
+          $("<img />")
+            .attr("src", "https://graph.facebook.com/"+results[each].id+"/picture")
+            .attr("cmcid", id) // this is the id from above! not results[each].id!
+            .addClass("srpic")
+            .one('load', $.proxy(function(event) {
+              // I never want to see more than one image here again. --zack
+              $($(event.target).attr("cmcid")).children("div.result-picture").children("img").remove();
+              $($(event.target).attr("cmcid")).children("div.result-picture").append($(event.target));
+              this.ajaxNotifyComplete();
+              __notifyImageLoadCompleted();
+            }, this));
+        } else {
+          // this thing is probably intentionally blank, so don't load anything
+          var i = 1;
+          for (i = 1; i <= 4; ++i) { // set up four timeouts to clear the pictures after they load
+            var timeout = setTimeout("$('" + id + "').children('.result-picture').children('img').hide();", 100 * i);
+            CMC.invitePageImageClearJobQueue.push(timeout);
+          }
+          this.ajaxNotifyComplete();
+          __notifyImageLoadCompleted();
+        }
+      } //end for
+    } // end else
+    this.endFunction();
+  },
+
+  animateShowInviteResults : function (results) {
+    this.beginFunction();
+    var maxSearchResults = $(".cmc-invite-result").length, i = 0;
+    this.log("animating resultset starting with " + results[0].name);
+    this.swooshy(results, "#cmc-invite-results", "#cmc-invite-result-", maxSearchResults);
+    this.endFunction();
+  },
+
   showSearchResults : function (results, isRetryCall) {
     this.beginFunction();
     isRetryCall = isRetryCall || false; // optional parameter
@@ -2040,6 +2144,139 @@ var CMC = {
     this.endFunction();
   },
 
+  padInviteResults : function (results) {
+    this.beginFunction();
+    // might we think about making this a constant or something?
+    
+    var maxSearchResults = $(".cmc-invite-result").length, i = 0, ret = results.slice(0);
+    if (results.length < maxSearchResults) {
+      for (i = results.length; i < maxSearchResults; i++) {
+        ret.push({id: false, name: false});
+      }
+    }
+    this.endFunction();
+    return ret;
+  },
+
+  animateHideInviteResults : function(callback) {
+    this.beginFunction();
+    var fadesCompleted = 0, imagesDeleted = 0, _processFadeComplete = $.proxy(function () {
+      ++fadesCompleted;
+      if (fadesCompleted == $(".cmc-invite-result").length) {
+        this.log("now killing pictures in _processFadeComplete");
+        $(".result-name").each(function () {
+          $(this).html("");
+        });
+        $(".result-picture").each($.proxy(function (index, element) {
+          ++imagesDeleted;
+          $(element).children("img").remove();
+          if (imagesDeleted == $(".result-picture").length) {
+            if (callback != undefined) {
+              this.assert(typeof callback == "function", "type of callback is not a function");
+              callback();
+            }
+          }
+        }, this));
+      }
+    }, this);
+    $(".cmc-invite-result").queue("custom-InviteResultsQueue", function () {
+      $(this).stop(true, true).fadeOut(100, function () {
+        _processFadeComplete();
+      });
+    }).dequeue("custom-InviteResultsQueue");
+    this.endFunction();
+  },
+
+  navigateToNextInvitePage : function () {
+    this.beginFunction();
+    var inviteIndex = ++this.currentDisplayedInvitePage, interval;
+    this.updateInvitePagingControls();
+    this.animateHideInviteResults($.proxy(function () {
+      if (this.invitePageCache[inviteIndex] !== undefined) {
+        this.showInviteResults(this.padInviteResults(this.invitePageCache[inviteIndex]));
+      } else {
+        CMC.assert("Invalid invite page cache index!");
+      }
+    }, this));
+    this.endFunction();
+  },
+
+  navigateToPreviousInvitePage : function () {
+    this.beginFunction();
+    var fadesCompleted = 0, imagesDeleted = 0;
+    var inviteIndex = --this.currentDisplayedInvitePage;
+    this.updateInvitePagingControls();
+    if (this.invitePageCache[inviteIndex] !== undefined) {
+      this.animateHideInviteResults($.proxy(function () {
+        this.showInviteResults(this.invitePageCache[inviteIndex]);
+      }, this));
+    } else {
+      // something went horribly, horribly wrong, and we should probably know about it
+      this.assert(false, "stumbled on an undefined page while navigating to the previous page");
+    }
+    this.updateInvitePagingControls();
+    this.endFunction();
+  },
+
+  updateInvitePagingControls : function () {
+    this.beginFunction();
+    this.assert(this.currentDisplayedInvitePage >= 0, "displaying invate page that is negative.");
+    $("#cmc-invite-results-pagingctl-text").children(".ui-button-text").html("page " + (this.currentDisplayedInvitePage + 1));
+    if (this.currentDisplayedInvitePage <= 0) {
+      $("#cmc-invite-results-pagingctl-prev").removeClass("ui-state-hover").button("disable");
+    } else {
+      $("#cmc-invite-results-pagingctl-prev").button("enable");
+    }
+    if (this.invitePageCache[this.currentDisplayedInvitePage + 1] != null) {
+      $("#cmc-invite-results-pagingctl-next").button("enable");
+    } else {
+      $("#cmc-invite-results-pagingctl-next").removeClass("ui-state-hover").button("disable");
+    }
+    this.endFunction();
+  },
+
+  clearInvitePageImageClearJobQueue : function () {
+    CMC.beginFunction();
+    if (CMC.invitePageImageClearJobQueue.length > 0) {
+      CMC.log("found " + CMC.invitePageImageClearJobQueue.length + " leftover image clearing jobs, stopping them");
+      while (CMC.invitePageImageClearJobQueue.length > 0) {
+        clearTimeout(CMC.invitePageImageClearJobQueue.pop());
+      }
+    }
+    CMC.endFunction();
+  },
+
+  respondToInviteText : function(filterText) {
+      this.beginFunction();
+      if (filterText != CMC.inviteFilterText) {
+        var filteredFriends = CMC.filterInviteResults(CMC.friends, filterText);
+
+        CMC.invitePageCache = [[]];
+          
+        if (filteredFriends != undefined) {
+            var maxBlockSize = $(".cmc-invite-result").length;
+            for (var beginBlock = 0; beginBlock < filteredFriends.length; beginBlock += maxBlockSize) {
+                CMC.invitePageCache[beginBlock / maxBlockSize] = filteredFriends.slice(beginBlock, beginBlock + maxBlockSize);
+            }
+        }
+
+        this.currentDisplayedInvitePage = 0;
+        this.clearInvitePageImageClearJobQueue();
+        this.animateHideInviteResults($.proxy(function () {
+          if (this.invitePageCache[this.currentDisplayedInvitePage] !== undefined) {
+            this.showInviteResults(this.padInviteResults(this.invitePageCache[CMC.currentDisplayedInvitePage]));
+          }
+        }, this));
+        CMC.updateInvitePagingControls();
+        $("#cmc-invite-results-title").stop(true, true).fadeIn();
+        CMC.inviteFilterText = filterText;
+      }
+      else {
+        CMC.log("Invite filter text did not change. Not updating results.");
+      }
+      this.endFunction();
+  },
+
   animateSearchResultSelected : function (whichResult) {
     this.beginFunction();
     $(".cmc-search-result").not(whichResult).each(function () {
@@ -2074,7 +2311,7 @@ var CMC = {
       };
       this.assert(whichFBID != null && whichFBID != "", "fbid attr is null for clicked search result");
       this.assert(whichFBLink != null && whichFBLink != "", "fblink attr is null for clicked search result");
-      this.getProfile(whichFBID, true, __showProfileWithLinkPrecacheInternal);      
+      this.getProfile(whichFBID, true, __showProfileWithLinkPrecacheInternal);
       this.animateSearchResultSelected(whichResult);
     } else {
       this.log("search result clicked, but name is empty; ignoring");
@@ -2101,14 +2338,14 @@ var CMC = {
       $("#tabs").tabs('select', 1);
     }, 285);
     this.endFunction();
-  },  
+  },
   
   handleShowTripMemberProfile : function (whichResult) {
     this.beginFunction();
     if($(whichResult).children(".profile-tripmember-name").html() != "") {
       var whichFBID = $(whichResult).attr("fbid");
       this.assert(whichFBID != null && whichFBID != "", "fbid attr is null for clicked search result");
-      this.getProfile(whichFBID, true, this.showProfile);      
+      this.getProfile(whichFBID, true, this.showProfile);
       this.animateTripMemberResultSelected(whichResult);
     } else {
       this.log("search result clicked, but name is empty; ignoring");
@@ -2449,10 +2686,10 @@ var CMC = {
           }
         }
         if (this.isreceiver) {
-          //$("#profile-toggle-dialog").dialog('close');    
+          //$("#profile-toggle-dialog").dialog('close');
           $("#profile-organizer-dialog").dialog('open');
         } else {
-          //$("#profile-toggle-dialog").dialog('close');    
+          //$("#profile-toggle-dialog").dialog('close');
           $("#profile-volunteer-dialog").dialog('open');
         }
       } else {
@@ -2803,25 +3040,24 @@ var CMC = {
 
      var TDeparture, TReturn;
     // Logic to determine that the trip begin date is before the trip end date
-      if (tripdepart != "") {
-          var departdate = tripdepart.split(".");
-          DepartMonth=parseInt(departdate[0],10);   
-          DepartDay=parseInt(departdate[1],10);   
-          DepartYear=parseInt(departdate[2],10);
+    if (tripdepart != "") {
+      var departdate = tripdepart.split(".");
+      DepartMonth=parseInt(departdate[0],10);
+      DepartDay=parseInt(departdate[1],10);
+      DepartYear=parseInt(departdate[2],10);
       TDeparture = new Date();
       TDeparture.setFullYear(DepartYear,DepartMonth,DepartDay);
-      }
-      if (tripreturn != "") {
-          var returndate = tripreturn.split(".");
-          ReturnMonth=parseInt(returndate[0],10);   
-          ReturnDay=parseInt(returndate[1],10);   
-          ReturnYear=parseInt(returndate[2],10);  
+    }
+    if (tripreturn != "") {
+      var returndate = tripreturn.split(".");
+      ReturnMonth=parseInt(returndate[0],10);
+      ReturnDay=parseInt(returndate[1],10);
+      ReturnYear=parseInt(returndate[2],10);
       TReturn = new Date();
-      TReturn.setFullYear(ReturnYear,ReturnMonth,ReturnDay);      
-      }
-    
+      TReturn.setFullYear(ReturnYear,ReturnMonth,ReturnDay);
+    }
     if (TDeparture > TReturn) {
-          reason += errornum + ' ' + 'Trip departure date should be before the return date' + '\n';
+      reason += errornum + ' ' + 'Trip departure date should be before the return date' + '\n';
       errornum = errornum + 1;
       isValid = false;
     }
@@ -2861,7 +3097,7 @@ var CMC = {
     this.endFunction();
     return ret;
   },
-  
+
   onSubmitTripSuccess : function(data, textStatus, jqXHR) {
     this.beginFunction();
     if (!data.has_error) {
@@ -2888,8 +3124,8 @@ var CMC = {
     this.handleGenericServerError(jqXHR, textStatus, errorThrown);
     alert("Sorry, we aren't able to save your trip right now. Try again later.");
     this.endFunction();
-  },  
-  
+  },
+
   createTrip : function () {
     this.emptyTripForm();
     this.tripdata = {};
@@ -2906,9 +3142,9 @@ var CMC = {
   },
 
   validateEmail : function (email) {
-    var eisValid =  false;
-    var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+[\.]{1}[a-zA-Z]{2,4}$/;  
-    eisValid = emailPattern.test(email);  
+    var eisValid = false;
+    var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+[\.]{1}[a-zA-Z]{2,4}$/;
+    eisValid = emailPattern.test(email);
     return eisValid;
   },
 
@@ -3164,7 +3400,7 @@ $(function() {
     close: function() {
       CMC.dialogClose(this);
     }
-  });  
+  });
 
   $("#make-organizer-link").click(function() {
     CMC.isreceiver = true;
@@ -3184,7 +3420,7 @@ $(function() {
     close: function() {
       CMC.dialogClose(this);
     }
-  });  
+  });
   
   $("#profile-toggle-dialog").dialog({
     autoOpen: false,
@@ -3199,7 +3435,7 @@ $(function() {
     close: function() {
       CMC.dialogClose(this);
     }
-  });  
+  });
   
   //@/BEGIN/DEBUGONLYSECTION
   $("#assert-dialog").dialog({
@@ -3210,7 +3446,7 @@ $(function() {
     modal: true,
     width: 400,
     height: 275,
-  });  
+  });
   //@/END/DEBUGONLYSECTION
   
   $("#make-trip").click(function() {
@@ -3377,6 +3613,61 @@ $(function() {
       }
     });
 
+  $("#cmc-invite-results-pagingctl-prev")
+    .button({ text: false, icons: { primary: "ui-icon-circle-triangle-w" }})
+    .click(function () {
+      if (!$(this).button("option", "disabled")) {
+        CMC.navigateToPreviousInvitePage();
+      }
+    });
+
+  $("#cmc-invite-results-pagingctl-next")
+    .button({ text: false, icons: { primary: "ui-icon-circle-triangle-e" }})
+    .click(function () {
+      if (!$(this).button("option", "disabled")) {
+        CMC.navigateToNextInvitePage();
+      }
+    });
+  $("#cmc-invite-results-title").hide();
+  $(".cmc-invite-result")
+    .each(function () { $(this).hide(); })
+    .click( function () {
+        if ($(this).children(".result-name").html() != "") {
+          if (CMC.invitePageSelected.indexOf($(this).attr('fbid')) == -1) {
+             CMC.invitePageSelected.push($(this).attr('fbid'));
+             $(this).removeClass('ui-state-default');
+             $(this).addClass('ui-state-hover');
+          }
+          else {
+             CMC.invitePageSelected.splice(CMC.invitePageSelected.indexOf($(this).attr('fbid')), 1);
+             $(this).removeClass('ui-state-hover');
+             $(this).addClass('ui-state-default');
+          }
+        }
+    })
+    .hover(
+        function () {
+            if (!$(this).hasClass('ui-state-default') &&
+                !$(this).hasClass('ui-state-hover')   &&
+                $(this).children(".result-name").html() != "") {
+
+                $(this).addClass('ui-state-default');
+            }
+        },
+        function () { 
+            if (CMC.invitePageSelected.indexOf($(this).attr('fbid')) == -1) {
+                $(this).removeClass('ui-state-default');
+            }
+        });
+
+  $("#cmc-invite-results-total-selected-text")
+      .button({ label: "Clear Selection"})
+      .click(
+          function () {
+              CMC.invitePageSelected = [];
+              $(".cmc-invite-result").removeClass('ui-state-hover');
+          });
+
   $("#cmc-search-results-title").hide();
   $("#cmc-search-results-noresultmsg").hide();
   $(".cmc-search-result")
@@ -3407,12 +3698,24 @@ $(function() {
             CMC.assert("CMC.profiledata was null after Facebook login response!");
           }
         }
+        CMC.respondToInviteText("");
       });
     } else {
       CMC.log("authResponse is null; no user session, do not cache data yet");
       CMC.handleUserUnauthorized();
     }
   });
+
+  $('input:text#[name=invite-search-box-text]')
+    .keyup( function () {
+          if (CMC.inviteTimeout != null) {
+              clearTimeout(CMC.inviteTimeout);
+          }
+          var text = $(this).val();
+          CMC.inviteTimeout = setTimeout(function() {
+              CMC.respondToInviteText(text);
+          }, 200);
+        });
 
   CMC.log("setting up dialog boxes");
   $("#copyrights-dialog").dialog({
@@ -3477,7 +3780,7 @@ $(function() {
   });
 
   $("#profile-org-submit").click(function() {
-      CMC.submitorgProfile(CMC.getFormData("#profile-organizer-form"));
+    CMC.submitorgProfile(CMC.getFormData("#profile-organizer-form"));
   });
 
   $("#profile-trip-submit").click(function() {
@@ -3506,13 +3809,13 @@ $(function() {
     message: "Trip name is a required field"
   });
   //$("#profile-org-website").validate[optional,custom[url]];
-  //$("#profile-trip-website").validate[optional,custom[url]];  
-  
+  //$("#profile-trip-website").validate[optional,custom[url]];
+
   $("#profile-org-website").validate({
     expression: "if (VAL.test(/(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/) && VAL) return true; else if (!VAL) return true; else return false;",
     message: "Please enter a valid website"
   });
-  
+
   $("#profile-email").validate({
     expression: "if (VAL.match(/^[^\\W][a-zA-Z0-9\\_\\-\\.]+([a-zA-Z0-9\\_\\-\\.]+)*\\@[a-zA-Z0-9_]+(\\.[a-zA-Z0-9_]+)*\\.[a-zA-Z]{2,4}$/) && VAL) return true; else if (!VAL) return true; else return false;",
     message: "Please enter a valid Email ID"
@@ -3520,7 +3823,7 @@ $(function() {
   $("#profile-org-email").validate({
     expression: "if (VAL.match(/^[^\\W][a-zA-Z0-9\\_\\-\\.]+([a-zA-Z0-9\\_\\-\\.]+)*\\@[a-zA-Z0-9_]+(\\.[a-zA-Z0-9_]+)*\\.[a-zA-Z]{2,4}$/) && VAL) return true; else if (!VAL) return true; else return false;",
     message: "Please enter a valid Email ID"
-  });   
+  });
   $("#profile-trip-email").validate({
     expression: "if (VAL.match(/^[^\\W][a-zA-Z0-9\\_\\-\\.]+([a-zA-Z0-9\\_\\-\\.]+)*\\@[a-zA-Z0-9_]+(\\.[a-zA-Z0-9_]+)*\\.[a-zA-Z]{2,4}$/) && VAL) return true; else if (!VAL) return true; else return false;",
     message: "Please enter a valid Email ID"
@@ -3532,7 +3835,7 @@ $(function() {
   $("#profile-org-zipcode").validate({
     expression: "if (VAL.match(new RegExp(/(^[0-9]{5}$)|(^[0-9]{5}-[0-9]{4}$)/)) && VAL) return true; else if (!VAL) return true; else return false;",
     message: "Please enter a valid Zipcode"
-  });  
+  });
   $("#profile-trip-zipcode").validate({
     expression: "if (VAL.match(new RegExp(/(^[0-9]{5}$)|(^[0-9]{5}-[0-9]{4}$)/)) && VAL) return true; else if (!VAL) return true; else return false;",
     message: "Please enter a valid Zipcode"
@@ -3544,7 +3847,7 @@ $(function() {
   $("#profile-org-phone").validate({
     expression: "if (VAL.match(new RegExp(/(^[0-9]{10}$)/)) && VAL) return true; else if (!VAL) return true; else return false;",
     message: "Please enter a valid Phone Number"
-  });   
+  });
   $("#profile-trip-phone").validate({
     expression: "if (VAL.match(new RegExp(/(^[0-9]{10}$)/)) && VAL) return true; else if (!VAL) return true; else return false;",
     message: "Please enter a valid Phone Number"
