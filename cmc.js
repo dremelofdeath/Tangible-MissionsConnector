@@ -3635,13 +3635,13 @@ $(function() {
         if ($(this).children(".result-name").html() != "") {
           if (CMC.invitePageSelected.indexOf($(this).attr('fbid')) == -1) {
              CMC.invitePageSelected.push($(this).attr('fbid'));
-             $(this).removeClass('ui-state-default');
+             $(this).removeClass('ui-state-default').removeClass("cmc-invite-border-fix");
              $(this).addClass('ui-state-hover');
           }
           else {
              CMC.invitePageSelected.splice(CMC.invitePageSelected.indexOf($(this).attr('fbid')), 1);
              $(this).removeClass('ui-state-hover');
-             $(this).addClass('ui-state-default');
+             $(this).addClass('ui-state-default').removeClass("cmc-invite-border-fix");
           }
         }
     })
@@ -3651,12 +3651,12 @@ $(function() {
                 !$(this).hasClass('ui-state-hover')   &&
                 $(this).children(".result-name").html() != "") {
 
-                $(this).addClass('ui-state-default');
+                $(this).addClass('ui-state-default').removeClass("cmc-invite-border-fix");
             }
         },
         function () { 
             if (CMC.invitePageSelected.indexOf($(this).attr('fbid')) == -1) {
-                $(this).removeClass('ui-state-default');
+                $(this).removeClass('ui-state-default').addClass("cmc-invite-border-fix");
             }
         });
 

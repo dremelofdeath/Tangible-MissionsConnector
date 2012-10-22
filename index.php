@@ -396,6 +396,11 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
         position: absolute;
       }
 
+      .cmc-invite-border-fix {
+        padding-top: 1px;
+        padding-left: 1px;
+      }
+
       #cmc-invite-result-col-0 {
         margin-left: 0px;
       }
@@ -982,7 +987,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
           <div id="cmc-invite-result-list">
             <div id="cmc-invite-result-col-0" class="cmc-search-result-col">
               <div id="cmc-invite-result-container-0" class="cmc-invite-result-container">
-                <div id="cmc-invite-result-0" class="cmc-invite-result ui-corner-all">
+                <div id="cmc-invite-result-0" class="cmc-invite-result cmc-invite-border-fix ui-corner-all">
                   <div class="result-picture">
                     <img src="ajax-spinner.gif" class="srpic srloading"/>
                   </div>
@@ -990,7 +995,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                 </div>
               </div>
               <div id="cmc-invite-result-container-1" class="cmc-invite-result-container">
-                <div id="cmc-invite-result-1" class="cmc-invite-result ui-corner-all">
+                <div id="cmc-invite-result-1" class="cmc-invite-result cmc-invite-border-fix ui-corner-all">
                  <div class="result-picture">
                    <img src="ajax-spinner.gif" class="srpic srloading"/>
                   </div>
@@ -998,7 +1003,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                 </div>
               </div>
               <div id="cmc-invite-result-container-2" class="cmc-invite-result-container">
-                <div id="cmc-invite-result-2" class="cmc-invite-result ui-corner-all">
+                <div id="cmc-invite-result-2" class="cmc-invite-result cmc-invite-border-fix ui-corner-all">
                   <div class="result-picture">
                     <img src="ajax-spinner.gif" class="srpic srloading"/>
                   </div>
@@ -1006,7 +1011,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                 </div>
               </div>
               <div id="cmc-invite-result-container-3" class="cmc-invite-result-container">
-                <div id="cmc-invite-result-3" class="cmc-invite-result ui-corner-all">
+                <div id="cmc-invite-result-3" class="cmc-invite-result cmc-invite-border-fix ui-corner-all">
                   <div class="result-picture">
                     <img src="ajax-spinner.gif" class="srpic srloading"/>
                   </div>
@@ -1014,7 +1019,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                 </div>
               </div>
               <div id="cmc-invite-result-container-4" class="cmc-invite-result-container">
-                <div id="cmc-invite-result-4" class="cmc-invite-result ui-corner-all">
+                <div id="cmc-invite-result-4" class="cmc-invite-result cmc-invite-border-fix ui-corner-all">
                   <div class="result-picture">
                     <img src="ajax-spinner.gif" class="srpic srloading"/>
                   </div>
@@ -1024,7 +1029,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
             </div>
             <div id="cmc-invite-result-col-1" class="cmc-invite-result-col">
               <div id="cmc-invite-result-container-5" class="cmc-invite-result-container">
-                <div id="cmc-invite-result-5" class="cmc-invite-result ui-corner-all">
+                <div id="cmc-invite-result-5" class="cmc-invite-result cmc-invite-border-fix ui-corner-all">
                   <div class="result-picture">
                     <img src="ajax-spinner.gif" class="srpic srloading"/>
                   </div>
@@ -1032,7 +1037,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                 </div>
               </div>
               <div id="cmc-invite-result-container-6" class="cmc-invite-result-container">
-                <div id="cmc-invite-result-6" class="cmc-invite-result ui-corner-all">
+                <div id="cmc-invite-result-6" class="cmc-invite-result cmc-invite-border-fix ui-corner-all">
                   <div class="result-picture">
                     <img src="ajax-spinner.gif" class="srpic srloading"/>
                   </div>
@@ -1040,7 +1045,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                 </div>
               </div>
               <div id="cmc-invite-result-container-7" class="cmc-invite-result-container">
-                <div id="cmc-invite-result-7" class="cmc-invite-result ui-corner-all">
+                <div id="cmc-invite-result-7" class="cmc-invite-result cmc-invite-border-fix ui-corner-all">
                   <div class="result-picture">
                     <img src="ajax-spinner.gif" class="srpic srloading"/>
                   </div>
@@ -1048,7 +1053,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                 </div>
               </div>
               <div id="cmc-invite-result-container-8" class="cmc-invite-result-container">
-                <div id="cmc-invite-result-8" class="cmc-invite-result ui-corner-all">
+                <div id="cmc-invite-result-8" class="cmc-invite-result cmc-invite-border-fix ui-corner-all">
                   <div class="result-picture">
                     <img src="ajax-spinner.gif" class="srpic srloading"/>
                   </div>
@@ -1056,7 +1061,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                 </div>
               </div>
               <div id="cmc-invite-result-container-7" class="cmc-invite-result-container">
-                <div id="cmc-invite-result-9" class="cmc-invite-result ui-corner-all">
+                <div id="cmc-invite-result-9" class="cmc-invite-result cmc-invite-border-fix ui-corner-all">
                   <div class="result-picture">
                     <img src="ajax-spinner.gif" class="srpic srloading"/>
                   </div>
