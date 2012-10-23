@@ -1783,14 +1783,14 @@ var CMC = {
         }
 
         if (CMC.invitePageSelected.indexOf(facebookID) != -1) {
-            if (!$(id).hasClass('ui-state-hover')) {
-                $(id).addClass('ui-state-hover');
-            }
+          if (!$(id).hasClass('ui-state-hover')) {
+            $(id).addClass('ui-state-hover');
+          }
         }
         else {
-           if ($(id).hasClass('ui-state-hover')) {
-             $(id).removeClass('ui-state-hover');
-           }
+         if ($(id).hasClass('ui-state-hover')) {
+           $(id).removeClass('ui-state-hover');
+         }
         }
         $(id).children("div.result-picture").children("img").remove();
         if (results[each].id) {
@@ -3653,6 +3653,13 @@ $(function() {
           $(this).removeClass('ui-state-hover');
           $(this).addClass('ui-state-default').removeClass("cmc-invite-border-fix");
         }
+        $("#cmc-invite-minions").button({label: ("Invite " + CMC.invitePageSelected.length + " People")});
+        if (CMC.invitePageSelected.length == 0) {
+          $("#cmc-invite-minions").button("disable");
+        }
+        else {
+          $("#cmc-invite-minions").button("enable");
+        }
       }
     })
     .hover(
@@ -3670,17 +3677,20 @@ $(function() {
         });
 
   $("#cmc-invite-results-total-selected-text")
-    .button({ label: "Start Over"})
+    .button({label: "Start Over"})
     .click(
       function () {
         CMC.invitePageSelected = [];
         $(".cmc-invite-result").removeClass('ui-state-hover');
         $('input:text#[name=invite-search-box-text]').val('');
+        CMC.currentDisplayedInvitePage = 0;
+        $("#cmc-invite-minions").button({label: "Invite 0 People", disabled: true});
+        CMC.inviteFilterText = " "; //force refresh
         CMC.respondToInviteText("");
       });
 
   $("#cmc-invite-minions")
-    .button({label: "Invite Selected"})
+    .button({label: "Invite 0 People", disabled: true})
     .click(
       function() {
         CMC.sendCMCInviteRequestToRecipients();
