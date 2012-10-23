@@ -416,13 +416,6 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
         bottom: 18px;
       }
 
-      #cmc-invite-results-total-selected-text {
-        position: relative;
-        display: inline-block;
-        height: 20px;
-        width: 150px !important;
-      }
-      
       img.srloading {
         z-index: -1;
         display: none;
@@ -1071,7 +1064,8 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
             </div>
           </div>
           <div id="cmc-invite-tab-selection-reporting">
-              <div id="cmc-invite-results-total-selected-text"></div>
+            <div id="cmc-invite-minions"></div>
+            <div id="cmc-invite-results-total-selected-text"></div>
           </div>
         </div>
       </div>

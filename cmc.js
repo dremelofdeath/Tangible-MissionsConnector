@@ -451,6 +451,13 @@ var CMC = {
     this.endFunction();
   },
 
+  sendCMCInviteRequestToRecipients : function() {
+    FB.ui({method: 'apprequests',
+      message: 'Invitation to use Christian Missions Connector',
+      to: CMC.invitePageSelected 
+    });
+  },
+
   getProfile : function(userid, showLoading, callback) {
     this.beginFunction();
     this.log("Obtaining data from the profile");
@@ -1762,10 +1769,10 @@ var CMC = {
 
       for(var each in results) {
         this.assert(results[each] !== undefined, "result[each] is missing at each=" + each);
-        //this.assert(results[each].id !== undefined, "id is missing from result at each=" + each);
+        this.assert(results[each].id !== undefined, "id is missing from result at each=" + each); 
         var id = "#cmc-invite-result-" + each;
         this.ajaxNotifyStart();
-        //this.assert(results[each].name !== undefined, "name is missing from result at each=" + each);
+        this.assert(results[each].name !== undefined, "name is missing from result at each=" + each);
         $(id).children(".result-name").html(results[each].name ? results[each].name : "");
 
         var facebookID = results[each].id;
@@ -3629,45 +3636,55 @@ $(function() {
         CMC.navigateToNextInvitePage();
       }
     });
+
   $("#cmc-invite-results-title").hide();
+
   $(".cmc-invite-result")
     .each(function () { $(this).hide(); })
     .click( function () {
-        if ($(this).children(".result-name").html() != "") {
-          if (CMC.invitePageSelected.indexOf($(this).attr('fbid')) == -1) {
-             CMC.invitePageSelected.push($(this).attr('fbid'));
-             $(this).removeClass('ui-state-default').removeClass("cmc-invite-border-fix");
-             $(this).addClass('ui-state-hover');
-          }
-          else {
-             CMC.invitePageSelected.splice(CMC.invitePageSelected.indexOf($(this).attr('fbid')), 1);
-             $(this).removeClass('ui-state-hover');
-             $(this).addClass('ui-state-default').removeClass("cmc-invite-border-fix");
-          }
+      if ($(this).children(".result-name").html() != "") {
+        if (CMC.invitePageSelected.indexOf($(this).attr('fbid')) == -1) {
+          CMC.invitePageSelected.push($(this).attr('fbid'));
+          $(this).removeClass('ui-state-default').removeClass("cmc-invite-border-fix");
+          $(this).addClass('ui-state-hover');
         }
+        else {
+          CMC.invitePageSelected.splice(CMC.invitePageSelected.indexOf($(this).attr('fbid')), 1);
+          $(this).removeClass('ui-state-hover');
+          $(this).addClass('ui-state-default').removeClass("cmc-invite-border-fix");
+        }
+      }
     })
     .hover(
-        function () {
-            if (!$(this).hasClass('ui-state-default') &&
-                !$(this).hasClass('ui-state-hover')   &&
-                $(this).children(".result-name").html() != "") {
-
-                $(this).addClass('ui-state-default').removeClass("cmc-invite-border-fix");
-            }
+      function () {
+        if (!$(this).hasClass('ui-state-default') &&
+          !$(this).hasClass('ui-state-hover')   &&
+          $(this).children(".result-name").html() != "") {
+            $(this).addClass('ui-state-default').removeClass("cmc-invite-border-fix");
+          }
         },
         function () { 
-            if (CMC.invitePageSelected.indexOf($(this).attr('fbid')) == -1) {
-                $(this).removeClass('ui-state-default').addClass("cmc-invite-border-fix");
-            }
+          if (CMC.invitePageSelected.indexOf($(this).attr('fbid')) == -1) {
+            $(this).removeClass('ui-state-default').addClass("cmc-invite-border-fix");
+          }
         });
 
   $("#cmc-invite-results-total-selected-text")
-      .button({ label: "Clear Selection"})
-      .click(
-          function () {
-              CMC.invitePageSelected = [];
-              $(".cmc-invite-result").removeClass('ui-state-hover');
-          });
+    .button({ label: "Start Over"})
+    .click(
+      function () {
+        CMC.invitePageSelected = [];
+        $(".cmc-invite-result").removeClass('ui-state-hover');
+        $('input:text#[name=invite-search-box-text]').val('');
+        CMC.respondToInviteText("");
+      });
+
+  $("#cmc-invite-minions")
+    .button({label: "Invite Selected"})
+    .click(
+      function() {
+        CMC.sendCMCInviteRequestToRecipients();
+      });
 
   $("#cmc-search-results-title").hide();
   $("#cmc-search-results-noresultmsg").hide();
