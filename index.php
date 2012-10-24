@@ -376,6 +376,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
       .cmc-invite-result {
         height: 50px;
         width: 200px;
+        cursor: pointer;
         position: relative;
       }
 
@@ -1064,8 +1065,8 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
             </div>
           </div>
           <div id="cmc-invite-tab-selection-reporting">
-            <div id="cmc-invite-minions"></div>
-            <div id="cmc-invite-results-total-selected-text"></div>
+            <div id="cmc-invite-selected-button"></div>
+            <div id="cmc-invite-start-over"></div>
           </div>
         </div>
       </div>

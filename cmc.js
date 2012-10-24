@@ -1732,16 +1732,93 @@ var CMC = {
 
   filterInviteResults : function (results, filter) {
     this.beginFunction();
+    var finalResults = null;
     if (filter == "") {
-      return results;
+      finalResults = results;
     }
-    var filterFunction = function (value) {
-      var lowerCaseFilter = filter.toLowerCase();
-      return value.name.toLowerCase().indexOf(lowerCaseFilter) != -1;
+    else {
+      var filterFunction = function (value) {
+        var lowerCaseFilter = filter.toLowerCase();
+        return value.name.toLowerCase().indexOf(lowerCaseFilter) != -1;
+      }
+      finalResults = results.filter(filterFunction);
     }
-    var finalResults = results.filter(filterFunction);
     this.endFunction();
     return finalResults;
+  },
+
+  handleInviteResultClick : function (result) {
+    this.beginFunction();
+    if ($(result).children(".result-name").html() != "") {
+      if (this.invitePageSelected.indexOf($(result).attr('fbid')) == -1) {
+        if (this.invitePageSelected.length >= 50) {
+          
+        }
+        else {
+          this.invitePageSelected.push($(result).attr('fbid'));
+          $(result).removeClass('ui-state-default').removeClass("cmc-invite-border-fix");
+          $(result).addClass('ui-state-hover');
+        }
+      }
+      else {
+        this.invitePageSelected.splice(this.invitePageSelected.indexOf($(result).attr('fbid')), 1);
+        $(result).removeClass('ui-state-hover');
+        $(result).addClass('ui-state-default').removeClass("cmc-invite-border-fix");
+      }
+      this.updateInviteSelectedButtonText(this.invitePageSelected.length);
+    }
+    this.endFunction();
+  },
+
+  updateInviteSelectedButtonText : function(number) {
+    this.beginFunction();
+    var inviteButton = $("#cmc-invite-selected-button");
+    var inviteButtonText = "Invite " + number + ' ';
+    if (number == 0) {
+      inviteButton.button("disable");
+      inviteButtonText += "People"
+    }
+    else {
+      inviteButton.button("enable");
+      if (number == 1) {
+        inviteButtonText += "Person";
+      }
+      else {
+        inviteButtonText += "People";
+      }
+    }
+    inviteButton.button({label: inviteButtonText});
+    this.endFunction();
+  },
+
+  handleInviteResultEnterHover : function (result) {
+    this.beginFunction();
+    if (!$(result).hasClass('ui-state-default') &&
+        !$(result).hasClass('ui-state-hover')   &&
+         $(result).children(".result-name").html() != "") {
+           $(result).addClass('ui-state-default').removeClass("cmc-invite-border-fix");
+    }
+    this.endFunction();
+  },
+
+  handleInviteResultLeaveHover : function (result) {
+    this.beginFunction();
+    if (CMC.invitePageSelected.indexOf($(result).attr('fbid')) == -1) {
+      $(result).removeClass('ui-state-default').addClass("cmc-invite-border-fix");
+    }
+    this.endFunction();
+  },
+
+  inviteTabStartOver : function () {
+    this.beginFunction();
+    this.invitePageSelected = [];
+    $(".cmc-invite-result").removeClass('ui-state-hover');
+    $('input:text#[name=invite-search-box-text]').val('');
+    this.currentDisplayedInvitePage = 0;
+    this.updateInviteSelectedButtonText(0);
+    this.inviteFilterText = " "; //force refresh
+    this.respondToInviteText("");
+    this.endFunction();
   },
 
   showInviteResults : function (results, isRetryCall) {
@@ -2243,11 +2320,11 @@ var CMC = {
   },
 
   clearInvitePageImageClearJobQueue : function () {
-    CMC.beginFunction();
-    if (CMC.invitePageImageClearJobQueue.length > 0) {
-      CMC.log("found " + CMC.invitePageImageClearJobQueue.length + " leftover image clearing jobs, stopping them");
-      while (CMC.invitePageImageClearJobQueue.length > 0) {
-        clearTimeout(CMC.invitePageImageClearJobQueue.pop());
+    this.beginFunction();
+    if (this.invitePageImageClearJobQueue.length > 0) {
+      this.log("found " + CMC.invitePageImageClearJobQueue.length + " leftover image clearing jobs, stopping them");
+      while (this.invitePageImageClearJobQueue.length > 0) {
+        clearTimeout(this.invitePageImageClearJobQueue.pop());
       }
     }
     CMC.endFunction();
@@ -3642,54 +3719,24 @@ $(function() {
   $(".cmc-invite-result")
     .each(function () { $(this).hide(); })
     .click( function () {
-      if ($(this).children(".result-name").html() != "") {
-        if (CMC.invitePageSelected.indexOf($(this).attr('fbid')) == -1) {
-          CMC.invitePageSelected.push($(this).attr('fbid'));
-          $(this).removeClass('ui-state-default').removeClass("cmc-invite-border-fix");
-          $(this).addClass('ui-state-hover');
-        }
-        else {
-          CMC.invitePageSelected.splice(CMC.invitePageSelected.indexOf($(this).attr('fbid')), 1);
-          $(this).removeClass('ui-state-hover');
-          $(this).addClass('ui-state-default').removeClass("cmc-invite-border-fix");
-        }
-        $("#cmc-invite-minions").button({label: ("Invite " + CMC.invitePageSelected.length + " People")});
-        if (CMC.invitePageSelected.length == 0) {
-          $("#cmc-invite-minions").button("disable");
-        }
-        else {
-          $("#cmc-invite-minions").button("enable");
-        }
-      }
+      CMC.handleInviteResultClick(this);
     })
     .hover(
       function () {
-        if (!$(this).hasClass('ui-state-default') &&
-          !$(this).hasClass('ui-state-hover')   &&
-          $(this).children(".result-name").html() != "") {
-            $(this).addClass('ui-state-default').removeClass("cmc-invite-border-fix");
-          }
+          CMC.handleInviteResultEnterHover(this);
         },
         function () { 
-          if (CMC.invitePageSelected.indexOf($(this).attr('fbid')) == -1) {
-            $(this).removeClass('ui-state-default').addClass("cmc-invite-border-fix");
-          }
+          CMC.handleInviteResultLeaveHover(this); 
         });
 
-  $("#cmc-invite-results-total-selected-text")
+  $("#cmc-invite-start-over")
     .button({label: "Start Over"})
     .click(
       function () {
-        CMC.invitePageSelected = [];
-        $(".cmc-invite-result").removeClass('ui-state-hover');
-        $('input:text#[name=invite-search-box-text]').val('');
-        CMC.currentDisplayedInvitePage = 0;
-        $("#cmc-invite-minions").button({label: "Invite 0 People", disabled: true});
-        CMC.inviteFilterText = " "; //force refresh
-        CMC.respondToInviteText("");
+        CMC.inviteTabStartOver();
       });
 
-  $("#cmc-invite-minions")
+  $("#cmc-invite-selected-button")
     .button({label: "Invite 0 People", disabled: true})
     .click(
       function() {
