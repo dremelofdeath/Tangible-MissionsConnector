@@ -1750,11 +1750,10 @@ var CMC = {
   handleInviteResultClick : function (result) {
     this.beginFunction();
     if ($(result).children(".result-name").html() != "") {
+      var MAXIMUM_SELECTION = 50;
+
       if (this.invitePageSelected.indexOf($(result).attr('fbid')) == -1) {
-        if (this.invitePageSelected.length >= 50) {
-          
-        }
-        else {
+        if (this.invitePageSelected.length < MAXIMUM_SELECTION) {
           this.invitePageSelected.push($(result).attr('fbid'));
           $(result).removeClass('ui-state-default').removeClass("cmc-invite-border-fix");
           $(result).addClass('ui-state-hover');
@@ -1765,6 +1764,15 @@ var CMC = {
         $(result).removeClass('ui-state-hover');
         $(result).addClass('ui-state-default').removeClass("cmc-invite-border-fix");
       }
+
+      if (this.invitePageSelected.length >= MAXIMUM_SELECTION) {
+        $('#cmc-reached-maximum-selection').html("You can only invite " 
+                                                 + MAXIMUM_SELECTION 
+                                                 + " users at a time!").fadeIn(); 
+      }
+      else {
+        $('#cmc-reached-maximum-selection').fadeOut(); 
+      } 
       this.updateInviteSelectedButtonText(this.invitePageSelected.length);
     }
     this.endFunction();
@@ -1803,7 +1811,7 @@ var CMC = {
 
   handleInviteResultLeaveHover : function (result) {
     this.beginFunction();
-    if (CMC.invitePageSelected.indexOf($(result).attr('fbid')) == -1) {
+    if (this.invitePageSelected.indexOf($(result).attr('fbid')) == -1) {
       $(result).removeClass('ui-state-default').addClass("cmc-invite-border-fix");
     }
     this.endFunction();
@@ -1814,6 +1822,7 @@ var CMC = {
     this.invitePageSelected = [];
     $(".cmc-invite-result").removeClass('ui-state-hover');
     $('input:text#[name=invite-search-box-text]').val('');
+    $('#cmc-reached-maximum-selection').fadeOut();
     this.currentDisplayedInvitePage = 0;
     this.updateInviteSelectedButtonText(0);
     this.inviteFilterText = " "; //force refresh
@@ -3723,11 +3732,12 @@ $(function() {
     })
     .hover(
       function () {
-          CMC.handleInviteResultEnterHover(this);
-        },
-        function () { 
-          CMC.handleInviteResultLeaveHover(this); 
-        });
+        CMC.handleInviteResultEnterHover(this);
+      },
+      function () { 
+        CMC.handleInviteResultLeaveHover(this); 
+      }
+    );
 
   $("#cmc-invite-start-over")
     .button({label: "Start Over"})
