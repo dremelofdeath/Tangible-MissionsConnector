@@ -1065,7 +1065,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
             </div>
           </div>
           <div id="cmc-invite-tab-selection-reporting">
-            <div id="cmc-reached-maximum-selection" style="display: none"></div>
+            <div id="cmc-reached-maximum-selection" style="display: inline-block; margin-right: 20px"></div>
             <div id="cmc-invite-selected-button"></div>
             <div id="cmc-invite-start-over"></div>
           </div>
