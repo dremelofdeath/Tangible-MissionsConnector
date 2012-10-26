@@ -1758,6 +1758,9 @@ var CMC = {
           $(result).removeClass('ui-state-default').removeClass("cmc-invite-border-fix");
           $(result).addClass('ui-state-hover');
         }
+        else {
+          $(result).effect("pulsate", { times:3 }, 20);
+        }
       }
       else {
         this.invitePageSelected.splice(this.invitePageSelected.indexOf($(result).attr('fbid')), 1);
@@ -1766,12 +1769,10 @@ var CMC = {
       }
 
       if (this.invitePageSelected.length >= MAXIMUM_SELECTION) {
-        $('#cmc-reached-maximum-selection').html("You can only invite " 
-                                                 + MAXIMUM_SELECTION 
-                                                 + " users at a time!").fadeIn(); 
+        $('#cmc-reached-maximum-selection').html("Invite these " +  MAXIMUM_SELECTION + ". Then you can choose more.").stop(true, true).fadeIn();
       }
       else {
-        $('#cmc-reached-maximum-selection').fadeOut(); 
+        $('#cmc-reached-maximum-selection').stop(true, true).fadeOut(); 
       } 
       this.updateInviteSelectedButtonText(this.invitePageSelected.length);
     }
