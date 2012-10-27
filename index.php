@@ -1006,6 +1006,9 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
             </div>
             <h1 id="cmc-invite-results-title-text">Friends:</h1>
           </div>
+          <div id="cmc-invite-results-subtitles">
+            <h2 id="cmc-invite-results-noresultmsg" style="display: none">No friends by that name :(</h2>
+          </div>
           <div id="cmc-invite-result-list">
             <div id="cmc-invite-result-col-0" class="cmc-search-result-col">
               <div id="cmc-invite-result-container-0" class="cmc-invite-result-container">
