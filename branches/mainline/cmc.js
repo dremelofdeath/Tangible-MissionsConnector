@@ -1854,7 +1854,7 @@ var CMC = {
       this.assert(results === undefined, "undefined passed as results for showInviteResults");
     } else if (results == null || results.length == 0) {
       // no results
-      $("#cmc-search-results-noresultmsg").stop(true, true).fadeIn();
+      $("#cmc-invite-results-noresultmsg").stop(true, true).fadeIn();
     } else {
       var imageLoadsCompleted = 0, __notifyImageLoadCompleted = $.proxy(function() {
         imageLoadsCompleted++;
@@ -2369,15 +2369,21 @@ var CMC = {
           this.log("caught undefined for filteredFriends... ignoring");
         }
 
+        $("#cmc-invite-results-noresultmsg").hide();
+
         this.currentDisplayedInvitePage = 0;
         this.clearInvitePageImageClearJobQueue();
+        var currentPage = this.invitePageCache[this.currentDisplayedInvitePage];
         this.animateHideInviteResults($.proxy(function () {
-          if (this.invitePageCache[this.currentDisplayedInvitePage] !== undefined) {
-            this.showInviteResults(this.padInviteResults(this.invitePageCache[CMC.currentDisplayedInvitePage]));
-          }
+          this.showInviteResults(this.padInviteResults(currentPage));
         }, this));
-        CMC.updateInvitePagingControls();
+
+        if (currentPage.length == 0) {
+          $("#cmc-invite-results-noresultmsg").stop(true, true).fadeIn();
+        }
+
         $("#cmc-invite-results-title").stop(true, true).fadeIn();
+        CMC.updateInvitePagingControls();
         CMC.inviteFilterText = filterText;
       } else {
         CMC.log("Invite filter text did not change. Not updating results.");
@@ -3756,6 +3762,8 @@ $(function() {
   $("#cmc-invite-icon").click(function() {
     $('input:text#[name=invite-search-box-text]').focus();
   });
+
+  $("#cmc-invite-results-noresultmsg").hide();
 
   $("#cmc-invite-start-over")
     .button({label: "Start Over"})
