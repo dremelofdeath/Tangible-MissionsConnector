@@ -376,7 +376,6 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
       .cmc-invite-result {
         height: 50px;
         width: 200px;
-        cursor: pointer;
         position: relative;
       }
 
