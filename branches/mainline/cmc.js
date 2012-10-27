@@ -3753,6 +3753,10 @@ $(function() {
       }
     );
 
+  $("#cmc-invite-icon").click(function() {
+    $('input:text#[name=invite-search-box-text]').focus();
+  });
+
   $("#cmc-invite-start-over")
     .button({label: "Start Over"})
     .click(
