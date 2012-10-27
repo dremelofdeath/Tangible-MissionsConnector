@@ -452,10 +452,22 @@ var CMC = {
   },
 
   sendCMCInviteRequestToRecipients : function() {
+    this.beginFunction();
     FB.ui({method: 'apprequests',
-      message: 'Invitation to use Christian Missions Connector',
-      to: CMC.invitePageSelected 
-    });
+      message: 'Join our global movement to unify Christian efforts to serve the poor through skilled mission trips!',
+      to: this.invitePageSelected
+      },
+      function (response) {
+        if (response != null) {
+          CMC.log("Invited FB IDs to use CMC: " + CMC.invitePageSelected);
+          CMC.log("Invitations sent. Resetting UI.");
+          CMC.inviteTabStartOver();
+        }
+        else {
+          CMC.log("Invite request cancelled. Not resetting UI.");
+        }
+      });
+    this.endFunction()
   },
 
   getProfile : function(userid, showLoading, callback) {
@@ -1861,6 +1873,7 @@ var CMC = {
         this.ajaxNotifyStart();
         this.assert(results[each].name !== undefined, "name is missing from result at each=" + each);
         $(id).children(".result-name").html(results[each].name ? results[each].name : "");
+        $(id).css("cursor", results[each].name ? "pointer" : "default");
 
         var facebookID = results[each].id;
         $(id).attr("fbid", facebookID);
