@@ -350,6 +350,25 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
         margin-bottom: 24px;
       }
 
+      #invite-box {
+        position: relative;
+        left: -0.7em;
+        width: 500px;
+        height: 30px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      
+      .cmc-invite-icon {
+        position: absolute;
+        float: right;
+        clear: both;
+        right: -5px;
+        margin-top: 4px;
+        margin-left: 0px;
+        vertical-align: middle;
+      }
+
       #cmc-invite-results-pagingctl {
         position: absolute;
         right: 18px;
@@ -958,13 +977,23 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
       <!-- @/END/CUTSECTION -->
       <div id="invite-tab">
         <div id="invite-box">
+          <div id="invite-tipbar" style="position: relative; height: 16px">
+            <div id="invite-tip-bar-left" style="position: absolute; left 2px;">
+              <div class="tipbar-content">
+                <div id="invite-hint-text">
+                  Type a friend's name to find him/her:
+                </div>
+              </div>
+            </div>
+          </div>
           <div id="invite-box-box">
+            <div id="cmc-invite-icon" class="ui-icon ui-icon-pencil cmc-invite-icon"></div>
             <div id="cmc-invite-box">
-              <input type="text" name="invite-search-box-text" style="width:100%"></input>
+              <input type="text" name="invite-search-box-text" class="ui-corner-all" style="width: 100%"></input>
             </div>
           </div>
         </div>
-        <div id="cmc-invite-results-spacer" style="display: block; height: 16px"></div>
+        <div id="cmc-invite-results-spacer" style="display: block; height: 10px"></div>
         <div id="cmc-invite-results">
           <div id="cmc-invite-results-title" style="display: none">
             <div id="cmc-invite-results-pagingctl">
