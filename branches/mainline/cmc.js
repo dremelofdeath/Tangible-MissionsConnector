@@ -1771,7 +1771,7 @@ var CMC = {
           $(result).addClass('ui-state-hover');
         }
         else {
-          $(result).effect("pulsate", { times:3 }, 20);
+          $("#invite-tab-max-selection-dialog").dialog('open');
         }
       }
       else {
@@ -3543,6 +3543,19 @@ $(function() {
     resizable: false,
     width: 150,
     height: 75,
+    open: function() {
+      CMC.dialogOpen(this);
+    },
+    close: function() {
+      CMC.dialogClose(this);
+    }
+  });
+
+  $("#invite-tab-max-selection-dialog").dialog({
+    autoOpen: false,
+    draggable: true,
+    position: ['center', 200],
+    resizable: false,
     open: function() {
       CMC.dialogOpen(this);
     },
