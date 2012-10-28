@@ -1831,7 +1831,7 @@ var CMC = {
     this.beginFunction();
     this.invitePageSelected = [];
     $(".cmc-invite-result").removeClass('ui-state-hover');
-    $('input:text#[name=invite-search-box-text]').val('');
+    $('input:text#[name=invite-search-box-text]').val('').blur();
     $('#cmc-invite-select-max-hint').fadeOut();
     this.currentDisplayedInvitePage = 0;
     this.updateInviteSelectedButtonText(0);
@@ -3555,6 +3555,7 @@ $(function() {
     draggable: false,
     position: ['center', 200],
     resizable: false,
+    modal: true,
     open: function() {
       CMC.dialogOpen(this);
     },
@@ -3830,6 +3831,8 @@ $(function() {
     }
   });
 
+  initWatermarkTextboxes();
+  
   $('input:text#[name=invite-search-box-text]')
     .keyup( function () {
       if (CMC.inviteTimeout != null) {
