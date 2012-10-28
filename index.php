@@ -987,7 +987,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
             </div>
           </div>
           <div id="invite-box-box">
-            <div id="cmc-invite-icon" class="ui-icon ui-icon-pencil cmc-invite-icon"></div>
+            <div id="cmc-invite-icon" class="ui-icon ui-icon-search cmc-invite-icon"></div>
             <div id="cmc-invite-box">
               <input type="text" name="invite-search-box-text" class="ui-corner-all" style="width: 100%"></input>
             </div>
@@ -1698,6 +1698,9 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
             300 characters left<!-- just some placeholder text -->
           </div>
         </form>
+      </div>
+      <div id="invite-tab-max-selection-dialog" title="Too many invitations">
+        <p>Fifty friends is the maximum. Either de-select some friends, start over, or invite the people that are already selected.</p>
       </div>
       <!-- @/BEGIN/ADMINCODEBLOCK -->
       <!-- debug only dialogs! remove these before shipping!! -zack -->
