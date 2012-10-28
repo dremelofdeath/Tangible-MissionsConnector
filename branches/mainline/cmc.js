@@ -1781,10 +1781,11 @@ var CMC = {
       }
 
       if (this.invitePageSelected.length >= MAXIMUM_SELECTION) {
-        $('#cmc-reached-maximum-selection').html("Invite these " +  MAXIMUM_SELECTION + ". Then you can choose more.").stop(true, true).fadeIn();
+        $('#cmc-invite-select-max-hint-value').html(MAXIMUM_SELECTION + ",");
+        $('#cmc-invite-select-max-hint').stop(true, true).fadeIn();
       }
       else {
-        $('#cmc-reached-maximum-selection').stop(true, true).fadeOut(); 
+        $('#cmc-invite-select-max-hint').stop(true, true).fadeOut(); 
       } 
       this.updateInviteSelectedButtonText(this.invitePageSelected.length);
     }
@@ -1813,21 +1814,17 @@ var CMC = {
   },
 
   handleInviteResultEnterHover : function (result) {
-    this.beginFunction();
     if (!$(result).hasClass('ui-state-default') &&
         !$(result).hasClass('ui-state-hover')   &&
          $(result).children(".result-name").html() != "") {
            $(result).addClass('ui-state-default').removeClass("cmc-invite-border-fix");
     }
-    this.endFunction();
   },
 
   handleInviteResultLeaveHover : function (result) {
-    this.beginFunction();
     if (this.invitePageSelected.indexOf($(result).attr('fbid')) == -1) {
       $(result).removeClass('ui-state-default').addClass("cmc-invite-border-fix");
     }
-    this.endFunction();
   },
 
   inviteTabStartOver : function () {
@@ -1835,10 +1832,10 @@ var CMC = {
     this.invitePageSelected = [];
     $(".cmc-invite-result").removeClass('ui-state-hover');
     $('input:text#[name=invite-search-box-text]').val('');
-    $('#cmc-reached-maximum-selection').fadeOut();
+    $('#cmc-invite-select-max-hint').fadeOut();
     this.currentDisplayedInvitePage = 0;
     this.updateInviteSelectedButtonText(0);
-    this.inviteFilterText = " "; //force refresh
+    this.inviteFilterText = " "; // force refresh
     this.respondToInviteText("");
     this.endFunction();
   },
@@ -2369,18 +2366,20 @@ var CMC = {
           this.log("caught undefined for filteredFriends... ignoring");
         }
 
-        $("#cmc-invite-results-noresultmsg").hide();
-
         this.currentDisplayedInvitePage = 0;
         this.clearInvitePageImageClearJobQueue();
         var currentPage = this.invitePageCache[this.currentDisplayedInvitePage];
-        this.animateHideInviteResults($.proxy(function () {
-          this.showInviteResults(this.padInviteResults(currentPage));
-        }, this));
 
-        if (currentPage.length == 0) {
-          $("#cmc-invite-results-noresultmsg").stop(true, true).fadeIn();
-        }
+        this.animateHideInviteResults($.proxy(function () {
+          var _onNoResultMsgFadeComplete = $.proxy(function () {
+            this.showInviteResults(this.padInviteResults(currentPage));
+          }, this);
+          if (currentPage.length == 0) {
+            $("#cmc-invite-results-noresultmsg").fadeIn(_onNoResultMsgFadeComplete);
+          } else {
+            $("#cmc-invite-results-noresultmsg").fadeOut('fast', _onNoResultMsgFadeComplete);
+          }
+        }, this));
 
         $("#cmc-invite-results-title").stop(true, true).fadeIn();
         CMC.updateInvitePagingControls();
@@ -3553,7 +3552,7 @@ $(function() {
 
   $("#invite-tab-max-selection-dialog").dialog({
     autoOpen: false,
-    draggable: true,
+    draggable: false,
     position: ['center', 200],
     resizable: false,
     open: function() {
@@ -3777,8 +3776,9 @@ $(function() {
   });
 
   $("#cmc-invite-results-noresultmsg").hide();
+  $('#cmc-invite-select-max-hint').hide();
 
-  $("#cmc-invite-start-over")
+  $("#cmc-invite-start-over-button")
     .button({label: "Start Over"})
     .click(
       function () {
@@ -3832,14 +3832,14 @@ $(function() {
 
   $('input:text#[name=invite-search-box-text]')
     .keyup( function () {
-          if (CMC.inviteTimeout != null) {
-              clearTimeout(CMC.inviteTimeout);
-          }
-          var text = $(this).val();
-          CMC.inviteTimeout = setTimeout(function() {
-              CMC.respondToInviteText(text);
-          }, 200);
-        });
+      if (CMC.inviteTimeout != null) {
+        clearTimeout(CMC.inviteTimeout);
+      }
+      var text = $(this).val();
+      CMC.inviteTimeout = setTimeout(function() {
+        CMC.respondToInviteText(text);
+      }, 200);
+    });
 
   CMC.log("setting up dialog boxes");
   $("#copyrights-dialog").dialog({

@@ -359,12 +359,17 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
         margin-right: auto;
       }
       
+      #invite-search-box-text {
+        height: 24px;
+        margin-top: 3px;
+      }
+
       .cmc-invite-icon {
         position: absolute;
         float: right;
         clear: both;
         right: -5px;
-        margin-top: 4px;
+        margin-top: 11px;
         margin-left: 0px;
         vertical-align: middle;
       }
@@ -429,7 +434,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
         margin-left: 50%;
       }
 
-      #cmc-invite-tab-selection-reporting {
+      #cmc-invite-tab-select-controls {
         position: absolute;
         right: 18px;
         bottom: 18px;
@@ -977,19 +982,10 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
       <!-- @/END/CUTSECTION -->
       <div id="invite-tab">
         <div id="invite-box">
-          <div id="invite-tipbar" style="position: relative; height: 16px">
-            <div id="invite-tip-bar-left" style="position: absolute; left 2px;">
-              <div class="tipbar-content">
-                <div id="invite-hint-text">
-                  Type a friend's name to find him/her:
-                </div>
-              </div>
-            </div>
-          </div>
           <div id="invite-box-box">
             <div id="cmc-invite-icon" class="ui-icon ui-icon-search cmc-invite-icon"></div>
             <div id="cmc-invite-box">
-              <input type="text" name="invite-search-box-text" class="ui-corner-all" style="width: 100%"></input>
+              <input type="text" id="invite-search-box-text" name="invite-search-box-text" class="ui-corner-all" style="width: 100%"></input>
             </div>
           </div>
         </div>
@@ -1007,7 +1003,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
             <h1 id="cmc-invite-results-title-text">Friends:</h1>
           </div>
           <div id="cmc-invite-results-subtitles">
-            <h2 id="cmc-invite-results-noresultmsg" style="display: none">No friends by that name :(</h2>
+            <h2 id="cmc-invite-results-noresultmsg" style="display: none">Sorry, couldn't find any friends with that name :(</h2>
           </div>
           <div id="cmc-invite-result-list">
             <div id="cmc-invite-result-col-0" class="cmc-search-result-col">
@@ -1095,10 +1091,14 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
               </div>
             </div>
           </div>
-          <div id="cmc-invite-tab-selection-reporting">
-            <div id="cmc-reached-maximum-selection" style="display: inline-block; margin-right: 20px"></div>
+          <div id="cmc-invite-tab-select-controls">
+            <div id="cmc-invite-select-max-hint" style="display: inline-block; margin-right: 20px">
+              <span id="cmc-invite-select-max-hint-before">Invite these</span>
+              <span id="cmc-invite-select-max-hint-value">50,</span><!-- This value is controlled in JS -zack -->
+              <span id="cmc-invite-select-max-hint-after">then you can choose more.</span>
+            </div>
             <div id="cmc-invite-selected-button" style="width: 118px"></div>
-            <div id="cmc-invite-start-over"></div>
+            <div id="cmc-invite-start-over-button"></div>
           </div>
         </div>
       </div>
@@ -1700,7 +1700,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
         </form>
       </div>
       <div id="invite-tab-max-selection-dialog" title="Too many invitations">
-        <p>Fifty friends is the maximum. Either de-select some friends, start over, or invite the people that are already selected.</p>
+        <p id="invite-tab-max-selection-dialog-text">Sorry, but we can only send 50 invites at a time. Send these invites now to choose more.</p>
       </div>
       <!-- @/BEGIN/ADMINCODEBLOCK -->
       <!-- debug only dialogs! remove these before shipping!! -zack -->
