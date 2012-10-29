@@ -61,6 +61,7 @@ if (!$has_error) {
               $membercount = $countrow['COUNT(userid)'];
               if ($membercount == 1) {
                 $has_error = TRUE;
+                $json['membercount'] = $membercount;
                 $err_msg = 'You are the only person in this trip'; 
               } else {
                 $sql = 'DELETE FROM tripmembers WHERE userid="'.$fbid.'" AND tripid="'.$tid.'"';
