@@ -986,7 +986,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
           <div id="invite-box-box">
             <div id="cmc-invite-icon" class="ui-icon ui-icon-search cmc-invite-icon"></div>
             <div id="cmc-invite-box">
-              <input type="text" id="invite-search-box-text" name="invite-search-box-text" value="Start typing to find your friends"  class="ui-corner-all watermarkTextbox" style="width: 100%"></input>
+              <input type="text" id="invite-search-box-text" name="invite-search-box-text" value="Start typing to find your friends..."  class="ui-corner-all watermarkTextbox" style="width: 100%"></input>
             </div>
           </div>
         </div>
