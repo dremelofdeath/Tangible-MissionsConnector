@@ -1423,6 +1423,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                         </select>
                       </td>
                     </tr>
+                    <!--
                     <tr>
                       <td style="width: 197px"><label>State</label></td>
                       <td style="width: 197px">
@@ -1444,7 +1445,8 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                         </select>
                       </td>
                     </tr>
-                    <tbody id="orgzip" style="display: none;">
+                    -->
+                    <tbody id="orgzip">
                       <tr>
                         <td><label>Zipcode</label></td>
                         <td><input type="text" id="profile-org-zipcode" class="cmc-form-spec"/></td>
