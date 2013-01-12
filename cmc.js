@@ -3671,7 +3671,7 @@ $(function() {
     firstselected : true, // circumvent a selection bug
     height : 6,
     maxshownitems : 5,
-    newel : true,
+    newel : false,
     onselect : function (item) { CMC.handleSearchSelect(item); },
     onremove : function (item) { CMC.handleSearchRemove(item); },
     // custom (i.e. undocumented) options here
