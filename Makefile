@@ -5,7 +5,12 @@ BUILDNUMBER = $(shell echo "ibase=10;obase=16;`svnversion | sed -E -e 's/.*://' 
 DEPCLEANPENDING = no
 SIGNBUILD = yes
 
-.PHONY: clean unfinalize buildnumber __depcleanpending nosign
+HOST := $(shell echo $(HOSTNAME) | cut -d . -f 1)
+PRODUCTION_HOST := chrome
+
+YUICOMPRESSOR := yuicompressor-2.4.7.jar
+
+.PHONY: clean unfinalize buildnumber __depcleanpending nosign __prodtools
 
 all: ship
 
@@ -39,11 +44,25 @@ cmc.ship.js: cmc.js
 		-e 's/\/\* @\/VERSIONMARKER \*\/.*$$/"2.0 Build $(BUILDNUMBER)",/' \
 		$? > $@
 
-%.yui.js: %.js
-	if [ "$(SVNDIR)" == "trunk" -o "$(FOURTHDIR)" == "htdocs" ]; then \
-	  java -jar ../tools/yuicompressor-2.4.7.jar -o $@ $?; \
+__prodtools:
+	if [ "$(HOST)" == "$(PRODUCTION_HOST)" ]; then \
+		svn export http://$(HOST)/svn/missionsconnector/tools --username system; \
+	fi
+
+__prodtoolsclean: $(JSFILES:.js=.yui.js) __prodtools cmc.ship.js cmc.ship.yui.js
+	if [ "$(HOST)" == "$(PRODUCTION_HOST)" ]; then \
+		rm -rf tools; \
+	fi
+
+%.yui.js: %.js __prodtools
+	if [ "$(HOST)" == "$(PRODUCTION_HOST)" ]; then \
+		java -jar tools/$(YUICOMPRESSOR) -o $@ $<; \
 	else \
-		java -jar ../../tools/yuicompressor-2.4.7.jar -o $@ $?; \
+		if [ "$(SVNDIR)" == "trunk" -o "$(FOURTHDIR)" == "htdocs" ]; then \
+			java -jar ../tools/$(YUICOMPRESSOR) -o $@ $<; \
+		else \
+			java -jar ../../tools/$(YUICOMPRESSOR) -o $@ $<; \
+		fi; \
 	fi
 
 index.ship.php: index.php
@@ -54,7 +73,7 @@ index.ship.php: index.php
 		-e '/\/\/@\/BEGIN\/CUTSECTION/,/\/\/@\/END\/CUTSECTION/d' \
 		$? > $@
 
-minifyfinalize: signfinalize $(JSFILES:.js=.yui.js) cmc.ship.js cmc.ship.yui.js
+minifyfinalize: signfinalize $(JSFILES:.js=.yui.js) cmc.ship.js cmc.ship.yui.js __prodtoolsclean
 	for jsfile in `ls *.yui.js`; do \
 		orig=`echo $$jsfile | sed -E -e 's/\.yui//'`; \
 		$(RM) $$orig; \
