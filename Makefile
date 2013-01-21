@@ -5,7 +5,7 @@ BUILDNUMBER = $(shell echo "ibase=10;obase=16;`svnversion | sed -E -e 's/.*://' 
 DEPCLEANPENDING = no
 SIGNBUILD = yes
 
-HOST := $(shell echo $(HOSTNAME) | cut -d . -f 1)
+HOST := $(shell hostname | cut -d . -f 1)
 PRODUCTION_HOST := chrome
 
 YUICOMPRESSOR := yuicompressor-2.4.7.jar
