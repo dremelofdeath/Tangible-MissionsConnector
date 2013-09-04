@@ -109,6 +109,8 @@ var CMC = {
       "profile-trip-phone" : "phone",
       "profile-trip-email" : "email",
       "profile-trip-stage" : "stage",
+      "profile-trip-onneeds" : "onneeds",
+      "profile-trip-timeframe" : "timeframe",
       "profile-trip-depart" : "depart",
       "profile-trip-return" : "return",
       "profile-trip-number" : "numpeople",
@@ -1173,6 +1175,20 @@ var CMC = {
       else {
         $("#profile-trip-stage").html(data.tripstage ? data.tripstage : "");
       }   
+
+      if (data.onneeds === undefined) {
+        $("#profile-trip-onneeds").html("");
+      }
+      else {
+        $("#profile-trip-onneeds").html(data.onneeds ? data.onneeds : "");
+      }
+
+      if (data.timeframe === undefined) {
+        $("#profile-trip-timeframe").html("");
+      }
+      else {
+        $("#profile-trip-timeframe").html(data.timeframe ? data.timeframe : "");
+      }
 
       if (data.departyear === undefined) {
         $("#profile-trip-depart").html("");
@@ -2510,6 +2526,12 @@ var CMC = {
           if (data.numpeople !== undefined) {
             $("input#profile-trip-number").val(data.numpeople);
           }
+          if (data.onneeds !== undefined) {
+            $('select#profile-trip-onneeds option[value="' + parseInt(data.onneeds,10) + '"]').attr('selected', 'selected');
+          }
+          if (data.timeframe !== undefined) {
+            $('select#profile-trip-timeframe option[value="' + parseInt(data.timeframe,10) + '"]').attr('selected', 'selected');
+          }
           if (data.departyear !== undefined) {
             var mydepart = String(data.departmonth) + '.' + String(data.departday) + '.' + String(data.departyear); 
             $("input#profile-trip-depart").val(mydepart);
@@ -3134,6 +3156,12 @@ var CMC = {
       }
     }
 
+    // If ongoing needs or flexible timeframe is selected, the user need not enter a trip departure date and a return date
+    if (profileData.hasOwnProperty("profile-trip-onneeds") || profileData.hasOwnProperty("profile-trip-timeframe")) {
+
+    }
+    else {
+
     if (profileData.hasOwnProperty("profile-trip-depart")) {
       tripdepart = profileData["profile-trip-depart"];
       if (tripdepart == "select") {
@@ -3149,6 +3177,7 @@ var CMC = {
         errornum = errornum + 1;
         isValid = false;
       }
+    }
     }
 
      var TDeparture, TReturn;

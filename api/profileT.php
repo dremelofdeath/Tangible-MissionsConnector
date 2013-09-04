@@ -138,6 +138,24 @@ function cmc_profile_render_skills($title, $type, $tid,&$has_error,&$err_msg,&$j
 			$json['tripstage'] = "Execution Phase";  
       
 		}
+		$onneeds=$row['ongoingneeds'];
+		if (!empty($onneeds)) {
+      
+		if ($onneeds==1)
+			$json['onneeds'] = "This trip has ongoing needs";  
+		else
+			$json['onneeds'] = "This trip does not have any ongoing needs";  
+      
+		}
+		$triptimeframe=$row['flextimeframe'];
+		if (!empty($triptimeframe)) {
+      
+		if ($triptimeframe==1)
+			$json['timeframe'] = "This trip has a flexible time-frame";  
+		else
+			$json['timeframe'] = "This trip does not have a flexible time-frame";  
+      
+		}
 		$destination=$row['destination'];
 		if (!empty($destination))
 			$json['destination'] = $destination;
