@@ -1540,6 +1540,18 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                       <td><input type="text" id="profile-trip-number" class="cmc-form-spec" /></td>
                     </tr>
                     <tr>
+                      <td style="width: 97px"><label>Ongoing Needs</label></td>
+                      <td style="width: 197px">
+                        <input name="profile-trip-onneeds" id="profile-trip-onneeds" class="cmc-form-spec" type=checkbox value="1" >We have ongoing needs<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="width: 97px"><label>Timeframe</label></td>
+                      <td style="width: 197px">
+                        <input name="profile-trip-timeframe" id="profile-trip-timeframe" class="cmc-form-spec" type=checkbox value="1"> Our timeframe is flexible<br>
+                      </td>
+                    </tr>
+                    <tr>
                       <td style="width: 97px"><label>Approximate Departure Date</label></td>
                       <td style="width: 197px">
                         <input name="profile-trip-depart" id="profile-trip-depart" class="cmc-form-spec" type=button value="select" onclick="displayDatePicker('profile-trip-depart', false, 'mdy', '.');">

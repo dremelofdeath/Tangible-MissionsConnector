@@ -760,6 +760,58 @@ if (!$has_error) {
           }
         }
 
+        if (isset($myobj->{'onneeds'})) {
+          $triponneeds = $myobj->{'onneeds'};
+          if ($update) {
+            if ($namemod)
+              $sql1 = $sql1.',ongoingneeds="'.$triponneeds.'"';
+            else {
+              $sql1 = $sql1.'ongoingneeds="'.$triponneeds.'"';
+              $namemod=1;
+            }
+          }
+          else {
+            $sql1 = $sql1.',ongoingneeds';
+            $sql2 = $sql2.',"'.$triponneeds.'"';
+          }
+        }
+        else {
+          if ($update) {
+            if ($namemod)
+              $sql1 = $sql1.',ongoingneeds=0';
+            else {
+              $sql1 = $sql1.'ongoingneeds=0';
+              $namemod=1;
+            }	
+          }
+        }
+
+        if (isset($myobj->{'timeframe'})) {
+          $triptimeframe = $myobj->{'timeframe'};
+          if ($update) {
+            if ($namemod)
+              $sql1 = $sql1.',flextimeframe="'.$triptimeframe.'"';
+            else {
+              $sql1 = $sql1.'flextimeframe="'.$triptimeframe.'"';
+              $namemod=1;
+            }
+          }
+          else {
+            $sql1 = $sql1.',flextimeframe';
+            $sql2 = $sql2.',"'.$triptimeframe.'"';
+          }
+        }
+        else {
+          if ($update) {
+            if ($namemod)
+              $sql1 = $sql1.',flextimeframe=0';
+            else {
+              $sql1 = $sql1.'flextimeframe=0';
+              $namemod=1;
+            }	
+          }
+        }
+
         function getdatestring($year,$month,$date) {
 
           if ($month<10)
