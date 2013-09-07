@@ -3119,6 +3119,7 @@ var CMC = {
     var tripreturn;
     var DepartMonth,DepartDay,DepartYear;
     var ReturnMonth,ReturnDay,ReturnYear;
+    var addtlinput = false;
 
     if (profileData.hasOwnProperty("profile-trip-website")) {
       if (!CMC.isUrl(profileData["profile-trip-website"])) {
@@ -3156,12 +3157,12 @@ var CMC = {
       }
     }
 
+      alert('checking for onneeds and timeframe for trip submit');
     // If ongoing needs or flexible timeframe is selected, the user need not enter a trip departure date and a return date
     if (profileData.hasOwnProperty("profile-trip-onneeds") || profileData.hasOwnProperty("profile-trip-timeframe")) {
-
+        addtlinput = true;
     }
     else {
-
     if (profileData.hasOwnProperty("profile-trip-depart")) {
       tripdepart = profileData["profile-trip-depart"];
       if (tripdepart == "select") {
@@ -3178,8 +3179,7 @@ var CMC = {
         isValid = false;
       }
     }
-    }
-
+    
      var TDeparture, TReturn;
     // Logic to determine that the trip begin date is before the trip end date
     if (tripdepart != "") {
@@ -3203,6 +3203,7 @@ var CMC = {
       errornum = errornum + 1;
       isValid = false;
     }
+    }
     
     if (reason != "") {
       alert('Some input fields need correction:\n'+ reason);
@@ -3210,12 +3211,16 @@ var CMC = {
       var profiletripformdata = {};
       profiletripformdata.profiletype=2;
 
+      if (!addtlinput) {
       profiletripformdata.DepartMonth = DepartMonth;
       profiletripformdata.DepartDay = DepartDay;
       profiletripformdata.DepartYear = DepartYear;
       profiletripformdata.ReturnMonth = ReturnMonth;
       profiletripformdata.ReturnDay = ReturnDay;
       profiletripformdata.ReturnYear = ReturnYear;
+      }
+
+      alert('extending data for trip submit');
 
       $.extend(profiletripformdata, this.applyTranslationMap(profileData, this.BackendTranslation.TripProfile));
 

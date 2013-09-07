@@ -1542,7 +1542,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                     <tr>
                       <td style="width: 97px"><label>Ongoing Needs</label></td>
                       <td style="width: 197px">
-                        <input name="profile-trip-onneeds" id="profile-trip-onneeds" class="cmc-form-spec" type=checkbox value="1" >We have ongoing needs<br>
+                        <input name="profile-trip-onneeds" id="profile-trip-onneeds" class="cmc-form-spec" type=checkbox value="1" >There are ongoing needs<br>
                       </td>
                     </tr>
                     <tr>
