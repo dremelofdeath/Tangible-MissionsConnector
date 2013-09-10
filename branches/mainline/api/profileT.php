@@ -26,6 +26,8 @@ $json = array();
 if (!$has_error) {
 $json['tripid'] = $tid;
 $sql = 'select * from trips where id="'.$tid.'"';
+
+$json['sql'] = $sql;
 $result = mysql_query($sql,$con);
 if (!$result) {
 	setjsonmysqlerror($has_error,$err_msg,$sql);
@@ -139,23 +141,19 @@ function cmc_profile_render_skills($title, $type, $tid,&$has_error,&$err_msg,&$j
       
 		}
 		$onneeds=$row['ongoingneeds'];
-		if (!empty($onneeds)) {
       
 		if ($onneeds==1)
-			$json['onneeds'] = "This trip has ongoing needs";  
+			$json['onneeds'] = $onneeds;  
 		else
-			$json['onneeds'] = "This trip does not have any ongoing needs";  
+			$json['onneeds'] = $onneeds;  
       
-		}
 		$triptimeframe=$row['flextimeframe'];
-		if (!empty($triptimeframe)) {
       
 		if ($triptimeframe==1)
-			$json['timeframe'] = "This trip has a flexible time-frame";  
+			$json['timeframe'] = $triptimeframe;  
 		else
-			$json['timeframe'] = "This trip does not have a flexible time-frame";  
+			$json['timeframe'] = $triptimeframe;  
       
-		}
 		$destination=$row['destination'];
 		if (!empty($destination))
 			$json['destination'] = $destination;
