@@ -1180,14 +1180,20 @@ var CMC = {
         $("#profile-trip-onneeds").html("");
       }
       else {
-        $("#profile-trip-onneeds").html(data.onneeds ? data.onneeds : "");
+        if (data.onneeds == 1)
+        $("#profile-trip-onneeds").html("This trip has ongoing needs");
+        else
+        $("#profile-trip-onneeds").html("This trip does not have ongoing needs");
       }
 
       if (data.timeframe === undefined) {
         $("#profile-trip-timeframe").html("");
       }
       else {
-        $("#profile-trip-timeframe").html(data.timeframe ? data.timeframe : "");
+        if (data.timeframe == 1)
+        $("#profile-trip-timeframe").html("This trip's timeframe is flexible");
+        else
+        $("#profile-trip-timeframe").html("This trip's timeframe is not flexible");
       }
 
       if (data.departyear === undefined) {
@@ -3157,10 +3163,11 @@ var CMC = {
       }
     }
 
-      alert('checking for onneeds and timeframe for trip submit');
     // If ongoing needs or flexible timeframe is selected, the user need not enter a trip departure date and a return date
-    if (profileData.hasOwnProperty("profile-trip-onneeds") || profileData.hasOwnProperty("profile-trip-timeframe")) {
+    //if (profileData.hasOwnProperty("profile-trip-onneeds") || profileData.hasOwnProperty("profile-trip-timeframe")) {
+    if (profileData["profile-trip-onneeds"]==1 || profileData["profile-trip-timeframe"]==1) { 
         addtlinput = true;
+      //  }
     }
     else {
     if (profileData.hasOwnProperty("profile-trip-depart")) {
@@ -3219,8 +3226,6 @@ var CMC = {
       profiletripformdata.ReturnDay = ReturnDay;
       profiletripformdata.ReturnYear = ReturnYear;
       }
-
-      alert('extending data for trip submit');
 
       $.extend(profiletripformdata, this.applyTranslationMap(profileData, this.BackendTranslation.TripProfile));
 

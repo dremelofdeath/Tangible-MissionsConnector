@@ -800,6 +800,8 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
               <h5>E-mail: <span id="profile-trip-email">Email</span></h5>
               <h5>Phone: <span id="profile-trip-phone">Phone</span></h5>
               <h5>Execution Stage: <span id="profile-trip-stage">Trip Execution Stage</span></h5>
+              <h5>Trip On-Going Needs: <span id="profile-trip-onneeds">Trip On-going Needs</span></h5>
+              <h5>Trip Timeframe: <span id="profile-trip-timeframe">Trip Time frame</span></h5>
               <h5>Date of Departure: <span id="profile-trip-depart">Departure Date</span></h5>
               <h5>Date of Return: <span id="profile-trip-return">Return</span></h5>
               <h5>Trip Religion: <span id="profile-trip-religion">Trip religion</span><h5>
@@ -1542,6 +1544,17 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                     <tr>
                       <td style="width: 97px"><label>Ongoing Needs</label></td>
                       <td style="width: 197px">
+                        <select id="profile-trip-onneeds" class="cmc-form-spec">
+                          <option class="cmc-default-opt" value="Select Ongoing Needs">Select Ongoing Needs</option>
+                          <option value="0", selected="selected">This trip does not have any ongoing needs</option>
+                          <option value="1">This trip has ongoing needs</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <!--
+                    <tr>
+                      <td style="width: 97px"><label>Ongoing Needs</label></td>
+                      <td style="width: 197px">
                         <input name="profile-trip-onneeds" id="profile-trip-onneeds" class="cmc-form-spec" type=checkbox value="1" >There are ongoing needs<br>
                       </td>
                     </tr>
@@ -1549,6 +1562,17 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
                       <td style="width: 97px"><label>Timeframe</label></td>
                       <td style="width: 197px">
                         <input name="profile-trip-timeframe" id="profile-trip-timeframe" class="cmc-form-spec" type=checkbox value="1"> Our timeframe is flexible<br>
+                      </td>
+                    </tr>
+                    -->
+                    <tr>
+                      <td style="width: 97px"><label>Timeframe</label></td>
+                      <td style="width: 197px">
+                        <select id="profile-trip-timeframe" class="cmc-form-spec">
+                          <option class="cmc-default-opt" value="Select Trip Timeframe">Select Trip Timeframe</option>
+                          <option value="0", selected="selected">This trip does not have a flexible timeframe</option>
+                          <option value="1">This trip has a flexible time-frame</option>
+                        </select>
                       </td>
                     </tr>
                     <tr>
