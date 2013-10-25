@@ -1,1 +1,0 @@
-$.fn.imagesLoaded=function(d){var b=this.filter("img"),a=b.length,c="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";b.one("load",function(){if(--a<=0&&this.src!==c){d.call(b,this)}}).each(function(){if(this.complete||this.complete===undefined){var e=this.src;this.src=c;this.src=e}});return this};
