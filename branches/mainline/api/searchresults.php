@@ -11,7 +11,7 @@ header('Content-type: application/json');
 
 $con = arena_connect();
 
-$saferequest = cmc_safe_request_strip();
+$saferequest = cmc_safe_request_strip($con);
 $has_error = FALSE;
 $err_msg = '';
 
@@ -43,7 +43,7 @@ if (array_key_exists('fbid', $saferequest)) {
           break;
       }
 
-    $searchkeys = cmc_safe_object_strip($searchkeys);
+    $searchkeys = cmc_safe_object_strip($con, $searchkeys);
 	  
 	  // If page and perpage are given in the arguments, then get that information
 	  if (array_key_exists('page',$saferequest) && (array_key_exists('perpage',$saferequest))) {
@@ -108,16 +108,16 @@ function mysqlHaversine($lat = 0, $lon = 0) {
 // function to get zip info
 function getZipInfo($zip,&$has_error,&$err_msg,$con) {
   $sql  = "SELECT * FROM zipcodes WHERE zipcode='" . $zip . "'";
-  $query = mysql_query($sql,$con);
+  $query = $con->query($sql);
   if (!$query) {
     setjsonmysqlerror($has_error,$err_msg,$sql);
     return FALSE;
   }
   else {
-    if(mysql_num_rows($query) < 1)
+    if($query->num_rows < 1)
       return FALSE;
 
-    $zipInfo = mysql_fetch_object($query);
+    $zipInfo = $query->fetch_object();
     return $zipInfo;
   }
 } //end getZipInfo
@@ -132,7 +132,7 @@ function getZipsWithin($zip, $miles, &$has_error, &$err_msg, $con) {
     ." HAVING distance <= ".$miles
     ." ORDER BY distance;";
 
-  $query = mysql_query($sql, $con);
+  $query = $con->query($sql);
 
   if (!$query) {
     setjsonmysqlerror($has_error,$err_msg,$sql);
@@ -141,7 +141,7 @@ function getZipsWithin($zip, $miles, &$has_error, &$err_msg, $con) {
 
   $retval = array();
 
-  while($row = mysql_fetch_row($query)) {
+  while($row = $query->fetch_row()) {
     $retval[] = $row[0];
   }
 
@@ -290,23 +290,23 @@ function getzipsearchstring($result,$con,&$has_error,&$err_msg,&$sqlstr,&$sqlstr
 
 function update_searchtables($fbid,$keywords,$con,&$has_error,&$err_msg) {
   $sql = 'insert into searches (userid) VALUES ("'.$fbid.'")';
-  $result = mysql_query($sql,$con);
+  $result = $con->query($sql);
   if (!$result) {
     setjsonmysqlerror($has_error,$err_msg,$sql);
   } else {
     $sql2 = 'select max(searchid) as searchid from searches where userid="'.$fbid.'"';
-    $result2 = mysql_query($sql2,$con);
+    $result2 = $con->query($sql2);
     if (!$result2) {
       setjsonmysqlerror($has_error,$err_msg,$sql2);
     } else {
-      while ($row = mysql_fetch_array($result2, MYSQL_ASSOC)) {
+      while ($row = $result2->fetch_array()) {
         $searchid = $row['searchid']+0;  
         break; // what the heck? --zack
       }
 
       // Now insert into searchterms table
       $sql2 = "insert into searchterms (searchid,searchquery) VALUES ('".$searchid."','".$keywords."')";
-      $result2 = mysql_query($sql2,$con);
+      $result2 = $con->query($sql2);
       if (!$result2) {
         setjsonmysqlerror($has_error,$err_msg,$sql2);
       }
@@ -337,13 +337,12 @@ if (!$has_error) {
   } else {
     // get the zipcode of the current user if zipcode and search radius are not included in the search string
     $sql = 'select zipcode from users where userid="'.$fbid.'"';
-    $result = mysql_query($sql,$con);
+    $result = $con->query($sql);
     if (!$result) {
       setjsonmysqlerror($has_error,$err_msg,$sql);
     } else {
-      $numrows = mysql_num_rows($result);
-      if ($numrows != 0) {
-        $row = mysql_fetch_array($result,MYSQL_ASSOC);
+      if ($result->num_rows != 0) {
+        $row = $result->fetch_array();
         $myzipcode = $row['zipcode'];
       }
     }
@@ -399,16 +398,15 @@ if (!$has_error) {
 	$sql = $sql." LIMIT ".$offset.",".$perpage;
 	}
 
-    $result = mysql_query($sql,$con);
+    $result = $con->query($sql);
 
     if($result) {
-      $num_rows = mysql_num_rows($result);
-      if($num_rows==0){
+      if($result->num_rows==0){
         // Nothing to display or return, just stores the sql query in the database
       }
       else {
         $json['searchids'] = array();
-        while($row= mysql_fetch_array($result,MYSQL_ASSOC)) {
+        while($row = $result->fetch_array()) {
           $json['searchids'][] = $row['userid'];
         }
       }

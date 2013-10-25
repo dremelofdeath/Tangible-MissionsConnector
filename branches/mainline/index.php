@@ -7,18 +7,22 @@ $con = arena_connect();
 function cmc_get_opts_for_result($result, $idColumn, $nameColumn, $valuePrefix='') {
   $optiontext = '';
   if ($result) {
-    if (mysql_num_rows($result) > 0) {
-      while($row = mysql_fetch_assoc($result)) {
+    if ($result->num_rows > 0) {
+      while($row = $result->fetch_assoc()) {
         $optiontext .= '<option value="'.$valuePrefix.$row[$idColumn].'">'.$row[$nameColumn].'</option>';
       }
+    } else {
+      die("no rows in result");
     }
+  } else {
+    die("opts result failed: " . $con->error);
   }
   return $optiontext;
 }
 
 function cmc_get_opts_for_table($table, $idColumn, $nameColumn, $valuePrefix='') {
   global $con;
-  return cmc_get_opts_for_result(mysql_query("SELECT * FROM ".$table.";", $con), $idColumn, $nameColumn, $valuePrefix);
+  return cmc_get_opts_for_result($con->query("SELECT * FROM ".$table.";"), $idColumn, $nameColumn, $valuePrefix);
 }
 
 function cmc_echo_opt_countries($valuePrefix='') {
@@ -37,9 +41,9 @@ function cmc_echo_opt_skills($skilltype=FALSE, $valuePrefix='') {
   global $con;
   $result = false;
   if (!$skilltype) {
-    $result = mysql_query("SELECT * FROM skills WHERE type=1 OR type=2 OR type=3;", $con);
+    $result = $con->query("SELECT * FROM skills WHERE type=1 OR type=2 OR type=3;");
   } else {
-    $result = mysql_query("SELECT * FROM skills WHERE type=".$skilltype.";", $con);
+    $result = $con->query("SELECT * FROM skills WHERE type=".$skilltype.";");
   }
   echo cmc_get_opts_for_result($result, "id", "skilldesc", $valuePrefix);
 }

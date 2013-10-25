@@ -7,7 +7,7 @@
 include_once 'common.php';
 $con = arena_connect();
 
-$saferequest = cmc_safe_request_strip();
+$saferequest = cmc_safe_request_strip($con);
 $has_error = FALSE;
 $err_msg = '';
 
@@ -26,9 +26,8 @@ $json = array();
 if (!$has_error) {
 $json['tripid'] = $tid;
 $sql = 'select * from trips where id="'.$tid.'"';
+$result = $con->query($sql);
 
-$json['sql'] = $sql;
-$result = mysql_query($sql,$con);
 if (!$result) {
 	setjsonmysqlerror($has_error,$err_msg,$sql);
 }
@@ -38,13 +37,13 @@ function cmc_profile_render_skills($title, $type, $tid,&$has_error,&$err_msg,&$j
   $sql = "SELECT * FROM skills".
        " JOIN skillsselectedtrips ON skills.id = skillsselectedtrips.id".
        " WHERE skills.type=".$type." AND skillsselectedtrips.tripid='".$tid."'";
-  $result = mysql_query($sql,$con);
+  $result = $con->query($sql);
   if (!$result) {
   	setjsonmysqlerror($has_error,$err_msg,$sql);
   }
   else {
     $i=0;
-    while($row= mysql_fetch_array($result)){
+    while($row= $result->fetch_array()){
       if ($i==0) {
 	  $json[str_replace (" ", "", $title)] = array();
 	  $json[str_replace (" ", "", $title)."id"] = array();
@@ -56,27 +55,27 @@ function cmc_profile_render_skills($title, $type, $tid,&$has_error,&$err_msg,&$j
   }
 }
 
-  $num_rows = mysql_num_rows($result);
+  $num_rows = $result->num_rows;
 
   cmc_profile_render_skills("Medical Skills", '1', $tid,$has_error,$err_msg,$json,$con);
   cmc_profile_render_skills("Non_Medical Skills", '2', $tid,$has_error,$err_msg,$json,$con);
   cmc_profile_render_skills("Spiritual Skills", '3', $tid,$has_error,$err_msg,$json,$con);  
   
   if ($num_rows > 0) {
-  while($row= mysql_fetch_array($result)) {
+  while($row= $result->fetch_array()) {
     $name = $row['tripname'];
 	if (!empty($name))
 		$json['tripname'] = $name;
     $creatorid = $row['creatorid'];
 	$json['creatorid'] = $creatorid;
     $sql2 = 'select * from users where userid="'.$creatorid.'"';
-    $result2 = mysql_query($sql2,$con);
+    $result2 = $con->query($sql2);
 	if (!$result2) {
 		setjsonmysqlerror($has_error,$err_msg);
 		continue 1;
 	}
 	else {
-		$row2 = mysql_fetch_array($result2);
+		$row2 = $result2->fetch_array();
 		$towner=$row2['name'];
 		if (!empty($towner))
 			$json['tripowner'] = $towner;
@@ -95,25 +94,25 @@ function cmc_profile_render_skills($title, $type, $tid,&$has_error,&$err_msg,&$j
 			$languages = explode(",", $languages); 
 				foreach($languages as $lg) {
 					$sqll = 'select * from languages where englishname="'.$lg.'"';
-					$resultl = mysql_query($sqll,$con);	
+					$resultl = $con->query($sqll);	
 					if (!$resultl) {
 						setjsonmysqlerror($has_error,$err_msg);
 						continue 1;
 					}
 					else {
-						$rowl = mysql_fetch_array($resultl);
+						$rowl = $resultl->fetch_array();
 						$json['languageid'][] = $rowl['id'];
 					}
 				}
 			}
 			else {
 				$sqll = 'select * from languages where englishname="'.$languages.'"';
-				$resultl = mysql_query($sqll,$con);	
+				$resultl = $con->query($sqll);	
 				if (!$resultl) {
 					setjsonmysqlerror($has_error,$err_msg);
 				}
 				else {
-					$rowl = mysql_fetch_array($resultl);
+					$rowl = $resultl->fetch_array();
 					$json['languageid'][] = $rowl['id'];
 				}				
 			}
@@ -162,12 +161,12 @@ function cmc_profile_render_skills($title, $type, $tid,&$has_error,&$err_msg,&$j
 	     //$json['countryid'] = array();
 			 $json['destinationcountry'] = $destinationcountry;
 				$sqlc = 'select * from countries where longname="'.$destinationcountry.'"';
-				$resultc = mysql_query($sqlc,$con);	
+				$resultc = $con->query($sqlc);	
 				if (!$resultc) {
 					setjsonmysqlerror($has_error,$err_msg);
 				}
 				else {
-					$rowc = mysql_fetch_array($resultc);
+					$rowc = $resultc->fetch_array();
 					$json['countryid'] = $rowc['id'];
 				}				
 
@@ -204,15 +203,14 @@ function cmc_profile_render_skills($title, $type, $tid,&$has_error,&$err_msg,&$j
 // see if the user is already part of this trip
 
 $sql = 'select * from tripmembers where userid="'.$fbid.'" and tripid="'.$tid.'"';
-$result = mysql_query($sql,$con);
+$result = $con->query($sql);
 
 if (!$result) {
 	setjsonmysqlerror($has_error,$err_msg,$sql);
 }
 else {
 
-$numrows = mysql_num_rows($result);
-if ($numrows>0) {
+if ($result->num_rows>0) {
 	$json['member'] = true;
 }
 else {
@@ -222,7 +220,7 @@ else {
 
 // now get all the tripmembers information to display on the trips page
 $sql = 'select * from tripmembers where tripid="'.$tid.'"';
-$result = mysql_query($sql,$con);
+$result = $con->query($sql);
 
 if (!$result) {
 	setjsonmysqlerror($has_error,$err_msg,$sql);
@@ -231,9 +229,8 @@ else {
 
 $json['memberids'] = array();
 
-$numrows = mysql_num_rows($result);
-  if ($numrows > 0) {
-  while($row= mysql_fetch_array($result)) {
+  if ($result->num_rows > 0) {
+  while($row= $result->fetch_array()) {
     if ($creatorid != $row['userid']) {
       $json['memberids'][] = $row['userid'];
     }

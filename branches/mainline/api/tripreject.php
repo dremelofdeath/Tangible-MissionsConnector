@@ -9,7 +9,7 @@ include_once 'common.php';
 
 $con = arena_connect();
 
-$saferequest = cmc_safe_request_strip();
+$saferequest = cmc_safe_request_strip($con);
 $has_error = FALSE;
 $err_msg = '';
 
@@ -38,14 +38,12 @@ $today = date("F j, Y");
 
 // first check that the user has a CMC profile - otherwise redirect user to create a profile
 $sql = 'select * from users where userid="'.$fbid.'"';
-$result = mysql_query($sql,$con);
+$result = $con->query($sql);
 if (!$result) {
  	setjsonmysqlerror($has_error,$err_msg,$sql);
 }
 else {
-	$numrows = mysql_num_rows($result);
-
-	if ($numrows==0) {
+	if ($result->num_rows==0) {
 		// This means user does not have a CMC profile
 		$has_error = TRUE;
 		$err_msg = "No CMC Profile Yet";
@@ -54,7 +52,7 @@ else {
 
 		$sql = 'insert into tripmembers (userid, tripid, isadmin, invited, accepted, type, datejoined) VALUES ("'.$fbid.'","'.$tripid.'","'.$isadmin.'","1","0","'.$membertype.'","'.$today.'")';
 
-		$result = mysql_query($sql,$con);
+		$result = $con->query($sql);
 		if (!$result) {
 			setjsonmysqlerror($has_error,$err_msg,$sql);
 		}

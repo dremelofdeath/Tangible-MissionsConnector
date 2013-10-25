@@ -8,7 +8,7 @@ include_once 'common.php';
 
 $con = arena_connect();
 
-$saferequest = cmc_safe_request_strip();
+$saferequest = cmc_safe_request_strip($con);
 $has_error = FALSE;
 $err_msg = '';
 
@@ -29,7 +29,7 @@ $json = array();
 if (!$has_error) {
 
 $sql = 'select * from users where userid="'.$showuserid.'"';
-$result = mysql_query($sql,$con);
+$result = $con->query($sql);
 
 if (!$result) {
  	setjsonmysqlerror($has_error,$err_msg,$sql);
@@ -40,7 +40,7 @@ function cmc_profile_render_id_join($title2,$title,$desc, $descdb, $selecteddb, 
   $sql = "SELECT * FROM ".$descdb.
      " JOIN ".$selecteddb." ON ".$descdb.".id = ".$selecteddb.".id".
      " WHERE ".$selecteddb.".userid='".$fbid."'";
-  $result = mysql_query($sql,$con);
+  $result = $con->query($sql);
   $id2 = str_replace (" ", "", $title2);
   $id1 = str_replace (" ", "", $title);
   if (!$result) {
@@ -48,7 +48,7 @@ function cmc_profile_render_id_join($title2,$title,$desc, $descdb, $selecteddb, 
   }
   else {
     $i=0;
-    while($row= mysql_fetch_array($result)) {
+    while($row= $result->fetch_array()) {
 
   if ($i==0) {
     if ($k==0) {
@@ -76,12 +76,12 @@ function cmc_profile_render_skills($title, $type, $fbid,&$has_error,&$err_msg,&$
   $sql = "SELECT * FROM skills".
        " JOIN skillsselected ON skills.id = skillsselected.id".
        " WHERE skills.type=".$type." AND skillsselected.userid='".$fbid."'";
-  $result = mysql_query($sql,$con);
+  $result = $con->query($sql);
   if (!$result) {
   	setjsonmysqlerror($has_error,$err_msg,$sql);
   } else {
     $i=0;
-    while($row = mysql_fetch_array($result)) {
+    while($row = $result->fetch_array()) {
       if ($i == 0) {
         $json[str_replace (" ", "", $title)] = array();
         $json[str_replace (" ", "", $title)."id"] = array();
@@ -93,9 +93,9 @@ function cmc_profile_render_skills($title, $type, $fbid,&$has_error,&$err_msg,&$
   }
 }
 
-if (mysql_num_rows($result) != 0) {
+if ($result->num_rows != 0) {
   $json['exists'] = 1;
-  while($row = mysql_fetch_array($result,MYSQL_ASSOC)) {
+  while($row = $result->fetch_array()) {
     $name = $row['name'];
     $organization = $row['organization'];
     $isleader = $row['isreceiver'];
@@ -120,7 +120,7 @@ if (mysql_num_rows($result) != 0) {
     $name = get_name_from_fb_using_curl($showuserid); // FIXME: really? really? --zack
 
     $sql2 = 'update users set name="'.$name.'" where userid="'.$showuserid.'"';
-    $result2 = mysql_query($sql2,$con);
+    $result2 = $con->query($sql2);
     if (!$result2) {
       setjsonmysqlerror($has_error,$err_msg,$sql2);
     }
@@ -192,9 +192,9 @@ if (mysql_num_rows($result) != 0) {
     "ON tm.tripid=t.id ".
     "WHERE tm.userid='".$showuserid."' ".
     "ORDER BY tm.datejoined";
-  $result = mysql_query($sql, $con);
+  $result = $con->query($sql);
   if($result) {
-    while($row = mysql_fetch_array($result)) {
+    while($row = $result->fetch_array()) {
       $json['trips'][] = $row;
     }
   } else {

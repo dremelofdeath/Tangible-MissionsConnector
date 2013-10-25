@@ -4,7 +4,7 @@ include_once 'common.php';
 
 $con = arena_connect();
 
-$saferequest = cmc_safe_request_strip();
+$saferequest = cmc_safe_request_strip($con);
 $has_error = FALSE;
 $err_msg = '';
 
@@ -24,7 +24,7 @@ $json = array();
 
 
 // This can be placed in index - CREATE hits table only if it does not exist - some logic needed there
-//mysql_query("CREATE TABLE hits (unique int(6), total int(7))");
+//mysqli_query("CREATE TABLE hits (unique int(6), total int(7))");
 
 // Assumes: you are already connected to MySQL,
 // and have selected the database you will be using;
@@ -60,22 +60,21 @@ if(isset($_COOKIE["visited"])) {
 if (!$cookie) {
   
   $sql = 'select * from hits where userid="'.$fbid.'"';
-  $result = mysql_query($sql,$con);
+  $result = $con->query($sql);
   if (!$result)
 	setjsonmysqlerror($has_error,$err_msg,$sql);
   else {
-  $numrows = mysql_num_rows($result);
-  if ($numrows==0) {
+  if ($result->num_rows==0) {
 	$sql = 'insert into hits (userid,count) VALUES ("'.$fbid.'","1")';
-	$result = mysql_query($sql,$con);
+	$result = $con->query($sql);
 	if (!$result)
 		setjsonmysqlerror($has_error,$err_msg,$sql);
   }
   else {
-  $row = mysql_fetch_array($result);
+  $row = $result->fetch_array();
   $unique_hits = $row['count'] + 1;
   $sql = 'update hits set count="'.$unique_hits.'" where userid="'.$fbid.'"';
-  $result = mysql_query($sql,$con);
+  $result = $con->query($sql);
   if (!$result)
 	setjsonmysqlerror($has_error,$err_msg,$sql);
   }
