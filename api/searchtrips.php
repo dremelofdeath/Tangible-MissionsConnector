@@ -3,7 +3,7 @@ include_once 'common.php';
 
 $con = arena_connect();
 
-$saferequest = cmc_safe_request_strip();
+$saferequest = cmc_safe_request_strip($con);
 $has_error = FALSE;
 $err_msg = '';
 
@@ -15,7 +15,7 @@ $json = array();
 $sql = null;
 if (array_key_exists('fbid', $saferequest) && $saferequest['fbid'] != '') {
   // first check that the user has a CMC profile - otherwise redirect user to create a profile
-  if (!db_check_user($saferequest['fbid'])) {
+  if (!db_check_user($con, $saferequest['fbid'])) {
     // This means user does not have a CMC profile
     $has_error = TRUE;
     $err_msg = "No CMC Profile";
@@ -31,14 +31,14 @@ if (array_key_exists('fbid', $saferequest) && $saferequest['fbid'] != '') {
       $sql = 'SELECT * FROM trips WHERE departure >= NOW()';
     }
 
-    $result = mysql_query($sql,$con);
+    $result = $con->query($sql);
 
     if ($result) {
-      $numrows = mysql_num_rows($result);
+      $numrows = $result->num_rows;
       $json['trips'] = array();
 
       if ($numrows!=0) {
-        while ($row = mysql_fetch_array($result)) {
+        while ($row = $result->fetch_array()) {
           $json['trips'][] = $row;
         }
       }
