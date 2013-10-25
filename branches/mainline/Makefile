@@ -101,5 +101,10 @@ buildfinalize: __depcleanpending signfinalize minifyfinalize cutsfinalize ship
 unfinalize: clean
 	svn revert $(JSFILES) cmc.js *.php
 
-buildnumber:
+buildnumber: bc-exists
 	@echo $(BUILDNUMBER)
+
+# Checks to see if required commands exist
+
+bc-exists:
+	@which bc > /dev/null
