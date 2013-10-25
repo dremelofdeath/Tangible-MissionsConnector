@@ -2,7 +2,7 @@
 include_once 'common.php';
 
 $con = arena_connect();
-$saferequest = cmc_safe_request_strip();
+$saferequest = cmc_safe_request_strip($con);
 
 $has_error = FALSE;
 $err_msg = '';
@@ -10,14 +10,14 @@ $err_msg = '';
 if (array_key_exists('fbid', $saferequest)) {
   // facebook userid should be provided in the least
   $fbid = $saferequest['fbid'];
-} 
-else if ((array_key_exists('fbid', $saferequest)) && (array_key_exists('userid', $saferequest)) && (array_key_exists('cmd', $saferequest))) {
+} else if ((array_key_exists('fbid', $saferequest))
+    && (array_key_exists('userid', $saferequest))
+    && (array_key_exists('cmd', $saferequest))) {
   // both userid and facebook userid should be provided
   $fbid = $saferequest['fbid'];
   $usertopurge = $saferequest['userid'];
   $cmd = $saferequest['cmd'];
-}
-else {
+} else {
   // error case
   $has_error = TRUE;
   $err_msg = "Facebook id was not defined.";
@@ -25,60 +25,56 @@ else {
 
 if (!$has_error) {
 
-// get admins of CMC from the database - We need to create this table first
-$appadminids = array();
+  // get admins of CMC from the database - We need to create this table first
+  $appadminids = array();
 
-$sql = 'select * from cmcadmins';
-$result = mysql_query($sql,$con);
-if (!$result) {
-	$has_error = TRUE;
-	$err_msg = "Can't query (query was '$query'): " . mysql_error();
-}
-else {
-	$appadminids = array();
-	while ($row = mysql_fetch_array($result,MYSQL_ASSOC)) {
-		$appadminids[] = $row['userid'];
-	}
-}
-
-$allow=0;
-for ($i=0;$i<count($appadminids);$i++) {
-  if ($fbid==$appadminids[$i]) {
-  $allow = 1;
-  continue 1;
+  $sql = 'select * from cmcadmins';
+  $result = $con->query($sql);
+  if (!$result) {
+    $has_error = TRUE;
+    $err_msg = "Can't query (query was '$query'): " . $con->error;
+  } else {
+    $appadminids = array();
+    while ($row = $result->fetch_array()) {
+      $appadminids[] = $row['userid'];
+    }
   }
-}
 
-if (!$allow) {
-  $has_error = TRUE;
-  $err_msg = "No Administrative privileges";
-} else {
+  $allow=0;
+  for ($i=0;$i<count($appadminids);$i++) {
+    if ($fbid==$appadminids[$i]) {
+      $allow = 1;
+      continue 1;
+    }
+  }
 
-  process_admin_commands($cmd,$usertopurge,$con,$has_error,$err_msg);
+  if (!$allow) {
+    $has_error = TRUE;
+    $err_msg = "No Administrative privileges";
+  } else {
+    process_admin_commands($cmd,$usertopurge,$con,$has_error,$err_msg);
 
-  $numhits = numhits($con,$has_error,$err_msg);
+    $numhits = numhits($con,$has_error,$err_msg);
 
-  if (!$has_error)
-  	$json['numhits'] = $numhits;
-  
-}
-
+    if (!$has_error)
+      $json['numhits'] = $numhits;
+  }
 }
 
 function numhits($con,&$has_error,&$err_msg) {
   // sum up all the user specific hits
   $sql = "select * from hits";
-  $result = mysql_query($sql,$con);
+  $result = $con->query($sql);
   if (!$result) {
-	setjsonmysqlerror($has_error,$err_msg,$sql);
-	return -1;
+    setjsonmysqlerror($has_error,$err_msg,$sql);
+    return -1;
   }
   else {
-  $unique_hits = 0;
-  while ($row = mysql_fetch_array($result)) {
-    $unique_hits = $unique_hits + $row['count'];
-  }
-  return $unique_hits;
+    $unique_hits = 0;
+    while ($row = $result->fetch_array()) {
+      $unique_hits = $unique_hits + $row['count'];
+    }
+    return $unique_hits;
   }
 }
 
@@ -117,18 +113,18 @@ function process_admin_purgeuser($usertopurge,$con) {
 function process_admin_purgeuser4real($usertopurge,$con,&$has_error,&$err_msg) {
   $resultcode = db_purge_user_by_id($usertopurge,$con,$has_error,$err_msg);
   if (!$has_error) {
-  if($resultcode == 0) {
-	$has_error = TRUE;
-	$err_msg = "User ID:".$usertopurge." could not be found in the databases";
-  } else if($resultcode > 1) {
-	$has_error = TRUE;
-	$err_msg = "Multiple results for ID::".$usertopurge.". Did not delete anything. Please check the DB.";
-  } else if($resultcode == 1) {
+    if($resultcode == 0) {
+      $has_error = TRUE;
+      $err_msg = "User ID:".$usertopurge." could not be found in the databases";
+    } else if($resultcode > 1) {
+      $has_error = TRUE;
+      $err_msg = "Multiple results for ID::".$usertopurge.". Did not delete anything. Please check the DB.";
+    } else if($resultcode == 1) {
 
-  } else {
-	$has_error = TRUE;
-	$err_msg = "CATASTROPHIC FAILURE: Negative number of users. Something really horrible just happened";
-  }
+    } else {
+      $has_error = TRUE;
+      $err_msg = "CATASTROPHIC FAILURE: Negative number of users. Something really horrible just happened";
+    }
   }
 }
 
@@ -152,18 +148,18 @@ function process_admin_scrubuser($usertopurge,$con) {
 function process_admin_scrubuser4real($usertopurge,$con,&$has_error,&$err_msg) {
   $resultcode = db_scrub_user_by_id($usertopurge,$con,$has_error,$err_msg);
   if (!$has_error) {
-  if($resultcode == 0) {
-	$has_error = TRUE;
-	$err_msg = "User ID:".$usertopurge." could not be found in the databases";
-  } else if($resultcode > 1) {
-	$has_error = TRUE;
-	$err_msg = "Multiple results for ID::".$usertopurge.". Did not delete anything. Please check the DB.";
-  } else if($resultcode == 1) {
+    if($resultcode == 0) {
+      $has_error = TRUE;
+      $err_msg = "User ID:".$usertopurge." could not be found in the databases";
+    } else if($resultcode > 1) {
+      $has_error = TRUE;
+      $err_msg = "Multiple results for ID::".$usertopurge.". Did not delete anything. Please check the DB.";
+    } else if($resultcode == 1) {
 
-  } else {
-	$has_error = TRUE;
-	$err_msg = "CATASTROPHIC FAILURE: Negative number of users. Something really horrible just happened";
-  }
+    } else {
+      $has_error = TRUE;
+      $err_msg = "CATASTROPHIC FAILURE: Negative number of users. Something really horrible just happened";
+    }
   }
 }
 
