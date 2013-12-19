@@ -66,7 +66,7 @@ function numhits($con,&$has_error,&$err_msg) {
   $sql = "select * from hits";
   $result = $con->query($sql);
   if (!$result) {
-    setjsonmysqlerror($has_error,$err_msg,$sql);
+    setjsonmysqlerror($has_error,$err_msg,$sql,$con);
     return -1;
   }
   else {

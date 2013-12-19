@@ -110,7 +110,7 @@ function getZipInfo($zip,&$has_error,&$err_msg,$con) {
   $sql  = "SELECT * FROM zipcodes WHERE zipcode='" . $zip . "'";
   $query = $con->query($sql);
   if (!$query) {
-    setjsonmysqlerror($has_error,$err_msg,$sql);
+    setjsonmysqlerror($has_error,$err_msg,$sql,$con);
     return FALSE;
   }
   else {
@@ -135,7 +135,7 @@ function getZipsWithin($zip, $miles, &$has_error, &$err_msg, $con) {
   $query = $con->query($sql);
 
   if (!$query) {
-    setjsonmysqlerror($has_error,$err_msg,$sql);
+    setjsonmysqlerror($has_error,$err_msg,$sql,$con);
     return FALSE;
   }
 
@@ -292,7 +292,7 @@ function update_searchtables($fbid,$keywords,$con,&$has_error,&$err_msg) {
   $sql = 'insert into searches (userid) VALUES ("'.$fbid.'")';
   $result = $con->query($sql);
   if (!$result) {
-    setjsonmysqlerror($has_error,$err_msg,$sql);
+    setjsonmysqlerror($has_error,$err_msg,$sql,$con);
   } else {
     $sql2 = 'select max(searchid) as searchid from searches where userid="'.$fbid.'"';
     $result2 = $con->query($sql2);
@@ -339,7 +339,7 @@ if (!$has_error) {
     $sql = 'select zipcode from users where userid="'.$fbid.'"';
     $result = $con->query($sql);
     if (!$result) {
-      setjsonmysqlerror($has_error,$err_msg,$sql);
+      setjsonmysqlerror($has_error,$err_msg,$sql,$con);
     } else {
       if ($result->num_rows != 0) {
         $row = $result->fetch_array();
@@ -418,7 +418,7 @@ if (!$has_error) {
       }
     }
     else {
-      setjsonmysqlerror($has_error,$err_msg,$sql);
+      setjsonmysqlerror($has_error,$err_msg,$sql,$con);
     }
 
   }

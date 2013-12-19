@@ -32,7 +32,7 @@ if (!$has_error) {
   $sql = 'select * from trips where id="'.$tid.'"';
   $result = $con->query($sql);
   if (!$result) {
-    setjsonmysqlerror($has_error,$err_msg,$sql);
+    setjsonmysqlerror($has_error,$err_msg,$sql,$con);
   } else {
     if ($result->num_rows ==0) {
       $has_error = TRUE;
@@ -42,7 +42,7 @@ if (!$has_error) {
         $sql = 'select * from tripmembers where userid="'.$fbid.'" and accepted="1" and tripid="'.$tid.'"';
         $result = $con->query($sql);
         if (!$result) {
-          setjsonmysqlerror($has_error,$err_msg,$sql);
+          setjsonmysqlerror($has_error,$err_msg,$sql,$con);
         } else {
           if ($result->num_rows == 0) {
             $has_error = TRUE;
@@ -51,7 +51,7 @@ if (!$has_error) {
             $sql = 'select COUNT(userid) from tripmembers where accepted="1" and tripid="'.$tid.'"';
             $result = $con->query($sql);
             if (!$result) {
-              setjsonmysqlerror($has_error,$err_msg,$sql);
+              setjsonmysqlerror($has_error,$err_msg,$sql,$con);
             } else {
               $countrow = $result->fetch_array();
               $membercount = $countrow['COUNT(userid)'];
@@ -63,7 +63,7 @@ if (!$has_error) {
                 $sql = 'DELETE FROM tripmembers WHERE userid="'.$fbid.'" AND tripid="'.$tid.'"';
                 $result = $con->query($sql);
                 if (!$result) {
-                  setjsonmysqlerror($has_error, $err_msg, $sql);
+                  setjsonmysqlerror($has_error, $err_msg, $sql, $con);
                 }
               }
             }
@@ -78,7 +78,7 @@ if (!$has_error) {
             $sql = 'delete from tripmembers where userid="'.$mytripmember.'" and tripid="'.$tid.'"';
             $result = $con->query($sql);
             if (!result) {
-              setjsonmysqlerror($has_error,$err_msg,$sql);
+              setjsonmysqlerror($has_error,$err_msg,$sql,$con);
               continue 1;
             }
             next($tripmembers);
@@ -89,7 +89,7 @@ if (!$has_error) {
           $result = $con->query($sql);
 
           if (!result) {
-            setjsonmysqlerror($has_error,$err_msg,$sql);
+            setjsonmysqlerror($has_error,$err_msg,$sql,$con);
           }
         }
       }

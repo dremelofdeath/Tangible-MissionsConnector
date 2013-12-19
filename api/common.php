@@ -64,7 +64,7 @@ function db_purge_user_by_id($userid,$con,&$has_error,&$err_msg) {
   $result = $con->query($query);
 
   if (!$result) {
-    setjsonmysqlerror($has_error,$err_msg,$query);
+    setjsonmysqlerror($has_error,$err_msg,$query,$con);
     return -1;
   } else {
     $ret = -1;
@@ -81,17 +81,17 @@ function db_purge_user_by_id($userid,$con,&$has_error,&$err_msg) {
       $query = "DELETE FROM countriesselected WHERE userid='".$userid."'";
       $result = $con->query($query);
       if (!$result) {
-        setjsonmysqlerror($has_error,$err_msg,$query);
+        setjsonmysqlerror($has_error,$err_msg,$query,$con);
       }
       $query = "DELETE FROM durationsselected WHERE userid='".$userid."'";
       $result = $con->query($query);
       if (!$result) {
-        setjsonmysqlerror($has_error,$err_msg,$query);
+        setjsonmysqlerror($has_error,$err_msg,$query,$con);
       }
       $query = "DELETE FROM hits WHERE userid='".$userid."'";
       $result = $con->query($query);
       if (!$result) {
-        setjsonmysqlerror($has_error,$err_msg,$query);
+        setjsonmysqlerror($has_error,$err_msg,$query,$con);
       }
       $query = "DELETE FROM languagesselected WHERE userid='".$userid."'";
       $result = $con->query($query);
@@ -106,51 +106,51 @@ function db_purge_user_by_id($userid,$con,&$has_error,&$err_msg) {
       $query = "DELETE FROM regionsselected WHERE userid='".$userid."'";
       $result = $con->query($query);
       if (!$result) {
-        setjsonmysqlerror($has_error,$err_msg,$query);
+        setjsonmysqlerror($has_error,$err_msg,$query,$con);
       }
       $query = "DELETE skillsselectedtrips FROM skillsselectedtrips "
         . "JOIN trips ON trips.id=skillsselectedtrips.tripid "
         . "INNER JOIN users ON users.userid='".$userid."' AND users.userid=trips.creatorid";
       $result = $con->query($query);
       if (!$result) {
-        setjsonmysqlerror($has_error,$err_msg,$query);
+        setjsonmysqlerror($has_error,$err_msg,$query,$con);
       }
       $query = "DELETE searches, searchterms FROM searches "
         . "JOIN searchterms ON searches.searchid=searchterms.searchid "
         . "WHERE searches.userid='".$userid."'";
       $result = $con->query($query);
       if (!$result) {
-        setjsonmysqlerror($has_error,$err_msg,$query);
+        setjsonmysqlerror($has_error,$err_msg,$query,$con);
       }
       $query = "DELETE FROM skillsselected WHERE userid='".$userid."'";
       $result = $con->query($query);
       if (!$result) {
-        setjsonmysqlerror($has_error,$err_msg,$query);
+        setjsonmysqlerror($has_error,$err_msg,$query,$con);
       }
       $query = "DELETE FROM tripmembers WHERE userid='".$userid."'";
       $result = $con->query($query);
       if (!$result) {
-        setjsonmysqlerror($has_error,$err_msg,$query);
+        setjsonmysqlerror($has_error,$err_msg,$query,$con);
       }
       $query = "DELETE FROM trips WHERE creatorid='".$userid."'";
       $result = $con->query($query);
       if (!$result) {
-        setjsonmysqlerror($has_error,$err_msg,$query);
+        setjsonmysqlerror($has_error,$err_msg,$query,$con);
       }
       $query = "DELETE FROM tripwallinvites WHERE userid='".$userid."'";
       $result = $con->query($query);
       if (!$result) {
-        setjsonmysqlerror($has_error,$err_msg,$query);
+        setjsonmysqlerror($has_error,$err_msg,$query,$con);
       }
       $query = "DELETE FROM usstatesselected WHERE userid='".$userid."'";
       $result = $con->query($query);
       if (!$result) {
-        setjsonmysqlerror($has_error,$err_msg,$query);
+        setjsonmysqlerror($has_error,$err_msg,$query,$con);
       }
       $query = "DELETE FROM users WHERE userid='".$userid."'";
       $result = $con->query($query);
       if (!$result) {
-        setjsonmysqlerror($has_error,$err_msg,$query);
+        setjsonmysqlerror($has_error,$err_msg,$query,$con);
       }
       $ret = 1;
     } else {
@@ -173,7 +173,7 @@ function db_scrub_user_by_id($userid,$con,&$has_error,&$err_msg) {
   $result = $con->query($query);
 
   if (!$result) {
-    setjsonmysqlerror($has_error,$err_msg,$query);
+    setjsonmysqlerror($has_error,$err_msg,$query,$con);
     return -1;
   } else {
     $ret = -1;
@@ -188,27 +188,27 @@ function db_scrub_user_by_id($userid,$con,&$has_error,&$err_msg) {
       $query = "DELETE FROM countriesselected WHERE userid='".$userid."'";
       $result = $con->query($query);
       if (!$result) {
-        setjsonmysqlerror($has_error,$err_msg,$query);
+        setjsonmysqlerror($has_error,$err_msg,$query,$con);
       }
       $query = "DELETE FROM durationsselected WHERE userid='".$userid."'";
       $result = $con->query($query);
       if (!$result) {
-        setjsonmysqlerror($has_error,$err_msg,$query);
+        setjsonmysqlerror($has_error,$err_msg,$query,$con);
       }
       $query = "DELETE FROM regionsselected WHERE userid='".$userid."'";
       $result = $con->query($query);
       if (!$result) {
-        setjsonmysqlerror($has_error,$err_msg,$query);
+        setjsonmysqlerror($has_error,$err_msg,$query,$con);
       }
       $query = "DELETE FROM skillsselected WHERE userid='".$userid."'";
       $result = $con->query($query);
       if (!$result) {
-        setjsonmysqlerror($has_error,$err_msg,$query);
+        setjsonmysqlerror($has_error,$err_msg,$query,$con);
       }
       $query = "DELETE FROM usstatesselected WHERE userid='".$userid."'";
       $result = $con->query($query);
       if (!$result) {
-        setjsonmysqlerror($has_error,$err_msg,$query);
+        setjsonmysqlerror($has_error,$err_msg,$query,$con);
       }
       $query = "UPDATE LOW_PRIORITY users ".
         "SET name=NULL, organization=NULL, isreceiver=NULL, state=NULL, city=NULL, zipcode=NULL, ".
@@ -216,7 +216,7 @@ function db_scrub_user_by_id($userid,$con,&$has_error,&$err_msg) {
         "aboutme=NULL, website=NULL, partnersite=NULL WHERE userid='".$userid."' LIMIT 1";
       $result = $con->query($query);
       if (!$result) {
-        setjsonmysqlerror($has_error,$err_msg,$query);
+        setjsonmysqlerror($has_error,$err_msg,$query,$con);
       }
       $ret = 1;
     } else {

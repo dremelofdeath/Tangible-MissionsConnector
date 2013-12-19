@@ -43,7 +43,7 @@ if (array_key_exists('fbid', $saferequest) && $saferequest['fbid'] != '') {
         }
       }
     } else {
-      setjsonmysqlerror($has_error,$err_msg,$sql);
+      setjsonmysqlerror($has_error,$err_msg,$sql,$con);
     }
   }
 }

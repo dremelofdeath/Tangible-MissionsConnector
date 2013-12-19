@@ -29,7 +29,7 @@ $sql = 'select * from trips where id="'.$tid.'"';
 $result = $con->query($sql);
 
 if (!$result) {
-	setjsonmysqlerror($has_error,$err_msg,$sql);
+	setjsonmysqlerror($has_error,$err_msg,$sql,$con);
 }
 else {
 
@@ -39,7 +39,7 @@ function cmc_profile_render_skills($title, $type, $tid,&$has_error,&$err_msg,&$j
        " WHERE skills.type=".$type." AND skillsselectedtrips.tripid='".$tid."'";
   $result = $con->query($sql);
   if (!$result) {
-  	setjsonmysqlerror($has_error,$err_msg,$sql);
+  	setjsonmysqlerror($has_error,$err_msg,$sql,$con);
   }
   else {
     $i=0;
@@ -206,7 +206,7 @@ $sql = 'select * from tripmembers where userid="'.$fbid.'" and tripid="'.$tid.'"
 $result = $con->query($sql);
 
 if (!$result) {
-	setjsonmysqlerror($has_error,$err_msg,$sql);
+	setjsonmysqlerror($has_error,$err_msg,$sql,$con);
 }
 else {
 
@@ -223,7 +223,7 @@ $sql = 'select * from tripmembers where tripid="'.$tid.'"';
 $result = $con->query($sql);
 
 if (!$result) {
-	setjsonmysqlerror($has_error,$err_msg,$sql);
+	setjsonmysqlerror($has_error,$err_msg,$sql,$con);
 }
 else {
 
