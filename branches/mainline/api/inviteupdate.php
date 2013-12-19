@@ -38,6 +38,6 @@ if (!$has_error) {
   $result = $con->query($sql);
 
   if (!$result) {
-    setjsonmysqlerror($has_error,$err_msg,$sql);
+    setjsonmysqlerror($has_error,$err_msg,$sql,$con);
   }
 }

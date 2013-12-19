@@ -32,7 +32,7 @@ $sql = 'select * from users where userid="'.$showuserid.'"';
 $result = $con->query($sql);
 
 if (!$result) {
- 	setjsonmysqlerror($has_error,$err_msg,$sql);
+ 	setjsonmysqlerror($has_error,$err_msg,$sql,$con);
 }
 else {
 
@@ -44,7 +44,7 @@ function cmc_profile_render_id_join($title2,$title,$desc, $descdb, $selecteddb, 
   $id2 = str_replace (" ", "", $title2);
   $id1 = str_replace (" ", "", $title);
   if (!$result) {
-    setjsonmysqlerror($has_error,$err_msg,$sql);
+    setjsonmysqlerror($has_error,$err_msg,$sql,$con);
   }
   else {
     $i=0;
@@ -78,7 +78,7 @@ function cmc_profile_render_skills($title, $type, $fbid,&$has_error,&$err_msg,&$
        " WHERE skills.type=".$type." AND skillsselected.userid='".$fbid."'";
   $result = $con->query($sql);
   if (!$result) {
-  	setjsonmysqlerror($has_error,$err_msg,$sql);
+  	setjsonmysqlerror($has_error,$err_msg,$sql,$con);
   } else {
     $i=0;
     while($row = $result->fetch_array()) {
@@ -198,7 +198,7 @@ if ($result->num_rows != 0) {
       $json['trips'][] = $row;
     }
   } else {
-    setjsonmysqlerror($has_error,$err_msg,$sql);
+    setjsonmysqlerror($has_error,$err_msg,$sql,$con);
   }
 } else {
   $json['exists'] = 0;		

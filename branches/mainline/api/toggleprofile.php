@@ -71,7 +71,7 @@ if ($myobj->{'toggle'} == 1) {
    $sql = 'select * from users where userid="'.$fbid.'"';
    $result = $con->query($sql);
    if (!$result) {
- 	  setjsonmysqlerror($has_error,$err_msg,$sql);
+ 	  setjsonmysqlerror($has_error,$err_msg,$sql,$con);
    }
    else {
    if ($result->num_rows > 0) {

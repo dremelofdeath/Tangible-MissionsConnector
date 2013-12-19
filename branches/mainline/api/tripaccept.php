@@ -40,14 +40,14 @@ $sql = 'select userid from tripmembers where userid="'.$fbid.'" and tripid="'.$t
 $result = $con->query($sql);
 
 if (!$result) {
- 	setjsonmysqlerror($has_error,$err_msg,$sql);
+ 	setjsonmysqlerror($has_error,$err_msg,$sql,$con);
 }
 else {
 	if ($result->num_rows > 0) {
  	$sql = 'update tripmembers set accepted="1", type="'.$membertype.'", datejoined="'.$today.'", isadmin="'.$isadmin.'" where userid="'.$fbid.'" and tripid="'.$tripid.'"';
  		$result = $con->query($sql);
  		if (!$result) {
- 			setjsonmysqlerror($has_error,$err_msg,$sql);
+ 			setjsonmysqlerror($has_error,$err_msg,$sql,$con);
 		}
 
 		if (!$has_error) {
@@ -63,11 +63,11 @@ else {
  			$sql = 'update trips set numpeople="'.$numpeople.'" where id="'.$tripid.'"';
  			$result = $con->query($sql);
 			if (!$result) {
- 				setjsonmysqlerror($has_error,$err_msg,$sql);
+ 				setjsonmysqlerror($has_error,$err_msg,$sql,$con);
 			}
  		}
 		else 
-			setjsonmysqlerror($has_error,$err_msg,$sql);
+			setjsonmysqlerror($has_error,$err_msg,$sql,$con);
 
 		} // has_error
 
@@ -78,7 +78,7 @@ else {
    		$sql = 'select * from users where userid="'.$fbid.'"';
    		$result = $con->query($sql);
 		if (!$result) {
-			setjsonmysqlerror($has_error,$err_msg,$sql);
+			setjsonmysqlerror($has_error,$err_msg,$sql,$con);
 		}
 
 		if (!$has_error) {
@@ -107,15 +107,15 @@ else {
   				$sql = 'update trips set numpeople="'.$numpeople.'" where id="'.$tripid.'"';
   				$result = $con->query($sql);
 				if (!$result) {
- 					setjsonmysqlerror($has_error,$err_msg,$sql);
+ 					setjsonmysqlerror($has_error,$err_msg,$sql,$con);
 				}
   			}
 			else {
-				setjsonmysqlerror($has_error,$err_msg,$sql);
+				setjsonmysqlerror($has_error,$err_msg,$sql,$con);
 			}
 			}
 			else {
-				setjsonmysqlerror($has_error,$err_msg,$sql);
+				setjsonmysqlerror($has_error,$err_msg,$sql,$con);
 			}
 
 		}

@@ -113,19 +113,19 @@ if (!$has_error) {
         $result = $con->query($sql);
 
         if (!$result) {
-          setjsonmysqlerror($has_error,$err_msg,$sql);
+          setjsonmysqlerror($has_error,$err_msg,$sql,$con);
         } else {
           if ($result->num_rows > 0) {
             $sql = 'UPDATE tripmembers set invited="1" where userid="'.$selected.'" and tripid="'.$tripid.'" and type="'.$membertype.'"';
             $result = $con->query($sql);
             if (!$result) {
-              setjsonmysqlerror($has_error,$err_msg,$sql);
+              setjsonmysqlerror($has_error,$err_msg,$sql,$con);
             }
           } else {
             $sql = 'INSERT into tripmembers (userid, tripid,invited,type) VALUES ("'.$selected.'","'.$tripid.'","1","'.$membertype.'")';
             $result = $con->query($sql);
             if (!$result) {
-              setjsonmysqlerror($has_error,$err_msg,$sql);
+              setjsonmysqlerror($has_error,$err_msg,$sql,$con);
             }
           }
         }
@@ -137,7 +137,7 @@ if (!$has_error) {
     $sql = 'select * from notifications where id="'.$fbid.'"';
     $result = $con->query($sql);
     if (!$result) {
-      setjsonmysqlerror($has_error,$err_msg,$sql);	
+      setjsonmysqlerror($has_error,$err_msg,$sql,$con);	
     } else {
       if ($result->num_rows > 0) {
         $row = $result->fetch_array();
@@ -166,7 +166,7 @@ if (!$has_error) {
       $myfriends=array();
       $result = $con->query($sql);
       if (!$result) {
-        setjsonmysqlerror($has_error,$err_msg,$sql);
+        setjsonmysqlerror($has_error,$err_msg,$sql,$con);
       }
       else {
         while ($invitedfriends = $result->fetch_array()) {
@@ -180,7 +180,7 @@ if (!$has_error) {
     $sql = 'select tripname,tripdesc,destination,departure,returning,religion from trips where id="'.$tripid.'"';
     $result = $con->query($sql);
     if (!$result) {
-      setjsonmysqlerror($has_error,$err_msg,$sql);
+      setjsonmysqlerror($has_error,$err_msg,$sql,$con);
     } else {
       $row = $result->fetch_array();
       if (!empty($row['tripname']))

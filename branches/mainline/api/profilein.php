@@ -121,7 +121,7 @@ if (!$has_error) {
                    'WHERE zipcodes.zipcode='.$myobj->{'zip'};
             $result = $con->query($sql);
             if (!$result) {
-              setjsonmysqlerror($has_error, $err_msg, $sql);
+              setjsonmysqlerror($has_error, $err_msg, $sql, $con);
             } else {
               if ($result->num_rows > 0) {
                 $row = $result->fetch_array();
@@ -162,7 +162,7 @@ if (!$has_error) {
           $sql = 'select * from users where userid="'.$fbid.'"';
           $result = $con->query($sql);
           if (!$result) {
-            setjsonmysqlerror($has_error,$err_msg,$sql);
+            setjsonmysqlerror($has_error,$err_msg,$sql,$con);
           }
           else {
             if ($result->num_rows > 0) {
@@ -213,7 +213,7 @@ if (!$has_error) {
         $result = $con->query($sql);
 
         if (!$result) {
-          setjsonmysqlerror($has_error,$err_msg,$sql);
+          setjsonmysqlerror($has_error,$err_msg,$sql,$con);
         }
         else {
 
@@ -415,7 +415,7 @@ if (!$has_error) {
             //$json['sql'] = $sql;
             $result = $con->query($sql);
             if (!$result) {
-              setjsonmysqlerror($has_error,$err_msg,$sql);
+              setjsonmysqlerror($has_error,$err_msg,$sql,$con);
             }
           }
 
@@ -1014,7 +1014,7 @@ if ($month%2==0) {
 				$resultl = $con->query($sqll);
 
 				if (!$resultl) {
-					setjsonmysqlerror($has_error, $err_msg, $sqll);
+					setjsonmysqlerror($has_error, $err_msg, $sqll, $con);
 				} else {			
 				$rowl = $resultl->fetch_array();
 			
@@ -1301,7 +1301,7 @@ else {
 
         $result = $con->query($sql);
         if (!$result) {
-          setjsonmysqlerror($has_error,$err_msg,$sql);
+          setjsonmysqlerror($has_error,$err_msg,$sql,$con);
         }
         else {
           if ($update) {
@@ -1313,7 +1313,7 @@ else {
 
             $result = $con->query($sql);
             if (!$result) {
-              setjsonmysqlerror($has_error,$err_msg,$sql);
+              setjsonmysqlerror($has_error,$err_msg,$sql,$con);
             }
             else {
               while ($row = $result->fetch_array()) {
@@ -1326,7 +1326,7 @@ else {
 
               $result = $con->query($sql);
               if (!$result) {
-                setjsonmysqlerror($has_error,$err_msg,$sql);
+                setjsonmysqlerror($has_error,$err_msg,$sql,$con);
               }	
             }
           }
@@ -1338,7 +1338,7 @@ else {
     $sql = "DELETE FROM skillsselectedtrips WHERE tripid='".$tripid."'";
     $result = $con->query($sql);
     if (!$result) {
-      setjsonmysqlerror($has_error,$err_msg,$sql);
+      setjsonmysqlerror($has_error,$err_msg,$sql,$con);
     }
 
     if (isset($myobj->{'medskills'})) {
@@ -1347,7 +1347,7 @@ else {
         $sql = "INSERT INTO skillsselectedtrips VALUES ('".$tripid."','".$ms."')";
         $result = $con->query($sql);
         if(!$result){
-          setjsonmysqlerror($has_error,$err_msg,$sql);
+          setjsonmysqlerror($has_error,$err_msg,$sql,$con);
         }
       }
     }
@@ -1358,7 +1358,7 @@ else {
         $sql = "INSERT INTO skillsselectedtrips VALUES ('".$tripid."','".$ms."')";
         $result = $con->query($sql);
         if(!$result) {
-          setjsonmysqlerror($has_error,$err_msg,$sql);
+          setjsonmysqlerror($has_error,$err_msg,$sql,$con);
         }
       }
     }
@@ -1369,7 +1369,7 @@ else {
         $sql = "INSERT INTO skillsselectedtrips VALUES ('".$tripid."','".$ms."')";
         $result = $con->query($sql);
         if(!$result) {
-          setjsonmysqlerror($has_error,$err_msg,$sql);
+          setjsonmysqlerror($has_error,$err_msg,$sql,$con);
         }
       }
     }	
@@ -1385,28 +1385,28 @@ else {
     $sql = "DELETE FROM skillsselected WHERE userid='".$fbid."'";
     $result = $con->query($sql);
     if (!$result) {
-      setjsonmysqlerror($has_error,$err_msg,$sql);
+      setjsonmysqlerror($has_error,$err_msg,$sql,$con);
     }
 
     $sql = "DELETE FROM regionsselected WHERE userid='".$fbid."'";
     $result = $con->query($sql);
     if (!$result) {
-      setjsonmysqlerror($has_error,$err_msg,$sql);
+      setjsonmysqlerror($has_error,$err_msg,$sql,$con);
     }
     $sql = "DELETE FROM countriesselected WHERE userid='".$fbid."'";
     $result = $con->query($sql);
     if (!$result) {
-      setjsonmysqlerror($has_error,$err_msg,$sql);
+      setjsonmysqlerror($has_error,$err_msg,$sql,$con);
     }
     $sql = "DELETE FROM usstatesselected WHERE userid='".$fbid."'";
     $result = $con->query($sql);
     if (!$result) {
-      setjsonmysqlerror($has_error,$err_msg,$sql);
+      setjsonmysqlerror($has_error,$err_msg,$sql,$con);
     }
     $sql = "DELETE FROM durationsselected WHERE userid='".$fbid."'";
     $result = $con->query($sql);
     if (!$result) {
-      setjsonmysqlerror($has_error,$err_msg,$sql);
+      setjsonmysqlerror($has_error,$err_msg,$sql,$con);
     }
 
     if (isset($myobj->{'medfacil'})) {
@@ -1415,7 +1415,7 @@ else {
         $sql = "INSERT INTO skillsselected VALUES ('".$fbid."','".$ms."')";
         $result = $con->query($sql);
         if(!$result){
-          setjsonmysqlerror($has_error,$err_msg,$sql);
+          setjsonmysqlerror($has_error,$err_msg,$sql,$con);
         }
       }
     }
@@ -1426,7 +1426,7 @@ else {
         $sql = "INSERT INTO skillsselected VALUES ('".$fbid."','".$ms."')";
         $result = $con->query($sql);
         if(!$result){
-          setjsonmysqlerror($has_error,$err_msg,$sql);
+          setjsonmysqlerror($has_error,$err_msg,$sql,$con);
         }
       }
     }
@@ -1437,7 +1437,7 @@ else {
         $sql = "INSERT INTO skillsselected VALUES ('".$fbid."','".$ms."')";
         $result = $con->query($sql);
         if(!$result){
-          setjsonmysqlerror($has_error,$err_msg,$sql);
+          setjsonmysqlerror($has_error,$err_msg,$sql,$con);
         }
       }
     }
@@ -1448,7 +1448,7 @@ else {
         $sql = "INSERT INTO skillsselected VALUES ('".$fbid."','".$ms."')";
         $result = $con->query($sql);
         if(!$result) {
-          setjsonmysqlerror($has_error,$err_msg,$sql);
+          setjsonmysqlerror($has_error,$err_msg,$sql,$con);
         }
       }
     }
@@ -1459,7 +1459,7 @@ else {
         $sql = "INSERT INTO skillsselected VALUES ('".$fbid."','".$ms."')";
         $result = $con->query($sql);
         if(!$result) {
-          setjsonmysqlerror($has_error,$err_msg,$sql);
+          setjsonmysqlerror($has_error,$err_msg,$sql,$con);
         }
       }
     }
@@ -1470,7 +1470,7 @@ else {
         $sql = "INSERT INTO regionsselected VALUES ('".$fbid."','".$ms."')";
         $result = $con->query($sql);
         if(!$result) {
-          setjsonmysqlerror($has_error,$err_msg,$sql);
+          setjsonmysqlerror($has_error,$err_msg,$sql,$con);
         }
       }
     }
@@ -1480,7 +1480,7 @@ else {
       $sql = "INSERT INTO usstatesselected VALUES ('".$fbid."','".$mystate."')";
       $result = $con->query($sql);
       if(!$result) {
-        setjsonmysqlerror($has_error,$err_msg,$sql);
+        setjsonmysqlerror($has_error,$err_msg,$sql,$con);
       }
     }
 
@@ -1491,7 +1491,7 @@ else {
           $sql = "INSERT INTO countriesselected VALUES ('".$fbid."','".$ms."')";
           $result = $con->query($sql);
           if(!$result) {
-            setjsonmysqlerror($has_error,$err_msg,$sql);
+            setjsonmysqlerror($has_error,$err_msg,$sql,$con);
           }
         }
       }
@@ -1499,7 +1499,7 @@ else {
         $sql = "INSERT INTO countriesselected VALUES ('".$fbid."','".$country[0]."')";
         $result = $con->query($sql);
         if(!$result) {
-          setjsonmysqlerror($has_error,$err_msg,$sql);
+          setjsonmysqlerror($has_error,$err_msg,$sql,$con);
         }
       }
     }
@@ -1511,7 +1511,7 @@ else {
           $sql = "INSERT INTO durationsselected VALUES ('".$fbid."','".$ms."')";
           $result = $con->query($sql);
           if(!$result) {
-            setjsonmysqlerror($has_error,$err_msg,$sql);
+            setjsonmysqlerror($has_error,$err_msg,$sql,$con);
           }
         }
       }
@@ -1519,7 +1519,7 @@ else {
         $sql = "INSERT INTO durationsselected VALUES ('".$fbid."','".$dur."')";
         $result = $con->query($sql);
         if(!$result) {
-          setjsonmysqlerror($has_error,$err_msg,$sql);
+          setjsonmysqlerror($has_error,$err_msg,$sql,$con);
         }
       }
     }

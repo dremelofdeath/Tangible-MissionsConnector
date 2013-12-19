@@ -73,7 +73,7 @@ if (isset($selectedids)) {
  
  $result = $con->query($sql);
  if (!result) {
- 	setjsonmysqlerror($has_error,$err_msg,$sql);
+ 	setjsonmysqlerror($has_error,$err_msg,$sql,$con);
  }
  else {
  $row = $result->fetch_array();
@@ -156,14 +156,14 @@ if (!empty($row['zipcode']))
 				$sql = 'select * from tripwallinvites where userid="'.$selected.'" and tripid="'.$tripid.'"';
 				$result = $con->query($sql);
 				if (!$result) {
-					setjsonmysqlerror($has_error,$err_msg,$sql);
+					setjsonmysqlerror($has_error,$err_msg,$sql,$con);
 				}
 				else {
 					if ($result->num_rows == 0) {
 						$sql = 'INSERT into tripwallinvites (userid, tripid) VALUES ("'.$selected.'","'.$tripid.'")';
 						$result = $con->query($sql);
 						if (!$result) {
-							setjsonmysqlerror($has_error,$err_msg,$sql);
+							setjsonmysqlerror($has_error,$err_msg,$sql,$con);
 						}
 					}
 				}
@@ -184,7 +184,7 @@ else {
    $result = $con->query($sql);
    
 	if (!$result) {
-		setjsonmysqlerror($has_error,$err_msg,$sql);	
+		setjsonmysqlerror($has_error,$err_msg,$sql,$con);	
 	}
 	else {
 		if ($result->num_rows > 0) {
@@ -206,7 +206,7 @@ else {
 		$myfriends=array();
 		$result = $con->query($sql);
 		if (!$result) {
-			setjsonmysqlerror($has_error,$err_msg,$sql);
+			setjsonmysqlerror($has_error,$err_msg,$sql,$con);
 		}
 		else {
 			while ($invitedfriends = $result->fetch_array()) {

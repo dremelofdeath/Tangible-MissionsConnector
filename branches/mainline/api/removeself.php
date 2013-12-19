@@ -32,7 +32,7 @@ if (!$has_error) {
 $sql = 'select * from trips where id="'.$tripid.'"';
 $result = $con->query($sql);
 if (!$result) {
-  setjsonmysqlerror($has_error,$err_msg,$sql);
+  setjsonmysqlerror($has_error,$err_msg,$sql,$con);
 }
 else {
 
@@ -46,7 +46,7 @@ if (isset($tripid)) {
 $sql = 'select * from tripmembers where tripid="'.$tripid.'" and userid="'.$fbid.'"';
 $result = $con->query($sql);
 if (!$result) {
-	setjsonmysqlerror($has_error,$err_msg,$sql);
+	setjsonmysqlerror($has_error,$err_msg,$sql,$con);
 }
 else {
   if ($result->num_rows==0) {
@@ -62,7 +62,7 @@ else {
 		$result = $con->query($sql);
 		
 		if (!$result) {
-			setjsonmysqlerror($has_error,$err_msg,$sql);
+			setjsonmysqlerror($has_error,$err_msg,$sql,$con);
 		}
 		else {
 
@@ -70,7 +70,7 @@ else {
 		$sql = 'select * from trips where id="'.$tripid.'"';
 		$result = $con->query($sql);
 		if (!$result) {
-			setjsonmysqlerror($has_error,$err_msg,$sql);
+			setjsonmysqlerror($has_error,$err_msg,$sql,$con);
 		}
 		else {
 			$row = $result->fetch_array();
@@ -80,7 +80,7 @@ else {
 			$sql = 'update trips set numpeople="'.$numpeople.' where id="'.$tripid.'"';
 			$result = $con->query($sql);
 			if (!$result) {
-				setjsonmysqlerror($has_error,$err_msg,$sql);
+				setjsonmysqlerror($has_error,$err_msg,$sql,$con);
 			}
 		}
 		}

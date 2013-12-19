@@ -31,7 +31,7 @@ if (!$has_error) {
   $result = $con->query($sql);
 
   if (!$result) {
-    setjsonmysqlerror($has_error,$err_msg,$sql);
+    setjsonmysqlerror($has_error,$err_msg,$sql,$con);
   } else {
     if ($result->num_rows == 0) {
       $has_error = TRUE;
@@ -59,13 +59,13 @@ if (!$has_error) {
           if ($result) {
             $json['tripname'] = $tripname;
           } else {
-            setjsonmysqlerror($has_error,$err_msg,$sql);
+            setjsonmysqlerror($has_error,$err_msg,$sql,$con);
           }
         } else {
-          setjsonmysqlerror($has_error,$err_msg,$sql);
+          setjsonmysqlerror($has_error,$err_msg,$sql,$con);
         }
       } else {
-        setjsonmysqlerror($has_error,$err_msg,$sql);
+        setjsonmysqlerror($has_error,$err_msg,$sql,$con);
       }
     }
   }

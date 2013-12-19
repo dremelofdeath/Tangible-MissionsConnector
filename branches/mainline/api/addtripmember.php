@@ -35,7 +35,7 @@ if (!$has_error) {
 	$sql = 'select * from users where userid="'.$fbid.'"';
 	$result = $con->query($sql);
 	if (!$result) {
-    setjsonmysqlerror($has_error,$err_msg,$sql);
+    setjsonmysqlerror($has_error,$err_msg,$sql,$con);
   } else {
     if ($result->num_rows == 0) {
       // This means user does not have a CMC profile
@@ -46,7 +46,7 @@ if (!$has_error) {
       $sql = 'select * from trips where id="'.$tid.'"';
       $result = $con->query($sql);
       if (!$result) {
-        setjsonmysqlerror($has_error,$err_msg,$sql);
+        setjsonmysqlerror($has_error,$err_msg,$sql,$con);
       } else {
         if ($result->num_rows == 0) {
           $has_error = TRUE;
@@ -56,7 +56,7 @@ if (!$has_error) {
           $sql = 'select * from tripmembers where tripid="'.$tid.'" and userid="'.$fbid.'"';
           $result = $con->query($sql);
           if (!$result) {
-            setjsonmysqlerror($has_error,$err_msg,$sql);
+            setjsonmysqlerror($has_error,$err_msg,$sql,$con);
           } else {
             $numbs = $result->num_rows;
             if ($numbs > 0) {
@@ -68,13 +68,13 @@ if (!$has_error) {
                 . 'VALUES ("'.$fbid.'","'.$tid.'","0","1","1","'.$membertype.'")';
               $con->query($sql);
               if(!$result) {	
-                setjsonmysqlerror($has_error,$err_msg,$sql);
+                setjsonmysqlerror($has_error,$err_msg,$sql,$con);
               } else {
                 // update number of people in trips table
                 $sql = 'select numpeople from trips where id="'.$tid.'"';
                 $con->query($sql);
                 if (!$result) {
-                  setjsonmysqlerror($has_error,$err_msg,$sql);
+                  setjsonmysqlerror($has_error,$err_msg,$sql,$con);
                 } else {
                   $row = $result->fetch_array();
                   $numpeople = $row['numpeople'];

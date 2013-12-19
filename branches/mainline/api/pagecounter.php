@@ -62,13 +62,13 @@ if (!$cookie) {
   $sql = 'select * from hits where userid="'.$fbid.'"';
   $result = $con->query($sql);
   if (!$result)
-	setjsonmysqlerror($has_error,$err_msg,$sql);
+	setjsonmysqlerror($has_error,$err_msg,$sql,$con);
   else {
   if ($result->num_rows==0) {
 	$sql = 'insert into hits (userid,count) VALUES ("'.$fbid.'","1")';
 	$result = $con->query($sql);
 	if (!$result)
-		setjsonmysqlerror($has_error,$err_msg,$sql);
+		setjsonmysqlerror($has_error,$err_msg,$sql,$con);
   }
   else {
   $row = $result->fetch_array();
@@ -76,7 +76,7 @@ if (!$cookie) {
   $sql = 'update hits set count="'.$unique_hits.'" where userid="'.$fbid.'"';
   $result = $con->query($sql);
   if (!$result)
-	setjsonmysqlerror($has_error,$err_msg,$sql);
+	setjsonmysqlerror($has_error,$err_msg,$sql,$con);
   }
 
   setcookie("visited","1",time()+600);
