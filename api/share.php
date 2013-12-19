@@ -9,7 +9,7 @@ include_once 'common.php';
 
 $con = arena_connect();
 
-$saferequest = cmc_safe_request_strip();
+$saferequest = cmc_safe_request_strip($con);
 $has_error = FALSE;
 $err_msg = '';
 
@@ -71,12 +71,12 @@ if (isset($selectedids)) {
 
  $sql = 'select creatorid,tripname,tripdesc,phone,email,departure,returning,zipcode from trips where id="'.$tripid.'"';
  
- $result = mysql_query($sql,$con);
+ $result = $con->query($sql);
  if (!result) {
- 	setjsonmysqlerror($has_error,$err_msg,$sql);
+ 	setjsonmysqlerror($has_error,$err_msg,$sql,$con);
  }
  else {
- $row = mysql_fetch_array($result,MYSQL_ASSOC);
+ $row = $result->fetch_array();
 
  $name = get_name_from_fb_using_curl($row['creatorid']);
 
@@ -116,21 +116,20 @@ if (!empty($row['zipcode']))
 	$today = getdatestring($todayy,$todaym,$todayd,$todayH,$todayi,$todays);
 	
 	$sql2 = 'select * from notifications where id="'.$fbid.'"';
-	$result2 = mysql_query($sql2,$con);
+	$result2 = $con->query($sql2);
 	if (!$result2) {
 		setjsonmysqlerror($has_error,$err_msg,$sql2);
 	}
 	else {
-		$numrows = mysql_num_rows($result2);
-		if ($numrows == 0) {
+		if ($result->num_rows == 0) {
 			$sql2 = 'insert into notifications (id,starttime,notifications) VALUES ("'.$fbid.'","'.$today.'","'.count($selectedids).'")';
-			$result2 = mysql_query($sql2,$con);
+			$result2 = $con->query($sql2);
 			if (!$result2) {
 				setjsonmysqlerror($has_error,$err_msg,$sql2);
 			}
 		}
 		else {
-			$row = mysql_fetch_array($result2);
+			$row = $result2->fetch_array();
 			$notifications = $row['notifications'];
 			$starttime = $row['starttime'];
 	
@@ -146,7 +145,7 @@ if (!empty($row['zipcode']))
 				$sql2 = 'update notifications set notifications="'.$notifications.'" where id="'.$fbid.'"';
 			}
 
-			$result2 = mysql_query($sql2,$con);
+			$result2 = $con->query($sql2);
 			if (!$result2) {
 				setjsonmysqlerror($has_error,$err_msg,$sql2);
 			}
@@ -155,17 +154,16 @@ if (!empty($row['zipcode']))
 			// update the database tables to reflect that these guys have been invited
 			foreach($selectedids as $selected) {
 				$sql = 'select * from tripwallinvites where userid="'.$selected.'" and tripid="'.$tripid.'"';
-				$result = mysql_query($sql,$con);
+				$result = $con->query($sql);
 				if (!$result) {
-					setjsonmysqlerror($has_error,$err_msg,$sql);
+					setjsonmysqlerror($has_error,$err_msg,$sql,$con);
 				}
 				else {
-					$numrows = mysql_num_rows($result);
-					if ($numrows == 0) {
+					if ($result->num_rows == 0) {
 						$sql = 'INSERT into tripwallinvites (userid, tripid) VALUES ("'.$selected.'","'.$tripid.'")';
-						$result = mysql_query($sql,$con);
+						$result = $con->query($sql);
 						if (!$result) {
-							setjsonmysqlerror($has_error,$err_msg,$sql);
+							setjsonmysqlerror($has_error,$err_msg,$sql,$con);
 						}
 					}
 				}
@@ -183,15 +181,14 @@ if (!$has_error) {
 else {
 
    $sql = 'select * from notifications where id="'.$fbid.'"';
-   $result = mysql_query($sql,$con);
+   $result = $con->query($sql);
    
 	if (!$result) {
-		setjsonmysqlerror($has_error,$err_msg,$sql);	
+		setjsonmysqlerror($has_error,$err_msg,$sql,$con);	
 	}
 	else {
-		$numrows = mysql_num_rows($result);
-		if ($numrows > 0) {
-			$row = mysql_fetch_array($result,MYSQL_ASSOC);
+		if ($result->num_rows > 0) {
+			$row = $result->fetch_array();
 			$notifications = $row['notifications'];
 		}
 		else {
@@ -207,12 +204,12 @@ else {
 
    		$sql = 'select userid from tripwallinvites where tripid="'.$tripid.'"';
 		$myfriends=array();
-		$result = mysql_query($sql,$con);
+		$result = $con->query($sql);
 		if (!$result) {
-			setjsonmysqlerror($has_error,$err_msg,$sql);
+			setjsonmysqlerror($has_error,$err_msg,$sql,$con);
 		}
 		else {
-			while ($invitedfriends = mysql_fetch_array($result,MYSQL_ASSOC)) {
+			while ($invitedfriends = $result->fetch_array()) {
 				$myfriends[] = $invitedfriends['userid'];
 			}
 			$json['invitedfriends'] = $myfriends;
