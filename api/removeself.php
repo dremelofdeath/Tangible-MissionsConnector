@@ -9,7 +9,7 @@ include_once 'common.php';
 
 $con = arena_connect();
 
-$saferequest = cmc_safe_request_strip();
+$saferequest = cmc_safe_request_strip($con);
 $has_error = FALSE;
 $err_msg = '';
 
@@ -30,15 +30,13 @@ if (!$has_error) {
 
 // check the existence of the trip
 $sql = 'select * from trips where id="'.$tripid.'"';
-$result = mysql_query($sql,$con);
+$result = $con->query($sql);
 if (!$result) {
-  setjsonmysqlerror($has_error,$err_msg,$sql);
+  setjsonmysqlerror($has_error,$err_msg,$sql,$con);
 }
 else {
 
- $numrows = mysql_num_rows($result);
-
- if ($numrows == 0) {
+ if ($result->num_rows == 0) {
     $has_error = TRUE;
     $err_msg = "No Trip exists with the specified ID";
  }
@@ -46,13 +44,12 @@ else {
 if (isset($tripid)) {
 
 $sql = 'select * from tripmembers where tripid="'.$tripid.'" and userid="'.$fbid.'"';
-$result = mysql_query($sql,$con);
+$result = $con->query($sql);
 if (!$result) {
-	setjsonmysqlerror($has_error,$err_msg,$sql);
+	setjsonmysqlerror($has_error,$err_msg,$sql,$con);
 }
 else {
-	$numrows = mysql_num_rows($result);
-  if ($numrows==0) {
+  if ($result->num_rows==0) {
 		$has_error = TRUE;
 		$err_msg = "You are not a member of this trip";
   }
@@ -62,28 +59,28 @@ else {
 	}
 	else {
 		$sql = 'delete from tripmembers where tripid="'.$tripid.'" and userid="'.$fbid.'"';
-		$result = mysql_query($sql,$con);
+		$result = $con->query($sql);
 		
 		if (!$result) {
-			setjsonmysqlerror($has_error,$err_msg,$sql);
+			setjsonmysqlerror($has_error,$err_msg,$sql,$con);
 		}
 		else {
 
 		// Now decrement the number of people on this trip
 		$sql = 'select * from trips where id="'.$tripid.'"';
-		$result = mysql_query($sql,$con);
+		$result = $con->query($sql);
 		if (!$result) {
-			setjsonmysqlerror($has_error,$err_msg,$sql);
+			setjsonmysqlerror($has_error,$err_msg,$sql,$con);
 		}
 		else {
-			$row = mysql_fetch_array($result);
+			$row = $result->fetch_array();
 			$numpeople = $row['numpeople'] + 0;
 			$numpeople--;
 
 			$sql = 'update trips set numpeople="'.$numpeople.' where id="'.$tripid.'"';
-			$result = mysql_query($sql,$con);
+			$result = $con->query($sql);
 			if (!$result) {
-				setjsonmysqlerror($has_error,$err_msg,$sql);
+				setjsonmysqlerror($has_error,$err_msg,$sql,$con);
 			}
 		}
 		}

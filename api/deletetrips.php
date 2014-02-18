@@ -8,7 +8,7 @@
 include_once 'common.php';
 $con = arena_connect();
 
-$saferequest = cmc_safe_request_strip();
+$saferequest = cmc_safe_request_strip($con);
 $has_error = FALSE;
 $err_msg = '';
 
@@ -27,47 +27,48 @@ $json = array();
 
 if (!$has_error) {
 
-$sql = 'select * from trips where id="'.$tripid.'"';
-$result = mysql_query($sql,$con);
-if (!$result) {
-    setjsonmysqlerror($has_error,$err_msg,$sql);
-}
-else {
+  $sql = 'select * from trips where id="'.$tripid.'"';
+  $result = $con->query($sql);
 
-  $numrows = mysql_num_rows($result);
+  if (!$result) {
+    setjsonmysqlerror($has_error,$err_msg,$sql,$con);
+  } else {
+    if ($result->num_rows == 0) {
+      $has_error = TRUE;
+      $err_msg = "No Trips to match the tripid";
+    } else {
+      $row = $result->fetch_array();
+      $tripname = $row['tripname'];
 
-  if ($numrows == 0) {
-    $has_error = TRUE;
-    $err_msg = "No Trips to match the tripid";
+      $result->free();
+
+      // first we need to delete the tripmembers for this trip
+      $sql = 'delete from tripmembers where tripid="'.$tripid.'"';
+      $result = $con->query($sql);
+
+      if ($result) {
+        // Then delete skills associated with the trip
+        $sql1 = 'delete from skillsselectedtrips where tripid="'.$tripid.'"';
+        $result1 = $con->query($sql1);
+
+        if ($result1) {
+
+          // Then delete the row from trips table
+          $sql = 'delete from trips where id="'.$tripid.'"';
+          $result = $con->query($sql);
+          if ($result) {
+            $json['tripname'] = $tripname;
+          } else {
+            setjsonmysqlerror($has_error,$err_msg,$sql,$con);
+          }
+        } else {
+          setjsonmysqlerror($has_error,$err_msg,$sql,$con);
+        }
+      } else {
+        setjsonmysqlerror($has_error,$err_msg,$sql,$con);
+      }
+    }
   }
-  else {
-	$row = mysql_fetch_array($result,MYSQL_ASSOC);
-	$tripname = $row['tripname'];
-	
-	mysql_free_result($result);
-
-	// first we need to delete the tripmembers for this trip
-	$sql = 'delete from tripmembers where tripid="'.$tripid.'"';
-	$result = mysql_query($sql,$con);
-
-	if ($result) {
-  
-  		// Then delete the row from trips table
-  		$sql = 'delete from trips where id="'.$tripid.'"';
-  		$result = mysql_query($sql,$con);
-  		if ($result) {
-			$json['tripname'] = $tripname;
-  		}
-  		else {
-    			setjsonmysqlerror($has_error,$err_msg,$sql);
-  		}
-	}
-	else {
-    		setjsonmysqlerror($has_error,$err_msg,$sql);
-	}
-  }
-}
-
 }
 
 $json['has_error'] = $has_error;
