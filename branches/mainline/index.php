@@ -650,7 +650,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
         <p>Are you interested in missions work? Do you want to connect with people and organizations who share your passion for missions? Whether you want to find a missions organization, start a mission team, join a mission team or just connect with others who have a passion for missions, Christian Missions Connector can help.</p>
         <p>You can get started by either exploring with the tabs above or watching the instructional video below.</p>
         <div id="welcome-video">
-          <iframe width="480" height="270" src="http://www.youtube.com/embed/7qfBm53lp64" frameborder="0" allowfullscreen></iframe>
+          <iframe width="480" height="270" src="https://www.youtube.com/embed/7qfBm53lp64" frameborder="0" allowfullscreen></iframe>
         </div>
       </div>
       <div id="profile-tab">
