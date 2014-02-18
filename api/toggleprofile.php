@@ -7,7 +7,7 @@ include_once 'common.php';
 header('Content-type: application/json');
 $con = arena_connect();
 
-$saferequest = cmc_safe_request_strip();
+$saferequest = cmc_safe_request_strip($con);
 $has_error = FALSE;
 $err_msg = '';
 
@@ -53,7 +53,7 @@ if (array_key_exists('fbid', $saferequest) && array_key_exists('profileinfo',$sa
           break;
       }
 
-    $myobj = cmc_safe_object_strip($myobj);
+    $myobj = cmc_safe_object_strip($con, $myobj);
 
 }
 else {
@@ -69,19 +69,18 @@ if (isset($myobj->{'toggle'})) {
 
 if ($myobj->{'toggle'} == 1) {
    $sql = 'select * from users where userid="'.$fbid.'"';
-   $result = mysql_query($sql,$con);
+   $result = $con->query($sql);
    if (!$result) {
- 	  setjsonmysqlerror($has_error,$err_msg,$sql);
+ 	  setjsonmysqlerror($has_error,$err_msg,$sql,$con);
    }
    else {
-   $numrows = mysql_num_rows($result);
-   if ($numrows > 0) {
-   $row = mysql_fetch_array($result);
+   if ($result->num_rows > 0) {
+   $row = $result->fetch_array();
    $misreceiver = $row['isreceiver'];
    if ($misreceiver == 1) {
    	$newrecr = 0;
 	  $sql2 = 'UPDATE users SET isreceiver="'.$newrecr.'" where userid="'.$fbid.'"';
-	  $result = mysql_query($sql2,$con);
+	  $result = $con->query($sql2);
    	if (!$result) {
  		setjsonmysqlerror($has_error,$err_msg,$sql2);
    	}
@@ -91,7 +90,7 @@ if ($myobj->{'toggle'} == 1) {
    else {
    	$newrecr = 1;
 	$sql2 = 'UPDATE users SET isreceiver="'.$newrecr.'" where userid="'.$fbid.'"';
-	$result = mysql_query($sql2,$con);
+	$result = $con->query($sql2);
 	if (!$result) {
  		setjsonmysqlerror($has_error,$err_msg,$sql2);
    	}
@@ -99,6 +98,10 @@ if ($myobj->{'toggle'} == 1) {
 		$isreceiver = $newrecr;
    }
 
+   }
+   else {
+         $has_error = TRUE;
+         $err_msg = "No CMC Profile - Please create a profile first";
    }
    }
 }
