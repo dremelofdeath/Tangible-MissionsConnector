@@ -816,11 +816,13 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
               <h5>Trip Spiritual Skills: <span id="profile-trip-spiritskills">Spiritual skills</span></h5>
               <h5>People involved in this Trip:</h5>
               <div id="profile-trip-people">
-                <div id="cmc-trip-member-0" class="cmc-tripmember-results">
-                  <div id="profile-tripmember-image">
-                    <img class="profile-tripmember-picture" src="ajax-spinner.gif">
+                <div id="cmc-trip-members">
+                  <div id="cmc-trip-member-0" class="cmc-tripmember-results">
+                    <div id="profile-tripmember-image">
+                      <img class="profile-tripmember-picture" src="ajax-spinner.gif">
+                    </div>
+                    <div id="profile-tripmember-name">Member Name</div>
                   </div>
-                  <div id="profile-tripmember-name">Member Name</div>
                 </div>
               </div>
             </div>
