@@ -1280,42 +1280,44 @@ var CMC = {
         }
       }
 
-      if (data.memberids === undefined) {
-        //$(id).children("#trip-profile-right-column").children(".box1").children(".profile-trip-people").html("<h6></h6>");
-        $("#profile-trip-people").html("");
-      }
-      else {
-        //display trip member information
-        if (data.memberids.length > 0) {
-          //first update the html part
-          var eachstr = "";
-          for (var each in data.memberids) {
-            eachstr += "<div id=\"cmc-trip-member-"+each+"\" class=\"cmc-tripmember-results\">";
-            eachstr += "<div id=\"profile-tripmember-image\">";
-            eachstr += "<img class=\"profile-tripmember-picture\" src=\"ajax-spinner.gif\">";
-            eachstr += "</div>";
-            eachstr += "<div class=\"profile-tripmember-name\">Member Name</div>";
-            eachstr += "</div>";
-          }
+      $("#profile-trip-people").html("");
 
-          $("#profile-trip-people").html(data.memberids ? eachstr : "");
+      // display trip member information
+      if (data.memberids.length > 0) {
+        // first update the html part
+        var allMembers = $('<div id="cmc-trip-members"></div>');
+        for (var each in data.memberids) {
+          FB.api(data.memberids[each], function(response) {
+            var divElement = $('<div></div>')
+                .addClass('cmc-tripmember-results')
+                .hide();
+            var imgDivElement = $('<div id="profile-tripmember-image"></div>');
+            var img = $('<img src="ajax-spinner.gif" />')
+                .addClass('profile-tripmember-picture');
+            imgDivElement.append(img);
+            var nameDivElement = $('<div>Member Name</div>')
+                .addClass('profile-tripmember-name');
 
-          for (var each in data.memberids) {
-            id2 = "#profile-trip-people";
-            FB.api(data.memberids[each], function(response) {
-                $(id2).children("#cmc-trip-member-"+each).children(".profile-tripmember-name").html(response.name ? response.name : "");
-                $(id2).children("#cmc-trip-member-"+each).children("#profile-tripmember-image").children("img.profile-tripmember-picture").attr("src", "https://graph.facebook.com/"+data.memberids[each]+"/picture");
-                //$(id2).children("#cmc-trip-member-"+each).children("#profile-tripmember-image").children("img.profile-tripmember-picture").wrap('<a href="' + response.link + '" target="_blank"></a>');
-                });
-
-            $("#cmc-trip-member-"+each).attr("fbid", data.memberids[each]);
-
-            $(".cmc-tripmember-results")
-              .click(function () { CMC.handleShowTripMemberProfile(this); });
-          }
-        } else {
-          $("#profile-trip-people").html("");
+            nameDivElement.html(response.name ? response.name : "");
+            img.attr('src', 'https://graph.facebook.com/'+response.id+'/picture');
+            //img.wrap('<a href="' + response.link + '" target="_blank"></a>');
+            divElement
+              .attr('fbid', response.id)
+              .append(imgDivElement)
+              .append(nameDivElement)
+              .click(function () {
+                CMC.handleShowTripMemberProfile(this);
+              })
+              .show();
+            allMembers.append(divElement);
+          });
         }
+
+        if (data.memberids) {
+          $("#profile-trip-people").append(allMembers);
+        }
+      } else {
+        $("#profile-trip-people").html("");
       }
 
       // change to the Trips Tab
@@ -2454,40 +2456,20 @@ var CMC = {
     this.endFunction();
   },
 
-  animateTripMemberResultSelected : function (whichResult) {
-    this.beginFunction();
-    $(".cmc-tripmember-results").not(whichResult).each(function () {
-      var _onHideComplete = function() {
-        setTimeout($.proxy(function () {
-          $(this).show().fadeTo(0, 1);
-        }, this), 300);
-      };
-      $(this)
-        .stop(true, true)
-        .show()
-        .hide("drop", {direction: "right", distance: 115, easing: "easeOutQuart"}, 350, _onHideComplete)
-        .show(0) // the 0 forces the show to be an animation event, and therefore happen after the hide() above
-        .fadeTo(0, 0);
-    });
-    setTimeout(function () {
-      $("#tabs").tabs('select', 1);
-    }, 285);
-    this.endFunction();
-  },
-  
   handleShowTripMemberProfile : function (whichResult) {
     this.beginFunction();
     if($(whichResult).children(".profile-tripmember-name").html() != "") {
       var whichFBID = $(whichResult).attr("fbid");
-      this.assert(whichFBID != null && whichFBID != "", "fbid attr is null for clicked search result");
+      this.assert(whichFBID != null && whichFBID != "",
+          "fbid attr is null for clicked search result");
       this.getProfile(whichFBID, true, this.showProfile);
-      this.animateTripMemberResultSelected(whichResult);
+      $("#tabs").tabs('select', 1);
     } else {
       this.log("search result clicked, but name is empty; ignoring");
     }
     this.endFunction();
   },
-  
+
   emptyTripForm : function () {
     this.beginFunction();
     $(':input', '#profile-trip-form').removeAttr('checked').removeAttr('selected');
