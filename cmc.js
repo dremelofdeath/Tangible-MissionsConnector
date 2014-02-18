@@ -182,14 +182,14 @@ var CMC = {
 
     beginFunction : function() {
       // check for scope corruption
-      CMC.assert(this === CMC, "Scope corruption detected! this === CMC failed!");
+      this.assert(this === CMC, "Scope corruption detected! this === CMC failed!");
       this.log("begin function: " + this.findFunctionNameFor(this.beginFunction.caller));
       this.debugFunctionDepth++;
     },
 
     endFunction : function() {
       this.debugFunctionDepth--;
-      CMC.assert(this.debugFunctionDepth >= 0, "debugFunctionDepth went negative");
+      this.assert(this.debugFunctionDepth >= 0, "debugFunctionDepth went negative");
       this.log("end function: " + this.findFunctionNameFor(this.endFunction.caller));
     },
   },
@@ -212,7 +212,7 @@ var CMC = {
       this.error = handlerSet.error;
     }
     if ("assert" in handlerSet) {
-      CMC.assert = handlerSet.assert;
+      this.assert = handlerSet.assert;
     }
     if ("findFunctionNameFor" in handlerSet) {
       this.findFunctionNameFor = handlerSet.findFunctionNameFor;
@@ -223,7 +223,7 @@ var CMC = {
     if ("endFunction" in handlerSet) {
       this.endFunction = handlerSet.endFunction;
     }
-    CMC.assert(this.hasOwnProperty("debugFunctionDepth"), "debugFunctionDepth is missing! where could it be?");
+    this.assert(this.hasOwnProperty("debugFunctionDepth"), "debugFunctionDepth is missing! where could it be?");
     $("#debug-section").show();
   },
 
@@ -231,7 +231,7 @@ var CMC = {
     $("#debug-log").val("");
     this.log = $.noop;
     this.error = $.noop;
-    CMC.assert = $.noop;
+    this.assert = $.noop;
     this.findFunctionNameFor = $.noop;
     this.beginFunction = $.noop;
     this.endFunction = $.noop;
@@ -271,7 +271,7 @@ var CMC = {
       $("#tabs, #cmc-footer").fadeTo('fast', 1.0);
     }
     if (this.dialogsOpen <= 0) {
-      CMC.assert("closing a dialog when none was open!");
+      this.assert("closing a dialog when none was open!");
     } else {
       this.dialogsOpen--;
     }
@@ -310,7 +310,7 @@ var CMC = {
       }
     } else if (this.requestsOutstanding == 0) {
       // this is a bug, and needs to be logged. --zack
-      CMC.assert("notified a completed request when none was made");
+      this.assert("notified a completed request when none was made");
     }
     //@/BEGIN/DEBUGONLYSECTION
     this.updateDebugAjaxRequestInformation();
@@ -327,15 +327,15 @@ var CMC = {
             if (translationMap.hasOwnProperty(each)) {
               ret[translationMap[each]] = object[each];
             } else {
-              CMC.assert("don't know how to map property '" + each + "' -- possibly update map?");
+              this.assert("don't know how to map property '" + each + "' -- possibly update map?");
             }
           }
         }
       } else {
-        CMC.assert("translationMap was null. you must specify a translation map");
+        this.assert("translationMap was null. you must specify a translation map");
       }
     } else {
-      CMC.assert("null object passed for applying translation map");
+      this.assert("null object passed for applying translation map");
     }
     this.endFunction();
     return ret;
@@ -403,7 +403,7 @@ var CMC = {
 
   handleGenericServerError : function(jqXHR, textStatus, errorThrown) {
     this.error("can't contact server (" + textStatus + ") " + jqXHR.status + " " + errorThrown);
-    CMC.assert(textStatus != "parsererror", "Web service failure!<br/>Response contents:<br/><br/>" + jqXHR.responseText);
+    this.assert(textStatus != "parsererror", "Web service failure!<br/>Response contents:<br/><br/>" + jqXHR.responseText);
   },
 
   showTabLoading : function (tabid) {
@@ -478,7 +478,7 @@ var CMC = {
     callback = callback || this.handleGetProfileCallbackSave;
     // handle the case where showLoading hasn't been provided at all
     if (typeof showLoading == 'function') {
-      CMC.assert(typeof callback != 'function', "both showLoading and callback are functions, overwriting callback");
+      this.assert(typeof callback != 'function', "both showLoading and callback are functions, overwriting callback");
       callback = showLoading;
       showLoading = false;
     }
@@ -504,7 +504,7 @@ var CMC = {
         error: this.onGetProfileDataError
       });
     } else {
-      CMC.assert("userid was blank when calling getProfile()");
+      this.assert("userid was blank when calling getProfile()");
     }
     this.endFunction();
   },
@@ -579,7 +579,7 @@ var CMC = {
     this.beginFunction();
     if (data === undefined) {
       // this should be a bug! do NOT pass this function undefined! say null to inform it that you have no results!
-      CMC.assert(data === undefined, "undefined passed as results for showProfile");
+      this.assert(data === undefined, "undefined passed as results for showProfile");
     } else if (data == null) {
       // no profile exists - so display the new profile creation dialogs
       this.showCreateNewProfileUI();
@@ -591,10 +591,10 @@ var CMC = {
         $("#profile-picture-link").attr('href', link);
       };
       this.hideIntermediateNewProfileCreationSteps();
-      CMC.assert(data.id != undefined, "id is missing from result set");
+      this.assert(data.id != undefined, "id is missing from result set");
       this.currentlyShownUserProfileID = data.id;
       this.updateProfileControls(data.id);
-      CMC.assert(data.name != undefined, "name is missing from result set");
+      this.assert(data.name != undefined, "name is missing from result set");
 
       $("#profile-name").html(data.name ? data.name : "");
      
@@ -746,7 +746,7 @@ var CMC = {
   handleGetProfileDataSuccessHasError : function(data) {
     this.beginFunction();
     this.ajaxNotifyComplete();
-    CMC.assert(data != undefined, "data is undefined in handleGetProfileDataSuccessHasError");
+    this.assert(data != undefined, "data is undefined in handleGetProfileDataSuccessHasError");
     // we have a known error, handle it
     if(data.err_msg !== undefined) {
       if(data.err_msg != '') {
@@ -789,7 +789,7 @@ var CMC = {
   
   onGetTripsDataSuccess : function(data, textStatus, jqXHR) {
     this.beginFunction();
-    CMC.assert(data != undefined, "data is undefined in onGetTripsDataSuccess");
+    this.assert(data != undefined, "data is undefined in onGetTripsDataSuccess");
     if(data.has_error !== undefined && data.has_error !== null) {
       if(data.has_error) {
         // we have a known error, handle it
@@ -889,7 +889,7 @@ var CMC = {
       });
     }
     if (showInvite) {
-      CMC.assert("Invite button for trip lists cut for 2.0.");
+      this.assert("Invite button for trip lists cut for 2.0.");
     }
     var ul = this.buildTripListEx(data, buttons);
     this.endFunction();
@@ -901,13 +901,13 @@ var CMC = {
     $("#show-trip-profile").fadeOut('fast', $.proxy(function () {
       if (data === undefined) {
         // this should be a bug! do NOT pass this function undefined! say null to inform it that you have no results!
-        CMC.assert(data === undefined, "undefined passed as results for updateFutureTrips");
+        this.assert(data === undefined, "undefined passed as results for updateFutureTrips");
       } else if (data === null) {
         // no future trips exist - so display new trip creation dialog
         $("#no-trip").fadeIn();
       } else {
         var id = "#show-trips";
-        CMC.assert(data.trips !== undefined, "Trips are missing from result set");
+        this.assert(data.trips !== undefined, "Trips are missing from result set");
         if (!data.trips || data.trips.length <= 0) {
           $("#no-trip").fadeIn();
         } else {
@@ -931,7 +931,7 @@ var CMC = {
   
   handleGetTripsDataSuccessHasError : function(data) {
     this.beginFunction();
-    CMC.assert(data != undefined, "data is undefined in handleGetTripsDataSuccessHasError");
+    this.assert(data != undefined, "data is undefined in handleGetTripsDataSuccessHasError");
     // we have a known error, handle it
     if(data.err_msg !== undefined) {
       if(data.err_msg != '') {
@@ -969,7 +969,7 @@ var CMC = {
 
   onToggleSuccess : function(data, textStatus, jqXHR) {
     this.beginFunction();
-    CMC.assert(data != undefined, "data is undefined in onToggleSuccess");
+    this.assert(data != undefined, "data is undefined in onToggleSuccess");
     if(data.has_error !== undefined && data.has_error !== null) {
       if(data.has_error) {
         // we have a known error, handle it
@@ -1005,7 +1005,7 @@ var CMC = {
   
   handleToggleSuccessHasError : function(data) {
     this.beginFunction();
-    CMC.assert(data != undefined, "data is undefined in handleToggleSuccessHasError");
+    this.assert(data != undefined, "data is undefined in handleToggleSuccessHasError");
     // we have a known error, handle it
     if(data.err_msg !== undefined) {
       if(data.err_msg != '') {
@@ -1057,7 +1057,7 @@ var CMC = {
 
   onGetTripProfileDataSuccess : function(data, textStatus, jqXHR) {
     this.beginFunction();
-    CMC.assert(data != undefined, "data is undefined in onGetTripProfileDataSuccess");
+    this.assert(data != undefined, "data is undefined in onGetTripProfileDataSuccess");
     if(data.has_error !== undefined && data.has_error !== null) {
       if(data.has_error) {
           // we have a known error, handle it
@@ -1074,7 +1074,7 @@ var CMC = {
   
   onGetTripProfileDataSuccessEdit : function(data, textStatus, jqXHR) {
     this.beginFunction();
-    CMC.assert(data != undefined, "data is undefined in onGetTripProfileDataSuccess");
+    this.assert(data != undefined, "data is undefined in onGetTripProfileDataSuccess");
     if(data.has_error !== undefined && data.has_error !== null) {
       if(data.has_error) {
           // we have a known error, handle it
@@ -1091,7 +1091,7 @@ var CMC = {
 
   handleGetTripProfileDataSuccessHasError : function(data) {
     this.beginFunction();
-    CMC.assert(data != undefined, "data is undefined in handleGetTripProfileDataSuccessHasError");
+    this.assert(data != undefined, "data is undefined in handleGetTripProfileDataSuccessHasError");
     // we have a known error, handle it
     if(data.err_msg !== undefined) {
       if(data.err_msg != '') {
@@ -1109,7 +1109,7 @@ var CMC = {
     this.beginFunction();
     if (data === undefined) {
       // this should be a bug! do NOT pass this function undefined! say null to inform it that you have no results!
-      CMC.assert(data === undefined, "undefined passed as results for showTripProfile");
+      this.assert(data === undefined, "undefined passed as results for showTripProfile");
     } else if (data == null) {
       // no trip profile exists - // This condition should never be met
       $("#no-trip").fadeIn();
@@ -1118,7 +1118,7 @@ var CMC = {
       var id = "#tripprofilecontent";
 
       this.ajaxNotifyStart();
-      CMC.assert(data.tripname !== undefined, "Trip name is missing from result set");
+      this.assert(data.tripname !== undefined, "Trip name is missing from result set");
 
       $("#profile-trip-owner").html(data.tripowner ? data.tripowner : "");
 
@@ -1413,7 +1413,7 @@ var CMC = {
     this.beginFunction();
     var key = null;
     if (this.isSearchLocked) {
-      CMC.assert("attempted to obtain the search lock while it was already held!");
+      this.assert("attempted to obtain the search lock while it was already held!");
     } else {
       this._searchLockKeyExpected = "lock" + this._lastSearchLockKeyGenerated;
       key = this._lastSearchLockKeyGenerated;
@@ -1430,10 +1430,10 @@ var CMC = {
       if ("lock" + key == this._searchLockKeyExpected) {
         this.isSearchLocked = false;
       } else {
-        CMC.assert("wrong key used to try to release the search lock!");
+        this.assert("wrong key used to try to release the search lock!");
       }
     } else {
-      CMC.assert("tried to release the search lock when no lock was held!");
+      this.assert("tried to release the search lock when no lock was held!");
     }
     this.endFunction();
   },
@@ -1448,7 +1448,7 @@ var CMC = {
       this.error("caught exception while parsing JSON:\n" + e);
     }
     if (!errorWhileParsing) {
-      CMC.assert(typeof value == "string", "type of value was not a string, actual type = " + typeof value);
+      this.assert(typeof value == "string", "type of value was not a string, actual type = " + typeof value);
       if (value.substring(0,2) == "!!") {
         // this is a special value, we handle these differently
         if (value.substring(2,3) == "z") { // this detection could definitely be better
@@ -1489,7 +1489,7 @@ var CMC = {
             this.SearchState.countries = [countryid];
           }
         } else {
-          CMC.assert("incoming unknown object type '" + value.substring(2,3) + "' can't be handled!");
+          this.assert("incoming unknown object type '" + value.substring(2,3) + "' can't be handled!");
         }
       } else {
         // this is a text item
@@ -1514,7 +1514,7 @@ var CMC = {
       this.error("caught exception while parsing JSON:\n" + e);
     }
     if (!errorWhileParsing) {
-      CMC.assert(typeof value == "string", "type of value was not a string, actual type = " + typeof value);
+      this.assert(typeof value == "string", "type of value was not a string, actual type = " + typeof value);
       if (value.substring(0,2) == "!!") {
         // this is a special value, we handle these differently
         var objectType = value.substring(2,3);
@@ -1526,7 +1526,7 @@ var CMC = {
         } else if (objectType == "c") {
           this.deleteObjectFromSearchState("countries", value.substring(4, value.length));
         } else {
-          CMC.assert("outgoing unknown object type '" + value.substring(2,3) + "' can't be handled!");
+          this.assert("outgoing unknown object type '" + value.substring(2,3) + "' can't be handled!");
         }
       } else {
         // this is a text item
@@ -1555,17 +1555,17 @@ var CMC = {
         for (i = 0; i < this.SearchState[whichObjectType].length; i++) {
           if (this.SearchState[whichObjectType][i] == obj) {
             if (foundObject) {
-              CMC.assert("found multiple copies of the same object you're trying to delete! (delete " + obj + " from " + whichObjectType + ")");
+              this.assert("found multiple copies of the same object you're trying to delete! (delete " + obj + " from " + whichObjectType + ")");
             } else {
               this.SearchState[whichObjectType].splice(i, 1);
               foundObject = true;
             }
           }
         }
-        CMC.assert(foundObject, "couldn't find the object you're trying to delete! (delete " + obj + " from " + whichObjectType + ")");
+        this.assert(foundObject, "couldn't find the object you're trying to delete! (delete " + obj + " from " + whichObjectType + ")");
       }
     } else {
-      CMC.assert("trying to delete a object when the container object is dead!");
+      this.assert("trying to delete a object when the container object is dead!");
     }
     this.endFunction();
   },
@@ -1573,7 +1573,7 @@ var CMC = {
   search : function () {
     this.beginFunction();
     if (this.isSearchLocked) {
-      CMC.assert("called search() while search was locked!");
+      this.assert("called search() while search was locked!");
     } else {
       var searchUnlockKey = this.obtainSearchLock();
       this.searchPageCache = [];
@@ -1624,7 +1624,7 @@ var CMC = {
 
   onSearchSuccess : function(data, textStatus, jqXHR) {
     this.beginFunction();
-    CMC.assert(data != undefined, "data is undefined in onSearchSuccess");
+    this.assert(data != undefined, "data is undefined in onSearchSuccess");
     $(".cmc-search-result").each(function () {
       $(this).hide();
     });
@@ -1672,7 +1672,7 @@ var CMC = {
   handleSearchSuccessHasError : function(data) {
     this.beginFunction();
     this.ajaxNotifyComplete();
-    CMC.assert(data != undefined, "data is undefined in handleSearchSuccessHasError");
+    this.assert(data != undefined, "data is undefined in handleSearchSuccessHasError");
     // we have a known error, handle it
     if(data.err_msg !== undefined) {
       if(data.err_msg != '') {
@@ -1710,7 +1710,7 @@ var CMC = {
           if(!hasRetryPosted) {
             this.getDataForEachFBID(fbids, callback, true);
           } else {
-            CMC.assert("something just went horribly wrong.\nhasRetryPosted = true, while isRetryCall = false");
+            this.assert("something just went horribly wrong.\nhasRetryPosted = true, while isRetryCall = false");
           }
           hasRetryPosted = true;
         } else {
@@ -1871,27 +1871,27 @@ var CMC = {
     }
     if (results === undefined) {
       // this is a bug! do NOT pass this function undefined! say null to inform it that you have no results!
-      CMC.assert(results === undefined, "undefined passed as results for showInviteResults");
+      this.assert(results === undefined, "undefined passed as results for showInviteResults");
     } else if (results == null || results.length == 0) {
       // no results
       $("#cmc-invite-results-noresultmsg").stop(true, true).fadeIn();
     } else {
       var imageLoadsCompleted = 0, __notifyImageLoadCompleted = $.proxy(function() {
         imageLoadsCompleted++;
-        CMC.assert(imageLoadsCompleted <= results.length, "loading more images than we have results for (" + imageLoadsCompleted + ")");
+        this.assert(imageLoadsCompleted <= results.length, "loading more images than we have results for (" + imageLoadsCompleted + ")");
         if(imageLoadsCompleted == results.length) {
           this.animateShowInviteResults(results);
         }
       }, this);
 
-      CMC.assert(results.length <= 10, "more than 10 results passed to showInviteResults");
+      this.assert(results.length <= 10, "more than 10 results passed to showInviteResults");
 
       for(var each in results) {
-        CMC.assert(results[each] !== undefined, "result[each] is missing at each=" + each);
-        CMC.assert(results[each].id !== undefined, "id is missing from result at each=" + each); 
+        this.assert(results[each] !== undefined, "result[each] is missing at each=" + each);
+        this.assert(results[each].id !== undefined, "id is missing from result at each=" + each); 
         var id = "#cmc-invite-result-" + each;
         this.ajaxNotifyStart();
-        CMC.assert(results[each].name !== undefined, "name is missing from result at each=" + each);
+        this.assert(results[each].name !== undefined, "name is missing from result at each=" + each);
         $(id).children(".result-name").html(results[each].name ? results[each].name : "");
         $(id).css("cursor", results[each].name ? "pointer" : "default");
 
@@ -1956,19 +1956,19 @@ var CMC = {
     }
     if (results === undefined) {
       // this is a bug! do NOT pass this function undefined! say null to inform it that you have no results!
-      CMC.assert(results === undefined, "undefined passed as results for showSearchResults");
+      this.assert(results === undefined, "undefined passed as results for showSearchResults");
     } else if (results == null || results.length == 0) {
       // no results
       $("#cmc-search-results-noresultmsg").stop(true, true).fadeIn();
     } else {
       var imageLoadsCompleted = 0, __notifyImageLoadCompleted = $.proxy(function() {
         imageLoadsCompleted++;
-        CMC.assert(imageLoadsCompleted <= results.length, "loading more images than we have results for (" + imageLoadsCompleted + ")");
+        this.assert(imageLoadsCompleted <= results.length, "loading more images than we have results for (" + imageLoadsCompleted + ")");
         if(imageLoadsCompleted == results.length) {
           this.animateShowSearchResults(results);
         }
       }, this);
-      CMC.assert(results.length <= 10, "more than 10 results passed to showSearchResults");
+      this.assert(results.length <= 10, "more than 10 results passed to showSearchResults");
       if (!isRetryCall) {
         this.coalesceDefinedSearchResults(results); // fixes the "missing teeth" problem with invalid search results
       }
@@ -1984,11 +1984,11 @@ var CMC = {
         }
       }
       for(var each in results) {
-        CMC.assert(results[each] !== undefined, "result[each] is missing at each=" + each);
-        //CMC.assert(results[each].id !== undefined, "id is missing from result at each=" + each);
+        this.assert(results[each] !== undefined, "result[each] is missing at each=" + each);
+        //this.assert(results[each].id !== undefined, "id is missing from result at each=" + each);
         var id = "#cmc-search-result-" + each;
         this.ajaxNotifyStart();
-        //CMC.assert(results[each].name !== undefined, "name is missing from result at each=" + each);
+        //this.assert(results[each].name !== undefined, "name is missing from result at each=" + each);
         $(id).children(".result-name").html(results[each].name ? results[each].name : "");
         $(id).attr("fbid", results[each].id);
         $(id).attr("fblink", results[each].link);
@@ -2031,9 +2031,9 @@ var CMC = {
 
   swooshy : function (results, containerId, idPrefix, maxPageSize) {
     this.beginFunction();
-    CMC.assert(typeof containerId == "string", "swooshy's containerId is not a string");
-    CMC.assert(typeof idPrefix == "string", "swooshy's idPrefix is not a string");
-    CMC.assert(typeof maxPageSize == "number", "swooshy's maxPageSize is not a number");
+    this.assert(typeof containerId == "string", "swooshy's containerId is not a string");
+    this.assert(typeof idPrefix == "string", "swooshy's idPrefix is not a string");
+    this.assert(typeof maxPageSize == "number", "swooshy's maxPageSize is not a number");
     $(containerId).clearQueue("custom-SearchResultsQueue");
     var _doOneResultPageAnimation = function () {
       CMC.assert(this.hasOwnProperty("results"), "search results not correctly assigned to animation delegate");
@@ -2089,7 +2089,7 @@ var CMC = {
           $(element).children("img").remove();
           if (imagesDeleted == $(".cmc-search-result").children(".result-picture").length) {
             if (callback != undefined) {
-              CMC.assert(typeof callback == "function", "type of callback is not a function");
+              this.assert(typeof callback == "function", "type of callback is not a function");
               callback();
             }
           }
@@ -2248,7 +2248,7 @@ var CMC = {
       }, this));
     } else {
       // something went horribly, horribly wrong, and we should probably know about it
-      CMC.assert(false, "stumbled on an undefined page while navigating to the previous page");
+      this.assert(false, "stumbled on an undefined page while navigating to the previous page");
     }
     this.updateSearchPagingControls();
     this.endFunction();
@@ -2256,7 +2256,7 @@ var CMC = {
 
   updateSearchPagingControls : function () {
     this.beginFunction();
-    CMC.assert(this.currentDisplayedSearchPage >= 1, "displaying search page that is negative or zero");
+    this.assert(this.currentDisplayedSearchPage >= 1, "displaying search page that is negative or zero");
     $("#cmc-search-results-pagingctl-text").children(".ui-button-text").html("page " + this.currentDisplayedSearchPage);
     if (this.currentDisplayedSearchPage <= 1) {
       $("#cmc-search-results-pagingctl-prev").removeClass("ui-state-hover").button("disable");
@@ -2299,7 +2299,7 @@ var CMC = {
           $(element).children("img").remove();
           if (imagesDeleted == $(".cmc-invite-result").children(".result-picture").length) {
             if (callback != undefined) {
-              CMC.assert(typeof callback == "function", "type of callback is not a function");
+              this.assert(typeof callback == "function", "type of callback is not a function");
               callback();
             }
           }
@@ -2339,7 +2339,7 @@ var CMC = {
       }, this));
     } else {
       // something went horribly, horribly wrong, and we should probably know about it
-      CMC.assert(false, "stumbled on an undefined page while navigating to the previous page");
+      this.assert(false, "stumbled on an undefined page while navigating to the previous page");
     }
     this.updateInvitePagingControls();
     this.endFunction();
@@ -2347,7 +2347,7 @@ var CMC = {
 
   updateInvitePagingControls : function () {
     this.beginFunction();
-    CMC.assert(this.currentDisplayedInvitePage >= 0, "displaying invate page that is negative.");
+    this.assert(this.currentDisplayedInvitePage >= 0, "displaying invate page that is negative.");
     $("#cmc-invite-results-pagingctl-text").children(".ui-button-text").html("page " + (this.currentDisplayedInvitePage + 1));
     if (this.currentDisplayedInvitePage <= 0) {
       $("#cmc-invite-results-pagingctl-prev").removeClass("ui-state-hover").button("disable");
@@ -2445,8 +2445,8 @@ var CMC = {
         }
         CMC.showProfile(data);
       };
-      CMC.assert(whichFBID != null && whichFBID != "", "fbid attr is null for clicked search result");
-      CMC.assert(whichFBLink != null && whichFBLink != "", "fblink attr is null for clicked search result");
+      this.assert(whichFBID != null && whichFBID != "", "fbid attr is null for clicked search result");
+      this.assert(whichFBLink != null && whichFBLink != "", "fblink attr is null for clicked search result");
       this.getProfile(whichFBID, true, __showProfileWithLinkPrecacheInternal);
       this.animateSearchResultSelected(whichResult);
     } else {
@@ -2459,8 +2459,7 @@ var CMC = {
     this.beginFunction();
     if($(whichResult).children(".profile-tripmember-name").html() != "") {
       var whichFBID = $(whichResult).attr("fbid");
-      CMC.assert(whichFBID != null && whichFBID != "",
-          "fbid attr is null for clicked search result");
+      this.assert(whichFBID != null && whichFBID != "", "fbid attr is null for clicked search result");
       this.getProfile(whichFBID, true, this.showProfile);
       $("#tabs").tabs('select', 1);
     } else {
@@ -2838,13 +2837,13 @@ var CMC = {
             ret = fieldValue;
           }
         } else {
-          CMC.assert("more than one result for form selector: " + formSelector + ", field: " + fieldSelector);
+          this.assert("more than one result for form selector: " + formSelector + ", field: " + fieldSelector);
         }
       } else {
-        CMC.assert("form field is missing! form: " + formSelector + ", field: " + fieldSelector);
+        this.assert("form field is missing! form: " + formSelector + ", field: " + fieldSelector);
       }
     } else {
-      CMC.assert("null value from form selector: " + formSelector + ", field: " + fieldSelector);
+      this.assert("null value from form selector: " + formSelector + ", field: " + fieldSelector);
     }
     this.endFunction();
     return ret;
@@ -2895,7 +2894,7 @@ var CMC = {
     allowEmptyFieldValues = allowEmptyFieldValues || false; // optional argument
     var ret = {};
     var formFieldContainerObject = $(formSelector).find(".cmc-form-spec");
-    CMC.assert(formFieldContainerObject.size() > 0, "form " + formSelector + " did not contain any values!");
+    this.assert(formFieldContainerObject.size() > 0, "form " + formSelector + " did not contain any values!");
     formFieldContainerObject.each(function (index, element) {
       var fieldID = $(element).attr("id");
       var field = CMC.retrieveOneFormField(formSelector, "#" + fieldID, allowEmptyFieldValues);
@@ -3311,12 +3310,12 @@ var CMC = {
       if (typeof response.error == "string") {
         this.error("caught error from Facebook API call: " + response.error);
       } else {
-        CMC.assert(response.error.message, "facebook error response didn't contain a message!");
-        CMC.assert(response.error.type, "facebook error response didn't contain a type!");
+        this.assert(response.error.message, "facebook error response didn't contain a message!");
+        this.assert(response.error.type, "facebook error response didn't contain a type!");
         this.error("caught error from Facebook API call -- " + response.error.type + ": " + response.error.message);
       }
     } else {
-      CMC.assert("handling a Facebook error when apparently none happened.");
+      this.assert("handling a Facebook error when apparently none happened.");
     }
     this.endFunction();
   },
@@ -3336,7 +3335,7 @@ var CMC = {
         if (response.authResponse.hasOwnProperty("accessToken")) {
           this.accessToken = response.authResponse.accessToken;
         } else {
-          CMC.assert("Facebook authResponse did not contain an access token");
+          this.assert("Facebook authResponse did not contain an access token");
           this.accessToken = null;
           // this is about the time that we should surface an error to the user, no? --zack
         }
@@ -3346,7 +3345,7 @@ var CMC = {
         this.accessToken = null;
       }
     } else {
-      CMC.assert("Facebook did not return a response at all, can't cache data");
+      this.assert("Facebook did not return a response at all, can't cache data");
     }
     this.endFunction();
   },
@@ -3418,7 +3417,7 @@ var CMC = {
         $("#logged-in-user-value").html("(handshake failure!)");
         //@/END/DEBUGONLYSECTION
       } else {
-        CMC.assert("userLoggedIn=true, but the timeout still fired");
+        this.assert("userLoggedIn=true, but the timeout still fired");
       }
     }, this), 2500);
     var __notifyLoginComplete = function () {
