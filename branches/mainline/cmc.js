@@ -1291,20 +1291,19 @@ var CMC = {
             var divElement = $('<div></div>')
                 .addClass('cmc-tripmember-results')
                 .hide();
-            var imgDivElement = $('<div id="profile-tripmember-image"></div>');
             var img = $('<img src="ajax-spinner.gif" />')
-                .addClass('profile-tripmember-picture');
-            imgDivElement.append(img);
-            var nameDivElement = $('<div>Member Name</div>')
-                .addClass('profile-tripmember-name');
+                .addClass('profile-tripmember-image')
+                .attr('src', 'https://graph.facebook.com/'+response.id+'/picture')
+                .tipTip({
+                  content: response.name,
+                  defaultPosition: 'top',
+                  delay: 100
+                });
 
-            nameDivElement.html(response.name ? response.name : "");
-            img.attr('src', 'https://graph.facebook.com/'+response.id+'/picture');
             //img.wrap('<a href="' + response.link + '" target="_blank"></a>');
             divElement
               .attr('fbid', response.id)
-              .append(imgDivElement)
-              .append(nameDivElement)
+              .append(img)
               .click(function () {
                 CMC.handleShowTripMemberProfile(this);
               })

@@ -514,8 +514,13 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
       .profile-picture {
         width: 180px;
       }
+
       .trip-profile-picture {
         width: 180px;
+      }
+
+      .cmc-tripmember-results, .profile-tripmember-image {
+        display: inline;
       }
 
       ul.trip-list {
@@ -818,9 +823,7 @@ function cmc_big_button($title, $subtext=FALSE, $onclick=FALSE, $img=FALSE, $img
               <div id="profile-trip-people">
                 <div id="cmc-trip-members">
                   <div id="cmc-trip-member-0" class="cmc-tripmember-results">
-                    <div id="profile-tripmember-image">
-                      <img class="profile-tripmember-picture" src="ajax-spinner.gif">
-                    </div>
+                    <img class="profile-tripmember-image" src="ajax-spinner.gif">
                     <div id="profile-tripmember-name">Member Name</div>
                   </div>
                 </div>
