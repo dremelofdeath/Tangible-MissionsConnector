@@ -6,7 +6,7 @@ header('Content-type: application/json');
 
 $con = arena_connect();
 
-$saferequest = cmc_safe_request_strip();
+$saferequest = cmc_safe_request_strip($con);
 
 $has_error = FALSE;
 $err_msg = '';
@@ -32,22 +32,22 @@ $json = array();
 
 if (!$has_error) {
   $query = "SELECT zipcode, city, state FROM zipcodes WHERE ".$criteria.";";
-  $result = mysql_query($query, $con);
+  $result = $con->query($query);
   if (!$result) {
     $has_error = TRUE;
-    $err_msg = "Can't query (query was '$query'): " . mysql_error();
+    $err_msg = "Can't query (query was '$query'): " . $con->error;
   } else {
-    if (mysql_num_rows($result) == 1) {
-      $row = mysql_fetch_array($result, MYSQL_ASSOC);
+    if ($result->num_rows == 1) {
+      $row = $result->fetch_array();
       $json['zipcode'] = $row['zipcode'];
       $json['city'] = $row['city'].", ".$row['state'];
-    } else if (mysql_num_rows($result) == 0) {
+    } else if ($result->num_rows == 0) {
       $has_error = TRUE;
       $err_msg = "No results.";
-    } else if (mysql_num_rows($result) < 0) {
+    } else if ($result->num_rows < 0) {
       $has_error = TRUE;
       $err_msg = "Catastropic failure: negative results.";
-    } else if (mysql_num_rows($result) > 1) {
+    } else if ($result->num_rows > 1) {
       $has_error = TRUE;
       $err_msg = "Ambiguous request; more than one result.";
     }
